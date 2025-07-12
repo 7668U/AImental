@@ -1,0 +1,39 @@
+<view>
+  <view class="user-info-top" bindtap="onChangeAvatar">
+    <image class="avatar" src="{{userInfo.avatar_url || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+    <view class="nickname">{{userInfo.nickname || '访客'}}</view>
+  </view>
+
+  <view class="menu-list">
+    <view class="menu-item" bindtap="goToUserInfo">
+      <view class="menu-item-left">
+        <image class="menu-icon" src="/images/icons/icon-user.png"></image>
+        <text class="menu-text">个人信息</text>
+      </view>
+    </view>
+    <view class="menu-item" bindtap="goToReports">
+      <view class="menu-item-left">
+        <image class="menu-icon" src="/images/icons/icon-report.png"></image>
+        <text class="menu-text">分析报告</text>
+      </view>
+    </view>
+    <view class="menu-item" bindtap="goToFeedback">
+      <view class="menu-item-left">
+        <image class="menu-icon" src="/images/icons/icon-feedback.png"></image>
+        <text class="menu-text">意见反馈</text>
+      </view>
+    </view>
+    <view class="menu-item" bindtap="goToAboutUs">
+      <view class="menu-item-left">
+        <image class="menu-icon" src="/images/icons/icon-about.png"></image>
+        <text class="menu-text">关于我们</text>
+      </view>
+    </view>
+  </view>
+  
+  <view class="action-btn-container">
+    <view wx:if="{{isLogin}}" class="action-btn logout-btn" bindtap="logout">退出登录</view>
+    <view wx:else class="action-btn login-btn" bindtap="login">点击登录</view>
+  </view>
+
+</view>

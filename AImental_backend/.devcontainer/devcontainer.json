@@ -1,0 +1,10 @@
+{
+    "name": "engenius_ielts",
+    "image": "myimage",
+    "runArgs": [
+        "--add-host=host.docker.internal:host-gateway",
+        "-p",
+        "3000:8080"
+    ],
+    "postStartCommand": "/bin/bash"
+}

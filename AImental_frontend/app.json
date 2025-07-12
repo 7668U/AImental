@@ -1,0 +1,49 @@
+{
+  "pages": [
+    "pages/ai-therapist/index",
+    "pages/assessment/index",
+    "pages/daily-checkin/index",
+    "pages/daily-checkin/record",
+    "pages/profile/index"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "AI心理疗愈",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "color": "#8a8a8a",
+    "selectedColor": "#1296db",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/ai-therapist/index",
+        "text": "心理咨询",
+        "iconPath": "/images/tabbar/chat_default.png",
+        "selectedIconPath": "/images/tabbar/chat_selected.png"
+      },
+      {
+        "pagePath": "pages/assessment/index",
+        "text": "心理测评",
+        "iconPath": "/images/tabbar/assessment_default.png",
+        "selectedIconPath": "/images/tabbar/assessment_selected.png"
+      },
+      {
+        "pagePath": "pages/daily-checkin/index",
+        "text": "每日打卡",
+        "iconPath": "/images/tabbar/checkin_default.png",
+        "selectedIconPath": "/images/tabbar/checkin_selected.png"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的",
+        "iconPath": "/images/tabbar/profile_default.png",
+        "selectedIconPath": "/images/tabbar/profile_selected.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

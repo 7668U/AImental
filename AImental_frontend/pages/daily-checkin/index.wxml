@@ -1,0 +1,35 @@
+<view class="container">
+  
+  <view class="welcome-wrapper">
+    <view class="title">你好，</view>
+    <view class="subtitle">今天也请好好关照自己</view>
+  </view>
+
+  <view class="card-list">
+    
+    <view class="card" bind:tap="goToCalendar">
+      <image class="card-icon" src="/images/daily-checkin/calendar.png" mode="aspectFit"></image>
+      <view class="card-content">
+        <view class="card-title">心情日历</view>
+        <view class="card-subtitle">打开时光宝盒，重温每日心情</view>
+      </view>
+    </view>
+
+    <view class="card" bind:tap="goToRecord">
+      <image class="card-icon" src="/images/daily-checkin/illustration-welcome.png" mode="aspectFit"></image>
+      <view class="card-content">
+        <view class="card-title">今日打卡</view>
+        <view class="card-subtitle">关照此刻的感受，从这里开始</view>
+      </view>
+    </view>
+
+    <view class="card" bind:tap="goToStatistics">
+      <image class="card-icon" src="/images/daily-checkin/report.png" mode="aspectFit"></image>
+      <view class="card-content">
+        <view class="card-title">我的心情报告</view>
+        <view class="card-subtitle">回顾点滴，发现情绪的流动</view>
+      </view>
+    </view>
+
+  </view>
+</view>

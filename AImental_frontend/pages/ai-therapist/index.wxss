@@ -1,0 +1,226 @@
+/* pages/ai-therapist/index.wxss (最终无头像版) */
+
+/* --- 1. 全局与颜色变量 --- */
+page {
+  --primary-orange: #F2994A;
+  --primary-orange-light: #FFF5EE;
+  --text-primary: #333333;
+  --text-secondary: #888888;
+  --bg-color: #F7F7F7;
+  --hover-color: #f0f0f0;
+}
+/* --- 2. 页面级容器 --- */
+.page-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--bg-color);
+  overflow: hidden;
+}
+/* --- 3. 侧边栏样式 --- */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 75vw;
+  max-width: 560rpx;
+  height: 100%;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 100;
+  border-right: 1rpx solid #EAEAEA;
+  display: flex;
+  flex-direction: column;
+  padding: 100rpx 30rpx 40rpx; 
+}
+.sidebar-visible {
+  transform: translateX(0);
+}
+.new-chat-btn {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 30rpx;
+  background-color: var(--primary-orange-light);
+  border: 1rpx solid var(--primary-orange);
+  border-radius: 20rpx;
+  font-size: 30rpx;
+  color: var(--primary-orange);
+  font-weight: bold;
+  margin: 20rpx 0;
+  flex-shrink: 0;
+}
+.icon-plus { width: 36rpx; height: 36rpx; margin-right: 20rpx; }
+.history-title-container {
+  display: flex;
+  align-items: center;
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  padding: 20rpx 10rpx;
+}
+.history-title-icon { width: 32rpx; height: 32rpx; margin-right: 15rpx; }
+.history-list {
+  flex-grow: 1;
+  height: 100%;
+}
+.history-item {
+  padding: 25rpx 20rpx;
+  font-size: 28rpx;
+  color: var(--text-primary);
+  border-radius: 16rpx;
+  margin-bottom: 10rpx;
+  transition: background-color 0.2s, color 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.history-item-hover {
+  background-color: var(--hover-color) !important;
+  color: var(--text-primary) !important;
+}
+.history-item.active {
+  background-color: var(--primary-orange);
+  color: #ffffff;
+  font-weight: bold;
+}
+
+/* --- 主内容区 --- */
+.main-content {width: 100%;height: 100%;display: flex;flex-direction: column;transition: transform 0.3s ease-in-out;}
+.main-content-pushed {transform: translateX(75vw);}
+/* 1. 父容器 .top-bar */
+.top-bar {
+  display: flex; /* 开启 Flex 布局 */
+  align-items: center; /* 让左、中、右三个部分在垂直方向上居中 */
+  width: 100%; /* 宽度占满 */
+  
+  /* 其他基础样式 */
+  height: 60rpx; 
+  padding-top: 100rpx; /* 适配刘海屏 */
+  background-color: #fff;
+  border-bottom: 1rpx solid #f0f0f0;
+  box-sizing: content-box; /* 确保 padding 不会影响宽度计算 */
+  flex-shrink: 0;
+}
+
+/* 2. 定义左、中、右三个部分 */
+.top-bar-left,
+.top-bar-right {
+  flex: 1; /* (关键) 让左右两边各占一份空间 */
+  display: flex;
+  align-items: center;
+}
+
+.top-bar-center {
+  flex: 2; /* 让中间区域占据更多空间，也可以设为1，效果类似 */
+  text-align: center; /* (关键) 让标题在其中文本居中 */
+}
+
+/* 3. 左边部分的具体内容样式 */
+.top-bar-left {
+  padding-left: 30rpx; /* 给图标一个左边距 */
+}
+
+/* 4. 中间标题的字体样式 */
+.top-bar-title {
+  display: inline-block; /* 确保标题是行内块，以便居中 */
+  font-family: 'Playfair Display', serif; /* 你选的艺术字体 */
+  font-size: 38rpx;
+  font-weight: 600;
+}
+
+/* 5. 图标样式 (不再需要任何定位) */
+.menu-icon {
+  width: 48rpx;
+  height: 48rpx;
+}
+
+/* ai-therapist.wxss */
+
+/* ai-therapist.wxss */
+
+.top-bar-title {
+  /* (核心修改) 优先使用 Georgia，如果系统没有，则使用默认的衬线体 */
+  font-family: Georgia, serif; 
+  
+  font-weight: 600;
+  font-size: 40rpx;
+}
+
+.message-list {
+  flex-grow: 1;
+  /* 只保留上下边距，移除左右边距 */
+  padding: 30rpx 0; 
+  overflow-y: auto;
+}
+
+.message-item {
+  display: flex; 
+  margin-bottom: 40rpx;
+  /* 已经删除了 width: 100% 和 box-sizing: border-box */
+}
+
+.user-row {
+  justify-content: flex-end; /* 关键：让用户消息行的内容靠右 */
+}
+
+/* 聊天气泡的基础样式 */
+.message-bubble {
+  max-width: 85%;
+  padding: 22rpx 30rpx;
+  border-radius: 30rpx;
+  font-size: 30rpx;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+/* AI气泡的特定样式 */
+.ai-bubble {
+  background-color: #ffffff;
+  color: var(--text-primary);
+  border-top-left-radius: 8rpx;
+}
+
+/* 用户气泡的特定样式 */
+.user-bubble {
+  background-color: var(--primary-orange);
+  color: #ffffff;
+  border-top-right-radius: 8rpx;
+}
+
+
+/* --- [新增] 加载动画样式 --- */
+.loader {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%; /* 让它变成一个圆形 */
+  
+  /* 动画的关键：设置边框，并将顶部的颜色设为我们的主题橙色 */
+  border: 6rpx solid rgba(0, 0, 0, 0.1); /* 边框的底色，浅灰色轨道 */
+  border-top-color: var(--primary-orange); /* 顶部颜色，用你已定义的橙色变量 */
+
+  /* 应用动画效果 */
+  animation: spin 1s linear infinite;
+}
+
+/* 定义动画的关键帧 */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* --- 输入与登录区域 --- */
+.input-area-minimalist {display: flex;align-items: center;padding: 20rpx 30rpx;background-color: #fff;border-top: 1rpx solid #f0f0f0;flex-shrink: 0;}
+.input-field { flex-grow: 1; background-color: var(--bg-color); border-radius: 40rpx; padding: 18rpx 30rpx; height: 80rpx; box-sizing: border-box; }
+.send-icon { width: 50rpx; height: 50rpx; margin-left: 20rpx; opacity: 0.5; }
+.send-icon.active { opacity: 1; }
+.login-prompt-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40rpx; box-sizing: border-box; }
+.login-avatar { width: 160rpx; height: 160rpx; border-radius: 50%; margin-bottom: 30rpx; }
+.login-title { font-size: 40rpx; font-weight: bold; color: var(--text-primary); margin-bottom: 20rpx; }
+.login-subtitle { font-size: 28rpx; color: var(--text-secondary); margin-bottom: 80rpx; }
+.login-btn { background-color: var(--primary-orange); color: white; border-radius: 50rpx; padding: 0 60rpx; height: 90rpx; display: flex; align-items: center; justify-content: center; font-size: 32rpx; white-space: nowrap; margin: 0; border: none; line-height: normal; }
+.login-btn::after { border: none; }

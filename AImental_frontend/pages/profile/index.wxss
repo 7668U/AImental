@@ -1,0 +1,112 @@
+/* /pages/profile/index.wxss (匹配新WXML的最终版) */
+page {
+  /* 新增样式以实现垂直居中 */
+  height: 100vh; /* 让页面容器占满整个屏幕高度 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* 核心：将所有内容作为一个整体垂直居中 */
+
+  /* 保留原有样式 */
+  background-color: #f7f8fa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+}
+
+/* 1. 单独给需要内缩的元素添加左右边距 */
+.user-info-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60rpx 40rpx;
+}
+
+.avatar {
+  width: 170rpx;
+  height: 170rpx;
+  border-radius: 50%;
+  border: 4rpx solid #eee;
+  margin-bottom: 24rpx;
+}
+
+.nickname {
+  font-size: 40rpx;
+  font-weight: 500;
+  color: #303133;
+}
+
+/* 2. 让菜单列表的背景和边框都为0，实现贴边 */
+.menu-list {
+  background-color: #ffffff;
+  margin: 0 0 30rpx 0; 
+  padding: 0; /* 确保自身没有内边距 */
+  border-radius: 0;
+}
+
+/* 3. 给菜单项的内容添加内边距，防止文字和图标贴边 */
+.menu-item {
+  display: flex;
+  align-items: center; /* 修正垂直居中 */
+  padding: 55rpx 40rpx; 
+  position: relative;
+}
+
+/* 使用伪元素创建下划线，并控制其左右边距 */
+.menu-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 40rpx;
+    right: 0;
+    height: 1rpx;
+    background-color: #f2f2f2;
+}
+
+.menu-item:last-child::after {
+  display: none;
+}
+
+.menu-item:active {
+  background-color: #f7f8fa;
+}
+
+.menu-item-left {
+  display: flex;
+  align-items: center;
+}
+
+.menu-icon {
+  width: 60rpx;
+  height: 60rpx;
+  margin-right: 35rpx;
+}
+
+.menu-text {
+  font-size: 36rpx;
+  color: #333;
+}
+
+/* 4. 单独给需要内缩的按钮容器添加左右边距 */
+.action-btn-container {
+  margin: 40rpx 30rpx 0 30rpx;
+}
+
+.action-btn {
+  color: #ffffff;
+  font-size: 34rpx; 
+  font-weight: 500;
+  padding: 32rpx;
+  text-align: center;
+  border-radius: 50rpx;
+  transition: opacity 0.2s;
+}
+
+.action-btn:active {
+  opacity: 0.8;
+}
+
+.login-btn {
+  background-color: #F7931E; 
+}
+
+.logout-btn {
+  background-color: #fa5151;
+}

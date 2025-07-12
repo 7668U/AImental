@@ -1,0 +1,76 @@
+<view class="page-container">
+  <view class="header">
+    <view class="main-title">记录今日心情</view>
+    <view class="sub-title">选择你的心情、状态和专属颜色吧</view>
+  </view>
+
+  <view class="selector-container">
+    <view class="selector-row">
+      <view class="row-label">心情</view>
+      <scroll-view class="scroll-view" scroll-x="true" scroll-with-animation>
+        <view 
+          wx:for="{{moods}}" 
+          wx:key="name" 
+          class="item mood-item {{item.selected ? 'selected' : ''}}"
+          bind:tap="handleSelect" 
+          data-type="moods" 
+          data-index="{{index}}"
+        >
+          <image class="item-icon" src="/images/daily-checkin/emotion/{{item.icon}}.png"></image>
+          <text class="item-text">{{item.name}}</text>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view class="selector-row">
+      <view class="row-label">状态</view>
+      <scroll-view class="scroll-view" scroll-x="true" scroll-with-animation>
+        <view 
+          wx:for="{{statuses}}" 
+          wx:key="name" 
+          class="item status-item {{item.selected ? 'selected' : ''}}"
+          bind:tap="handleSelect" 
+          data-type="statuses" 
+          data-index="{{index}}"
+        >
+          <image class="item-icon" src="/images/daily-checkin/status/{{item.icon}}.png"></image>
+          <text class="item-text">{{item.name}}</text>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view class="selector-row">
+      <view class="row-label">颜色</view>
+      <scroll-view class="scroll-view" scroll-x="true" scroll-with-animation>
+        <view 
+          wx:for="{{colors}}" 
+          wx:key="value" 
+          class="item color-item {{item.selected ? 'selected' : ''}}"
+          bind:tap="handleSelect" 
+          data-type="colors" 
+          data-index="{{index}}"
+        >
+          <view class="color-dot" style="background-color: {{item.value}};"></view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <view class="journal-container">
+    <textarea 
+      class="text-area" 
+      placeholder="此刻，你想对自己说些什么？"
+      value="{{textContent}}"
+      bindinput="onTextInput"
+      maxlength="500"
+    ></textarea>
+    <view class="image-uploader" bind:tap="chooseImage">
+      <image wx:if="{{imageUrl}}" src="{{imageUrl}}" mode="aspectFill"></image>
+      <text wx:else class="plus-icon">+</text>
+    </view>
+  </view>
+
+  <view class="footer">
+    <button class="submit-btn" bind:tap="submitCheckin">封存今日心情</button>
+  </view>
+</view>

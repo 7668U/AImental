@@ -1,0 +1,76 @@
+/* pages/daily-checkin/index.wxss */
+page {
+  background-color: #F9F7F3; /* 一个温暖的米色背景，比纯白更柔和 */
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+}
+
+.container {
+  padding: 40rpx;
+  box-sizing: border-box;
+}
+
+/* 欢迎语样式 */
+.welcome-wrapper {
+  margin-bottom: 60rpx;
+}
+
+.welcome-wrapper .title {
+  font-size: 52rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.welcome-wrapper .subtitle {
+  font-size: 32rpx;
+  color: #888;
+  margin-top: 10rpx;
+}
+
+/* 卡片列表 */
+.card-list {
+  width: 100%;
+}
+
+/* 核心的卡片样式 */
+.card {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 24rpx; /* 更大的圆角，更柔和 */
+  padding: 40rpx;
+  margin-bottom: 40rpx;
+  box-sizing: border-box;
+  box-shadow: 0 8rpx 24rpx rgba(226, 172, 112, 0.15); /* 核心：一个柔和的、带橙色的阴影 */
+  transition: all 0.2s ease-in-out;
+}
+
+/* 增加按下的交互效果 */
+.card:active {
+  transform: scale(0.98);
+  box-shadow: 0 4rpx 12rpx rgba(226, 172, 112, 0.2);
+}
+
+.card-icon {
+  width: 90rpx;
+  height: 90rpx;
+  margin-right: 30rpx;
+  flex-shrink: 0; /* 防止图标被压缩 */
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 8rpx;
+}
+
+.card-subtitle {
+  font-size: 26rpx;
+  color: #999999;
+}

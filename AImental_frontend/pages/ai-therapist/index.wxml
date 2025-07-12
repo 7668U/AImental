@@ -1,0 +1,85 @@
+<view class="page-container">
+    <view class="sidebar {{ isSidebarVisible ? 'sidebar-visible' : '' }}">
+        <view class="new-chat-btn" bindtap="startNewChat">
+            <image src="/images/icons/plus.png" class="icon-plus"></image>
+            <text>新建聊天</text>
+        </view>
+        <scroll-view class="history-list" scroll-y="true">
+            <view 
+                wx:for="{{chatHistory}}" 
+                wx:key="id" 
+                class="history-item {{item.id === activeChatId ? 'active' : ''}}"
+                bindtap="switchChat"
+                data-id="{{item.id}}"
+            >
+                {{item.title}}
+            </view>
+        </scroll-view>
+    </view>
+
+    <view class="main-content {{ isSidebarVisible ? 'main-content-pushed' : '' }}" bindtap="closeSidebar">
+
+        <block wx:if="{{isLoggedIn}}">
+          <view class="top-bar">
+            <view class="top-bar-left">
+              <image class="menu-icon" src="/images/icons/menu.png" catchtap="toggleSidebar"></image>
+            </view>
+
+            <view class="top-bar-center">
+              <view class="top-bar-title">Feel Yourself</view>
+            </view>
+
+            <view class="top-bar-right"></view>
+          </view>
+
+            <scroll-view class="message-list" scroll-y="true" scroll-into-view="{{latestMessageId}}">
+                
+                <view wx:for="{{messages}}" wx:key="id" id="msg-{{item.id}}" class="message-item {{item.sender === 'user' ? 'user-row' : ''}}">
+
+                  <view wx:if="{{item.sender === 'ai'}}" class="message-bubble ai-bubble">
+                      <block wx:if="{{item.isLoading}}">
+                          <view class="loader"></view>
+                      </block>
+                      <block wx:else>
+                          <view class="content">{{item.text}}</view>
+                      </block>
+                  </view>
+
+                    <view wx:if="{{item.sender === 'user'}}" class="message-bubble user-bubble">
+                        <view class="content">{{item.text}}</view>
+                    </view>
+                    
+                </view>
+            </scroll-view>
+
+            <view class="input-area-minimalist">
+                <input 
+                    class="input-field" 
+                    type="text" 
+                    value="{{inputValue}}"
+                    bindinput="onInput"
+                    placeholder="" 
+                    confirm-type="send"
+                    bindconfirm="onSend"
+                />
+                <image 
+                    class="send-icon {{inputValue ? 'active' : ''}}" 
+                    src="/images/icons/send.png" 
+                    bindtap="onSend"
+                ></image>
+            </view>
+        </block>
+
+        <block wx:else>
+            <view class="login-prompt-container">
+                <image class="login-avatar" src="/images/ai_avatar.png"></image>
+                <view class="login-title">欢迎来到AI心理疗愈室</view>
+                <view class="login-subtitle">请先登录，开启您的心灵对话之旅</view>
+                <button class="login-btn" bindtap="handleLogin">
+                    微信授权登录
+                </button>
+            </view>
+        </block>
+
+    </view>
+</view>

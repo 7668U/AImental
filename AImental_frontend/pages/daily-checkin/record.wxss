@@ -1,0 +1,131 @@
+/* record.wxss */
+page {
+  background-color: #F9F7F3;
+  font-family: sans-serif;
+}
+.page-container {
+  /* 调整内边距，给顶部和底部留出空间 */
+  padding: 40rpx;
+}
+
+/* --- 【优化二】新增的标题样式 --- */
+.header {
+  margin-bottom: 60rpx;
+}
+.main-title {
+  font-size: 52rpx;
+  font-weight: bold;
+  color: #333;
+  /* 推荐一些免费可商用的俏皮字体，若用户手机没有则会依次降级 */
+  font-family: 'LXGW WenKai', 'ZCOOL KuaiLe', sans-serif;
+}
+.sub-title {
+  font-size: 28rpx;
+  color: #aaa;
+  margin-top: 10rpx;
+}
+
+/* --- 选择器 --- */
+.selector-container {
+  margin-bottom: 40rpx;
+}
+.selector-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 40rpx; /* 增加了行间距 */
+}
+/* --- 【优化三】美化后的标签样式 --- */
+.row-label {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #fff;
+  background-color: #FFA500; /* 主色调橙色背景 */
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx 20rpx 20rpx 0; /* 别致的圆角，像个小标签 */
+  margin-right: 30rpx;
+  flex-shrink: 0; /* 防止标签被压缩 */
+  font-family: 'LXGW WenKai', 'ZCOOL KuaiLe', sans-serif; /* 同样使用俏皮字体 */
+}
+.scroll-view {
+  width: calc(100% - 120rpx); /* 根据标签宽度微调 */
+  white-space: nowrap;
+}
+.item {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx;
+  margin-right: 20rpx;
+  border-radius: 20rpx;
+  background-color: #fff;
+  border: 4rpx solid transparent;
+  transition: all 0.3s ease;
+  vertical-align: middle; /* 垂直对齐 */
+}
+.item.selected {
+  border-color: #FFA500;
+  box-shadow: 0 4rpx 12rpx rgba(255, 165, 0, 0.3);
+  transform: scale(1.05);
+}
+.item-icon {
+  width: 60rpx;
+  height: 60rpx;
+  margin-bottom: 10rpx;
+}
+.item-text {
+  font-size: 24rpx;
+  color: #555;
+}
+.color-item {
+  padding: 10rpx;
+}
+.color-dot {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+}
+
+/* --- 日记区 (无变化) --- */
+.journal-container {
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+.text-area {
+  width: 100%;
+  height: 200rpx;
+  font-size: 30rpx;
+  line-height: 1.6;
+  margin-bottom: 20rpx;
+}
+.image-uploader {
+  width: 150rpx;
+  height: 150rpx;
+  border-radius: 16rpx;
+  background-color: #f7f7f7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.plus-icon {
+  font-size: 80rpx;
+  color: #ccc;
+  font-weight: 100;
+}
+
+/* --- 【优化一】调整后的底部按钮 --- */
+.footer {
+  /* 移除了 position: fixed 和其他相关属性 */
+  width: 100%;
+  margin-top: 60rpx; /* 与上方内容拉开距离 */
+  padding-bottom: 40rpx; /* 增加底部安全距离 */
+}
+.submit-btn {
+  background-color: #FFA500;
+  color: #fff;
+  border-radius: 50rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+}
