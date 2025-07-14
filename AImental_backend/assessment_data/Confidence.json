@@ -1,0 +1,78 @@
+{
+  "scale_info": {
+    "name": "自信心测试",
+    "short_name": "Confidence_Test_40",
+    "description": "本测试旨在评估您的自信心水平。自信是个人能力和价值感的重要体现，了解自己的自信程度有助于更好地进行自我认知和提升。",
+    "instructions": "请如实回答下列各题，选择最符合您情况的选项。",
+    "scoring_rules": {
+      "raw_score_sum": true,
+      "multiplier": 1,
+      "post_action": "none"
+    }
+  },
+  "questions": [
+    { "order": 1, "text": "一旦你下了决心，即使 没有人赞同，你仍会坚持做到底吗？", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 2, "text": "参加晚宴时，即使很想上洗手间，你也会忍着直到宴会结束吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 3, "text": "如果想买性感内衣，你会尽量邮购，而不亲自到店里去吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 4, "text": "你认为自己是个较完美的人吗？", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 5, "text": "如果店员的服务态度不好，你会告诉他们的经理吗？", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 6, "text": "你不常欣赏自己的照片吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 7, "text": "别人批评你，你会觉得难过吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 8, "text": "你很少对人说出你真正的意见吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 9, "text": "对别人的赞美，你持怀疑的态度吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 10, "text": "你总是觉得自己比别人差吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 11, "text": "你对自己的外表满意吗？", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 12, "text": "你认为自己的能力比别人差吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 13, "text": "在聚会上，只有你一个人穿得不正式，你会感到不自在吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 14, "text": "你是个受欢迎的人吗？", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 15, "text": "你认为自己很有魅力吗？", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 16, "text": "你有幽默感吗？", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 17, "text": "目前的工作是你的专长吗？", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 18, "text": "你懂得搭配衣服吗？", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 19, "text": "危急时，你很冷静吗？", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 20, "text": "你与别人合作无间吗？", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 21, "text": "你认为自己只是个寻常人吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 22, "text": "你经常希望自己长得像某某人吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 23, "text": "你经常羡慕别人的成就吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 24, "text": "你为了不使他人难过，而放弃自己喜欢做的事吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 25, "text": "你会为了讨好别人而打扮吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 26, "text": "你勉强自己做许多不愿意做的事吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 27, "text": "你任由他人来支配你的生活吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 28, "text": "你认为你的优点比缺点多吗？", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 29, "text": "你经常跟人说抱歉吗？即使在不是你错的情况下？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 30, "text": "如果在非故意的情况下伤了别人的心，你会难过吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 31, "text": "你希望自己具备更多的才能和天赋吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 32, "text": "你经常听取别人的意见吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 33, "text": "在聚会上，你经常等别人先跟你打招呼吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 34, "text": "你每天照镜子超过三次吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 35, "text": "你的个性很强吗？", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 36, "text": "你是个优秀的领导者吗？", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 37, "text": "你的记性很好吗？", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 38, "text": "你对异性有吸引力吗？", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 39, "text": "你懂得理财吗？", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 40, "text": "买衣服前 , 你通常先听取别人的意见吗？", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] }
+  ],
+  "interpretations": [
+    {
+      "min_score": 0,
+      "max_score": 11,
+      "level": "自信心不足",
+      "interpretation": "结果显示，您对自己显然不太有信心。您可能过于谦虚和自我压抑，有时会因此受到他人的影响或支配。",
+      "recommendation": "从现在起，请尝试更多地关注自己的优点和长处，而不是弱点。学会看重自己是让别人看重你的第一步。每天肯定自己的一点进步，都是建立自信的基石。"
+    },
+    {
+      "min_score": 12,
+      "max_score": 24,
+      "level": "比较自信",
+      "interpretation": "您对自己颇有自信，这很不错。但在某些时候，您仍然会感到一些不安全感，或对自己产生怀疑。",
+      "recommendation": "不妨时常提醒自己，在优点和长处方面您并不比别人差。有意识地对自己强调已有的才能和成就，可以进一步巩固您的自信心。"
+    },
+    {
+      "min_score": 25,
+      "max_score": 40,
+      "level": "自信心十足",
+      "interpretation": "您对自己充满信心，非常明白自己的优点，同时也清楚地认识自己的缺点。这是一种非常健康和强大的心理状态。",
+      "recommendation": "请继续保持这份自信！同时，文件中也善意提醒：当分数接近40分时，要注意表达方式，适当的谦逊可能会让您的人际关系更加和谐融洽。"
+    }
+  ]
+}

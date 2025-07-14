@@ -1,0 +1,274 @@
+/* pages/daily-checkin/analysis.wxss */
+
+/* --- 全局与页面背景 --- */
+page {
+  background-color: #F9F7F3; /* 一个温暖、柔和的米色背景 */
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 30rpx;
+  box-sizing: border-box;
+}
+
+/* --- 1. 顶部控制区 --- */
+.controls-wrapper {
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 24rpx;
+  padding: 40rpx;
+  box-sizing: border-box;
+  margin-bottom: 30rpx;
+  box-shadow: 0 8rpx 24rpx rgba(226, 172, 112, 0.1);
+}
+
+.page-title {
+  font-size: 48rpx;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 40rpx;
+  color: #333;
+}
+
+/* 时间范围选择器 */
+.time-selector {
+  display: flex;
+  justify-content: center;
+  background-color: #F0F0F0;
+  border-radius: 35rpx; /* 圆润的胶囊形状 */
+  padding: 8rpx;
+  margin-bottom: 40rpx;
+}
+
+.time-option {
+  flex: 1;
+  text-align: center;
+  padding: 12rpx 0;
+  font-size: 28rpx;
+  color: #666;
+  border-radius: 30rpx;
+  transition: all 0.2s ease-in-out;
+}
+
+.time-option.active {
+  background-color: #FFA726; /* 主题橙色 */
+  color: #ffffff;
+  font-weight: bold;
+  box-shadow: 0 4rpx 10rpx rgba(255, 167, 38, 0.3);
+}
+
+/* 分析维度按钮网格 */
+.analysis-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30rpx;
+}
+
+.analysis-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #F9F9F9;
+  border: 2rpx solid #EAEAEA;
+  border-radius: 20rpx;
+  padding: 30rpx 0;
+  transition: all 0.2s ease-in-out; /* 【优化】增加平滑过渡效果 */
+}
+
+/* 【优化】增加按下的交互效果 */
+.analysis-btn:active {
+  transform: scale(0.97);
+  opacity: 0.8;
+}
+
+.analysis-btn.active {
+  border-color: #FFA726;
+  background-color: #FFF7EE; /* 橙色的浅色背景，突出选中状态 */
+}
+
+.btn-icon {
+  width: 70rpx;
+  height: 70rpx;
+  margin-bottom: 16rpx;
+}
+
+.btn-text {
+  font-size: 26rpx;
+  color: #333;
+}
+
+/* --- 2. 内容展示区 --- */
+.content-wrapper {
+  width: 100%;
+}
+
+/* 【优化】为结果展示区增加淡入动画 */
+.result-wrapper {
+  animation: fade-in 0.5s ease-in-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(20rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* 加载状态 */
+.loading-wrapper {
+  padding: 150rpx 0;
+  text-align: center;
+  color: #999;
+}
+
+.loading-text {
+  font-size: 28rpx;
+}
+
+/* 图表容器 */
+.chart-container {
+  width: 100%;
+  height: 600rpx; /* 给予图表足够的展示高度 */
+  background-color: #fff;
+  border-radius: 24rpx;
+  padding: 20rpx;
+  box-sizing: border-box;
+  margin-bottom: 30rpx;
+  box-shadow: 0 8rpx 24rpx rgba(226, 172, 112, 0.1);
+}
+
+/* 结果卡片（通用样式） */
+.result-card {
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 24rpx;
+  padding: 40rpx;
+  box-sizing: border-box;
+  margin-bottom: 30rpx;
+  box-shadow: 0 8rpx 24rpx rgba(226, 172, 112, 0.1);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  font-size: 34rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+  color: #333;
+}
+
+.card-content {
+  font-size: 28rpx;
+  line-height: 1.7; /* 增加行高，提升长文本的阅读体验 */
+  color: #555;
+  white-space: pre-wrap; /* 保证AI报告中的换行符(\n)能够生效 */
+}
+
+/* AI报告卡片的特殊样式 */
+.ai-card .card-title {
+  color: #FFA726; /* AI卡片的标题使用主题橙色 */
+}
+
+.ai-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 16rpx;
+}
+
+/* 初始占位提示 */
+.initial-placeholder {
+  padding: 150rpx 0;
+  text-align: center;
+  color: #aaa;
+  font-size: 28rpx;
+}
+
+/* --- 情绪画板专属样式 --- */
+.palette-board {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 30rpx;
+  box-sizing: border-box;
+}
+
+.palette-title {
+  font-size: 26rpx;
+  color: #888;
+  margin-bottom: 16rpx;
+}
+
+/* 1. 主导色 */
+.dominant-color-wrapper {
+  margin-bottom: 40rpx;
+}
+
+.dominant-color-block {
+  width: 100%;
+  height: 180rpx;
+  border-radius: 20rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 32rpx;
+  color: #fff;
+  font-weight: bold;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* 2. 辅助色 */
+.accent-colors-wrapper {
+  margin-bottom: 40rpx;
+}
+
+.accent-color-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  font-size: 28rpx;
+}
+
+.accent-color-label {
+  width: 140rpx;
+  color: #555;
+}
+
+.accent-color-bar {
+  height: 30rpx;
+  border-radius: 15rpx;
+  margin-right: 20rpx;
+}
+
+.accent-color-percent {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 3. 融合色 */
+.average-color-wrapper {
+  border-top: 1rpx solid #f0f0f0;
+  padding-top: 30rpx;
+}
+
+.average-color-content {
+  display: flex;
+  align-items: center;
+}
+
+.average-color-dot {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+  border: 1rpx solid rgba(0, 0, 0, 0.1);
+}
+
+.average-color-name {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: bold;
+}

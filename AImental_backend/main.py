@@ -1,30 +1,34 @@
 # main.py
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from dotenv import load_dotenv
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+import os
 
-
+# Load environment variables
 load_dotenv() 
-# Import all database connection objects from db.py
+
+# --- 1. Import Database Connections ---
 from db import all_dbs, user_db, chat_db, assessment_db, status_db
 
-# Import all your Peewee models from the 'model' directory
+# --- 2. Import All Peewee Models ---
 from model.user import User
 from model.chat import Chat
-from model.assessment import Assessment
+from model.assessment import Scale, UserAssessment
 from model.status import Checkin
+from model.analysis import Analysis # 【新增】导入 Analysis 模型
 
-# Import all the individual routers from your 'router' directory
+# --- 3. Import All Routers ---
 from router import user as user_router
 from router import chat as chat_router
 from router import assessment as assessment_router
 from router import status as status_router
-from fastapi.middleware.cors import CORSMiddleware # 1. 导入CORS中间件
-import os
-from fastapi.staticfiles import StaticFiles # 1. 导入这个
-
+from router import system as system_router
+from router import analysis as analysis_router # 【新增】导入 analysis 路由
+from router import assessment as assessment_router # 【新增】导入 assessment 路由
 # ---------------------------------------------------
-# 1. Create the main FastAPI application instance
+# FastAPI Application Instance
 # ---------------------------------------------------
 app = FastAPI(
     title="AI Psychologist API",
@@ -32,51 +36,48 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# 2. 在这里添加 CORS 中间件配置
+# CORS Middleware Configuration
 app.add_middleware(
     CORSMiddleware,
-    # 允许所有来源的请求。对于本地开发，使用 "*" 是最简单的。
-    # 如果您未来要部署到线上，可以将其改为您的前端域名。
     allow_origins=["*"], 
-    # 允许所有HTTP方法 (GET, POST, etc.)
     allow_methods=["*"],
-    # 允许所有请求头, 包括像 "Authorization" 这样的自定义头部
     allow_headers=["*"],
 )
 
-# 这会创建一个 'static' 文件夹（如果它不存在的话）
+# Mount static files directory
 if not os.path.exists("static"):
     os.makedirs("static")
-# 这句代码的意思是：当浏览器访问 /static/... 路径时，
-# FastAPI会去项目的 static/ 文件夹里找对应的文件
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
 # ---------------------------------------------------
-# 2. Register startup and shutdown events
+# Application Startup and Shutdown Events
 # ---------------------------------------------------
 
 @app.on_event("startup")
 def on_startup():
     """
-    This function now safely connects to databases, binds models, and creates tables.
+    Safely connects to databases, binds models, and creates tables.
     """
+    # 【修改】将 Analysis 模型添加到映射中
     model_db_mapping = {
         User: user_db,
         Chat: chat_db,
-        Assessment: assessment_db,
+        Scale: assessment_db,
+        UserAssessment: assessment_db,
         Checkin: status_db,
+        Analysis: status_db, # Analysis 数据也存在 status_db 中
     }
     
     print("🚀 Starting database initialization...")
     for model, db in model_db_mapping.items():
-        # The fix is here: We check if the connection is closed before connecting.
         if db.is_closed():
             db.connect()
         
-        # The rest of the logic remains the same
         try:
+            # The `bind` method is deprecated, direct creation is preferred
+            # but we will keep it for consistency with your existing code.
             model.bind(db, bind_refs=False, bind_backrefs=False)
             db.create_tables([model])
-            # I've moved the success print inside the 'try' block for more accurate logging
             print(f"✅ Table '{model._meta.table_name}' is ready in DB '{db.database}'")
         except Exception as e:
             print(f"❌ Error during table setup for '{model._meta.table_name}': {e}")
@@ -86,8 +87,7 @@ def on_startup():
 @app.on_event("shutdown")
 def on_shutdown():
     """
-    This function runs when the application shuts down.
-    It safely disconnects from all databases.
+    Safely disconnects from all databases.
     """
     print("👋 Closing all database connections...")
     for db in all_dbs:
@@ -96,7 +96,7 @@ def on_shutdown():
     print("💤 All connections closed.")
 
 # ---------------------------------------------------
-# 3. Mount all the sub-routers
+# Mount all the sub-routers
 # ---------------------------------------------------
 API_PREFIX = "/api/v1"
 
@@ -104,9 +104,12 @@ app.include_router(user_router.router, prefix=API_PREFIX)
 app.include_router(chat_router.router, prefix=API_PREFIX)
 app.include_router(assessment_router.router, prefix=API_PREFIX)
 app.include_router(status_router.router, prefix=API_PREFIX)
+app.include_router(system_router.router, prefix=API_PREFIX)
+app.include_router(analysis_router.router, prefix=API_PREFIX) # 【新增】注册 analysis 路由
+app.include_router(assessment_router.router, prefix=API_PREFIX) # 【新增】注册 assessment 路由
 
 # ---------------------------------------------------
-# 4. Define a root endpoint for health checks
+# Root endpoint for health checks
 # ---------------------------------------------------
 
 @app.get("/", tags=["Root"])

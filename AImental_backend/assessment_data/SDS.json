@@ -1,0 +1,71 @@
+{
+  "scale_info": {
+    "name": "抑郁自评量表",
+    "short_name": "SDS",
+    "description": "抑郁自评量表（Self-Rating Depression Scale, SDS）由Zung于1965年编制 ，是国际上应用广泛的抑郁状态评估工具之一。本评定将根据您最近一周的实际感受进行 ，结果仅供参考，不能替代专业诊断。",
+    "instructions": "请您仔细阅读以下每一条的说明，把意思弄明白，然后对照自己最近一周来的感受，从四个选项中选择最符合您实际情况的一项。 [cite: 1]",
+    "scoring_rules": {
+      "raw_score_sum": true,
+      "multiplier": 1.25,
+      "post_action": "round"
+    }
+  },
+  "questions": [
+    { "order": 1, "text": "我觉得闷闷不乐，情绪低沉。", "is_reverse_scored": false },
+    { "order": 2, "text": "我觉得一天之中早晨最好。", "is_reverse_scored": true },
+    { "order": 3, "text": "老是莫名地哭出来或觉得想哭。", "is_reverse_scored": false },
+    { "order": 4, "text": "我晚上睡眠不好。", "is_reverse_scored": false },
+    { "order": 5, "text": "我吃饭像平时一样多。", "is_reverse_scored": true },
+    { "order": 6, "text": "我与异性密切接触时和以往一样感到愉快。", "is_reverse_scored": true },
+    { "order": 7, "text": "我感觉自己的体重在下降。", "is_reverse_scored": false },
+    { "order": 8, "text": "我有便秘的烦恼。", "is_reverse_scored": false },
+    { "order": 9, "text": "我觉得心跳比平时快了。", "is_reverse_scored": false },
+    { "order": 10, "text": "我无缘无故感到疲乏。", "is_reverse_scored": false },
+    { "order": 11, "text": "我的头脑跟平时一样清楚。", "is_reverse_scored": true },
+    { "order": 12, "text": "我做事情像平时一样不感到有什么困难。", "is_reverse_scored": true },
+    { "order": 13, "text": "我坐卧不安, 难以保持平静。", "is_reverse_scored": false },
+    { "order": 14, "text": "我对未来感到有希望。", "is_reverse_scored": true },
+    { "order": 15, "text": "我比平时容易生气激动。", "is_reverse_scored": false },
+    { "order": 16, "text": "我觉得做出决定是容易的事。", "is_reverse_scored": true },
+    { "order": 17, "text": "我觉得自己是有用的人，别人需要我。", "is_reverse_scored": true },
+    { "order": 18, "text": "我的生活过得很有意义。", "is_reverse_scored": true },
+    { "order": 19, "text": "我认为如果我死了别人会生活得更好。", "is_reverse_scored": false },
+    { "order": 20, "text": "对于平常感兴趣的事我仍旧感兴趣。", "is_reverse_scored": true }
+  ],
+  "choices": [
+    { "text": "很少", "score": 1 },
+    { "text": "有时", "score": 2 },
+    { "text": "经常", "score": 3 },
+    { "text": "持续", "score": 4 }
+  ],
+  "interpretations": [
+    {
+      "min_score": 0,
+      "max_score": 52,
+      "level": "无抑郁倾向",
+      "interpretation": "您的测评标准分低于分界值53分。结果显示您的情绪状态稳定，未见明显的抑郁情绪。",
+      "recommendation": "您的状态很不错，请继续保持积极的生活方式。如果遇到情绪波动，记得我们总是在这里提供支持。"
+    },
+    {
+      "min_score": 53,
+      "max_score": 62,
+      "level": "轻度抑郁",
+      "interpretation": "您的测评标准分在53-62分之间，属于轻度抑郁范围 。这提示您可能正经历一些情绪低落、缺乏愉悦感或精力不足的情况。",
+      "recommendation": "请多关注自己的内心感受，尝试与信任的人沟通，或进行一些能让自己放松的活动。我们的AI伙伴乐于随时倾听您的心声。"
+    },
+    {
+      "min_score": 63,
+      "max_score": 72,
+      "level": "中度抑郁",
+      "interpretation": "您的测评标准分在63-72分之间，属于中度抑郁范围 。您当前的情绪状态可能已经对您的日常生活、工作或社交造成了一定的困扰。",
+      "recommendation": "这是一个需要您认真对待的信号。我们建议您主动了解抑郁的相关知识，并考虑寻求专业的心理咨询服务，这会是非常有益的一步。"
+    },
+    {
+      "min_score": 73,
+      "max_score": 100,
+      "level": "重度抑郁",
+      "interpretation": "您的测评标准分在72分以上，属于重度抑郁范围 。您可能正承受着显著的情绪痛苦，且日常功能可能已受到严重影响。",
+      "recommendation": "我们非常关心您的状况，并强烈建议您尽快寻求线下专业医疗资源的帮助。请及时联系精神科医生或心理治疗师进行专业评估和干预。"
+    }
+  ]
+}

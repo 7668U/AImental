@@ -1,0 +1,106 @@
+/* pages/assessment/result/result.wxss */
+page {
+  background-color: #f7f8fa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx 30rpx;
+}
+
+.result-card {
+  background-color: #ffffff;
+  border-radius: 24rpx;
+  width: 100%;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+  margin-bottom: 40rpx;
+  padding: 40rpx;
+  box-sizing: border-box;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #333;
+}
+
+.score-container {
+  display: flex;
+  align-items: baseline;
+  color: #F97316;
+}
+
+.score-value {
+  font-size: 100rpx;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.score-label {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-left: 10rpx;
+}
+
+.result-level {
+  font-size: 44rpx;
+  font-weight: bold;
+  margin-top: 20rpx;
+  color: #333333;
+}
+
+.detail-card {
+  padding: 30rpx 40rpx;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #eeeeee;
+}
+
+.card-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 16rpx;
+}
+
+.card-content {
+  font-size: 33rpx; 
+  line-height: 1.8;
+  color: #555555;
+  white-space: pre-wrap;
+  /* 【已修正】移除了顶部的外边距，解决留白问题 */
+  /* margin-top: 30rpx; */
+}
+
+/* 底部确认按钮 */
+.confirm-btn {
+  width: 100%;
+  height: 96rpx;
+  background-color: #F97316;
+  color: #ffffff;
+  font-size: 32rpx;
+  font-weight: bold;
+  border-radius: 48rpx;
+  margin-top: 20rpx;
+  border: none;
+  box-shadow: 0 8rpx 16rpx rgba(249, 115, 22, 0.2);
+
+  /* 【已修正】使用Flexbox实现完美居中，替换line-height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.confirm-btn:active {
+  background-color: #DD6B20;
+}

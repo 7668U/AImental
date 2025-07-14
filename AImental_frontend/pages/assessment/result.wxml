@@ -1,0 +1,31 @@
+<view class="container">
+  <view class="result-card summary-card">
+    <view class="score-container">
+      <view class="score-value">{{result.final_score || 0}}</view>
+      <view class="score-label">分</view>
+    </view>
+    <view class="result-level">{{result.result_level || '分析中...'}}</view>
+  </view>
+
+  <view class="result-card detail-card" wx:if="{{result.result_interpretation}}">
+    <view class="card-title">
+      <image class="card-icon" src="/images/icons/interpretation.png"></image>
+      <text>详细解读</text>
+    </view>
+    <view class="card-content">
+      {{result.result_interpretation}}
+    </view>
+  </view>
+
+  <view class="result-card detail-card" wx:if="{{result.result_recommendation}}">
+    <view class="card-title">
+      <image class="card-icon" src="/images/icons/recommendation.png"></image>
+      <text>给你的建议</text>
+    </view>
+    <view class="card-content">
+      {{result.result_recommendation}}
+    </view>
+  </view>
+
+  <button class="confirm-btn" bindtap="handleConfirm">我知道了</button>
+</view>
