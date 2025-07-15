@@ -1,0 +1,129 @@
+/* about.wxss (最终正确版) */
+
+/* about.wxss */
+
+/* === 新增：自定义导航栏样式 === */
+.custom-nav {
+  position: fixed; /* 固定在屏幕顶部 */
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #f7f8fa; /* 导航栏背景色，和页面背景色统一 */
+  z-index: 1000; /* 设置一个很高的层级，确保它在最上层 */
+  height: 44px; /* 导航栏内容区域标准高度 */
+  display: flex;
+  align-items: center; /* 垂直居中 */
+  justify-content: center; /* 水平居中 */
+}
+
+.nav-back {
+  position: absolute; /* 绝对定位，方便放在左侧 */
+  left: 10rpx;
+  width: 80rpx;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-back-icon {
+  width: 36rpx;
+  height: 36rpx;
+}
+
+.nav-title {
+  /* 在这里，你可以自由地修改标题样式了！*/
+  font-size: 34rpx;
+  color: #323233; /* 和内容文字颜色统一 */
+  font-weight: 600; /* 可以设置粗体 */
+}
+
+/* === 以下是你之前的样式 (保持不变即可) === */
+.container {
+  /* ... */
+}
+/* ... */
+.container {
+  /* 关键：必须设置为相对定位，才能控制背景图片子元素的位置 */
+  position: relative;
+  
+  /* 其他样式 */
+  min-height: 100vh;
+  background-color: #f7f8fa; /* 给页面一个底色 */
+  overflow: hidden; /* 防止背景图片意外溢出 */
+  box-sizing: border-box;
+}
+
+/* 关键：定义背景图片样式 */
+.bg-image {
+  position: absolute; /* 设置为绝对定位，脱离文档流，才能作为背景 */
+  top: -7%; /* 图片距离顶部 15% */
+  left: 16%; /* 图片距离左侧 20% */
+  width: 70%; /* 图片宽度为容器的 70% */
+  height: 70%; /* 图片高度为容器的 60% */
+  
+  z-index: 0; /* 将图片层级设为0，低于内容的层级 */
+  opacity: 0.9; /* 设置极低的透明度，产生水印效果 */
+}
+
+/* === 内容和底部样式 === */
+/* 内容区域容器，需要更高的 z-index 以便显示在背景图片之上 */
+.content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding-top: 30vh; /* <--- 现在请修改这个值！ */
+}
+
+.footer {
+  position: absolute;
+  z-index: 1; /* 层级为1，高于背景图 */
+  bottom: 60rpx;
+  width: 100%;
+  text-align: center;
+  font-size: 24rpx;
+  color: #c8c9cc;
+}
+
+
+/* === 信息列表样式 (保持不变) === */
+.info-list {
+  width: calc(100% - 60rpx);
+  margin: 0 30rpx;
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 15rpx rgba(0, 0, 0, 0.05);
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx 30rpx;
+  position: relative;
+  font-size: 30rpx;
+}
+
+.info-item:first-child::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 30rpx;
+  right: 0;
+  height: 1rpx;
+  background-color: #ebedf0;
+  transform: scaleY(0.5);
+}
+
+.item-label {
+  color: #050505;
+}
+
+.item-value {
+  color: #050505;
+}
+
+.info-item.clickable:active {
+  background-color: #f2f3f5;
+}
