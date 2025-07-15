@@ -206,7 +206,21 @@ Page({
   },
   
   goToUserInfo: function() { if (!this.data.isLogin) { wx.showToast({ title: '请先登录', icon: 'none' }); return; } wx.navigateTo({ url: '/pages/profile-edit/index' }); },
-  goToReports: function() { if (!this.data.isLogin) { wx.showToast({ title: '请先登录', icon: 'none' }); return; } wx.navigateTo({ url: '/pages/reports-list/index' }); },
+  goToReports: function() {
+    // 这段登录判断逻辑是正确的，需要保留
+    if (!this.data.isLogin) {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    // 只需修改这里的 url 指向我们新创建的 history 页面
+    wx.navigateTo({
+      url: '/pages/profile/history' 
+    });
+  },
   goToFeedback: function() { wx.navigateTo({ url: '/pages/feedback/index' }); },
 
   /**

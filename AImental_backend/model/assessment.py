@@ -116,7 +116,7 @@ class AssessmentTables:
     def __init__(self, db_connection):
         self.db = db_connection
         self.db.create_tables([Scale, UserAssessment])
-        # self.initialize_scales_from_json()
+        self.initialize_scales_from_json()
     # --- Scale (题库) 相关方法 ---
 
     def initialize_scales_from_json(self):

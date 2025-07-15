@@ -92,6 +92,19 @@ class ChatTable:
             timestamp=int(time.time())
         )
         return new_chat
+    
+    # --- [新增] 更新聊天标题的函数 ---
+    def update_chat_title(self, chat_id: str, new_title: str) -> bool:
+        """
+        Updates the title of a specific chat session.
+        Returns True if the update was successful, False otherwise.
+        """
+        # 使用 Peewee 的 update() 方法，更高效
+        query = Chat.update(title=new_title).where(Chat.id == chat_id)
+        rows_updated = query.execute()
+        
+        # execute() 返回受影响的行数，大于0表示更新成功
+        return rows_updated > 0
 
     def add_message_to_chat(self, chat_id: str, new_message: NewMessageForm) -> Optional[Chat]:
         """

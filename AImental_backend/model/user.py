@@ -1,12 +1,12 @@
 # models/user.py
 
 import uuid
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional
 
 # Import necessary types from peewee and other libraries
-from peewee import Model, CharField, IntegerField, DateTimeField
-from pydantic import BaseModel
+from peewee import Model, CharField, IntegerField, DateTimeField, DateField
+from pydantic import BaseModel, Field
 from fastapi import UploadFile
 import shutil
 import os
@@ -19,7 +19,7 @@ DEFAULT_AVATAR_URL = "/static/avatars/default.png"
 AVATAR_UPLOAD_DIR = "static/avatars/"
 
 # ---------------------------------------------------
-# 1. Peewee & Pydantic Models (No changes here)
+# 1. Peewee & Pydantic Models (已更新)
 # ---------------------------------------------------
 
 class User(Model):
@@ -28,6 +28,12 @@ class User(Model):
     openid = CharField(max_length=128, unique=True, index=True)
     nickname = CharField(max_length=255, null=True)
     avatar_url = CharField(max_length=1024, null=True)
+    
+    # --- 新增字段 ---
+    gender = IntegerField(default=0, null=True)  # 0: 未知, 1: 男, 2: 女
+    birthday = DateField(null=True)
+    # --- --------- ---
+    
     status = IntegerField(default=1)
     created_at = DateTimeField(default=datetime.now)
     last_login_at = DateTimeField(default=datetime.now)
@@ -43,6 +49,12 @@ class UserModel(BaseModel):
     openid: str
     nickname: Optional[str] = None
     avatar_url: Optional[str] = None
+    
+    # --- 新增字段 ---
+    gender: Optional[int] = Field(None, description="0: 保密, 1: 男, 2: 女")
+    birthday: Optional[date] = None
+    # --- --------- ---
+
     status: int
     created_at: datetime
     last_login_at: datetime
@@ -51,13 +63,14 @@ class UserModel(BaseModel):
         from_attributes = True
 
 # ---------------------------------------------------
-# 2. Table Access Class (Updated)
+# 2. Table Access Class (已更新)
 # ---------------------------------------------------
 
 class UserTable:
     """Encapsulates all database operations for the 'users' table."""
     def __init__(self, db_connection):
         self.db = db_connection
+        # 确保启动时自动创建表（包括新字段）
         self.db.create_tables([User])
         os.makedirs(AVATAR_UPLOAD_DIR, exist_ok=True)
 
@@ -74,8 +87,8 @@ class UserTable:
             id=str(uuid.uuid4()), 
             openid=openid,
             nickname=nickname,
-            # Use provided avatar_url or fall back to the default
             avatar_url=avatar_url or DEFAULT_AVATAR_URL
+            # gender 和 birthday 使用数据库默认的 null 值
         )
         return user
 
@@ -94,7 +107,7 @@ class UserTable:
         """
         return User.get_or_none(User.id == user_id)
 
-    # --- Method 4: Update User Profile (NEW) ---
+    # --- Method 4: Update User Profile (OLD - kept for reference if needed elsewhere) ---
     def update_user_profile(self, user_id: str, nickname: Optional[str], avatar_url: Optional[str]):
         """
         Updates a user's nickname and/or avatar URL.
@@ -138,6 +151,31 @@ class UserTable:
         user.save()
 
         return web_path
-    
+        
+    # --- 【新增方法】 Method 6: 更新用户基本信息 ---
+    def update_user_info(self, user_id: str, nickname: Optional[str], gender: Optional[int], birthday: Optional[date]) -> bool:
+        """
+        更新用户的昵称、性别和生日。
+        只更新非 None 的字段。
+        """
+        user = self.get_user_by_id(user_id)
+        if not user:
+            return False
+
+        update_data = {}
+        if nickname is not None:
+            update_data['nickname'] = nickname
+        if gender is not None:
+            update_data['gender'] = gender
+        if birthday is not None:
+            update_data['birthday'] = birthday
+
+        if not update_data:
+            return True # 没有需要更新的内容，也视为成功
+
+        query = User.update(**update_data).where(User.id == user_id)
+        rows_updated = query.execute()
+        return rows_updated > 0
+
 # --- Instantiate the table access object ---
 user_table = UserTable(user_db)

@@ -14,7 +14,7 @@
     <view class="menu-item" bindtap="goToReports">
       <view class="menu-item-left">
         <image class="menu-icon" src="/images/icons/icon-report.png"></image>
-        <text class="menu-text">分析报告</text>
+        <text class="menu-text">测试历史</text>
       </view>
     </view>
     <view class="menu-item" bindtap="goToFeedback">

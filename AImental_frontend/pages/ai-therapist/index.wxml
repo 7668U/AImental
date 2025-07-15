@@ -8,12 +8,23 @@
             <view 
                 wx:for="{{chatHistory}}" 
                 wx:key="id" 
-                class="history-item {{item.id === activeChatId ? 'active' : ''}}"
-                bindtap="switchChat"
-                data-id="{{item.id}}"
-            >
-                {{item.title}}
-            </view>
+                class="history-item-wrapper" >
+                <view 
+                    class="history-item {{item.id === activeChatId ? 'active' : ''}}"
+                    bindtap="switchChat"
+                    data-id="{{item.id}}"
+                >
+                    <text class="history-item-title">{{item.title}}</text>
+                </view>
+                
+                <image 
+                    src="/images/icons/more.png" 
+                    class="history-item-options"
+                    catchtap="showChatOptions"
+                    data-id="{{item.id}}"
+                    data-title="{{item.title}}"
+                ></image>
+                </view>
         </scroll-view>
     </view>
 

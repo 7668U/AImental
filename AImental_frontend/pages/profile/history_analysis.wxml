@@ -1,0 +1,65 @@
+<view class="container">
+  
+  <view class="page-header">
+    <text class="page-title">{{scaleName}} 分析报告</text>
+  </view>
+
+  <view class="analysis-card">
+    <view class="card-title">
+      <image class="card-icon" src="/images/assessment/record.png"></image>
+      <text>测试记录</text>
+    </view>
+    <view class="record-list-wrapper">
+      <view class="history-item" wx:for="{{currentScaleRecords}}" wx:key="id">
+        <view class="item-left">
+          <view class="item-time">{{item.completed_at_formatted}}</view>
+          <view class="item-score">得分：{{item.final_score}}</view>
+        </view>
+        <view class="item-right">
+          <view class="item-result">{{item.result_level}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="analysis-card">
+    <view class="card-title">
+      <image class="card-icon" src="/images/assessment/history_analysis.png"></image>
+      <text>综合评估</text>
+    </view>
+    <view class="card-content">
+      <text wx:if="{{isLoadingReport}}">报告生成中...</text>
+      <text wx:else>{{analysisReport.overall_assessment || '暂无数据'}}</text>
+    </view>
+  </view>
+
+  <view class="analysis-card">
+    <view class="card-title">
+      <image class="card-icon" src="/images/assessment/trend.png"></image>
+      <text>趋势分析</text>
+    </view>
+    <view class="chart-container">
+      <ec-canvas id="mychart-line" canvas-id="mychart-line" ec="{{ ec }}"></ec-canvas>
+    </view>
+    <view class="card-content">
+      <text wx:if="{{isLoadingReport}}">报告生成中...</text>
+      <text wx:else>{{analysisReport.trend_analysis || '暂无数据'}}</text>
+    </view>
+  </view>
+
+  <view class="analysis-card">
+    <view class="card-title">
+      <image class="card-icon" src="/images/assessment/suggestion.png"></image>
+      <text>个性化建议</text>
+    </view>
+    <view class="card-content">
+      <text wx:if="{{isLoadingReport}}">报告生成中...</text>
+      <text wx:else>{{analysisReport.recommendations || '暂无数据'}}</text>
+    </view>
+  </view>
+
+  <view class="footer">
+    <view class="disclaimer">本报告由AI生成，仅供参考，不能代替专业心理咨询。</view>
+    <button class="confirm-btn" bindtap="handleConfirm">我知道了</button>
+  </view>
+</view>

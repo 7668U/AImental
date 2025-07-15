@@ -18,6 +18,7 @@ from model.chat import Chat
 from model.assessment import Scale, UserAssessment
 from model.status import Checkin
 from model.analysis import Analysis # 【新增】导入 Analysis 模型
+from model.history_analysis import HistoryAnalysis
 
 # --- 3. Import All Routers ---
 from router import user as user_router
@@ -27,6 +28,7 @@ from router import status as status_router
 from router import system as system_router
 from router import analysis as analysis_router # 【新增】导入 analysis 路由
 from router import assessment as assessment_router # 【新增】导入 assessment 路由
+from router import history_analysis as history_analysis_router # 【新增】导入 history_analysis 路由
 # ---------------------------------------------------
 # FastAPI Application Instance
 # ---------------------------------------------------
@@ -64,6 +66,7 @@ def on_startup():
         Chat: chat_db,
         Scale: assessment_db,
         UserAssessment: assessment_db,
+        HistoryAnalysis: assessment_db,
         Checkin: status_db,
         Analysis: status_db, # Analysis 数据也存在 status_db 中
     }
@@ -106,7 +109,7 @@ app.include_router(assessment_router.router, prefix=API_PREFIX)
 app.include_router(status_router.router, prefix=API_PREFIX)
 app.include_router(system_router.router, prefix=API_PREFIX)
 app.include_router(analysis_router.router, prefix=API_PREFIX) # 【新增】注册 analysis 路由
-app.include_router(assessment_router.router, prefix=API_PREFIX) # 【新增】注册 assessment 路由
+app.include_router(history_analysis_router.router, prefix=API_PREFIX) # 【新增】注册 history_analysis 路由
 
 # ---------------------------------------------------
 # Root endpoint for health checks

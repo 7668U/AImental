@@ -1,0 +1,155 @@
+/* pages/profile/history.wxss */
+/* ... 省略了页面顶部和 scale-card 的样式，它们保持不变 ... */
+:root {
+  --theme-color: #F7931E; 
+  --theme-color-light: #fef5e8;
+}
+
+page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f7f8fa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+  box-sizing: border-box; 
+}
+
+.container {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 30rpx 0;
+}
+
+.page-title-wrapper {
+  padding: 0 30rpx;
+}
+
+.page-title {
+  font-size: 44rpx;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 40rpx;
+}
+
+.scale-card {
+  background-color: #ffffff;
+  border-radius: 20rpx;
+  margin: 0 15rpx 30rpx 15rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  width: calc(100% - 30rpx);
+}
+/* ... 省略了 card-header, card-left, card-right 等未修改的样式 ... */
+.card-header{display:flex;justify-content:space-between;align-items:center;padding:35rpx 30rpx}.card-left{display:flex;align-items:center;flex-shrink:0;margin-right:20rpx}.scale-icon{width:70rpx;height:70rpx;margin-right:25rpx}.scale-name{font-size:34rpx;font-weight:500;color:#333}.card-right{display:flex;align-items:center;color:#909399;flex-shrink:0}.expand-trigger{display:flex;align-items:center;padding:10rpx;margin:-10rpx;border-radius:10rpx}.expand-trigger:active{background-color:#f7f8fa}.test-count-number{font-size:28rpx;font-weight:600;color:#303133;margin:0 10rpx 0 4rpx}.arrow-icon{width:32rpx;height:32rpx;transition:transform .3s ease;opacity:.6}.arrow-icon.expanded{transform:rotate(180deg)}/* ✅ 修改：让容器变为垂直flex布局 */
+.analysis-btn-container {
+  margin-left: 20rpx;
+  width: 120rpx; /* 可以适当加宽一点以容纳文字 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.analysis-icon {
+  width: 50rpx;
+  height: 50rpx;
+  margin-bottom: 4rpx; /* 图标和文字之间的间距 */
+}
+
+/* ✅ 新增：分析文字的样式 */
+.analysis-text {
+  font-size: 22rpx;
+  color: #fda013;
+}.analysis-disabled-tip{font-size:24rpx;color:#c0c4cc;white-space:nowrap}
+
+.history-list {
+  background-color: #fafafa;
+  border-top: 1rpx solid #f2f2f2;
+  /* 移除内边距，交给 history-item-content 处理 */
+  padding: 0; 
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+.history-list.expanded {
+  max-height: 1000rpx;
+  transition: max-height 0.4s ease-in;
+}
+
+/* ✅ 【核心修改区域】 */
+.history-item {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1rpx solid #f2f2f2;
+
+  /* ✅ 新增 1: 明确设置一个不透明的背景色 */
+  background-color: #fafafa;
+  
+  /* ✅ 新增 2: 开启硬件加速，优化渲染，防止闪烁 (俗称3D-hack) */
+  transform: translateZ(0);
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+/* 上层可滑动内容 */
+.history-item-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  background-color: #fafafa; 
+  transition: transform 0.2s ease-out;
+  position: relative;
+  z-index: 2;
+
+  /* ✅ 新增这两行，确保内容层100%覆盖底层 */
+  width: 100%;
+  box-sizing: border-box;
+
+  
+}
+.history-item-content:active {
+  background-color: var(--theme-color-light);
+}
+
+/* 底层删除按钮 */
+.delete-action {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 160rpx; /* 删除按钮的宽度 */
+  background-color: #f3f3f3; /* 红色背景 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+.delete-btn {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.delete-btn:active {
+  background-color: #eeebeb;
+}
+.delete-icon {
+  width: 50rpx;
+  height: 50rpx;
+}
+/* 【核心修改区域结束】 */
+
+.item-left { flex-shrink: 0; margin-right: 20rpx; }
+.item-time { font-size: 28rpx; color: #606266; }
+.item-score { font-size: 24rpx; color: #909399; margin-top: 8rpx; }
+.item-right { display: flex; align-items: center; flex: 1; min-width: 0; justify-content: flex-end; }
+.item-result { font-size: 30rpx; font-weight: 600; color: var(--theme-color); text-align: right; word-break: break-all; max-width: 12ch; }
+.item-arrow { width: 28rpx; height: 28rpx; opacity: 0.5; flex-shrink: 0; margin-left: 15rpx; }
+.loading-tip, .empty-container { text-align: center; padding-top: 200rpx; color: #909399; }
+.empty-icon { width: 200rpx; height: 200rpx; margin-bottom: 20rpx; }
+.empty-text { display: block; font-size: 32rpx; margin-bottom: 10rpx; }
+.empty-subtext { font-size: 26rpx; color: #c0c4cc; }
