@@ -1,9 +1,8 @@
-// /pages/profile/index.js
+// index.js (正确分离的版本)
 
 // --- 配置 ---
 const SERVER_BASE_URL = 'http://127.0.0.1:8000'; 
 const API_BASE_URL = `${SERVER_BASE_URL}/api/v1/users`; 
-
 const defaultAvatarUrl = '/images/default-avatar.png';
 
 Page({
@@ -16,7 +15,6 @@ Page({
   },
 
   onShow: function () {
-    // 每次进入页面都检查登录状态并尝试刷新用户信息
     this.checkLoginStatus();
   },
   
@@ -24,20 +22,13 @@ Page({
     try {
       const token = wx.getStorageSync('token');
       if (token) {
-        // **【核心逻辑修正】**
-        // 只要有token，就认为用户是登录状态，并立即去服务器获取最新信息。
-        // 这样可以确保即使用户在其他设备上修改了信息，这里也能同步。
         this.setData({ isLogin: true });
         this.fetchUserProfile(token);
-
-        // 为了更好的用户体验，可以先用缓存里的旧数据快速显示一下
         const cachedUserInfo = wx.getStorageSync('userInfo');
         if (cachedUserInfo) {
           this.setData({ userInfo: cachedUserInfo });
         }
-
       } else {
-        // 没有token，就是未登录状态
         this.setData({
           isLogin: false,
           userInfo: {
@@ -51,9 +42,6 @@ Page({
     }
   },
 
-  /**
-   * 用户点击“点击登录”按钮
-   */
   login: function() {
     wx.showLoading({ title: '请授权...' });
     wx.getUserProfile({
@@ -76,7 +64,6 @@ Page({
                   if (apiRes.statusCode === 200 && apiRes.data.access_token) {
                     const token = apiRes.data.access_token;
                     wx.setStorageSync('token', token);
-                    // 登录成功后，立即获取一次完整的、带服务器地址的用户信息
                     this.fetchUserProfile(token);
                   } else {
                     wx.showToast({ title: apiRes.data.detail || '登录失败', icon: 'none' });
@@ -101,43 +88,31 @@ Page({
     });
   },
 
-  /**
-   * 使用token从后端获取当前用户的详细信息
-   */
   fetchUserProfile: function(token) {
-    // 不再显示“加载中”，让刷新在后台静默进行
     wx.request({
       url: `${API_BASE_URL}/me`,
       method: 'GET',
       header: { 'Authorization': `Bearer ${token}` },
       success: (res) => {
         if (res.statusCode === 200) {
-          // **【重要】** 每次从后端获取到信息后，都检查并拼接完整的头像URL
           if (res.data.avatar_url && !res.data.avatar_url.startsWith('http')) {
             res.data.avatar_url = SERVER_BASE_URL + res.data.avatar_url;
           }
-          // 将最新的、带完整URL的信息存入缓存和页面
           wx.setStorageSync('userInfo', res.data);
           this.setData({
             userInfo: res.data,
             isLogin: true,
           });
         } else {
-          // 如果token失效，清理登录状态
           this.clearLoginState();
         }
       },
       fail: (err) => {
-        // 网络请求失败时，不做处理，继续用缓存数据
         console.error("fetchUserProfile failed:", err);
       }
     });
   },
 
-  // ... logout, clearLoginState, onChangeAvatar, chooseAndUploadAvatar 等函数保持不变 ...
-  // ... goTo... 跳转函数也保持不变 ...
-
-  // (为了完整性，我还是把它们贴在下面)
   logout: function() {
     wx.showModal({
       title: '提示',
@@ -165,6 +140,7 @@ Page({
       }
     });
   },
+
   clearLoginState: function() {
     wx.removeStorageSync('token');
     wx.removeStorageSync('userInfo');
@@ -176,6 +152,7 @@ Page({
       }
     });
   },
+
   onChangeAvatar: function() {
     if (!this.data.isLogin) {
       wx.showToast({ title: '请先登录', icon: 'none' });
@@ -190,6 +167,7 @@ Page({
       },
     });
   },
+
   chooseAndUploadAvatar: function() {
     wx.chooseMedia({
       count: 1,
@@ -226,8 +204,17 @@ Page({
       }
     });
   },
+  
   goToUserInfo: function() { if (!this.data.isLogin) { wx.showToast({ title: '请先登录', icon: 'none' }); return; } wx.navigateTo({ url: '/pages/profile-edit/index' }); },
   goToReports: function() { if (!this.data.isLogin) { wx.showToast({ title: '请先登录', icon: 'none' }); return; } wx.navigateTo({ url: '/pages/reports-list/index' }); },
   goToFeedback: function() { wx.navigateTo({ url: '/pages/feedback/index' }); },
-  goToAboutUs: function() { wx.navigateTo({ url: '/pages/about-us/index' }); }
+
+  /**
+   * ✅ 点击“关于我们”，跳转到 about 页面
+   */
+  goToAboutUs: function() {
+    wx.navigateTo({
+      url: './about' // <-- 确保这个路径是正确的！
+    });
+  }
 });

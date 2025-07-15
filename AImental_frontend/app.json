@@ -4,7 +4,8 @@
     "pages/assessment/index",
     "pages/daily-checkin/index",
     "pages/daily-checkin/record",
-    "pages/profile/index"
+    "pages/profile/index",
+    "pages/profile/about"
   ],
   "window": {
     "backgroundTextStyle": "light",
