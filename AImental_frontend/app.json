@@ -7,9 +7,8 @@
     "pages/daily-checkin/index",
     "pages/daily-checkin/record",
     "pages/profile/index",
-    "pages/profile/about"
-    "pages/daily-checkin/analysis",
-    "pages/profile/index"
+    "pages/profile/about",
+    "pages/daily-checkin/analysis"
   ],
   "window": {
     "backgroundTextStyle": "light",
