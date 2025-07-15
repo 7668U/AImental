@@ -31,17 +31,20 @@
     <view class="main-content {{ isSidebarVisible ? 'main-content-pushed' : '' }}" bindtap="closeSidebar">
 
         <block wx:if="{{isLoggedIn}}">
-          <view class="top-bar">
-            <view class="top-bar-left">
-              <image class="menu-icon" src="/images/icons/menu.png" catchtap="toggleSidebar"></image>
-            </view>
+            <view class="top-bar">
+                <view class="top-bar-left">
+                  <image class="menu-icon" src="/images/icons/menu.png" catchtap="toggleSidebar"></image>
+                </view>
 
-            <view class="top-bar-center">
-              <view class="top-bar-title">Feel Yourself</view>
-            </view>
+                <view class="top-bar-center">
+                  </view>
 
-            <view class="top-bar-right"></view>
-          </view>
+                <view class="top-bar-right"></view>
+            </view>
+            
+            <view class="chat-background">
+                <image src="/images/background.png" class="chat-background-image"></image>
+            </view>
 
             <scroll-view class="message-list" scroll-y="true" scroll-into-view="{{latestMessageId}}">
                 

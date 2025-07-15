@@ -12,24 +12,23 @@
   </view>
 
   <view class="main-content" style="padding-top: {{navHeight + navTop}}px;">
-    <view class="avatar-wrapper">
-      <open-data type="userAvatarUrl" class="avatar"></open-data>
+    <view class="avatar-wrapper" bindtap="onChangeAvatar">
+      <image class="avatar" src="{{avatar_url || '/images/default-avatar.png'}}" mode="aspectFill"></image>
     </view>
 
     <view class="info-section">
       <view class="info-item">
         <text class="label">昵称</text>
-        <view class="value-container" bindtap="editNickname">
+        <view class="value-container">
           <input 
             wx:if="{{isEditingNickname}}"
             class="info-input" 
-            value="{{nickName}}" 
-            placeholder="请输入昵称" 
+            value="{{nickname}}"  placeholder="请输入昵称" 
             bindinput="onNickNameInput"
             bindblur="saveNickname"
             focus="{{isEditingNickname}}"
           />
-          <text wx:if="{{!isEditingNickname}}" class="user-info-text">{{nickName || '未设置'}}</text>
+          <text wx:else class="user-info-text" bindtap="editNickname">{{nickname || '未设置'}}</text>
         </view>
       </view>
 

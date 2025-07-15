@@ -113,6 +113,7 @@ def get_user_basic_info(current_user_id: str = Depends(get_current_user_id)):
     """
     获取当前登录用户的核心基本信息：昵称、性别、生日。
     """
+    print(f"获取用户基本信息: {current_user_id}")
     user = user_table.get_user_by_id(current_user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

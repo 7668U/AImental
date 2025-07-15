@@ -2,5 +2,5 @@
   "usingComponents": {
     "calendar": "./calendar"
   },
-  "navigationBarTitleText": "状态打卡"
+  "navigationBarTitleText": ""
 }

@@ -10,7 +10,7 @@ import os
 load_dotenv() 
 
 # --- 1. Import Database Connections ---
-from db import all_dbs, user_db, chat_db, assessment_db, status_db
+from db import all_dbs, user_db, chat_db, assessment_db, status_db,feedback_db
 
 # --- 2. Import All Peewee Models ---
 from model.user import User
@@ -19,6 +19,7 @@ from model.assessment import Scale, UserAssessment
 from model.status import Checkin
 from model.analysis import Analysis # 【新增】导入 Analysis 模型
 from model.history_analysis import HistoryAnalysis
+from model.feedback import Feedback # 【新增】导入 Feedback 模型    
 
 # --- 3. Import All Routers ---
 from router import user as user_router
@@ -29,6 +30,7 @@ from router import system as system_router
 from router import analysis as analysis_router # 【新增】导入 analysis 路由
 from router import assessment as assessment_router # 【新增】导入 assessment 路由
 from router import history_analysis as history_analysis_router # 【新增】导入 history_analysis 路由
+from router import feedback as feedback_router # 【新增】导入 feedback 路由
 # ---------------------------------------------------
 # FastAPI Application Instance
 # ---------------------------------------------------
@@ -63,6 +65,7 @@ def on_startup():
     # 【修改】将 Analysis 模型添加到映射中
     model_db_mapping = {
         User: user_db,
+        Feedback: feedback_db,  # 【新增】Feedback 模型使用 user_db
         Chat: chat_db,
         Scale: assessment_db,
         UserAssessment: assessment_db,
@@ -110,6 +113,7 @@ app.include_router(status_router.router, prefix=API_PREFIX)
 app.include_router(system_router.router, prefix=API_PREFIX)
 app.include_router(analysis_router.router, prefix=API_PREFIX) # 【新增】注册 analysis 路由
 app.include_router(history_analysis_router.router, prefix=API_PREFIX) # 【新增】注册 history_analysis 路由
+app.include_router(feedback_router.router, prefix=API_PREFIX) # 【新增】注册 feedback 路由
 
 # ---------------------------------------------------
 # Root endpoint for health checks

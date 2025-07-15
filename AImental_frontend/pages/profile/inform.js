@@ -1,31 +1,30 @@
-// pages/inform/inform.js
-const app = getApp();
+// pages/inform/inform.js (终极方案版)
+
+const SERVER_BASE_URL = 'http://127.0.0.1:8000/api/v1';
+const API_BASE_URL = `${SERVER_BASE_URL}/users`;
 
 Page({
   data: {
-    // 自定义导航栏相关数据
     navTop: 0,
     navHeight: 0,
-    // 用户信息
-    nickName: 'AImental', // 初始昵称，实际应从服务器获取
-    isEditingNickname: false, // 控制是否处于昵称编辑状态
-    genderRange: ['男', '女', '保密'],
-    genderIndex: 0,
+    avatar_url: '',
+    nickname: '',
+    genderIndex: 2,
     birthday: '请选择您的生日',
-    currentDate: ''
+    genderRange: ['男', '女', '保密'],
+    isEditingNickname: false,
+    currentDate: '',
+    _originalData: null
   },
 
   onLoad(options) {
     this.setNavSize();
     this.setCurrentDate();
-    // 假设从缓存或服务器获取了用户昵称
-    // wx.getStorage({
-    //   key: 'userInfo',
-    //   success: (res) => {
-    //     this.setData({ nickName: res.data.nickName });
-    //   }
-    // });
+    this.fetchUserInfo();
   },
+
+  onHide: function () { if (this.data.isEditingNickname) { this.saveNickname(); } },
+  onUnload: function () { if (this.data.isEditingNickname) { this.saveNickname(); } },
 
   setNavSize() {
     const sysInfo = wx.getSystemInfoSync();
@@ -41,54 +40,122 @@ Page({
     const year = now.getFullYear();
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
     const day = now.getDate().toString().padStart(2, '0');
-    this.setData({
-      currentDate: `${year}-${month}-${day}`
+    this.setData({ currentDate: `${year}-${month}-${day}` });
+  },
+
+  navigateBack() { wx.navigateBack({ delta: 1 }); },
+
+  fetchUserInfo() {
+    const token = wx.getStorageSync('token');
+    if (!token) { return; }
+    wx.showLoading({ title: '加载中...' });
+    wx.request({
+      url: `${API_BASE_URL}/me/info`,
+      method: 'GET',
+      header: { 'Authorization': `Bearer ${token}` },
+      success: (res) => {
+        if (res.statusCode === 200) {
+          const data = res.data;
+          // console.log('【侦探日志】从服务器收到的原始用户信息:', res.data);
+          let genderIndex = 2;
+          if (data.gender === 1) genderIndex = 0;
+          if (data.gender === 2) genderIndex = 1;
+          const cachedUserInfo = wx.getStorageSync('userInfo');
+          const profile = {
+            nickname: data.nickname || '',
+            birthday: data.birthday || '请选择您的生日',
+            genderIndex: genderIndex,
+            avatar_url: cachedUserInfo.avatar_url || ''
+          };
+          this.setData({ ...profile, _originalData: profile });
+        }
+      },
+      complete: () => { wx.hideLoading(); }
     });
   },
 
-  navigateBack() {
-    wx.navigateBack({
-      delta: 1
+  updateUserInfo(updateData) {
+    const token = wx.getStorageSync('token');
+    if (!token) { return; }
+    wx.request({
+      url: `${API_BASE_URL}/me/info`,
+      method: 'PUT',
+      header: { 'Authorization': `Bearer ${token}` },
+      data: updateData,
+      success: (res) => {
+        if (res.statusCode === 200) {
+          wx.showToast({ title: '保存成功', icon: 'success' });
+          console.log('保存成功，正在重新拉取最新信息...');
+          this.fetchUserInfo();
+          const userInfo = wx.getStorageSync('userInfo') || {};
+          const newUserInfo = { ...userInfo, ...updateData };
+          wx.setStorageSync('userInfo', newUserInfo);
+        } else {
+          wx.showToast({ title: '保存失败', icon: 'none' });
+          this.setData({ ...this.data._originalData });
+        }
+      },
+      fail: () => wx.showToast({ title: '网络错误', icon: 'none' })
     });
   },
 
-  // --- 昵称修改相关函数 ---
-  editNickname() {
-    this.setData({
-      isEditingNickname: true
+  editNickname() { this.setData({ isEditingNickname: true }); },
+  onNickNameInput(e) { this.setData({ nickname: e.detail.value }); },
+
+  saveNickname(e) {
+    if (!this.data.isEditingNickname) { return; }
+    this.setData({ isEditingNickname: false });
+    const newNickname = this.data.nickname.trim();
+    if (newNickname && newNickname !== this.data._originalData.nickname) {
+      this.updateUserInfo({ nickname: newNickname });
+    } else {
+      this.setData({ nickname: this.data._originalData.nickname });
+    }
+  },
+
+  bindGenderChange(e) {
+    const newIndex = parseInt(e.detail.value);
+    if (newIndex === this.data.genderIndex) return;
+    this.setData({ genderIndex: newIndex });
+    const genderMap = [1, 2, 0]; 
+    const backendGender = genderMap[newIndex];
+    this.updateUserInfo({ gender: backendGender });
+  },
+
+  bindBirthdayChange(e) {
+    const newBirthday = e.detail.value;
+    if (newBirthday === this.data.birthday) return;
+    this.setData({ birthday: newBirthday });
+    this.updateUserInfo({ birthday: newBirthday });
+  },
+
+  onChangeAvatar: function() {
+    wx.showActionSheet({
+      itemList: ['更换头像'],
+      success: (res) => { if (res.tapIndex === 0) { this.chooseAndUploadAvatar(); } },
     });
   },
 
-  onNickNameInput(e) {
-    this.setData({
-      nickName: e.detail.value
+  chooseAndUploadAvatar: function() {
+    wx.chooseMedia({
+      count: 1, mediaType: ['image'], sourceType: ['album', 'camera'], sizeType: ['compressed'],
+      success: (res) => {
+        wx.showLoading({ title: '正在上传...' });
+        const tempFilePath = res.tempFiles[0].tempFilePath;
+        const token = wx.getStorageSync('token');
+        wx.uploadFile({
+          url: `${API_BASE_URL}/me/avatar`,
+          filePath: tempFilePath, name: 'image',
+          header: { 'Authorization': `Bearer ${token}` },
+          success: (uploadRes) => {
+            if (uploadRes.statusCode === 200) {
+              wx.showToast({ title: '头像更新成功!', icon: 'success' });
+              this.fetchUserInfo(); // 头像更新成功后，也调用 fetchUserInfo 刷新所有信息
+            }
+          },
+          complete: () => wx.hideLoading()
+        });
+      }
     });
-  },
-
-  saveNickname() {
-    this.setData({
-      isEditingNickname: false
-    });
-    // 在这里添加将新昵称保存到服务器或本地缓存的逻辑
-    console.log('保存新昵称:', this.data.nickName);
-    wx.showToast({
-      title: '昵称已保存',
-      icon: 'success'
-    });
-  },
-  // -------------------------
-
-  bindGenderChange: function(e) {
-    this.setData({
-      genderIndex: e.detail.value
-    });
-    console.log('保存性别:', this.data.genderRange[e.detail.value]);
-  },
-
-  bindBirthdayChange: function(e) {
-    this.setData({
-      birthday: e.detail.value
-    });
-    console.log('保存生日:', e.detail.value);
   },
 });

@@ -6,7 +6,7 @@ from typing import List
 
 # 1. 从项目其他文件中导入
 from model.feedback import feedback_table, FeedbackModel
-from .auth import get_current_user_id # 导入用户认证依赖
+from .auth import get_current_user_id 
 
 # ---------------------------------------------------
 # Router 设置
@@ -21,6 +21,8 @@ router = APIRouter(
 # ---------------------------------------------------
 class FeedbackCreateRequest(BaseModel):
     """创建反馈时的请求体"""
+    # 【新增】增加 feedback_type 字段
+    feedback_type: str
     content: str
 
 # ---------------------------------------------------
@@ -29,20 +31,25 @@ class FeedbackCreateRequest(BaseModel):
 
 @router.post("/", response_model=FeedbackModel, status_code=201, summary="提交新的用户反馈")
 def submit_feedback(
-    request: FeedbackCreateRequest,
+    request: FeedbackCreateRequest, # <--- 请求体现在包含 feedback_type
     current_user_id: str = Depends(get_current_user_id)
 ):
     """
     用户提交一条新的反馈。
+    - **feedback_type**: 反馈类型 ('optimization' 或 'bug')
     - **content**: 反馈内容，不能为空。
     - 需要有效的 Token 进行认证。
     """
+    # 【修改】将 feedback_type 传递给数据库处理函数
     new_feedback = feedback_table.create_feedback(
         user_id=current_user_id,
-        content=request.content
+        content=request.content,
+        feedback_type=request.feedback_type
     )
     return new_feedback
 
+
+# --- 其他接口无需修改 ---
 
 @router.get("/", response_model=List[FeedbackModel], summary="获取我的历史反馈")
 def get_my_feedback_history(current_user_id: str = Depends(get_current_user_id)):
@@ -63,16 +70,13 @@ def delete_single_feedback(
     - 为了安全，服务器会校验这条反馈是否属于当前登录用户。
     - 需要有效的 Token 进行认证。
     """
-    # 1. 先查找反馈是否存在
     feedback_to_delete = feedback_table.get_feedback_by_id(feedback_id)
     if not feedback_to_delete:
         raise HTTPException(status_code=404, detail="Feedback not found")
 
-    # 2. 校验反馈的所有权，确保用户只能删除自己的反馈
     if feedback_to_delete.user_id != current_user_id:
         raise HTTPException(status_code=403, detail="Not authorized to delete this feedback")
 
-    # 3. 执行删除操作
     feedback_table.delete_feedback(feedback_id)
 
     return {"message": "Feedback deleted successfully"}

@@ -33,7 +33,7 @@ page {
   border-right: 1rpx solid #EAEAEA;
   display: flex;
   flex-direction: column;
-  padding: 100rpx 30rpx 40rpx; 
+  padding: 180rpx 30rpx 40rpx; 
 }
 .sidebar-visible {
   transform: translateX(0);
@@ -117,15 +117,24 @@ page {
 /* --- [SEÇÃO MODIFICADA] Fim das alterações --- */
 
 /* --- Conteúdo Principal --- */
-.main-content {width: 100%;height: 100%;display: flex;flex-direction: column;transition: transform 0.3s ease-in-out;}
-.main-content-pushed {transform: translateX(75vw);}
-/* 1. Contêiner pai .top-bar */
+.main-content {
+  /* 【修改】添加 position: relative，为背景图定位做准备 */
+  position: relative; 
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease-in-out;
+}
+.main-content-pushed {
+  transform: translateX(75vw);
+}
 .top-bar {
   display: flex;
   align-items: center;
   width: 100%;
-  height: 60rpx; 
-  padding-top: 100rpx;
+  height: 60rpx;
+  padding-top: 200rpx; 
   background-color: #fff;
   border-bottom: 1rpx solid #f0f0f0;
   box-sizing: content-box;
@@ -154,10 +163,18 @@ page {
   width: 48rpx;
   height: 48rpx;
 }
+
 .message-list {
   flex-grow: 1;
   padding: 30rpx 0; 
   overflow-y: auto;
+  
+  /* 【修改】移除旧的背景图样式，并将背景设为透明 */
+  background-color: transparent;
+
+  /* 【修改】添加层级关系，确保消息列表在背景图之上 */
+  position: relative;
+  z-index: 2;
 }
 .message-item {
   display: flex; 
@@ -184,7 +201,6 @@ page {
   color: #ffffff;
   border-top-right-radius: 8rpx;
 }
-/* --- Estilo de animação de carregamento --- */
 .loader {
   width: 40rpx;
   height: 40rpx;
@@ -201,14 +217,93 @@ page {
     transform: rotate(360deg);
   }
 }
+
 /* --- Área de Entrada e Login --- */
-.input-area-minimalist {display: flex;align-items: center;padding: 20rpx 30rpx;background-color: #fff;border-top: 1rpx solid #f0f0f0;flex-shrink: 0;}
-.input-field { flex-grow: 1; background-color: var(--bg-color); border-radius: 40rpx; padding: 18rpx 30rpx; height: 80rpx; box-sizing: border-box; }
-.send-icon { width: 50rpx; height: 50rpx; margin-left: 20rpx; opacity: 0.5; }
-.send-icon.active { opacity: 1; }
-.login-prompt-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40rpx; box-sizing: border-box; }
-.login-avatar { width: 160rpx; height: 160rpx; border-radius: 50%; margin-bottom: 30rpx; }
-.login-title { font-size: 40rpx; font-weight: bold; color: var(--text-primary); margin-bottom: 20rpx; }
-.login-subtitle { font-size: 28rpx; color: var(--text-secondary); margin-bottom: 80rpx; }
-.login-btn { background-color: var(--primary-orange); color: white; border-radius: 50rpx; padding: 0 60rpx; height: 90rpx; display: flex; align-items: center; justify-content: center; font-size: 32rpx; white-space: nowrap; margin: 0; border: none; line-height: normal; }
-.login-btn::after { border: none; }
+.input-area-minimalist {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 30rpx;
+  background-color: #fff;
+  border-top: 1rpx solid #f0f0f0;
+  flex-shrink: 0;
+}
+.input-field { 
+  flex-grow: 1; 
+  background-color: var(--bg-color); 
+  border-radius: 40rpx; 
+  padding: 18rpx 30rpx; 
+  height: 80rpx; 
+  box-sizing: border-box; 
+}
+.send-icon { 
+  width: 50rpx; 
+  height: 50rpx; 
+  margin-left: 20rpx; 
+  opacity: 0.5; 
+}
+.send-icon.active { 
+  opacity: 1; 
+}
+.login-prompt-container { 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: center; 
+  height: 100%; 
+  padding: 40rpx; 
+  box-sizing: border-box; 
+}
+.login-avatar { 
+  width: 160rpx; 
+  height: 160rpx; 
+  border-radius: 50%; 
+  margin-bottom: 30rpx; 
+}
+.login-title { 
+  font-size: 40rpx; 
+  font-weight: bold; 
+  color: var(--text-primary); 
+  margin-bottom: 20rpx; 
+}
+.login-subtitle { 
+  font-size: 28rpx; 
+  color: var(--text-secondary); 
+  margin-bottom: 80rpx; 
+}
+.login-btn { 
+  background-color: var(--primary-orange); 
+  color: white; 
+  border-radius: 50rpx; 
+  padding: 0 60rpx; 
+  height: 90rpx; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-size: 32rpx; 
+  white-space: nowrap; 
+  margin: 0; 
+  border: none; 
+  line-height: normal; 
+}
+.login-btn::after { 
+  border: none; 
+}
+
+/* --- 【新增】背景图片样式 --- */
+.chat-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  pointer-events: none;
+}
+.chat-background-image {
+  width: 450rpx;
+  height: 450rpx;
+  opacity: 0.8;
+}
