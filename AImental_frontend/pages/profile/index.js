@@ -205,7 +205,8 @@ Page({
     });
   },
   
-  goToUserInfo: function() { if (!this.data.isLogin) { wx.showToast({ title: '请先登录', icon: 'none' }); return; } wx.navigateTo({ url: '/pages/profile-edit/index' }); },
+  goToUserInfo: function() { if (!this.data.isLogin) { wx.showToast({ title: '请先登录', icon: 'none' }); return; } wx.navigateTo({ url: '/pages/profile/inform' }); },
+  goToFeedback: function() { wx.navigateTo({ url: '/pages/profile/feedback' }); },
   goToReports: function() {
     // 这段登录判断逻辑是正确的，需要保留
     if (!this.data.isLogin) {
@@ -221,7 +222,6 @@ Page({
       url: '/pages/profile/history' 
     });
   },
-  goToFeedback: function() { wx.navigateTo({ url: '/pages/feedback/index' }); },
 
   /**
    * ✅ 点击“关于我们”，跳转到 about 页面

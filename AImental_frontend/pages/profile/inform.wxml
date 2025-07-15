@@ -1,0 +1,55 @@
+<view class="page-container">
+  <view class="custom-nav-wrapper" style="padding-top: {{navTop}}px;">
+    <view class="custom-nav" style="height: {{navHeight}}px;">
+      <view class="nav-left" bindtap="navigateBack">
+        <image class="nav-back-icon" src="../../images/left.png"></image>
+      </view>
+      <view class="nav-center">
+        <text class="nav-title">个人信息</text>
+      </view>
+      <view class="nav-right"></view>
+    </view>
+  </view>
+
+  <view class="main-content" style="padding-top: {{navHeight + navTop}}px;">
+    <view class="avatar-wrapper">
+      <open-data type="userAvatarUrl" class="avatar"></open-data>
+    </view>
+
+    <view class="info-section">
+      <view class="info-item">
+        <text class="label">昵称</text>
+        <view class="value-container" bindtap="editNickname">
+          <input 
+            wx:if="{{isEditingNickname}}"
+            class="info-input" 
+            value="{{nickName}}" 
+            placeholder="请输入昵称" 
+            bindinput="onNickNameInput"
+            bindblur="saveNickname"
+            focus="{{isEditingNickname}}"
+          />
+          <text wx:if="{{!isEditingNickname}}" class="user-info-text">{{nickName || '未设置'}}</text>
+        </view>
+      </view>
+
+      <picker bindchange="bindGenderChange" value="{{genderIndex}}" range="{{genderRange}}">
+        <view class="info-item">
+          <text class="label">性别</text>
+          <view class="value-container">
+            <text class="user-info-text">{{genderRange[genderIndex]}}</text>
+          </view>
+        </view>
+      </picker>
+
+      <picker mode="date" value="{{birthday}}" start="1920-01-01" end="{{currentDate}}" bindchange="bindBirthdayChange">
+        <view class="info-item">
+          <text class="label">生日</text>
+          <view class="value-container">
+            <text class="user-info-text">{{birthday}}</text>
+          </view>
+        </view>
+      </picker>
+    </view>
+  </view>
+</view>
