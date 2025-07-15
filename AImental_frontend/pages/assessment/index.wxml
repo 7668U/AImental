@@ -1,7 +1,26 @@
-<!--index.wxml-->
-<navigation-bar title="Weixin" back="{{false}}" color="black" background="#FFF"></navigation-bar>
-<scroll-view class="scrollarea" scroll-y type="list">
-  <view class="container">
-  <text>敬请期待</text>
+<view class="container">
+  <view class="page-title">选择一个测评开始</view>
+  <view class="page-subtitle">了解自己的内心世界</view>
+
+  <view class="feedback-container" wx:if="{{isLoading}}">
+    <text>正在加载测评列表...</text>
+  </view>
+
+  <view class="feedback-container" wx:if="{{isError}}">
+    <text>加载失败，请下拉刷新重试</text>
+  </view>
+
+  <view class="card-grid" wx:if="{{!isLoading && !isError}}">
+    <block wx:for="{{scaleList}}" wx:key="id">
+      <view class="card-item" bindtap="goToTest" data-id="{{item.id}}">
+        <image 
+          class="card-icon" 
+          src="{{item.iconPath}}" 
+          binderror="handleIconError" 
+          data-index="{{index}}"
+        />
+        <view class="card-name">{{item.name}}</view>
+      </view>
+    </block>
+  </view>
 </view>
-</scroll-view>

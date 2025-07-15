@@ -1,10 +1,77 @@
-/**index.wxss**/
+/* pages/assessment/index/index.wxss */
 page {
-  height: 100vh;
+  background-color: #f7f8fa;
+}
+
+.container {
+  padding: 40rpx 30rpx;
+}
+
+.page-title {
+  font-size: 44rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.page-subtitle {
+  font-size: 28rpx;
+  color: #999;
+  margin-top: 10rpx;
+  margin-bottom: 50rpx;
+}
+
+/* 加载和错误提示 */
+.feedback-container {
+  width: 100%;
+  text-align: center;
+  color: #999;
+  padding: 100rpx 0;
+}
+
+/* 网格布局容器 */
+.card-grid {
+  display: grid;
+  /* 定义两列，每列占据可用空间的一半 */
+  grid-template-columns: 1fr 1fr;
+  /* 定义卡片之间的水平和垂直间距 */
+  gap: 30rpx;
+}
+
+.card-item {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 24rpx;
+  padding: 40rpx 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+  /* 让卡片保持正方形，视觉效果更佳 */
+  aspect-ratio: 1 / 1; 
 }
-.scrollarea {
-  flex: 1;
-  overflow-y: hidden;
+
+/* 点击卡片时的交互效果 */
+.card-item:active {
+  transform: scale(0.96);
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+.card-icon {
+  width: 96rpx;
+  height: 96rpx;
+  margin-bottom: 24rpx;
+}
+
+.card-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  /* 最多显示两行，超出部分显示省略号 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

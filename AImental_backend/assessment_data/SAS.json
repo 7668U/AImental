@@ -1,0 +1,151 @@
+{
+  "scale_info": {
+    "name": "焦虑自评量表",
+    "short_name": "SAS",
+    "description": "焦虑自评量表（Self-Rating Anxiety Scale, SAS）由华裔教授Zung编制 [cite: 3]，用于快速评估主观焦虑症状的严重程度。本结果根据您在最近一周的状况得出 [cite: 40]，仅供参考，不能替代专业诊断。",
+    "instructions": "请仔细阅读每一条，然后根据您【最近一星期】的实际感觉，选择最符合您的选项。",
+    "scoring_rules": {
+      "raw_score_sum": true,
+      "multiplier": 1.25,
+      "post_action": "to_integer"
+    }
+  },
+  "questions": [
+    {
+      "order": 1,
+      "text": "我觉得比平常容易紧张和着急。",
+      "is_reverse_scored": false
+    },
+    {
+      "order": 2,
+      "text": "我无缘无故地感到害怕。",
+      "is_reverse_scored": false
+    },
+    {
+      "order": 3,
+      "text": "我容易心里烦乱或觉得惊恐。",
+      "is_reverse_scored": false
+    },
+    {
+      "order": 4,
+      "text": "我觉得我可能将要发疯。",
+      "is_reverse_scored": false
+    },
+    {
+      "order": 5,
+      "text": "我觉得一切都很好，也不会发生什么不幸。",
+      "is_reverse_scored": true
+    },
+    {
+      "order": 6,
+      "text": "我手脚发抖打颤。",
+      "is_reverse_scored": false
+    },
+    {
+      "order": 7,
+      "text": "我因为头痛、颈痛和背痛而苦恼。",
+      "is_reverse_scored": false
+    },
+    {
+      "order": 8,
+      "text": "我感觉容易衰弱和疲乏。",
+      "is_reverse_scored": false
+    },
+    {
+      "order": 9,
+      "text": "我觉得心平气和，并且容易安静坐着。",
+      "is_reverse_scored": true
+    },
+    {
+      "order": 10,
+      "text": "我觉得心跳很快。",
+      "is_reverse_scored": false
+    },
+    {
+      "order": 11,
+      "text": "我因为一阵阵头晕而苦恼。",
+      "is_reverse_scored": false
+    },
+    {
+      "order": 12,
+      "text": "我有晕倒发作或觉得要晕倒似的。",
+      "is_reverse_scored": false
+    },
+    {
+      "order": 13,
+      "text": "我呼气吸气都感到很容易。",
+      "is_reverse_scored": true
+    },
+    {
+      "order": 14,
+      "text": "我手脚麻木和刺痛。",
+      "is_reverse_scored": false
+    },
+    {
+      "order": 15,
+      "text": "我因为胃痛和消化不良而苦恼。",
+      "is_reverse_scored": false
+    },
+    {
+      "order": 16,
+      "text": "我常常要小便。",
+      "is_reverse_scored": false
+    },
+    {
+      "order": 17,
+      "text": "我的手常常是干燥温暖的。",
+      "is_reverse_scored": true
+    },
+    {
+      "order": 18,
+      "text": "我脸红发热。",
+      "is_reverse_scored": false
+    },
+    {
+      "order": 19,
+      "text": "我容易入睡并且一夜睡得很好。",
+      "is_reverse_scored": true
+    },
+    {
+      "order": 20,
+      "text": "我做恶梦。",
+      "is_reverse_scored": false
+    }
+  ],
+  "choices": [
+    { "text": "没有或很少有", "score": 1 },
+    { "text": "有时有", "score": 2 },
+    { "text": "大部分时间有", "score": 3 },
+    { "text": "绝大部分或全部时间有", "score": 4 }
+  ],
+  "interpretations": [
+    {
+      "min_score": 0,
+      "max_score": 49,
+      "level": "无焦虑倾向",
+      "interpretation": "您的测评标准分低于50分 。结果显示您的状态良好，没有明显的焦虑情绪困扰。",
+      "recommendation": "非常棒！请继续保持身心健康，享受生活。您也可以探索我们的AI伙伴或每日打卡功能，记录和分享您的好心情。"
+    },
+    {
+      "min_score": 50,
+      "max_score": 59,
+      "level": "轻度焦虑",
+      "interpretation": "您的测评标准分在50-59分之间 ，提示您可能存在一些轻度的焦虑情绪。这可能会让您感到紧张，但通常还能正常应对日常生活。",
+      "recommendation": "请多留意自己的情绪变化，可以尝试一些放松技巧，比如深呼吸、正念冥想，或者与朋友聊聊天。我们的AI心理医生也可以陪您探讨这些感受。"
+    },
+    {
+      "min_score": 60,
+      "max_score": 69,
+      "level": "中度焦虑",
+      "interpretation": "您的测评标准分在60-69分之间，表明您可能正经历中等程度的焦虑困扰，这或许已经开始影响您的工作效率、睡眠质量或人际交往。",
+      "recommendation": "这是一个需要您认真关注的信号。建议您系统地了解焦虑情绪，并考虑寻求专业的心理咨询服务，学习更有效的应对策略。"
+    },
+    {
+      "min_score": 70,
+      "max_score": 100,
+      "level": "重度焦虑",
+      "interpretation": "您的测评标准分在70分及以上，提示您可能正承受着较严重的焦虑情绪，这很可能已对您的身心健康和日常生活造成了显著影响。",
+      "recommendation": "我们强烈建议您尽快寻求专业帮助。请联系精神科医生或专业的心理治疗师进行全面的评估。您也可以通过我们程序的'一键求助'功能，查找可用的心理援助热线。"
+    }
+  ]
+}

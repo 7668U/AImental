@@ -1,0 +1,225 @@
+/* 页码: pages/assessment/test.wxss
+  功能: 测评问卷答题页面的样式表 (最终修正版)
+*/
+
+/* 1. 全局 & 页面基础 */
+:root {
+  --primary-color: #F97316;
+  --text-color-primary: #333333;
+  --text-color-secondary: #666666;
+  --bg-color: #F7F8FA;
+  --border-color: #EBEEF5;
+}
+
+.container {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch !important;
+  padding: 0 !important;
+  justify-content: flex-start !important;
+}
+
+.main-content {
+  flex: 1;
+  width: 100%;
+  background-color: var(--bg-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+
+/* 2. 问题区域 (Swiper) */
+.question-swiper {
+  flex: 1;
+  width: 100%;
+}
+
+.swiper-item-content {
+  height: 100%;
+  box-sizing: border-box;
+  padding: 80rpx 60rpx 40rpx;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.question-text {
+  font-size: 44rpx;
+  font-weight: bold;
+  color: var(--text-color-primary);
+  line-height: 1.7;
+  margin-bottom: 50rpx;
+}
+
+/* 3. 选项 */
+.options-container {
+  background-color: #FFFFFF;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+
+.option-group {
+  width: 100%;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 40rpx;
+  border-bottom: 1rpx solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.option-row:last-child {
+  border-bottom: none;
+}
+
+.option-text {
+  font-size: 34rpx;
+  color: var(--text-color-secondary);
+  line-height: 1.5;
+}
+
+.option-row.selected .option-text {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.option-radio-hidden {
+  display: none;
+}
+
+.option-dot-wrapper {
+  margin-right: 30rpx;
+}
+
+.option-dot {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  background-color: #fff;
+  border: 4rpx solid #cccccc;
+  box-sizing: border-box;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.option-dot.selected {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* 4. 页内提交按钮 (最终修正版) */
+.in-page-submit-container {
+  width: 100%;
+  margin-top: 80rpx;
+  display: flex;
+  justify-content: center;
+}
+
+/* 直接给 View 组件设置样式 */
+.submit-btn-view {
+  width: 100%;
+  max-width: 600rpx;
+  height: 96rpx;
+  border-radius: 48rpx;
+  box-shadow: 0 8rpx 16rpx rgba(249, 115, 22, 0.2);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  
+  /* 关键修正: 直接使用十六进制颜色码，不再使用 CSS 变量 */
+  background-color: #fa812b !important;
+  color: #ffffff !important;
+  
+  font-size: 38rpx;
+  font-weight: bold;
+  
+  /* 使用 Flexbox 居中文字 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 禁用状态下的 View 样式 */
+.submit-btn-view.disabled {
+  /* 关键修正: 直接使用十六进制颜色码 */
+  background-color: #fab47d !important;
+  box-shadow: none;
+}
+
+
+/* 5. 底部固定栏 */
+.footer {
+  width: 100%;
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  padding: 20rpx 50rpx;
+  padding-bottom: calc(20rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background-color: #FFFFFF;
+  box-shadow: 0 -4rpx 20rpx rgba(0,0,0,0.05);
+  box-sizing: border-box;
+}
+
+.progress-bar-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20rpx;
+}
+
+.progress-wrapper {
+  flex-grow: 1;
+  position: relative;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 28rpx;
+  background-color: #e9ecef;
+  border-radius: 14rpx;
+}
+
+.progress-bar-fg {
+  height: 100%;
+  background-color: var(--primary-color);
+  border-radius: 14rpx;
+  transition: width 0.3s ease;
+}
+
+.runner-icon {
+  position: absolute;
+  top: 50%;
+  width: 72rpx;
+  height: 72rpx;
+  transform: translate(-50%, -50%);
+  transition: left 0.3s ease;
+}
+
+.progress-text {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: 20rpx;
+  font-weight: bold;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 80rpx;
+}
+
+.nav-icon {
+  width: 72rpx;
+  height: 72rpx;
+  opacity: 0.5;
+}

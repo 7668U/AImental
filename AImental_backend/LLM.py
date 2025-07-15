@@ -3,8 +3,8 @@
 import os
 import json
 from openai import OpenAI
-from typing import Optional
-
+from typing import Optional, List, Dict
+import datetime
 # 从你的 chat.py 文件中导入 chat_table 实例和 NewMessageForm 模型
 # 假设 LLM.py 和 chat.py 在同一个目录下
 from model.chat import chat_table, NewMessageForm
@@ -146,3 +146,68 @@ def generate_chat_title(first_message: str) -> str:
         print(f"为消息生成标题时出错: {e}")
         # 如果API调用失败，返回一个安全的默认标题
         return "新的聊天"
+    
+    
+
+def generate_ai_analysis_report(checkin_data: List[Dict], prompt_template: str, period_name: str) -> str:
+    """
+    根据用户的打卡数据和指定的Prompt模板，调用大模型生成一份心理分析报告。
+
+    Args:
+        checkin_data (List[Dict]): 从数据库查询出的打卡记录列表。
+        prompt_template (str): 一个包含 {period_name} 和 {data_summary} 占位符的字符串模板。
+        period_name (str): 时间段的名称，例如 "2025年7月", "2025年第三季度"。
+
+    Returns:
+        str: 大模型生成的分析报告文本。如果失败则返回错误提示。
+    """
+    # --- 1. 将结构化的打卡数据转换为简洁的文本摘要 ---
+    # 这个步骤至关重要，它将数据整理成对LLM友好的格式，并过滤掉空数据以节省Token
+    data_summary_parts = []
+    for record in checkin_data:
+        # 将Unix时间戳转换为日期字符串
+        date_str = datetime.datetime.fromtimestamp(record['timestamp']).strftime('%Y-%m-%d')
+        
+        # 只添加存在的数据项，确保摘要的紧凑性
+        record_summary = f"- 日期: {date_str}"
+        if record.get('mood'):
+            record_summary += f", 心情: {record['mood']}"
+        if record.get('tags'):
+            record_summary += f", 标签: {record['tags']}"
+        if record.get('text_content'):
+            record_summary += f", 日记: '{record['text_content']}'"
+        
+        data_summary_parts.append(record_summary)
+
+    # 如果没有任何数据，提前返回
+    if not data_summary_parts:
+        return "分析失败：该时间段内没有任何有效的打卡数据。"
+
+    data_summary = "\n".join(data_summary_parts)
+
+    # --- 2. 使用模板构建最终的系统指令 (System Prompt) ---
+    final_prompt = prompt_template.format(
+        period_name=period_name,
+        data_summary=data_summary
+    )
+
+    # --- 3. 构造发送给API的 messages 列表 ---
+    messages_for_api = [
+        {"role": "system", "content": final_prompt},
+        {"role": "user", "content": "请根据以上信息，为我生成这份心理健康分析报告。"}
+    ]
+
+    try:
+        # --- 4. 调用 DeepSeek API ---
+        response = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=messages_for_api,
+            temperature=0.7,  # 使用稍高的温度，让报告更具创造性和个性
+            stream=False
+        )
+        ai_report = response.choices[0].message.content
+        return ai_report
+
+    except Exception as e:
+        print(f"调用AI生成分析报告时发生错误: {e}")
+        return "抱歉，AI分析服务暂时出了一点小问题，请稍后再试。"

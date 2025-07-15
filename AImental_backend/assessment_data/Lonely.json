@@ -1,0 +1,65 @@
+{
+  "scale_info": {
+    "name": "孤独感测试",
+    "short_name": "Loneliness_Test_20",
+    "description": "本测试用于评估个体在一段时间内感受到的孤独程度。孤独是一种主观的情感体验，与个体期望的人际交往状态和实际状态之间的差距有关。",
+    "instructions": "请根据自己的实际情况对下列每一个问题进行是或否的回答。",
+    "scoring_rules": {
+      "raw_score_sum": true,
+      "multiplier": 1,
+      "post_action": "none"
+    }
+  },
+  "questions": [
+    { "order": 1, "text": "我感到不快活。", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 2, "text": "我觉得没人和我说话。", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 3, "text": "我感到孤独。", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 4, "text": "我觉得与人格格不入。", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 5, "text": "我觉得没有人真正了解我。", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 6, "text": "我发现自己等人打电话或写信给我。", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 7, "text": "我觉得与任何人都没有共同之处。", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 8, "text": "我觉得和周围的人不再亲近。", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 9, "text": "我觉得对人很难信赖。", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 10, "text": "我觉得没有人真正关心我。", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 11, "text": "我觉得很容易结交朋友。", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 12, "text": "我觉得与人疏远。", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 13, "text": "我觉得我的社会关系是表面的。", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 14, "text": "我觉得在朋友、同事、同学中，我是被忽略的一个。", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 15, "text": "我觉得我属于一个朋友群。", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 16, "text": "我觉得人们待我很真诚。", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 17, "text": "我觉得人们和我很投机。", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 18, "text": "我觉得很难结交朋友。", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] },
+    { "order": 19, "text": "我觉得人们并不了解我。", "choices": [{ "text": "是", "score": 1 }, { "text": "否", "score": 0 }] },
+    { "order": 20, "text": "在需要的时候，我觉得有许多人可以信赖。", "choices": [{ "text": "是", "score": 0 }, { "text": "否", "score": 1 }] }
+  ],
+  "interpretations": [
+    {
+      "min_score": 0,
+      "max_score": 4,
+      "level": "基本没有孤独感",
+      "interpretation": "您的得分低于5分。这表明您的人际关系状态良好，拥有不错的社交支持，基本没有感受到孤独的困扰。",
+      "recommendation": "这是一种非常理想的心理状态。请继续珍视和维护您的人际网络，它们是您宝贵的财富。"
+    },
+    {
+      "min_score": 5,
+      "max_score": 9,
+      "level": "孤独感处于平均水平",
+      "interpretation": "您的得分在5-9分之间。这表明您有时可能会感到些许孤独，但这种情况并不频繁，处于人群中的平均水平。",
+      "recommendation": "大部分人都会偶尔感到孤独。当这种感觉出现时，不妨主动发起一些社交联系，或者享受独处的时光，这都是正常的。"
+    },
+    {
+      "min_score": 10,
+      "max_score": 14,
+      "level": "存在一些孤独感",
+      "interpretation": "您的得分在10-14分之间。这提示您可能正经历一定程度的孤独，感觉自己与他人的联结不够紧密，或者渴望更高质量的陪伴。",
+      "recommendation": "请关注您对人际关系的需求。可以尝试主动参与一些您感兴趣的团体活动，创造结识新朋友的机会。与老朋友深入地交流也是一个好方法。"
+    },
+    {
+      "min_score": 15,
+      "max_score": 20,
+      "level": "有较强的孤独感",
+      "interpretation": "您的得分高于15分，表明您可能正被较强的孤独感所困扰。您可能感到自己被孤立，缺乏深入的情感链接，这种状态值得您认真对待。",
+      "recommendation": "强烈的孤独感会影响身心健康。我们建议您主动向外寻求帮助，可以是与信任的家人朋友倾诉，也可以是寻求专业的心理咨询，探讨孤独感背后的原因并找到解决方案。"
+    }
+  ]
+}

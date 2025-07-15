@@ -2,10 +2,14 @@
   "pages": [
     "pages/ai-therapist/index",
     "pages/assessment/index",
+    "pages/assessment/test",
+    "pages/assessment/result",
     "pages/daily-checkin/index",
     "pages/daily-checkin/record",
     "pages/profile/index",
     "pages/profile/about"
+    "pages/daily-checkin/analysis",
+    "pages/profile/index"
   ],
   "window": {
     "backgroundTextStyle": "light",

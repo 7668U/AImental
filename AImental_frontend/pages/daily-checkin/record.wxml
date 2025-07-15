@@ -1,7 +1,7 @@
 <view class="page-container">
   <view class="header">
-    <view class="main-title">记录今日心情</view>
-    <view class="sub-title">选择你的心情、状态和专属颜色吧</view>
+    <view class="main-title">{{isLocked ? '查看历史心情' : '记录今日心情'}}</view>
+    <view class="sub-title">看着这些记录，能想起那是怎样的一天吗？</view>
   </view>
 
   <view class="selector-container">
@@ -11,7 +11,7 @@
         <view 
           wx:for="{{moods}}" 
           wx:key="name" 
-          class="item mood-item {{item.selected ? 'selected' : ''}}"
+          class="item mood-item {{item.selected ? 'selected' : ''}} {{isLocked ? 'disabled' : ''}}"
           bind:tap="handleSelect" 
           data-type="moods" 
           data-index="{{index}}"
@@ -28,7 +28,7 @@
         <view 
           wx:for="{{statuses}}" 
           wx:key="name" 
-          class="item status-item {{item.selected ? 'selected' : ''}}"
+          class="item status-item {{item.selected ? 'selected' : ''}} {{isLocked ? 'disabled' : ''}}"
           bind:tap="handleSelect" 
           data-type="statuses" 
           data-index="{{index}}"
@@ -45,7 +45,7 @@
         <view 
           wx:for="{{colors}}" 
           wx:key="value" 
-          class="item color-item {{item.selected ? 'selected' : ''}}"
+          class="item color-item {{item.selected ? 'selected' : ''}} {{isLocked ? 'disabled' : ''}}"
           bind:tap="handleSelect" 
           data-type="colors" 
           data-index="{{index}}"
@@ -59,18 +59,21 @@
   <view class="journal-container">
     <textarea 
       class="text-area" 
-      placeholder="此刻，你想对自己说些什么？"
+      placeholder="{{isLocked ? '这是过去的记录，无法修改哦' : '此刻，你想对自己说些什么？'}}"
       value="{{textContent}}"
       bindinput="onTextInput"
       maxlength="500"
+      disabled="{{isLocked}}"
     ></textarea>
-    <view class="image-uploader" bind:tap="chooseImage">
+    <view class="image-uploader {{isLocked ? 'disabled' : ''}}" bind:tap="chooseImage">
       <image wx:if="{{imageUrl}}" src="{{imageUrl}}" mode="aspectFill"></image>
       <text wx:else class="plus-icon">+</text>
     </view>
   </view>
 
   <view class="footer">
-    <button class="submit-btn" bind:tap="submitCheckin">封存今日心情</button>
+    <button class="submit-btn" bind:tap="submitCheckin" disabled="{{isLocked}}">
+      {{ isLocked ? '不可修改过去状态' : (isEditMode ? '修改今日心情' : '封存今日心情') }}
+    </button>
   </view>
 </view>

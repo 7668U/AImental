@@ -1,0 +1,138 @@
+/* components/calendar/calendar.wxss */
+.calendar-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
+}
+
+.calendar-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.calendar-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #F9F7F3; /* 和你的主背景色一致 */
+  border-top-left-radius: 40rpx;
+  border-top-right-radius: 40rpx;
+  padding: 40rpx 30rpx;
+  box-sizing: border-box;
+  animation: slide-up 0.3s ease-out;
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40rpx;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.nav-arrow {
+  width: 40rpx;
+  height: 40rpx;
+  padding: 10rpx;
+}
+
+.week-header {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20rpx;
+  font-size: 28rpx;
+  color: #999;
+}
+
+.week-day {
+  width: calc(100% / 7);
+  text-align: center;
+}
+
+.date-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.day-cell {
+  width: calc(100% / 7);
+  height: 120rpx; /* 增加高度以容纳图标和数字 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.day-cell.is-placeholder {
+  pointer-events: none;
+}
+
+.day-cell.is-today .day-number {
+  border: 2rpx solid #FFA726; /* 橙色边框 */
+  border-radius: 50%;
+}
+
+.day-content {
+  width: 90rpx;
+  height: 90rpx;
+  border-radius: 16rpx;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.day-cell:active .day-content {
+    transform: scale(0.9);
+}
+
+.mood-icon {
+  width: 50rpx;
+  height: 50rpx;
+  position: absolute;
+  opacity: 0.9;
+}
+
+.day-number {
+  font-size: 28rpx;
+  color: #555;
+  width: 50rpx;
+  height: 50rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.4); /* 给数字一个半透明背景，避免和彩色背景糊在一起 */
+  border-radius: 50%;
+  font-weight: bold;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 0;
+}
+.empty-icon {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 20rpx;
+}
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+}

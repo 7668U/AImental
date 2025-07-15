@@ -1,0 +1,66 @@
+{
+  "scale_info": {
+    "name": "压力知觉量表",
+    "short_name": "PSS",
+    "description": "压力知觉量表（Perceived Stress Scale, PSS）是应用最广泛的心理压力评估工具之一。它评估的是您在过去一个月中，感觉生活在多大程度上是不可预测、不可控制和超负荷的，测量的是一种主观的压力感受。",
+    "instructions": "请仔细阅读下列每个问题，然后根据您在【过去一个月】的实际情况，选择最符合的选项。",
+    "scoring_rules": {
+      "raw_score_sum": true,
+      "multiplier": 1,
+      "post_action": "none"
+    }
+  },
+  "questions": [
+    { "order": 1, "text": "在过去一个月，您生活中发生一些出乎意料事情的频率是？", "is_reverse_scored": false },
+    { "order": 2, "text": "在过去一个月，您感到无法控制生活中重要事情的频率是？", "is_reverse_scored": false },
+    { "order": 3, "text": "在过去一个月，您感到紧张和压力的频率是？", "is_reverse_scored": false },
+    { "order": 4, "text": "在过去一个月，您成功地处理烦心事的频率是？", "is_reverse_scored": true },
+    { "order": 5, "text": "在过去一个月，您感到能有效地因应生活中重要改变的频率是？", "is_reverse_scored": true },
+    { "order": 6, "text": "在过去一个月，您对自己有能力处理个人问题的信心程度是？", "is_reverse_scored": true },
+    { "order": 7, "text": "在过去一个月，您感到事情都如您所愿进行的频率是？", "is_reverse_scored": true },
+    { "order": 8, "text": "在过去一个月，您发现自己无法应付所要做的事情的频率是？", "is_reverse_scored": false },
+    { "order": 9, "text": "在过去一个月，您能控制生活中恼人事情的频率是？", "is_reverse_scored": true },
+    { "order": 10, "text": "在过去一个月，您感到自己掌控一切的频率是？", "is_reverse_scored": true },
+    { "order": 11, "text": "在过去一个月，您因为无法掌控的事情而生气的频率是？", "is_reverse_scored": false },
+    { "order": 12, "text": "在过去一个月，您感到困难堆积如山，无法克服的频率是？", "is_reverse_scored": false },
+    { "order": 13, "text": "在过去一个月，您经常思考那些必须完成的事情的频率是？", "is_reverse_scored": true },
+    { "order": 14, "text": "在过去一个月，您能控制利用时间的频率是？", "is_reverse_scored": false }
+  ],
+  "choices": [
+    { "text": "从不", "score": 0 },
+    { "text": "几乎不", "score": 1 },
+    { "text": "偶尔", "score": 2 },
+    { "text": "时常", "score": 3 },
+    { "text": "总是", "score": 4 }
+  ],
+  "interpretations": [
+    {
+      "min_score": 0,
+      "max_score": 13,
+      "level": "压力水平正常",
+      "interpretation": "您的得分表明，您目前所感受到的压力水平非常低，处于正常范围内。您拥有出色的压力管理能力和积极的心态。",
+      "recommendation": "恭喜您！您就像一位“不倒翁”，能轻松应对生活中的各种挑战。请继续保持这种健康、平和的心态，享受生活的美好。"
+    },
+    {
+      "min_score": 14,
+      "max_score": 26,
+      "level": "压力水平中等",
+      "interpretation": "您的得分处于中等水平。这表明您在生活中感受到了一定的压力，有时可能会感到紧张或不知所措，但总体上仍能应对。",
+      "recommendation": "您就像一个“弹簧”，有一定的抗压能力，但压力过大时也会感到疲惫。建议您关注压力的来源，学习一些放松技巧，如运动、冥想或与人倾诉，以保持弹性。"
+    },
+    {
+      "min_score": 27,
+      "max_score": 41,
+      "level": "压力水平偏高",
+      "interpretation": "您的得分偏高，表明您正承受着较大的心理压力。您可能时常感到紧张、烦躁，觉得事情的发展超出控制，生活中的困难似乎堆积如山。",
+      "recommendation": "您可能感觉自己像一个“高压锅”，内部压力很大，需要释放。请务必重视这个信号，主动寻求减压方式。与朋友家人沟通、进行体育锻炼、或与我们的AI心理医生聊聊，都是很好的减压阀。"
+    },
+    {
+      "min_score": 42,
+      "max_score": 56,
+      "level": "压力水平非常高",
+      "interpretation": "您的得分非常高，说明您正处于巨大的压力之下，身心可能已不堪重负。您可能感觉自己对生活失去了控制，情绪和健康都受到了显著影响。",
+      "recommendation": "您就像一颗“定时炸弹”，急需专业的帮助来“拆除引信”。我们强烈建议您立即寻求专业支持，如联系心理咨询师或医生。请不要独自承受，专业的帮助是有效且必要的。"
+    }
+  ]
+}

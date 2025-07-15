@@ -1,3 +1,5 @@
+<calendar show="{{showCalendar}}" bind:daytap="onDayTap" bind:hide="hideCalendar"></calendar>
+
 <view class="container">
   
   <view class="welcome-wrapper">
@@ -7,7 +9,7 @@
 
   <view class="card-list">
     
-    <view class="card" bind:tap="goToCalendar">
+    <view class="card" bind:tap="openCalendar">
       <image class="card-icon" src="/images/daily-checkin/calendar.png" mode="aspectFit"></image>
       <view class="card-content">
         <view class="card-title">心情日历</view>
@@ -15,11 +17,19 @@
       </view>
     </view>
 
-    <view class="card" bind:tap="goToRecord">
+    <view wx:if="{{!hasCheckedInToday}}" class="card" bind:tap="goToRecord">
       <image class="card-icon" src="/images/daily-checkin/illustration-welcome.png" mode="aspectFit"></image>
       <view class="card-content">
         <view class="card-title">今日打卡</view>
         <view class="card-subtitle">关照此刻的感受，从这里开始</view>
+      </view>
+    </view>
+
+    <view wx:else class="card" bind:tap="goToRecord">
+      <image class="card-icon" src="/images/daily-checkin/already_checkin.png" mode="aspectFit"></image>
+      <view class="card-content">
+        <view class="card-title">查看今日心情</view>
+        <view class="card-subtitle">今日已打卡</view>
       </view>
     </view>
 

@@ -1,0 +1,61 @@
+{
+  "scale_info": {
+    "name": "自尊量表",
+    "short_name": "SES",
+    "description": "自尊量表（Self-Esteem Scale, SES）是用于评估个体对自己总体看法和价值感的工具。本测试旨在帮助您了解自己的自尊水平。",
+    "instructions": "下面是一个有关您对自己总的看法的量表，请在符合您情况的选项上打“√”。请注意，这个量表没有“对”或“错”的答案。因为人们的看法是各式各样的。请您独立完成，不要与他人商量。根据您的真实想法，坦率地回答。",
+    "scoring_rules": {
+      "raw_score_sum": true,
+      "multiplier": 1,
+      "post_action": "none"
+    }
+  },
+  "questions": [
+    { "order": 1, "text": "我感到我是一个有价值的人，至少与别人不相上下。", "is_reverse_scored": false },
+    { "order": 2, "text": "我感到我有许多好的品质。", "is_reverse_scored": false },
+    { "order": 3, "text": "总的来说，我倾向于认为我是一个失败者。", "is_reverse_scored": true },
+    { "order": 4, "text": "我做事可以做得和大多数人一样好。", "is_reverse_scored": false },
+    { "order": 5, "text": "我感到我值得自豪的地方不多。", "is_reverse_scored": true },
+    { "order": 6, "text": "我对自己持有一种肯定的态度。", "is_reverse_scored": false },
+    { "order": 7, "text": "总的来说，我对自己是满意的。", "is_reverse_scored": false },
+    { "order": 8, "text": "我希望我能为自己赢得更多尊重。", "is_reverse_scored": true },
+    { "order": 9, "text": "我时常感到自己毫无用处。", "is_reverse_scored": true },
+    { "order": 10, "text": "我时常认为我是一个不好的人。", "is_reverse_scored": true }
+  ],
+  "choices": [
+    { "text": "非常同意", "score": 4 },
+    { "text": "同意", "score": 3 },
+    { "text": "不同意", "score": 2 },
+    { "text": "非常不同意", "score": 1 }
+  ],
+  "interpretations": [
+    {
+      "min_score": 10,
+      "max_score": 20,
+      "level": "自尊水平较低",
+      "interpretation": "您的得分表明您的自尊水平可能偏低。您可能倾向于否定自己，较少看到自身的价值和优点，这可能会影响您的情绪和人际交往。",
+      "recommendation": "提升自尊是一个逐步的过程。建议您尝试记录自己的“小成就”，练习自我肯定，减少自我批评。与信任的朋友或我们的AI伙伴聊聊您的感受，或许能带来新的视角。"
+    },
+    {
+      "min_score": 21,
+      "max_score": 25,
+      "level": "自尊水平略低于平均",
+      "interpretation": "您的得分略低于平均水平，表明您的自尊心可能存在一些波动，有时会对自己产生怀疑。",
+      "recommendation": "这是一个很好的起点去关注和提升自我价值感。尝试挑战那些导致您自我怀疑的消极想法，并更多地关注和发挥您的长处。"
+    },
+    {
+      "min_score": 26,
+      "max_score": 34,
+      "level": "自尊水平健康",
+      "interpretation": "您的得分在健康范围内，表明您拥有良好、稳定的自尊水平。您能够客观看待自己，既能欣赏自己的优点，也能接纳自己的不足。",
+      "recommendation": "恭喜您！请继续保持这种积极的自我态度，这对于维持心理健康和应对生活挑战至关重要。"
+    },
+    {
+      "min_score": 35,
+      "max_score": 40,
+      "level": "自尊水平高",
+      "interpretation": "您的得分很高，表明您拥有非常强的自信和自我价值感。",
+      "recommendation": "拥有高自尊是一种宝贵的财富。同时，在与人交往中，适当展现谦逊和共情，将有助于建立更和谐的人际关系。"
+    }
+  ]
+}
