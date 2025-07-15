@@ -205,9 +205,9 @@ Page({
     });
   },
   
-  goToUserInfo: function() { if (!this.data.isLogin) { wx.showToast({ title: '请先登录', icon: 'none' }); return; } wx.navigateTo({ url: '/pages/profile-edit/index' }); },
+  goToUserInfo: function() { if (!this.data.isLogin) { wx.showToast({ title: '请先登录', icon: 'none' }); return; } wx.navigateTo({ url: '/pages/profile/inform' }); },
   goToReports: function() { if (!this.data.isLogin) { wx.showToast({ title: '请先登录', icon: 'none' }); return; } wx.navigateTo({ url: '/pages/reports-list/index' }); },
-  goToFeedback: function() { wx.navigateTo({ url: '/pages/feedback/index' }); },
+  goToFeedback: function() { wx.navigateTo({ url: '/pages/profile/feedback' }); },
 
   /**
    * ✅ 点击“关于我们”，跳转到 about 页面
