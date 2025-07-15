@@ -211,3 +211,139 @@ def generate_ai_analysis_report(checkin_data: List[Dict], prompt_template: str, 
     except Exception as e:
         print(f"调用AI生成分析报告时发生错误: {e}")
         return "抱歉，AI分析服务暂时出了一点小问题，请稍后再试。"
+    
+    
+
+# =================================================================================
+# 以下是新增的函数，用于生成用户多份历史测评的综合分析报告
+# =================================================================================
+
+from model.assessment import assessment_tables, UserAssessment 
+import json
+
+# ... (other functions like get_ai_response_and_update_history, etc.) ...
+
+
+# ✅ 2. 【替换旧函数】用下面这个修正后的完整函数，替换掉旧的 generate_assessment_synthesis_report
+def generate_assessment_synthesis_report(user_id: str, history_ids: List[str]) -> Optional[Dict[str, str]]:
+    """
+    根据用户提供的一系列测评历史记录ID，获取详细数据，并调用大模型生成一份综合分析报告。
+
+    Args:
+        user_id (str): 发起请求的用户ID，用于安全校验。
+        history_ids (List[str]): 用户选择用于分析的测评记录ID列表 (UserAssessment IDs)。
+
+    Returns:
+        Optional[Dict[str, str]]: 一个包含'comprehensive_evaluation', 'trend_analysis', 
+                                   'personalized_recommendations'三个键的字典。如果失败则返回None。
+    """
+    # --- 1. 数据准备：获取并格式化所有相关的测评详情 ---
+    comprehensive_data_parts = []
+    
+    # 【已修复】直接从 UserAssessment 模型本身进行查询，而不是通过 assessment_tables 实例
+    all_records = list(UserAssessment.select().where(
+        UserAssessment.id.in_(history_ids),
+        UserAssessment.user == user_id
+    ).order_by(UserAssessment.completed_at.asc()))
+
+    if not all_records:
+        print("错误：未找到任何有效的、属于该用户的测评记录。")
+        return None
+
+    for index, record in enumerate(all_records):
+        scale = record.scale
+        if not scale:
+            continue
+        
+        scale_data = json.loads(scale.json_data)
+        user_answers = json.loads(record.answers)
+        
+        question_map = {q['order']: q['text'] for q in scale_data.get('questions', [])}
+        
+        choice_map = {}
+        for q in scale_data.get('questions', []):
+            choice_map[q['order']] = {c['score']: c['text'] for c in q.get('choices', [])}
+
+        report_text = f"--- 测评记录 {index + 1} ---\n"
+        report_text += f"量表名称: {scale.name}\n"
+        report_text += f"完成时间: {record.completed_at.strftime('%Y-%m-%d %H:%M')}\n"
+        report_text += f"最终得分: {record.final_score}\n"
+        report_text += f"结果等级: {record.result_level}\n"
+        report_text += f"结果解读: {record.result_interpretation}\n"
+        report_text += "用户答案详情:\n"
+
+        for q_order_str, answer_score in user_answers.items():
+            q_order = int(q_order_str)
+            question_text = question_map.get(q_order, "未知题目")
+            answer_text = choice_map.get(q_order, {}).get(answer_score, "未知答案")
+            report_text += f"  - 题目: {question_text}\n"
+            report_text += f"    选择: {answer_text} (分值: {answer_score})\n"
+            
+        comprehensive_data_parts.append(report_text)
+
+    if not comprehensive_data_parts:
+        return None
+        
+    final_data_summary = "\n".join(comprehensive_data_parts)
+
+    # --- 2. Prompt工程：设计一个专门用于综合分析的系统指令 ---
+    SYSTEM_PROMPT_FOR_SYNTHESIS = """
+你是一名资深的AI心理分析师。你的任务是基于用户提供的多份心理测评历史报告，进行深入的、纵向的综合分析。你需要识别出用户的心理状态模式、变化趋势，并给出富有洞察力的综合评估和建议。
+
+你的分析报告必须严格按照以下格式组织，并包含三个部分：
+
+[综合评估]
+在此部分，请全面总结用户在所有测评中表现出的整体心理状态。你需要：
+- 整合所有报告的关键信息，而不是简单罗列。
+- 识别反复出现的主题或核心问题（例如：持续的焦虑、社交回避、情绪波动等）。
+- 指出用户的潜在心理优势和需要关注的方面。
+
+[趋势分析]
+在此部分，请基于测评完成的时间顺序，分析用户心理状态的变化趋势。你需要：
+- 对比不同时间点的测评得分和结果等级，描述其变化是改善、恶化还是保持稳定。
+- 如果可能，尝试推断导致这些变化的原因（例如，从某次测评后，某项指标持续改善）。
+- 识别出任何值得注意的模式，例如季节性情绪波动或特定事件后的心理变化。
+
+[个性化建议]
+在此部分，请根据前两部分的分析，为用户提供具体、可操作且充满关怀的个性化建议。你需要：
+- 建议应直接针对“综合评估”中发现的核心问题和“趋势分析”中观察到的变化。
+- 提供不超过3条最核心的建议，确保用户不会感到信息过载。
+- 建议应是建设性的，旨在帮助用户巩固优势、应对挑战。
+
+请严格遵守以上结构，不要添加任何额外的介绍、结语或无关内容。
+"""
+
+    # --- 3. 构造并调用大模型API ---
+    messages_for_api = [
+        {"role": "system", "content": SYSTEM_PROMPT_FOR_SYNTHESIS},
+        {"role": "user", "content": final_data_summary}
+    ]
+
+    try:
+        response = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=messages_for_api,
+            temperature=0.6,
+            stream=False
+        )
+        ai_report_text = response.choices[0].message.content
+
+        # --- 4. 解析AI返回的结构化报告 ---
+        parts = {}
+        try:
+            eval_part = ai_report_text.split('[综合评估]')[1].split('[趋势分析]')[0].strip()
+            trend_part = ai_report_text.split('[趋势分析]')[1].split('[个性化建议]')[0].strip()
+            reco_part = ai_report_text.split('[个性化建议]')[1].strip()
+            
+            parts['comprehensive_evaluation'] = eval_part
+            parts['trend_analysis'] = trend_part
+            parts['personalized_recommendations'] = reco_part
+            
+            return parts
+        except IndexError:
+            print(f"解析AI报告失败，原始报告内容: {ai_report_text}")
+            return None
+
+    except Exception as e:
+        print(f"调用AI生成综合分析报告时发生错误: {e}")
+        return None

@@ -42,6 +42,10 @@ class RespondResponse(BaseModel):
     """处理消息后的响应体"""
     reply: str
     title: Optional[str] = None  # 新标题是可选的，只在首次回复时返回
+    
+# --- [新增] 重命名聊天的请求体模型 ---
+class UpdateChatTitleRequest(BaseModel):
+    title: str
 
 # ---------------------------------------------------
 # 3. API 接口
@@ -144,3 +148,23 @@ def delete_a_chat_session(chat_id: str, current_user_id: str = Depends(get_curre
     
     # 成功删除后，按惯例返回204状态码，无需返回消息体
     return
+
+@router.patch("/{chat_id}", status_code=status.HTTP_200_OK)
+def update_chat_title_endpoint(
+    chat_id: str,
+    request_data: UpdateChatTitleRequest,
+    current_user_id: str = Depends(get_current_user_id)
+):
+    """**根据ID重命名一个聊天会话的标题**"""
+    # 验证聊天是否存在且属于当前用户 (安全校验)
+    chat_session = chat_table.get_chat_history_by_id(chat_id)
+    if not chat_session or chat_session.user_id != current_user_id:
+        raise HTTPException(status_code=404, detail="Chat not found or permission denied.")
+    
+    # 调用数据库函数更新标题
+    success = chat_table.update_chat_title(chat_id, request_data.title)
+    
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to update chat title.")
+        
+    return {"message": "Title updated successfully"}

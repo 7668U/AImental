@@ -1,67 +1,70 @@
 // pages/assessment/result.js
 Page({
-  /**
-   * 页面的初始数据
-   */
   data: {
-    // 初始化一个空的result对象，防止WXML在数据加载完成前渲染时报错
     result: {
       final_score: 0,
       result_level: '',
       result_interpretation: '',
       result_recommendation: '',
-    }
+    },
+    // ✅ 1. 增加一个数据字段，用于记录页面来源
+    source: '' 
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   * options 是从上一个页面跳转时传来的参数
-   */
   onLoad(options) {
+    // ✅ 2. 在页面加载时，检查并记录来源参数
+    if (options.from) {
+      this.setData({
+        source: options.from
+      });
+    }
+
     if (options.data) {
       try {
-        // 从URL参数中解码并解析JSON数据
         const resultData = JSON.parse(decodeURIComponent(options.data));
-
-        // 将解析出的数据更新到页面的data中，WXML会自动重新渲染
         this.setData({
           result: resultData
         });
-
       } catch (e) {
         console.error("解析结果数据失败", e);
-        wx.showToast({
-          title: '结果加载失败',
-          icon: 'error',
-          duration: 2000
-        });
-        setTimeout(() => {
-          this.handleConfirm(); // 加载失败也返回主页
-        }, 2000);
+        this.showErrorAndGoBack('结果加载失败');
       }
     } else {
       console.error("未接收到测评结果数据");
-      wx.showToast({
-        title: '无效的访问',
-        icon: 'error',
-        duration: 2000
-      });
-      setTimeout(() => {
-        this.handleConfirm(); // 无效访问也返回主页
-      }, 2000);
+      this.showErrorAndGoBack('无效的访问');
     }
   },
 
   /**
    * “我知道了”按钮的点击事件处理函数
+   * ✅ 3. 根据记录的 source 决定跳转行为
    */
   handleConfirm() {
-    // 使用 reLaunch 跳转到测评主页，清空导航栈，给用户一个全新的开始
-    wx.reLaunch({
-      // 因为 index, test, result 都在同一个 assessment 文件夹下，
-      // 所以我们直接跳转到 'index' 即可。
-      // 使用 / 开头的绝对路径更保险。
-      url: '/pages/assessment/index'
+    if (this.data.source === 'history') {
+      // 如果来源是历史页，则返回上一页
+      wx.navigateBack();
+    } else {
+      // 否则，执行默认行为（例如从答题页过来），跳转到测评列表
+      wx.reLaunch({
+        url: '/pages/assessment/index'
+      });
+    }
+  },
+
+  /**
+   * 封装一个统一的错误处理函数，代码更简洁
+   * @param {string} title 
+   */
+  showErrorAndGoBack(title) {
+    wx.showToast({
+      title: title,
+      icon: 'error',
+      duration: 2000
     });
+    
+    setTimeout(() => {
+      // 无论哪种错误，都统一返回上一页
+      wx.navigateBack();
+    }, 2000);
   }
 })

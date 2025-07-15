@@ -10,7 +10,9 @@
     "pages/profile/about",
     "pages/daily-checkin/analysis",
     "pages/profile/feedback",
-    "pages/profile/inform"
+    "pages/profile/inform",
+    "pages/profile/history",
+    "pages/profile/history_analysis"
   ],
   "window": {
     "backgroundTextStyle": "light",

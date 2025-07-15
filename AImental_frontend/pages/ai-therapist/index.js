@@ -44,7 +44,7 @@ Page({
     inputValue: '',
     latestMessageId: '',
     messageCounter: 0,
-    streamTimer: null, // [新增] 用于存放流式输出的定时器ID
+    streamTimer: null,
   },
   
   // =================================================================
@@ -135,7 +135,6 @@ Page({
   
   async loadChatHistory() {
     try {
-      // 假设后端 /chats/ 返回的是 [{id, title}, ...] 结构
       const chatSummaries = await request({ url: '/chats/' }); 
       if (chatSummaries) {
         this.setData({ chatHistory: chatSummaries });
@@ -149,7 +148,7 @@ Page({
   async startNewChat() {
     wx.showLoading({ title: '创建中...' });
     try {
-      const newChat = await request({ url: '/chats/', method: 'POST' }); // 假设返回 {chat_id, title}
+      const newChat = await request({ url: '/chats/', method: 'POST' });
       const currentHistory = this.data.chatHistory;
       const newHistoryItem = {
         id: newChat.chat_id,
@@ -241,6 +240,98 @@ Page({
     }
   },
 
+  // --- [新增] 聊天选项逻辑 (重命名与删除) ---
+  showChatOptions(e) {
+      const { id, title } = e.currentTarget.dataset;
+      const that = this; // 保存 this 上下文
+
+      wx.showActionSheet({
+          itemList: ['重命名', '删除'],
+          itemColor: '#333333', // 普通选项颜色
+          success(res) {
+              if (res.tapIndex === 0) {
+                  // 用户点击了 "重命名"
+                  that.handleRenameChat(id, title);
+              } else if (res.tapIndex === 1) {
+                  // 用户点击了 "删除"，二次确认
+                  wx.showActionSheet({
+                    itemList: ['确认删除'],
+                    itemColor: '#e64340', // 红色警告
+                    success(delRes) {
+                        if (delRes.tapIndex === 0) {
+                          that.handleDeleteChat(id);
+                        }
+                    }
+                  })
+              }
+          }
+      });
+  },
+
+  handleRenameChat(chatId, currentTitle) {
+      const that = this;
+      wx.showModal({
+          title: '重命名你的聊天',
+          content: '',
+          editable: true,
+          placeholderText: currentTitle,
+          success(res) {
+              if (res.confirm && res.content) {
+                  const newTitle = res.content.trim();
+                  if (newTitle && newTitle !== currentTitle) {
+                      wx.showLoading({ title: '保存中...' });
+                      // 调用后端API
+                      request({
+                          url: `/chats/${chatId}`,
+                          method: 'PATCH',
+                          data: { title: newTitle }
+                      }).then(() => {
+                          wx.hideLoading();
+                          // 更新前端 chatHistory 数组中的数据
+                          const history = that.data.chatHistory;
+                          const chatIndex = history.findIndex(chat => chat.id === chatId);
+                          if (chatIndex !== -1) {
+                              history[chatIndex].title = newTitle;
+                              that.setData({ chatHistory: history });
+                              wx.showToast({ title: '重命名成功', icon: 'success' });
+                          }
+                      }).catch(err => {
+                          wx.hideLoading();
+                          console.error("重命名失败", err);
+                          wx.showToast({ title: '操作失败', icon: 'none' });
+                      });
+                  }
+              }
+          }
+      });
+  },
+  
+  handleDeleteChat(chatId) {
+      const that = this;
+      wx.showLoading({ title: '删除中...' });
+      // 调用已有的删除API
+      request({
+          url: `/chats/${chatId}`,
+          method: 'DELETE'
+      }).then(() => {
+          wx.hideLoading();
+          // 从前端 chatHistory 数组中移除该项
+          const newHistory = that.data.chatHistory.filter(chat => chat.id !== chatId);
+          that.setData({ chatHistory: newHistory });
+
+          // [重要] 检查删除的是否是当前正在查看的聊天
+          if (that.data.activeChatId === chatId) {
+              // 如果是，则清空聊天界面或加载下一个聊天, 最简单的方式是重新初始化
+              that.initializeChat(); 
+          }
+          wx.showToast({ title: '删除成功', icon: 'success' });
+      }).catch(err => {
+          wx.hideLoading();
+          console.error("删除失败", err);
+          wx.showToast({ title: '操作失败', icon: 'none' });
+      });
+  },
+
   // =================================================================
   // 消息处理 (Message Handling)
   // =================================================================
@@ -267,7 +358,6 @@ Page({
         data: { message: text } 
       });
 
-      // --- [关键修改] 调用流式输出函数 ---
       this.streamMessage(loadingMessageId, response.reply); 
 
       this.moveChatToTop(this.data.activeChatId);
@@ -297,7 +387,6 @@ Page({
     const messageIndex = messages.findIndex(msg => msg.id === messageId);
     if (messageIndex !== -1) {
       const messageToUpdate = messages[messageIndex];
-      // 如果消息正在加载中，则将isLoading标志位置为false
       if (messageToUpdate.isLoading) {
         messageToUpdate.isLoading = false;
       }
@@ -306,12 +395,10 @@ Page({
     }
   },
   
-  // --- [新增] 流式输出函数 ---
   streamMessage(messageId, text) {
     let currentIndex = 0;
-    const interval = 50; // 打字速度(毫秒)，数字越小速度越快
+    const interval = 50; // 打字速度(毫秒)
 
-    // 清除上一个定时器，防止冲突
     if (this.data.streamTimer) {
       clearInterval(this.data.streamTimer);
     }
@@ -319,7 +406,6 @@ Page({
     const timer = setInterval(() => {
       if (currentIndex < text.length) {
         currentIndex++;
-        // 更新时，先移除isLoading状态，再显示文本和光标
         const messageToUpdate = this.data.messages.find(msg => msg.id === messageId);
         if (messageToUpdate && messageToUpdate.isLoading) {
           messageToUpdate.isLoading = false;

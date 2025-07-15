@@ -1,6 +1,6 @@
-/* pages/ai-therapist/index.wxss (最终无头像版) */
+/* pages/ai-therapist/index.wxss */
 
-/* --- 1. 全局与颜色变量 --- */
+/* --- 1. Variáveis Globais e de Cor --- */
 page {
   --primary-orange: #F2994A;
   --primary-orange-light: #FFF5EE;
@@ -9,7 +9,7 @@ page {
   --bg-color: #F7F7F7;
   --hover-color: #f0f0f0;
 }
-/* --- 2. 页面级容器 --- */
+/* --- 2. Contêiner no Nível da Página --- */
 .page-container {
   position: relative;
   width: 100vw;
@@ -17,7 +17,7 @@ page {
   background-color: var(--bg-color);
   overflow: hidden;
 }
-/* --- 3. 侧边栏样式 --- */
+/* --- 3. Estilos da Barra Lateral --- */
 .sidebar {
   position: fixed;
   left: 0;
@@ -61,111 +61,111 @@ page {
   padding: 20rpx 10rpx;
 }
 .history-title-icon { width: 32rpx; height: 32rpx; margin-right: 15rpx; }
+
+/* --- [SEÇÃO MODIFICADA] Início das alterações na lista de histórico --- */
 .history-list {
   flex-grow: 1;
   height: 100%;
 }
+.history-item-wrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10rpx;
+  border-radius: 16rpx;
+  transition: background-color 0.2s;
+}
+/* Efeito de hover para todo o wrapper */
+.history-item-wrapper:hover {
+  background-color: var(--hover-color);
+}
 .history-item {
+  flex-grow: 1; /* Permite que o item ocupe o espaço disponível */
   padding: 25rpx 20rpx;
   font-size: 28rpx;
   color: var(--text-primary);
   border-radius: 16rpx;
-  margin-bottom: 10rpx;
-  transition: background-color 0.2s, color 0.2s;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.history-item-hover {
-  background-color: var(--hover-color) !important;
-  color: var(--text-primary) !important;
+  /* O margin-bottom foi movido para o wrapper */
 }
 .history-item.active {
   background-color: var(--primary-orange);
   color: #ffffff;
   font-weight: bold;
 }
+/* Estilo para o botão de opções (três pontos) */
+.history-item-options {
+  flex-shrink: 0; 
+  width: 40rpx;
+  height: 40rpx;
+  padding: 10rpx; 
+  margin: 0 20rpx 0 10rpx;
+  transition: opacity 0.2s, filter 0.2s; /* [优化] 增加过渡效果 */
 
-/* --- 主内容区 --- */
-.main-content {width: 100%;height: 100%;display: flex;flex-direction: column;transition: transform 0.3s ease-in-out;}
-.main-content-pushed {transform: translateX(75vw);}
-/* 1. 父容器 .top-bar */
-.top-bar {
-  display: flex; /* 开启 Flex 布局 */
-  align-items: center; /* 让左、中、右三个部分在垂直方向上居中 */
-  width: 100%; /* 宽度占满 */
-  
-  /* 其他基础样式 */
-  height: 60rpx; 
-  padding-top: 100rpx; /* 适配刘海屏 */
-  background-color: #fff;
-  border-bottom: 1rpx solid #f0f0f0;
-  box-sizing: content-box; /* 确保 padding 不会影响宽度计算 */
-  flex-shrink: 0;
+  /* [核心修改] 默认状态下，使用滤镜将橙色图标变为灰色，并降低不透明度 */
+  filter: grayscale(100%);
+  opacity: 0.4;
 }
 
-/* 2. 定义左、中、右三个部分 */
+/* 当历史项被激活(选中)时，让选项按钮恢复原色 */
+.history-item.active + .history-item-options {
+  /* [核心修改] 选中状态下，移除所有滤镜，让图标恢复原始的橙色，并让它完全不透明 */
+  filter: none;
+  opacity: 1;
+}
+/* --- [SEÇÃO MODIFICADA] Fim das alterações --- */
+
+/* --- Conteúdo Principal --- */
+.main-content {width: 100%;height: 100%;display: flex;flex-direction: column;transition: transform 0.3s ease-in-out;}
+.main-content-pushed {transform: translateX(75vw);}
+/* 1. Contêiner pai .top-bar */
+.top-bar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 60rpx; 
+  padding-top: 100rpx;
+  background-color: #fff;
+  border-bottom: 1rpx solid #f0f0f0;
+  box-sizing: content-box;
+  flex-shrink: 0;
+}
 .top-bar-left,
 .top-bar-right {
-  flex: 1; /* (关键) 让左右两边各占一份空间 */
+  flex: 1;
   display: flex;
   align-items: center;
 }
-
 .top-bar-center {
-  flex: 2; /* 让中间区域占据更多空间，也可以设为1，效果类似 */
-  text-align: center; /* (关键) 让标题在其中文本居中 */
+  flex: 2;
+  text-align: center;
 }
-
-/* 3. 左边部分的具体内容样式 */
 .top-bar-left {
-  padding-left: 30rpx; /* 给图标一个左边距 */
+  padding-left: 30rpx;
 }
-
-/* 4. 中间标题的字体样式 */
 .top-bar-title {
-  display: inline-block; /* 确保标题是行内块，以便居中 */
-  font-family: 'Playfair Display', serif; /* 你选的艺术字体 */
-  font-size: 38rpx;
+  display: inline-block;
+  font-family: Georgia, serif; 
   font-weight: 600;
+  font-size: 40rpx;
 }
-
-/* 5. 图标样式 (不再需要任何定位) */
 .menu-icon {
   width: 48rpx;
   height: 48rpx;
 }
-
-/* ai-therapist.wxss */
-
-/* ai-therapist.wxss */
-
-.top-bar-title {
-  /* (核心修改) 优先使用 Georgia，如果系统没有，则使用默认的衬线体 */
-  font-family: Georgia, serif; 
-  
-  font-weight: 600;
-  font-size: 40rpx;
-}
-
 .message-list {
   flex-grow: 1;
-  /* 只保留上下边距，移除左右边距 */
   padding: 30rpx 0; 
   overflow-y: auto;
 }
-
 .message-item {
   display: flex; 
   margin-bottom: 40rpx;
-  /* 已经删除了 width: 100% 和 box-sizing: border-box */
 }
-
 .user-row {
-  justify-content: flex-end; /* 关键：让用户消息行的内容靠右 */
+  justify-content: flex-end;
 }
-
-/* 聊天气泡的基础样式 */
 .message-bubble {
   max-width: 85%;
   padding: 22rpx 30rpx;
@@ -174,37 +174,25 @@ page {
   line-height: 1.6;
   word-break: break-all;
 }
-
-/* AI气泡的特定样式 */
 .ai-bubble {
   background-color: #ffffff;
   color: var(--text-primary);
   border-top-left-radius: 8rpx;
 }
-
-/* 用户气泡的特定样式 */
 .user-bubble {
   background-color: var(--primary-orange);
   color: #ffffff;
   border-top-right-radius: 8rpx;
 }
-
-
-/* --- [新增] 加载动画样式 --- */
+/* --- Estilo de animação de carregamento --- */
 .loader {
   width: 40rpx;
   height: 40rpx;
-  border-radius: 50%; /* 让它变成一个圆形 */
-  
-  /* 动画的关键：设置边框，并将顶部的颜色设为我们的主题橙色 */
-  border: 6rpx solid rgba(0, 0, 0, 0.1); /* 边框的底色，浅灰色轨道 */
-  border-top-color: var(--primary-orange); /* 顶部颜色，用你已定义的橙色变量 */
-
-  /* 应用动画效果 */
+  border-radius: 50%;
+  border: 6rpx solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--primary-orange);
   animation: spin 1s linear infinite;
 }
-
-/* 定义动画的关键帧 */
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -213,7 +201,7 @@ page {
     transform: rotate(360deg);
   }
 }
-/* --- 输入与登录区域 --- */
+/* --- Área de Entrada e Login --- */
 .input-area-minimalist {display: flex;align-items: center;padding: 20rpx 30rpx;background-color: #fff;border-top: 1rpx solid #f0f0f0;flex-shrink: 0;}
 .input-field { flex-grow: 1; background-color: var(--bg-color); border-radius: 40rpx; padding: 18rpx 30rpx; height: 80rpx; box-sizing: border-box; }
 .send-icon { width: 50rpx; height: 50rpx; margin-left: 20rpx; opacity: 0.5; }

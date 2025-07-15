@@ -12,6 +12,7 @@ from typing import Optional, List, Dict, Any
 from peewee import Model, CharField, IntegerField, TextField, IntegrityError, fn
 from pydantic import BaseModel, Field
 from fastapi import UploadFile
+import random
 
 # Import the database connection as requested
 try:
