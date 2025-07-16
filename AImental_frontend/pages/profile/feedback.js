@@ -1,7 +1,7 @@
 // pages/feedback/feedback.js
 
 //【配置】请确保这里的地址是正确的
-const API_BASE_URL = 'http://127.0.0.1:8000/api/v1'; // 你的服务器根地址
+const API_BASE_URL = 'http://49.233.220.130:8000/api/v1'; // 你的服务器根地址
 
 Page({
   /**
