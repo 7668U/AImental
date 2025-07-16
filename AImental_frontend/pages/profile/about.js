@@ -3,7 +3,7 @@ Page({
   data: {
     statusBarHeight: 0, // 用于WXML设置导航栏样式的状态栏高度
     version: '1.0.0',
-    contactInfo: 'chaochao@power.com'
+    contactInfo: '7668U@power.com'
   },
 
   /**

@@ -16,11 +16,18 @@ from model.chat import chat_table, NewMessageForm
 # pip install python-dotenv
 # from dotenv import load_dotenv
 # load_dotenv()
-DEEPSEEK_API_KEY = "sk-b55d99ca5c3f41058f8f3e6380b41dac"
-DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 
+
+# DEEPSEEK_API_KEY = "sk-3a432e1f477845c085c01a3f77545b3f"
+# DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 # 初始化 DeepSeek API 客户端
-client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
+# client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
+
+# export MOONSHOT_API_KEY="sk-..."
+MOONSHOT_API_KEY = "sk-6gGW4lyWgHbvwFO8My2d1ivCkFY77iFBthp3J6TIolfAtJm3" 
+MOONSHOT_BASE_URL = "https://api.moonshot.cn/v1"
+# 初始化 Kimi (Moonshot AI) API 客户端
+client = OpenAI(api_key=MOONSHOT_API_KEY, base_url=MOONSHOT_BASE_URL)
 
 # AI心理医生的系统指令 (System Prompt)
 # 这是非常关键的一步，它定义了AI的角色、语气和行为准则
@@ -36,7 +43,7 @@ SYSTEM_PROMPT = """
 5.  **提供支持，而非诊断**：你不能替代人类心理医生，绝不能提供医学诊断或开具处方。如果用户情况严重，应建议他们寻求专业医疗帮助。
 6.  **保密原则**：向用户强调对话是保密的，以建立信任感。
 7.  **建立安全感**：对话开始时，可以用简短的话语让用户感到放松和安全。
-8.  **语气人类化**：语气尽可能人类话，不要太过AI感。
+8.  **语气人类化**：语气尽可能人类话，也不太有逻辑感，不要太过AI感，比如“听到你说....我感到....然后再提问”这种格式可以尽量避免。
 9.  **问题简短精炼**：每次只提一到两个问题，不要连续发问太多，让用户感到繁杂。
 """
 
@@ -79,7 +86,7 @@ def get_ai_response_and_update_history(chat_id: str, user_message: str) -> Optio
     try:
         # --- 4. 调用 DeepSeek API ---
         response = client.chat.completions.create(
-            model="deepseek-chat",  # 使用适合对话的模型
+            model="moonshot-v1-8k",  # 使用适合对话的模型
             messages=messages_for_api,
             stream=False  # 根据你的需求，也可以设置为 True 进行流式传输
         )
@@ -130,7 +137,7 @@ def generate_chat_title(first_message: str) -> str:
     try:
         # --- 调用 DeepSeek API 来生成标题 ---
         response = client.chat.completions.create(
-            model="deepseek-chat",
+            model="moonshot-v1-8k",
             messages=messages_for_title_api,
             temperature=0.2,  # 使用较低的温度，让标题生成更具确定性
             max_tokens=25     # 限制最大输出长度，节省token
@@ -200,7 +207,7 @@ def generate_ai_analysis_report(checkin_data: List[Dict], prompt_template: str, 
     try:
         # --- 4. 调用 DeepSeek API ---
         response = client.chat.completions.create(
-            model="deepseek-chat",
+            model="moonshot-v1-8k",
             messages=messages_for_api,
             temperature=0.7,  # 使用稍高的温度，让报告更具创造性和个性
             stream=False
@@ -321,7 +328,7 @@ def generate_assessment_synthesis_report(user_id: str, history_ids: List[str]) -
 
     try:
         response = client.chat.completions.create(
-            model="deepseek-chat",
+            model="moonshot-v1-8k",
             messages=messages_for_api,
             temperature=0.6,
             stream=False

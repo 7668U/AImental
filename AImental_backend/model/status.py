@@ -76,7 +76,7 @@ class CheckinTable:
         self.db.create_tables([Checkin], safe=True)
         # self.create_dummy_data_for_month()
         
-    def create_dummy_data_for_month(self, user_id: str = "d261c579-acf8-4ec6-bb70-5ef580b7465f"):
+    def create_dummy_data_for_month(self, user_id: str = "c959d470-64e7-45fe-8942-45ee05d0f153"):
         """
         Generates a full month of random check-in data for a user.
         """
