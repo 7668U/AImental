@@ -12,7 +12,8 @@
     "pages/profile/feedback",
     "pages/profile/inform",
     "pages/profile/history",
-    "pages/profile/history_analysis"
+    "pages/profile/history_analysis",
+    "components/login-prompt/login-prompt"
   ],
   "window": {
     "backgroundTextStyle": "light",
