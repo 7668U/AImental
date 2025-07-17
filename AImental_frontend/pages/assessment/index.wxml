@@ -1,3 +1,5 @@
+<block wx:if="{{isLoggedIn}}">
+
 <view class="container">
   <view class="page-title">选择一个测评开始</view>
   <view class="page-subtitle">了解自己的内心世界</view>
@@ -24,3 +26,12 @@
     </block>
   </view>
 </view>
+</block>
+
+<block wx:else>
+<login-prompt 
+  title="欢迎来到心理测评"
+  subtitle="登录后开始探索你的内心世界"
+  bind:loginevent="handleLogin" 
+/>
+</block>

@@ -1,6 +1,7 @@
 {
   "usingComponents": {
-    "calendar": "./calendar"
+    "calendar": "./calendar",
+    "login-prompt": "/components/login-prompt/login-prompt"
   },
   "navigationBarTitleText": ""
 }

@@ -1,7 +1,7 @@
 // pages/ai-therapist/index.js
 
 // --- 全局配置与网络请求封装 ---
-const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
+const API_BASE_URL = 'https://api.feelyourself.cn/api/v1';
 
 function request(options) {
   return new Promise((resolve, reject) => {
@@ -114,8 +114,12 @@ Page({
       },
       fail: (err) => {
         wx.hideLoading();
-        wx.showToast({ title: '登录接口调用失败', icon: 'none' });
-      }
+        // 在控制台打印完整的错误对象
+        console.error("登录接口调用失败，详细错误:", err); 
+        
+        // 仍然给用户一个通用的提示
+        wx.showToast({ title: '登录失败，请检查网络', icon: 'none' }); 
+    }
     });
   },
 
