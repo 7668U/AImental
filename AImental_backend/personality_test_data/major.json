@@ -1,0 +1,281 @@
+{
+  "test_info": {
+    "id": "real-major-v1",
+    "name": "测测你的“真实”专业",
+    "description": "当代大学生活图鉴！15道题揭示你潜意识里真正的“专业”归属，快来康康你的隐藏身份吧！"
+  },
+  "personalities": [
+    {
+      "id": "p01",
+      "college": "卷理学院",
+      "major": "图书馆生态信息学",
+      "college_motto": "知识的尽头是绩点，我们的尽头是图书馆。",
+      "description": "核心课程：《图书馆座位锁定技巧》、《专注力与环境噪音隔离》、《从入门到精通：各科文献综述》",
+      "recommendation": "生存指南：注意劳逸结合，偶尔也要看看窗外的世界，不要和书本融为一体了。"
+    },
+    {
+      "id": "p02",
+      "college": "卷理学院",
+      "major": "应用行为规划学",
+      "college_motto": "知识的尽头是绩点，我们的尽头是图书馆。",
+      "description": "核心课程：《规划的艺术与实践》、《GTD时间管理法导论》、《多线程任务处理》",
+      "recommendation": "生存指南：请学会接受“意外”，有时候计划赶不上变化也是一种别样的惊喜。"
+    },
+    {
+      "id": "p03",
+      "college": "卷理学院",
+      "major": "知识资产管理学",
+      "college_motto": "知识的尽头是绩点，我们的尽头是图书馆。",
+      "description": "核心课程：《数字笔记软件通论》、《信息检索与高效整理》、《个人知识库（PKM）构建》",
+      "recommendation": "生存指南：别忘了分享是知识增值的最佳途径，带带身边还在信息茧房里的朋友吧！"
+    },
+    {
+      "id": "p04",
+      "college": "寝室生命科学学院",
+      "major": "寝室软装工程学",
+      "college_motto": "宇宙的中心是我的床。",
+      "description": "核心课程：《宿舍美学与空间利用》、《LED灯带应用与光污染防治》、《消费主义与种草拔草》",
+      "recommendation": "生存指南：在改造寝室时，请务必先征得室友和宿管阿姨的同意。"
+    },
+    {
+      "id": "p05",
+      "college": "寝室生命科学学院",
+      "major": "人类睡眠学",
+      "college_motto": "宇宙的中心是我的床。",
+      "description": "核心课程：《睡眠与梦境解析》、《生物钟调节导论》、《枕头与床垫的选购艺术》",
+      "recommendation": "生存指南：你的生物钟可能和太阳不太同步，记得备好眼罩和耳塞。"
+    },
+    {
+      "id": "p06",
+      "college": "寝室生命科学学院",
+      "major": "床域生态系统学",
+      "college_motto": "宇宙的中心是我的床。",
+      "description": "核心课程：《床上运动力学》、《懒人经济学原理》、《零食仓储与伸手可及的艺术》",
+      "recommendation": "生存指南：偶尔清理一下“床域”环境，可能会有惊奇的考古发现。"
+    },
+    {
+      "id": "p07",
+      "college": "危机管理与精准决策学院",
+      "major": "DDL应急学",
+      "college_motto": "DDL是第一生产力，六十分是最高性价比。",
+      "description": "核心课程：《拖延心理学与自我和解》、《24小时极限任务规划》、《咖啡因与护肝片的应用》",
+      "recommendation": "生存指南：常备护肝片和咖啡因，它们是你最忠实的战友。"
+    },
+    {
+      "id": "p08",
+      "college": "危机管理与精准决策学院",
+      "major": "及格科学与工程",
+      "college_motto": "DDL是第一生产力，六十分是最高性价比。",
+      "description": "核心课程：《考纲重点剖析》、《最小努力原则》、《风险评估与成绩预测》",
+      "recommendation": "生存指南：请小心老师突然划重点或改变评分规则，那将是对你整个体系的降维打击。"
+    },
+    {
+      "id": "p09",
+      "college": "危机管理与精准决策学院",
+      "major": "命理学",
+      "college_motto": "DDL是第一生产力，六十分是最高性价比。",
+      "description": "核心课程：《摆烂哲学》、《玄学与自我安慰》、《好运锦鲤的转发技巧》",
+      "recommendation": "生存指南：转发锦鲤确实能带来好心情，但作业和考试还是得自己面对哦。"
+    },
+    {
+      "id": "p10",
+      "college": "食品安全与工程学院",
+      "major": "干饭经济学",
+      "college_motto": "人是铁，饭是钢，一顿不吃饿得慌。",
+      "description": "核心课程：《食堂菜价波动分析》、《优惠券叠加使用概论》、《卡路里摄入与预算平衡》",
+      "recommendation": "生存指南：别忘了偶尔也要犒劳一下自己，毕竟“省”下的钱就是用来“花”的！"
+    },
+    {
+      "id": "p11",
+      "college": "食品安全与工程学院",
+      "major": "美食搜索工程学",
+      "college_motto": "人是铁，饭是钢，一顿不吃饿得慌。",
+      "description": "核心课程：《城市探店指南》、《社交平台美食信息甄别》、《高级味蕾养成计划》",
+      "recommendation": "生存指南：体重秤可能不是你最好的朋友，但快乐是！"
+    },
+    {
+      "id": "p12",
+      "college": "食品安全与工程学院",
+      "major": "外卖软件管理学",
+      "college_motto": "人是铁，饭是钢，一顿不吃饿得慌。",
+      "description": "核心课程：《外卖平台算法研究》、《红包与满减最优策略》、《配送路线与时间估算》",
+      "recommendation": "生存指南：记得多给外卖小哥一个好评，并及时下楼取餐，维护外卖生态的和谐。"
+    },
+    {
+      "id": "p13",
+      "college": "互联网与计算机科学学院",
+      "major": "时间黑洞学",
+      "college_motto": "现实Offline，赛博Online。",
+      "description": "核心课程：《短视频沉浸式体验》、《信息茧房的构建与突破》、《“再刷五分钟”心理学》",
+      "recommendation": "生存指南：试试“番茄工作法”，也许能帮你从黑洞的引力中短暂逃逸。"
+    },
+    {
+      "id": "p14",
+      "college": "互联网与计算机科学学院",
+      "major": "虚拟环境栖息学",
+      "college_motto": "现实Offline，赛博Online。",
+      "description": "核心课程：《游戏世界观与文化研究》、《团队协作与战术指挥》、《多巴胺奖赏机制概论》",
+      "recommendation": "生存指南：在虚拟世界拯救艾泽拉斯的同时，别忘了现实世界的DDL也需要拯救。"
+    },
+    {
+      "id": "p15",
+      "college": "互联网与计算机科学学院",
+      "major": "舆情传播学",
+      "college_motto": "现实Offline，赛博Online。",
+      "description": "核心课程：《吃瓜的正确姿势》、《网络热点追踪技术》、《表情包符号学》",
+      "recommendation": "生存指南：吃瓜不信瓜，传谣需谨慎。保持独立思考，做个有态度的吃瓜群众。"
+    }
+  ],
+  "questions": [
+    {
+      "order": 1,
+      "text": "一个阳光明媚的周六下午，你没有课也没有作业，你会选择？",
+      "options": [
+        { "id": "a", "text": "拉上窗帘开电脑，今天必须要在虚拟世界里称霸一方！", "target_personality_id": "p14" },
+        { "id": "b", "text": "精心打扮一番，把寝室的床铺、书桌重新装饰一下，拍照发朋友圈。", "target_personality_id": "p04" },
+        { "id": "c", "text": "掏出手机，开始搜索方圆五公里内新开的、评分最高的美食店。", "target_personality_id": "p11" },
+        { "id": "d", "text": "学习使我快乐，没有什么比安静地在知识的海洋里遨游更惬意了。", "target_personality_id": "p01" }
+      ]
+    },
+    {
+      "order": 2,
+      "text": "这学期你选修了一门课，但老师讲得非常催眠，你会？",
+      "options": [
+        { "id": "a", "text": "既然环境这么好，不如……趴下补个觉吧，昨晚没睡好。", "target_personality_id": "p05" },
+        { "id": "b", "text": "打开社交软件，看看大家又在讨论什么八卦，吃瓜看戏两不误。", "target_personality_id": "p15" },
+        { "id": "c", "text": "打开电脑，开始做其他科目的作业和论文，主打一个“环境音”。", "target_personality_id": "p02" },
+        { "id": "d", "text": "这性价比太低了！立刻打开课程评价网站，给它打个差评提醒后人。", "target_personality_id": "p10" }
+      ]
+    },
+    {
+      "order": 3,
+      "text": "明天就是小组作业的截止日期（DDL），但你们组的进度还差一大截，作为组员的你：",
+      "options": [
+        { "id": "a", "text": "别急，掐指一算，我觉得我们运气不错，明天老师可能会推迟DDL。", "target_personality_id": "p09" },
+        { "id": "b", "text": "立刻召开紧急会议，分配好每个人的任务，精确到小时，保证完成。", "target_personality_id": "p07" },
+        { "id": "c", "text": "仔细研究评分标准，发现只要完成70%的内容就能及格，那就做到70%吧。", "target_personality_id": "p08" },
+        { "id": "d", "text": "默默打开自己的文件夹，里面是早已分门别类整理好的所有资料。", "target_personality_id": "p03" }
+      ]
+    },
+    {
+      "order": 4,
+      "text": "不知不觉到了月底，生活费告急，你的首选觅食策略是？",
+      "options": [
+        { "id": "a", "text": "打开外卖软件，挨个对比红包、满减和运费，计算出最优解再下单。", "target_personality_id": "p12" },
+        { "id": "b", "text": "没钱和吃饭有什么关系？先刷会儿短视频再说，刷着刷着可能就忘了饿了。", "target_personality_id": "p13" },
+        { "id": "c", "text": "在床上躺平，思考生命的意义，也许床会给我提供能量。", "target_personality_id": "p06" },
+        { "id": "d", "text": "去图书馆！既不用花钱，还能汲取知识，精神食粮最重要。", "target_personality_id": "p01" }
+      ]
+    },
+    {
+      "order": 5,
+      "text": "终于下定决心要出门了，你出门前的最后一步通常是：",
+      "options": [
+        { "id": "a", "text": "检查今天的待办事项清单，确保回家后的任务都已规划好。", "target_personality_id": "p02" },
+        { "id": "b", "text": "最后确认一遍全身的穿搭和妆容，必须保持精致。", "target_personality_id": "p04" },
+        { "id": "c", "text": "算了一卦，看看今天出门的运势如何，宜不宜见人。", "target_personality_id": "p09" },
+        { "id": "d", "text": "拔掉正在充电的手机，内心感叹“时间黑洞”又偷走了我一小时。", "target_personality_id": "p13" }
+      ]
+    },
+    {
+      "order": 6,
+      "text": "看到校园BBS上有人发帖讨论“你校最水的课”，你的第一反应是：",
+      "options": [
+        { "id": "a", "text": "立刻点进去，搬好小板凳，看看有没有自己上过的课，顺便围观论战。", "target_personality_id": "p15" },
+        { "id": "b", "text": "默默记下这些课的名字，并对照自己的课表，计算投入产出比。", "target_personality_id": "p08" },
+        { "id": "c", "text": "根据帖子里的信息，更新自己的“选课避雷/推荐”知识库文档。", "target_personality_id": "p03" },
+        { "id": "d", "text": "水不水无所谓，只要食堂好吃就行。顺手打开手机搜索附近美食。", "target_personality_id": "p11" }
+      ]
+    },
+    {
+      "order": 7,
+      "text": "当你感觉压力巨大、情绪低落时，最能治愈你的方式是：",
+      "options": [
+        { "id": "a", "text": "什么都别说，让我好好睡一觉，醒来就是新的一天。", "target_personality_id": "p05" },
+        { "id": "b", "text": "打开游戏，在虚拟世界里厮杀一场，把所有不快都发泄出来。", "target_personality_id": "p14" },
+        { "id": "c", "text": "大吃一顿！没有什么是一顿火锅解决不了的，如果有，就两顿。", "target_personality_id": "p10" },
+        { "id": "d", "text": "立刻开始行动！把压力转化为动力，完成一项拖延已久的任务。", "target_personality_id": "p07" }
+      ]
+    },
+    {
+      "order": 8,
+      "text": "你的手机相册里，存得最多的照片类型是：",
+      "options": [
+        { "id": "a", "text": "各种美食的照片，很多还没来得及发朋友圈。", "target_personality_id": "p11" },
+        { "id": "b", "text": "各种梗图、表情包和吃瓜截图。", "target_personality_id": "p15" },
+        { "id": "c", "text": "精心布置的寝室一角、新买的小物件和自己的OOTD（每日穿搭）。", "target_personality_id": "p04" },
+        { "id": "d", "text": "各种外卖订单的截图，用于月底复盘消费。", "target_personality_id": "p12" }
+      ]
+    },
+    {
+      "order": 9,
+      "text": "一个理想的下午茶，对你来说应该是：",
+      "options": [
+        { "id": "a", "text": "躺在床上，一边吃着零食，一边追着剧。", "target_personality_id": "p06" },
+        { "id": "b", "text": "一杯咖啡，一本书，在图书馆或咖啡馆安静地度过。", "target_personality_id": "p01" },
+        { "id": "c", "text": "一边喝奶茶，一边和朋友激烈地讨论最新的游戏版本更新。", "target_personality_id": "p14" },
+        { "id": "d", "text": "点一份从没吃过的外卖新品，开启一场味蕾的冒险。", "target_personality_id": "p12" }
+      ]
+    },
+    {
+      "order": 10,
+      "text": "临近期末考试，你的复习状态更接近于：",
+      "options": [
+        { "id": "a", "text": "严格按照自己一个月前制定的复习计划，稳步推进，一切尽在掌握。", "target_personality_id": "p02" },
+        { "id": "b", "text": "考前一晚，浓缩就是精华！把一学期的内容压缩成一晚的记忆。", "target_personality_id": "p07" },
+        { "id": "c", "text": "随缘复习法，翻到哪页看哪页，相信考试那天自有神助。", "target_personality_id": "p09" },
+        { "id": "d", "text": "先研究历年卷和老师划的重点，主攻核心考点，目标是安全飘过。", "target_personality_id": "p08" }
+      ]
+    },
+    {
+      "order": 11,
+      "text": "如果给你一笔小额的“寝室美化基金”，你会优先购买？",
+      "options": [
+        { "id": "a", "text": "一个更舒服的人体工学枕头或一套亲肤的床品，为了极致睡眠。", "target_personality_id": "p05" },
+        { "id": "b", "text": "一个多功能床上小桌板，这样吃喝玩乐就更离不开床了。", "target_personality_id": "p06" },
+        { "id": "c", "text": "一个智能插座和文件收纳盒，让所有知识和设备都井井有条。", "target_personality_id": "p03" },
+        { "id": "d", "text": "用这笔钱和室友一起聚餐，毕竟干饭才是第一生产力。", "target_personality_id": "p10" }
+      ]
+    },
+    {
+      "order": 12,
+      "text": "在B站或抖音，你最常停留的视频分区是？",
+      "options": [
+        { "id": "a", "text": "学习区/知识区，总在收藏各种干货，但“稍后学习”=“永不学习”。", "target_personality_id": "p01" },
+        { "id": "b", "text": "游戏区，看大神操作、新游速递和搞笑集锦。", "target_personality_id": "p14" },
+        { "id": "c", "text": "生活/家居区，看别人如何爆改房间，获得代入式满足。", "target_personality_id": "p04" },
+        { "id": "d", "text": "搞笑/鬼畜区，不知不觉就刷了几百个视频，时间瞬间消失。", "target_personality_id": "p13" }
+      ]
+    },
+    {
+      "order": 13,
+      "text": "你的信息管理方式更偏向于：",
+      "options": [
+        { "id": "a", "text": "拥有堪称典范的笔记软件和网盘分类，所有文件都能在3秒内找到。", "target_personality_id": "p03" },
+        { "id": "b", "text": "在deadline前十分钟，总能从混乱的桌面和脑海中精准定位到需要的东西。", "target_personality_id": "p07" },
+        { "id": "c", "text": "大脑就是我最好的收藏夹，虽然有点乱，但关键时刻总能想起大概在哪。", "target_personality_id": "p09" },
+        { "id": "d", "text": "每天制定详细的to-do list，并且严格执行，享受划掉每一项的快感。", "target_personality_id": "p02" }
+      ]
+    },
+    {
+      "order": 14,
+      "text": "朋友约你出去玩，但你有点懒得动，最可能让你改变主意的理由是：",
+      "options": [
+        { "id": "a", "text": "“我请客！去吃那家你种草了很久的日料！”", "target_personality_id": "p11" },
+        { "id": "b", "text": "“听说那个地方有最新的八卦，速来！”", "target_personality_id": "p15" },
+        { "id": "c", "text": "“只需要考60分就能拿2个学分，去不去？” (指某种实践活动)", "target_personality_id": "p08" },
+        { "id": "d", "text": "“来我家吧，新买了超舒服的懒人沙发，可以一起躺着。”", "target_personality_id": "p05" }
+      ]
+    },
+    {
+      "order": 15,
+      "text": "对你来说，手机最重要的功能是？",
+      "options": [
+        { "id": "a", "text": "点外卖！它是连接我与美食世界的桥梁。", "target_personality_id": "p12" },
+        { "id": "b", "text": "刷短视频！它是对抗无聊、杀时间的最佳利器。", "target_personality_id": "p13" },
+        { "id": "c", "text": "省钱！用各种比价和优惠券APP，做一个精明的消费者。", "target_personality_id": "p10" },
+        { "id": "d", "text": "在床上看世界！它是我的遥控器、游戏机和电影院。", "target_personality_id": "p06" }
+      ]
+    }
+  ]
+}

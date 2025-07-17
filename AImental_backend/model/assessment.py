@@ -16,7 +16,7 @@ from .user import User  # 假设 User 模型可以从 .user 导入
 
 # --- 静态配置 ---
 ASSESSMENT_DATA_DIR = "assessment_data/"
-
+TEST_DATA_DIR = "personality_test_data/"
 # ---------------------------------------------------
 # 1. Peewee 数据模型 (数据库表结构)
 # ---------------------------------------------------
@@ -246,3 +246,204 @@ class AssessmentTables:
 
 # --- 实例化数据表访问对象 ---
 assessment_tables = AssessmentTables(assessment_db)
+
+
+# 以下是建议添加到你的 model/assessment.py 文件中的新代码
+
+# --- 新增 Peewee 模型 ---
+
+class PersonalityTest(Model):
+    """
+    人格测试定义表 (例如“真实专业”测试)。
+    """
+    id = CharField(primary_key=True, max_length=36, default=lambda: str(uuid.uuid4()))
+    short_name = CharField(max_length=50, unique=True, index=True, help_text="人格测试的唯一简称, 如 'real-major-v1'")
+    name = CharField(max_length=255, help_text="测试的全称")
+    description = TextField(help_text="对测试的简短描述")
+    # 存储人格测试的完整结构(人格类型、题目、选项)的JSON字符串
+    json_data = TextField(help_text="存储人格测试完整结构的JSON字符串")
+    created_at = DateTimeField(default=datetime.now)
+    updated_at = DateTimeField(default=datetime.now)
+
+    class Meta:
+        database = assessment_db
+        table_name = 'personality_tests'
+
+class UserPersonalityTest(Model):
+    """
+    用户人格测试记录表。
+    """
+    id = CharField(primary_key=True, max_length=36, default=lambda: str(uuid.uuid4()))
+    user = ForeignKeyField(User, backref='personality_tests', field='id', on_delete='CASCADE')
+    test = ForeignKeyField(PersonalityTest, backref='attempts', field='id', on_delete='SET NULL', null=True)
+    
+    # 存储用户答案的JSON, e.g., '{"1": "a", "2": "c", ...}'
+    answers = TextField(help_text="用户提交的答案详情")
+    
+    # 核心结果字段
+    # 存储每个维度的得分详情, e.g., '{"p01": 5, "p02": 3, ...}'
+    scores_details = TextField(help_text="各个人格（专业）的得分详情 (JSON)")
+    # 最终结果的人格ID
+    result_personality_id = CharField(max_length=50, help_text="得分最高的人格ID")
+    
+    # 从JSON中冗余存储，方便查询和展示
+    result_college = CharField(max_length=255)
+    result_major = CharField(max_length=255)
+    result_interpretation = TextField()
+    result_recommendation = TextField()
+    
+    completed_at = DateTimeField(default=datetime.now, help_text="测试完成时间")
+
+    class Meta:
+        database = assessment_db
+        table_name = 'user_personality_tests'
+
+
+# --- 新增 Pydantic 模型 (用于API) ---
+
+class PersonalityTestInfoResponse(BaseModel):
+    id: str
+    short_name: str
+    name: str
+    description: str
+    
+    class Config:
+        from_attributes = True
+
+class SubmitPersonalityTestRequest(BaseModel):
+    test_id: str
+    # 答案格式：{题目order: 选项id}，例如 {1: "a", 2: "c", ...}
+    answers: Dict[int, str]
+
+class UserPersonalityTestResponse(BaseModel):
+    id: str
+    user_id: str
+    test_id: str
+    scores_details: Dict[str, int]
+    result_personality_id: str
+    result_college: str
+    result_major: str
+    result_interpretation: str
+    result_recommendation: str
+    completed_at: datetime
+    test_info: Optional[PersonalityTestInfoResponse] = None
+
+    class Config:
+        from_attributes = True
+        
+
+# model/assessment.py (第二部分)
+
+class PersonalityTestTables:
+    """封装所有与【人格/趣味测试】相关的数据库操作"""
+    
+    def __init__(self, db_connection):
+        self.db = db_connection
+        # 这个类只负责创建这两张新表
+        self.db.create_tables([PersonalityTest, UserPersonalityTest])
+        self.initialize_personality_tests_from_json()
+
+    # --- PersonalityTest (题库) 相关方法 ---
+    
+    def initialize_personality_tests_from_json(self):
+        """
+        从 /personality_test_data/ 文件夹读取JSON，并初始化到 PersonalityTest 表。
+        """
+        print("🌟 Initializing personality tests from JSON files...")
+        if not os.path.exists(TEST_DATA_DIR):
+            print(f"⚠️ Directory '{TEST_DATA_DIR}' not found. Skipping initialization.")
+            return
+
+        for filename in os.listdir(TEST_DATA_DIR):
+            if filename.endswith(".json"):
+                filepath = os.path.join(TEST_DATA_DIR, filename)
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    info = data.get('test_info', {})
+                    short_name = info.get('id') # 使用 test_info.id 作为 short_name
+                    
+                    if not short_name:
+                        print(f"❌ Skipping {filename}: 'id' not found in 'test_info'.")
+                        continue
+                    
+                    # 使用 Peewee 的 replace 方法，实现存在即更新，不存在即插入
+                    PersonalityTest.replace(
+                        short_name=short_name,
+                        name=info.get('name', 'N/A'),
+                        description=info.get('description', ''),
+                        json_data=json.dumps(data, ensure_ascii=False)
+                    ).execute()
+                    print(f"✅ Personality Test '{short_name}' has been loaded/updated from {filename}.")
+        print("✨ Personality Test initialization complete.")
+
+
+    def get_all_personality_tests(self) -> List[PersonalityTest]:
+        """获取所有人格测试的列表"""
+        return list(PersonalityTest.select(PersonalityTest.id, PersonalityTest.short_name, PersonalityTest.name, PersonalityTest.description))
+
+    def get_personality_test_by_id(self, test_id: str) -> Optional[PersonalityTest]:
+        """根据ID获取单个人格测试定义"""
+        return PersonalityTest.get_or_none(PersonalityTest.id == test_id)
+
+    # --- UserPersonalityTest (用户记录) 相关方法 ---
+
+    def create_user_personality_test(self, user_id: str, request_data: SubmitPersonalityTestRequest) -> Optional[UserPersonalityTest]:
+        """
+        核心方法：接收用户答案，进行【多维度计分】，并创建一条人格测试记录。
+        """
+        # (此方法的代码与上一条回复中的设计完全相同，此处直接粘贴)
+        test = self.get_personality_test_by_id(request_data.test_id)
+        if not test:
+            return None
+
+        test_data = json.loads(test.json_data)
+        personalities = {p['id']: p for p in test_data.get('personalities', [])}
+        questions = {q['order']: q for q in test_data.get('questions', [])}
+        
+        if not personalities or not questions:
+            raise ValueError(f"Personality test with id {test.id} has invalid JSON data.")
+
+        scores = {p_id: 0 for p_id in personalities.keys()}
+
+        for q_order, option_id in request_data.answers.items():
+            question = questions.get(int(q_order)) # 注意 key 可能是字符串
+            if not question: continue
+            chosen_option = next((opt for opt in question.get('options', []) if opt['id'] == option_id), None)
+            if chosen_option and 'target_personality_id' in chosen_option:
+                target_id = chosen_option['target_personality_id']
+                if target_id in scores:
+                    scores[target_id] += 1
+
+        result_id = max(scores, key=scores.get)
+        result_details = personalities.get(result_id)
+        
+        if not result_details:
+            raise ValueError(f"Result ID {result_id} not found in personalities definition.")
+
+        user_test_record = UserPersonalityTest.create(
+            user=user_id,
+            test=test.id,
+            answers=json.dumps(request_data.answers, ensure_ascii=False),
+            scores_details=json.dumps(scores, ensure_ascii=False),
+            result_personality_id=result_id,
+            result_college=result_details.get('college', 'N/A'),
+            result_major=result_details.get('major', 'N/A'),
+            result_interpretation=result_details.get('description', ''),
+            result_recommendation=result_details.get('recommendation', '')
+        )
+        return user_test_record
+
+    def get_personality_tests_by_user(self, user_id: str) -> List[UserPersonalityTest]:
+        """获取一个用户的所有人格测试历史记录"""
+        return list(UserPersonalityTest.select().where(UserPersonalityTest.user == user_id).order_by(UserPersonalityTest.completed_at.desc()))
+
+    def get_personality_test_by_record_id(self, record_id: str) -> Optional[UserPersonalityTest]:
+        """根据记录ID获取单条人格测试结果"""
+        return UserPersonalityTest.get_or_none(UserPersonalityTest.id == record_id)
+    
+    def delete_user_personality_test(self, user_id: str, record_id: str) -> bool:
+        """删除一条属于特定用户的人格测试记录"""
+        query = UserPersonalityTest.delete().where((UserPersonalityTest.id == record_id) & (UserPersonalityTest.user == user_id))
+        return query.execute() > 0
+    
+personality_test_manager = PersonalityTestTables(assessment_db)

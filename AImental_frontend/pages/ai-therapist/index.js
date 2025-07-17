@@ -1,7 +1,7 @@
 // pages/ai-therapist/index.js
 
 // --- 全局配置与网络请求封装 ---
-const API_BASE_URL = 'http://49.233.220.130:8000/api/v1';
+const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 
 function request(options) {
   return new Promise((resolve, reject) => {

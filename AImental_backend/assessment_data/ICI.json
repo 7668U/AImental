@@ -1,0 +1,187 @@
+{
+  "scale_info": {
+    "name": "人际魅力指数测试",
+    "short_name": "ICI",
+    "description": "本量表旨在评估您在人际交往中的个人魅力，主要从情感能力和社交能力两个维度进行考察。情感能力包括情绪的表达、感受和控制；社交能力则体现在社交场合的自如程度和对他人的影响力。",
+    "instructions": "请仔细阅读以下题目，并根据您的实际情况和真实感受，选择最符合您的选项。",
+    "scoring_rules": {
+      "type": "total_sum",
+      "subscales": []
+    }
+  },
+  "questions": [
+    {
+      "order": 1,
+      "text": "有人说过你的眼睛会说话吗？",
+      "reverse_scored": false
+    },
+    {
+      "order": 2,
+      "text": "你在和别人谈话的时候会接触到别人的身体吗？",
+      "reverse_scored": true
+    },
+    {
+      "order": 3,
+      "text": "别人会认为你的生活就像一场party？",
+      "reverse_scored": false
+    },
+    {
+      "order": 4,
+      "text": "你的情绪都写在脸上？",
+      "reverse_scored": true
+    },
+    {
+      "order": 5,
+      "text": "你被认为是一个精力充沛的人？",
+      "reverse_scored": false
+    },
+    {
+      "order": 6,
+      "text": "即使有人在你面前试图掩饰自己的情感，你也能读出来？",
+      "reverse_scored": false
+    },
+    {
+      "order": 7,
+      "text": "你是否经常能够感受到别人当时感受到的情感？",
+      "reverse_scored": false
+    },
+    {
+      "order": 8,
+      "text": "当你的朋友遇到情感方面的问题时他们都会来找你吗？",
+      "reverse_scored": false
+    },
+    {
+      "order": 9,
+      "text": "别人认为你很有同情心？",
+      "reverse_scored": false
+    },
+    {
+      "order": 10,
+      "text": "在别人十分沮丧或者兴奋的时候你能让他们冷静下来？",
+      "reverse_scored": false
+    },
+    {
+      "order": 11,
+      "text": "如果你想的话，你能轻松地在别人面前隐藏自己的情感？",
+      "reverse_scored": false
+    },
+    {
+      "order": 12,
+      "text": "你能表现出符合当时氛围的适当的情感？",
+      "reverse_scored": false
+    },
+    {
+      "order": 13,
+      "text": "当周围的人都可能将要失控的时候，你依然能够保持冷静？",
+      "reverse_scored": false
+    },
+    {
+      "order": 14,
+      "text": "你认为别人可能真的不知道你内心究竟发生了什么？",
+      "reverse_scored": true
+    },
+    {
+      "order": 15,
+      "text": "当别人陷入危机的时候，他们会想起你？",
+      "reverse_scored": false
+    },
+    {
+      "order": 16,
+      "text": "你是一个很出色的聆听者？",
+      "reverse_scored": false
+    },
+    {
+      "order": 17,
+      "text": "你在社交场合下总是很小心，不让自己陷入窘境？",
+      "reverse_scored": false
+    },
+    {
+      "order": 18,
+      "text": "你知道很多社交礼仪？",
+      "reverse_scored": false
+    },
+    {
+      "order": 19,
+      "text": "你所说的每一句话都是经过再三考量的？",
+      "reverse_scored": false
+    },
+    {
+      "order": 20,
+      "text": "你会观察周围人的一举一动？",
+      "reverse_scored": false
+    },
+    {
+      "order": 21,
+      "text": "别人认为你是一个泰然自若充满自信的人？",
+      "reverse_scored": false
+    },
+    {
+      "order": 22,
+      "text": "在社交场合你很少感到心慌或者尴尬？",
+      "reverse_scored": false
+    },
+    {
+      "order": 23,
+      "text": "你能够和不同类型的人和睦相处？",
+      "reverse_scored": false
+    },
+    {
+      "order": 24,
+      "text": "你能够放心地和陌生人去交谈？",
+      "reverse_scored": false
+    },
+    {
+      "order": 25,
+      "text": "你经常会被推选为一个小组的代言人或者领导？",
+      "reverse_scored": false
+    }
+  ],
+  "choices": [
+    {
+      "text": "十分符合",
+      "score": 4
+    },
+    {
+      "text": "符合",
+      "score": 3
+    },
+    {
+      "text": "不符合",
+      "score": 2
+    },
+    {
+      "text": "十分不符合",
+      "score": 1
+    }
+  ],
+  "interpretations": [
+    {
+      "level": "魅力指数：60分",
+      "min_score": 25,
+      "max_score": 30,
+      "interpretation": "想要在与人交往的过程中展现自己的魅力，主要受到两大因素的制约：情感能力和社会交往能力。而这两大能力又分为三个水平：表达水平、感受水平和控制水平。根据你的得分来看，你在这两大能力的得分上都比较低，即使你有着较为不错的先天条件（比如外貌、身材等等），但由于你没有发展出足够的魅商，因此你始终不能很好地展现出自己的魅力。",
+      "recommendation": "说准你了吗？不如分享给朋友看看他们是什么样的吧！"
+    },
+    {
+      "level": "魅力指数：70分",
+      "min_score": 31,
+      "max_score": 50,
+      "interpretation": "想要在与人交往的过程中展现自己的魅力，主要受到两大因素的制约：情感能力和社会交往能力。而这两大能力又分为三个水平：表达水平、感受水平和控制水平。根据你的得分来看，你可能在某一能力方面存在着较大的不足，或者是在两种能力中都得分较低。情感能力能够让你表达出适合的情感以及更好地理解他人的情感，而社会交往能力则能够让你在社交场合更加应对自如，只有掌握好这两大能力，你才能够真正展现出自己的魅力。",
+      "recommendation": "说准你了吗？不如分享给朋友看看他们是什么样的吧！"
+    },
+    {
+      "level": "魅力指数：80分",
+      "min_score": 51,
+      "max_score": 90,
+      "interpretation": "想要在与人交往的过程中展现自己的魅力，主要受到两大因素的制约：情感能力和社会交往能力。而这两大能力又分为三个水平：表达水平、感受水平和控制水平。根据你的得分来看，你在这两方面表现得都比较不错，更有可能有一方面的能力是你尤为擅长的。当然，这并不是说你已经能够完全将自己的魅力展现出来了，你只有让自己的社交和情感能力更加精进，才能够在他人面前展示出更大的魅力。",
+      "recommendation": "说准你了吗？不如分享给朋友看看他们是什么样的吧！"
+    },
+    {
+      "level": "魅力指数：90分",
+      "min_score": 91,
+      "max_score": 100,
+      "interpretation": "想要在与人交往的过程中展现自己的魅力，主要受到两大因素的制约：情感能力和社会交往能力。而这两大能力又分为三个水平：表达水平、感受水平和控制水平。根据你的得分来看，你在两方面的能力上都有着十分出色的表现，你擅长理解他人的情感，并在各种场合下都能表现出符合该场合氛围的情绪；同时你在社交场合中，知晓并且遵守着社交礼仪，同时也能够很快拉近与他人的距离。你的魅商很高，能够完全展现出自己的魅力，给他人留下一个深刻的印象。",
+      "recommendation": "说准你了吗？不如分享给朋友看看他们是什么样的吧！"
+    }
+  ]
+}

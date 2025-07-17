@@ -2,7 +2,7 @@
 
 import json
 from fastapi import APIRouter, Depends, HTTPException
-from typing import List
+from typing import List, Dict, Any
 
 # 1. 导入项目模块
 # 假设你的 auth.py 在同一个 router 目录下
@@ -19,7 +19,11 @@ from model.assessment import (
     ScaleInfoResponse,
     ScaleDetailResponse,
     SubmitAnswersRequest,
-    UserAssessmentResponse
+    UserAssessmentResponse,
+    personality_test_manager,  # 重点：使用新的 manager
+    PersonalityTestInfoResponse,
+    SubmitPersonalityTestRequest,
+    UserPersonalityTestResponse
 )
 from model.user import User  # 导入User模型以便在响应中获取用户信息
 
@@ -114,6 +118,114 @@ def delete_assessment_record(
     这是一个受保护的路由。
     """
     success = assessment_tables.delete_user_assessment(
+        user_id=current_user_id,
+        record_id=record_id
+    )
+    
+    if not success:
+        raise HTTPException(status_code=404, detail="Record not found or you do not have permission to delete it.")
+    
+    # 成功时，FastAPI 会自动返回 204 No Content 状态码
+    return
+
+
+
+
+# ---------------------------------------------------
+# 针对人格测试的全新 API 端点
+# ---------------------------------------------------
+
+# ---------------------------------------------------
+# 新增 Pydantic 模型 (用于“获取详情”接口)
+# ---------------------------------------------------
+
+class PersonalityTestDetailResponse(PersonalityTestInfoResponse):
+    """用于API返回的人格测试完整详情模型"""
+    # 将json_data字段解析为Python字典返回给前端
+    json_data: Dict[str, Any]
+
+@router.get("/", response_model=List[PersonalityTestInfoResponse], summary="获取所有人格/趣味测试列表")
+def get_all_available_personality_tests():
+    """
+    提供给前端，用于展示所有可用的人格/趣味测试，比如“真实专业测试”。
+    """
+    tests = personality_test_manager.get_all_personality_tests()
+    return tests
+
+@router.get("/{test_id}", response_model=PersonalityTestDetailResponse, summary="获取单个人格测试详情")
+def get_single_personality_test_details(test_id: str):
+    """
+    当用户选择一个特定的人格测试时，前端调用此接口获取完整的题目、选项和定义。
+    """
+    test = personality_test_manager.get_personality_test_by_id(test_id)
+    if not test:
+        raise HTTPException(status_code=404, detail="Personality test not found")
+    
+    # 将从数据库取出的JSON字符串解析为字典
+    test.json_data = json.loads(test.json_data)
+    
+    return test
+
+@router.post("/submit", response_model=UserPersonalityTestResponse, summary="提交人格测试答案并获取结果")
+def submit_personality_test_answers(
+    request_data: SubmitPersonalityTestRequest,
+    current_user_id: str = Depends(get_current_user_id)
+):
+    """
+    用户提交“真实专业测试”的答案后，调用此接口计算并返回最终的“专业”结果。
+    这是一个受保护的路由。
+    """
+    result_record = personality_test_manager.create_user_personality_test(
+        user_id=current_user_id,
+        request_data=request_data
+    )
+    
+    if not result_record:
+        raise HTTPException(status_code=400, detail="Failed to process personality test. Check test_id or answers.")
+    
+    # 【关键】在返回前，将 scores_details 字符串解析回字典，以便 response_model 正确校验
+    if isinstance(result_record.scores_details, str):
+        result_record.scores_details = json.loads(result_record.scores_details)
+    
+    return result_record
+
+@router.get("/history/", response_model=List[UserPersonalityTestResponse], summary="获取当前用户的人格测试历史")
+def get_user_personality_test_history(current_user_id: str = Depends(get_current_user_id)):
+    """
+    获取当前登录用户的所有人格测试历史记录，按时间倒序排列。
+    这是一个受保护的路由。
+    """
+    history = personality_test_manager.get_personality_tests_by_user(user_id=current_user_id)
+    
+    # 丰富返回信息，将 test 的基本信息也一并返回
+    response_list = []
+    for record in history:
+        # 将分数详情字符串解析为字典
+        if isinstance(record.scores_details, str):
+            record.scores_details = json.loads(record.scores_details)
+        
+        # 附加测试的基本信息
+        if record.test:
+            record.test_info = {
+                "id": record.test.id,
+                "short_name": record.test.short_name,
+                "name": record.test.name,
+                "description": record.test.description
+            }
+        response_list.append(record)
+        
+    return response_list
+
+@router.delete("/history/{record_id}", status_code=204, summary="删除一条人格测试记录")
+def delete_personality_test_record(
+    record_id: str,
+    current_user_id: str = Depends(get_current_user_id)
+):
+    """
+    删除属于当前用户的一条指定的人格测试历史记录。
+    这是一个受保护的路由。
+    """
+    success = personality_test_manager.delete_user_personality_test(
         user_id=current_user_id,
         record_id=record_id
     )
