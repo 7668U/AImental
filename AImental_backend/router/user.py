@@ -66,6 +66,7 @@ APP_SECRET = os.getenv("WECHAT_APP_SECRET", "ea616af4afb747c84fcaf18119bd11ef")
 
 @router.post("/login", response_model=TokenResponse, summary="微信小程序登录")
 def wechat_login(login_data: UserLoginRequest):
+    print(f"--- 收到前端传来的 Code: {login_data.code} ---")
     """
     处理微信登录请求，code换取openid，创建或登录用户，并返回JWT
     """
@@ -74,6 +75,7 @@ def wechat_login(login_data: UserLoginRequest):
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
+        print(f"--- 微信服务器返回: {data} ---")
     except requests.RequestException as e:
         raise HTTPException(status_code=500, detail=f"请求微信服务器失败: {e}")
 

@@ -64,7 +64,7 @@ Component({
       if (!token) return;
 
       wx.request({
-        url: `http://49.233.220.130:8000/api/v1/checkin/month/${year}/${month}`,
+        url: `https://api.feelyourself.cn/api/v1/checkin/month/${year}/${month}`,
         method: 'GET',
         header: { 'Authorization': `Bearer ${token}` },
         success: (res) => {

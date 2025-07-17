@@ -1,7 +1,7 @@
 // index.js (正确分离的版本)
 
 // --- 配置 ---
-const SERVER_BASE_URL = 'http://49.233.220.130:8000'; 
+const SERVER_BASE_URL = 'https://api.feelyourself.cn'; 
 const API_BASE_URL = `${SERVER_BASE_URL}/api/v1/users`; 
 const defaultAvatarUrl = '/images/default-avatar.png';
 
@@ -43,51 +43,57 @@ Page({
   },
 
   login: function() {
-    wx.showLoading({ title: '请授权...' });
-    wx.getUserProfile({
-      desc: '用于完善您的个人资料',
-      success: (profileRes) => {
-        wx.showLoading({ title: '正在登录...' });
-        wx.login({
-          success: loginRes => {
-            if (loginRes.code) {
-              wx.request({
-                url: `${API_BASE_URL}/login`,
-                method: 'POST',
-                data: {
-                  code: loginRes.code,
-                  nickname: profileRes.userInfo.nickName,
-                  avatar_url: profileRes.userInfo.avatarUrl,
-                },
-                success: (apiRes) => {
-                  wx.hideLoading();
-                  if (apiRes.statusCode === 200 && apiRes.data.access_token) {
-                    const token = apiRes.data.access_token;
-                    wx.setStorageSync('token', token);
-                    this.fetchUserProfile(token);
-                  } else {
-                    wx.showToast({ title: apiRes.data.detail || '登录失败', icon: 'none' });
-                  }
-                },
-                fail: (err) => {
-                  wx.hideLoading();
-                  wx.showToast({ title: '请求登录接口失败', icon: 'none' });
-                }
-              });
-            } else {
+    wx.showLoading({ title: '正在登录...' });
+
+    // 步骤1: 调用微信登录获取临时 code
+    wx.login({
+      success: loginRes => {
+        if (loginRes.code) {
+          // 步骤2: 将 code 发送到后端服务器
+          wx.request({
+            url: `${API_BASE_URL}/login`,
+            method: 'POST',
+            data: {
+              // 只发送 code，不发送任何用户信息
+              code: loginRes.code,
+            },
+            success: (apiRes) => {
               wx.hideLoading();
-              wx.showToast({ title: '获取凭证失败', icon: 'none' });
+              // 步骤3: 处理后端的响应
+              if (apiRes.statusCode === 200 && apiRes.data.access_token) {
+                // 登录成功
+                const token = apiRes.data.access_token;
+                wx.setStorageSync('token', token);
+                // 立刻获取用户信息并更新页面
+                this.fetchUserProfile(token);
+                wx.showToast({ title: '登录成功', icon: 'success' });
+              } else {
+                // 后端返回错误
+                console.error("登录API返回失败:", apiRes);
+                wx.showToast({ title: apiRes.data.detail || '登录失败', icon: 'none' });
+              }
+            },
+            fail: (err) => {
+              // 请求本身失败，如网络问题或IP不通
+              wx.hideLoading();
+              console.error("请求后端登录接口失败:", err);
+              wx.showToast({ title: '无法连接服务器', icon: 'none' });
             }
-          }
-        });
+          });
+        } else {
+          // 获取 code 失败
+          wx.hideLoading();
+          wx.showToast({ title: '获取微信凭证失败', icon: 'none' });
+        }
       },
       fail: (err) => {
+        // wx.login 接口本身调用失败
         wx.hideLoading();
-        wx.showToast({ title: '您已取消授权', icon: 'none' });
+        console.error("wx.login 调用失败:", err);
+        wx.showToast({ title: '微信登录调用失败', icon: 'none' });
       }
     });
   },
-
   fetchUserProfile: function(token) {
     wx.request({
       url: `${API_BASE_URL}/me`,

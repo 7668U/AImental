@@ -21,7 +21,7 @@ Page({
 
     // 先从后端获取权威的“今天”是几号
     wx.request({
-      url: 'http://49.233.220.130:8000/api/v1/system/time',
+      url: 'https://api.feelyourself.cn/api/v1/system/time',
       method: 'GET',
       header: { 'Authorization': `Bearer ${token}` },
       success: (timeRes) => {
@@ -33,7 +33,7 @@ Page({
         
         // 再用服务器的日期去查询打卡记录
         wx.request({
-          url: `http://49.233.220.130:8000/api/v1/checkin/date/${serverDateStr}`,
+          url: `https://api.feelyourself.cn/api/v1/checkin/date/${serverDateStr}`,
           method: 'GET',
           header: { 'Authorization': `Bearer ${token}` },
           success: (statusRes) => {

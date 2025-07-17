@@ -1,6 +1,6 @@
 // pages/assessment/test.js
 
-const API_BASE_URL = 'http://49.233.220.130:8000';
+const API_BASE_URL = 'https://api.feelyourself.cn';
 
 Page({
   data: {

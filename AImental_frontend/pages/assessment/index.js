@@ -1,6 +1,6 @@
 // pages/assessment/index/index.js
 
-const API_BASE_URL = 'http://49.233.220.130:8000';
+const API_BASE_URL = 'https://api.feelyourself.cn';
 const DEFAULT_ICON_PATH = '/images/assessment/default.png'; // 默认图标路径
 
 Page({
