@@ -45,6 +45,9 @@ Page({
     latestMessageId: '',
     messageCounter: 0,
     streamTimer: null,
+    statusBarHeight: 0,
+    navBarHeight: 0,
+    totalNavBarHeight: 0,
   },
   
   // =================================================================
@@ -54,6 +57,29 @@ Page({
   onLoad(options) {
     console.log("页面首次加载 (onLoad)");
     this.checkLoginStatus();
+
+    
+    // --- 【修改】使用新的API来获取窗口信息 ---
+    // const systemInfo = wx.getSystemInfoSync(); // <-- 旧的、废弃的API
+    const windowInfo = wx.getWindowInfo(); // <-- 【推荐】使用新的、正确的API
+
+    const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+
+    // 状态栏的高度
+    const extraPadding = 0; // <--- 你要修改的就是这个值！单位是px。
+                           //      把它调大，间距就变大；调小，间距就变小。
+    // const statusBarHeight = systemInfo.statusBarHeight; // <-- 旧的用法
+    const statusBarHeight = windowInfo.statusBarHeight; // <-- 【推荐】从 windowInfo 获取
+
+    // 【无需修改】下面的计算逻辑完全保持不变
+    const navBarHeight = (menuButtonInfo.top - statusBarHeight) * 2 + menuButtonInfo.height + extraPadding;
+    const totalNavBarHeight = statusBarHeight + navBarHeight;
+
+    this.setData({
+      statusBarHeight: statusBarHeight,
+      navBarHeight: navBarHeight,
+      totalNavBarHeight: totalNavBarHeight
+    });
   },
 
   onShow() {

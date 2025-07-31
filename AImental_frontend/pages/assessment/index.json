@@ -2,7 +2,5 @@
   "usingComponents": {
     "login-prompt": "/components/login-prompt/login-prompt"
   },
-  "navigationBarTitleText": "",
-  "enablePullDownRefresh": true,
-  "backgroundTextStyle": "dark"
+  "navigationStyle": "custom" 
 }

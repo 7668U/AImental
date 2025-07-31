@@ -7,7 +7,7 @@ page {
   justify-content: center; /* 核心：将所有内容作为一个整体垂直居中 */
 
   /* 保留原有样式 */
-  background-color: #f7f8fa;
+  background-color: #F9F7F3;
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
 }
 

@@ -31,33 +31,35 @@
     <view class="main-content {{ isSidebarVisible ? 'main-content-pushed' : '' }}" bindtap="closeSidebar">
 
         <block wx:if="{{isLoggedIn}}">
-            <view class="top-bar">
-                <view class="top-bar-left">
-                  <image class="menu-icon" src="/images/icons/menu.png" catchtap="toggleSidebar"></image>
+            <view class="top-bar" style="height: {{totalNavBarHeight}}px;">
+                <view class="nav-bar-content" style="margin-top: {{statusBarHeight}}px; height: {{navBarHeight}}px;">
+                    <view class="top-bar-left">
+                        <image class="menu-icon" src="/images/icons/menu.png" catchtap="toggleSidebar"></image>
+                    </view>
+
+                    <view class="top-bar-center">
+                        </view>
+
+                    <view class="top-bar-right"></view>
                 </view>
-
-                <view class="top-bar-center">
-                  </view>
-
-                <view class="top-bar-right"></view>
             </view>
             
             <view class="chat-background">
                 <image src="/images/background.png" class="chat-background-image"></image>
             </view>
 
-            <scroll-view class="message-list" scroll-y="true" scroll-into-view="{{latestMessageId}}">
+            <scroll-view class="message-list" scroll-y="true" scroll-into-view="{{latestMessageId}}" style="padding-top: {{totalNavBarHeight}}px;" bounces="false"> 
                 
                 <view wx:for="{{messages}}" wx:key="id" id="msg-{{item.id}}" class="message-item {{item.sender === 'user' ? 'user-row' : ''}}">
 
-                  <view wx:if="{{item.sender === 'ai'}}" class="message-bubble ai-bubble">
-                      <block wx:if="{{item.isLoading}}">
-                          <view class="loader"></view>
-                      </block>
-                      <block wx:else>
-                          <view class="content">{{item.text}}</view>
-                      </block>
-                  </view>
+                    <view wx:if="{{item.sender === 'ai'}}" class="message-bubble ai-bubble">
+                        <block wx:if="{{item.isLoading}}">
+                            <view class="loader"></view>
+                        </block>
+                        <block wx:else>
+                            <view class="content">{{item.text}}</view>
+                        </block>
+                    </view>
 
                     <view wx:if="{{item.sender === 'user'}}" class="message-bubble user-bubble">
                         <view class="content">{{item.text}}</view>
@@ -85,14 +87,11 @@
         </block>
 
         <block wx:else>
-            <view class="login-prompt-container">
-                <image class="login-avatar" src="/images/ai_avatar.png"></image>
-                <view class="login-title">欢迎来到AI心理疗愈室</view>
-                <view class="login-subtitle">请先登录，开启您的心灵对话之旅</view>
-                <button class="login-btn" bindtap="handleLogin">
-                    微信授权登录
-                </button>
-            </view>
+            <login-prompt 
+              title="欢迎来到AI心理疗愈室"
+              subtitle="请先登录，开启您的心灵对话之旅"
+              bind:loginevent="handleLogin" 
+            />
         </block>
 
     </view>

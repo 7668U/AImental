@@ -232,7 +232,45 @@ Page({
     };
   },
 
-  openPicker(e) { /* ... 保持不变 ... */ },
-  onPickerConfirm(e) { /* ... 保持不变 ... */ },
-  onPickerClose() { /* ... 保持不变 ... */ },
+  // ===================================================
+  // ========== 【新增功能】处理周期选择器的相关逻辑 ==========
+  // ===================================================
+
+  /**
+   * @description: 点击“月/季/年”按钮时触发
+   */
+  openPicker(e) {
+    const range = e.currentTarget.dataset.range;
+    this.setData({
+      selectedTimeRange: range, // 更新高亮按钮
+      pickerMode: range,        // 设置选择器模式
+      showPicker: true          // 弹出选择器
+    });
+  },
+
+  /**
+   * @description: 周期选择器点击“确认”后触发
+   */
+  onPickerConfirm(e) {
+    const { label, value } = e.detail;
+    const range = this.data.selectedTimeRange;
+
+    // 更新按钮标签和内部值，并清空旧的分析结果
+    this.setData({
+      [`periodLabels.${range}`]: label,
+      [`periodValues.${range}`]: value,
+      showPicker: false,
+      selectedAnalysis: '',
+      analysisResult: null
+    });
+  },
+
+  /**
+   * @description: 周期选择器请求关闭时触发
+   */
+  onPickerClose() {
+    this.setData({
+      showPicker: false // 关闭选择器
+    });
+  },
 });

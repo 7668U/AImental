@@ -10,7 +10,7 @@ import os
 load_dotenv() 
 
 # --- 1. Import Database Connections ---
-from db import all_dbs, user_db, chat_db, assessment_db, status_db,feedback_db
+from db import all_dbs, user_db, chat_db, assessment_db, status_db,feedback_db,promotion_db
 
 # --- 2. Import All Peewee Models ---
 from model.user import User
@@ -20,6 +20,7 @@ from model.status import Checkin
 from model.analysis import Analysis # 【新增】导入 Analysis 模型
 from model.history_analysis import HistoryAnalysis
 from model.feedback import Feedback # 【新增】导入 Feedback 模型    
+from model.promotion import TestRecord # 【新增】导入 promotion_table
 
 # --- 3. Import All Routers ---
 from router import user as user_router
@@ -31,6 +32,7 @@ from router import analysis as analysis_router # 【新增】导入 analysis 路
 from router import assessment as assessment_router # 【新增】导入 assessment 路由
 from router import history_analysis as history_analysis_router # 【新增】导入 history_analysis 路由
 from router import feedback as feedback_router # 【新增】导入 feedback 路由
+from router import promotion as promotion_router # 【新增】导入 promotion 路由
 # ---------------------------------------------------
 # FastAPI Application Instance
 # ---------------------------------------------------
@@ -72,6 +74,7 @@ def on_startup():
         HistoryAnalysis: assessment_db,
         Checkin: status_db,
         Analysis: status_db, # Analysis 数据也存在 status_db 中
+        TestRecord: promotion_db, # 【新增】TestRecord 使用 promotion_db
     }
     
     print("🚀 Starting database initialization...")
@@ -114,6 +117,7 @@ app.include_router(system_router.router, prefix=API_PREFIX)
 app.include_router(analysis_router.router, prefix=API_PREFIX) # 【新增】注册 analysis 路由
 app.include_router(history_analysis_router.router, prefix=API_PREFIX) # 【新增】注册 history_analysis 路由
 app.include_router(feedback_router.router, prefix=API_PREFIX) # 【新增】注册 feedback 路由
+app.include_router(promotion_router.router, prefix=API_PREFIX) # 【新增】注册 promotion 路由
 
 # ---------------------------------------------------
 # Root endpoint for health checks

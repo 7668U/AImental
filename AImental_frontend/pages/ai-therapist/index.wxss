@@ -6,7 +6,7 @@ page {
   --primary-orange-light: #FFF5EE;
   --text-primary: #333333;
   --text-secondary: #888888;
-  --bg-color: #F7F7F7;
+  --bg-color: #F9F7F3;
   --hover-color: #f0f0f0;
 }
 /* --- 2. Contêiner no Nível da Página --- */
@@ -129,16 +129,57 @@ page {
 .main-content-pushed {
   transform: translateX(75vw);
 }
+/* index.wxss */
+
 .top-bar {
+  /* ...保留之前的 position, top, left, z-index, width, background等样式... */
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1rpx solid #f0f0f0;
+  box-sizing: border-box; 
+  
+  /* 【删除】删除固定的 height 和 padding-top */
+  /* height: 128rpx;  <-- 删除 */
+  /* padding-top: 88rpx; <-- 删除 */
+}
+
+/* 【新增】为内容容器添加样式 */
+.nav-bar-content {
+  width: 100%;
   display: flex;
   align-items: center;
-  width: 100%;
-  height: 60rpx;
-  padding-top: 200rpx; 
-  background-color: #fff;
-  border-bottom: 1rpx solid #f0f0f0;
-  box-sizing: content-box;
-  flex-shrink: 0;
+  justify-content: space-between;
+}
+
+.message-list {
+  /* 占据父容器所有剩余空间 */
+  flex-grow: 1;
+
+  /* 内容超出时允许垂直滚动 */
+  overflow-y: auto;
+  
+  /* 【关键】修正盒子模型，让 padding-top 被正确计算 */
+  box-sizing: border-box;
+
+  /* 背景透明，以显示后方的背景图 */
+  background-color: transparent;
+
+  /* 用于层级控制 */
+  position: relative;
+  z-index: 2;
+  
+  /* 在列表底部留出一些空白，避免消息紧贴输入框 */
+  padding-bottom: 30rpx;
+
+  /* 注意：这里没有 padding-top！
+    因为 padding-top 是在 .wxml文件中通过 style 动态设置的，
+    所以 .wxss 文件里一定不能有固定的 padding-top。
+  */
 }
 .top-bar-left,
 .top-bar-right {
@@ -164,18 +205,8 @@ page {
   height: 48rpx;
 }
 
-.message-list {
-  flex-grow: 1;
-  padding: 30rpx 0; 
-  overflow-y: auto;
-  
-  /* 【修改】移除旧的背景图样式，并将背景设为透明 */
-  background-color: transparent;
 
-  /* 【修改】添加层级关系，确保消息列表在背景图之上 */
-  position: relative;
-  z-index: 2;
-}
+
 .message-item {
   display: flex; 
   margin-bottom: 40rpx;
@@ -244,50 +275,7 @@ page {
 .send-icon.active { 
   opacity: 1; 
 }
-.login-prompt-container { 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  justify-content: center; 
-  height: 100%; 
-  padding: 40rpx; 
-  box-sizing: border-box; 
-}
-.login-avatar { 
-  width: 160rpx; 
-  height: 160rpx; 
-  border-radius: 50%; 
-  margin-bottom: 30rpx; 
-}
-.login-title { 
-  font-size: 40rpx; 
-  font-weight: bold; 
-  color: var(--text-primary); 
-  margin-bottom: 20rpx; 
-}
-.login-subtitle { 
-  font-size: 28rpx; 
-  color: var(--text-secondary); 
-  margin-bottom: 80rpx; 
-}
-.login-btn { 
-  background-color: var(--primary-orange); 
-  color: white; 
-  border-radius: 50rpx; 
-  padding: 0 60rpx; 
-  height: 90rpx; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  font-size: 32rpx; 
-  white-space: nowrap; 
-  margin: 0; 
-  border: none; 
-  line-height: normal; 
-}
-.login-btn::after { 
-  border: none; 
-}
+
 
 /* --- 【新增】背景图片样式 --- */
 .chat-background {

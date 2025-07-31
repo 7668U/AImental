@@ -3,5 +3,5 @@
     "calendar": "./calendar",
     "login-prompt": "/components/login-prompt/login-prompt"
   },
-  "navigationBarTitleText": ""
+  "navigationStyle": "custom"
 }

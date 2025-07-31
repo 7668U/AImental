@@ -1,6 +1,35 @@
 /* pages/assessment/index/index.wxss */
 page {
-  background-color: #f7f8fa;
+  background-color: #F9F7F3;
+}
+
+/* 【新增】和聊天页面一样的全屏根容器 */
+.page-container {
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 【新增】用于垂直居中 login-prompt 组件的容器 */
+.login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%; /* 撑满 page-container 的高度 */
+}
+
+/* 【新增】自定义导航栏相关样式 */
+.top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  width: 100%;
+  background-color: #F9F7F3; /* 背景色可以和页面一致 */
+  box-sizing: border-box; 
+  /* 可以在此加一个下边框来区分导航栏和内容区 */
+  /* border-bottom: 1rpx solid #eee; */
 }
 
 .container {

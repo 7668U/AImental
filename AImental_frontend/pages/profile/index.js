@@ -161,7 +161,7 @@ Page({
 
   onChangeAvatar: function() {
     if (!this.data.isLogin) {
-      wx.showToast({ title: '请先登录', icon: 'none' });
+      wx.showToast({ title: '请先登录才能换头像哦~', icon: 'none' });
       return;
     }
     wx.showActionSheet({
@@ -211,13 +211,28 @@ Page({
     });
   },
   
-  goToUserInfo: function() { if (!this.data.isLogin) { wx.showToast({ title: '请先登录', icon: 'none' }); return; } wx.navigateTo({ url: '/pages/profile/inform' }); },
-  goToFeedback: function() { wx.navigateTo({ url: '/pages/profile/feedback' }); },
+  goToUserInfo: function() { if (!this.data.isLogin) { wx.showToast({ title: '请先登录才能查看个人信息哦~', icon: 'none' }); return; } wx.navigateTo({ url: '/pages/profile/inform' }); },
+  goToFeedback: function() {
+    // --- 核心改动：在这里添加登录判断 ---
+    if (!this.data.isLogin) {
+      wx.showToast({
+        title: '请先登录才能反馈哦~', // 提示用户需要登录
+        icon: 'none'
+      });
+      return; // 终止函数，不进行跳转
+    }
+    // ------------------------------------
+  
+    // 如果代码能执行到这里，说明用户已登录
+    wx.navigateTo({ 
+      url: '/pages/profile/feedback' 
+    });
+  },
   goToReports: function() {
     // 这段登录判断逻辑是正确的，需要保留
     if (!this.data.isLogin) {
       wx.showToast({
-        title: '请先登录',
+        title: '请先登录才能查看测试历史哦~',
         icon: 'none'
       });
       return;

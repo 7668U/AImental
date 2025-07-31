@@ -31,6 +31,9 @@ Page({
     isLoggedIn: false, // 新增：登录状态标志
     hasCheckedInToday: false,
     showCalendar: false,
+    statusBarHeight: 0,
+    navBarHeight: 0,
+    totalNavBarHeight: 0,
   },
 
   onLoad(options) {},
@@ -38,6 +41,25 @@ Page({
   onShow() {
     // 每次页面显示时，都重新检查登录状态
     this.checkLoginStatus();
+        // 【新增】完全一样的动态计算逻辑
+        const windowInfo = wx.getWindowInfo();
+        const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+        const extraPadding = 8; // 自定义间距，可自行调整
+    
+        const statusBarHeight = windowInfo.statusBarHeight;
+        const navBarHeight = (menuButtonInfo.top - statusBarHeight) * 2 + menuButtonInfo.height + extraPadding;
+        const totalNavBarHeight = statusBarHeight + navBarHeight;
+    
+        this.setData({
+          statusBarHeight: statusBarHeight,
+          navBarHeight: navBarHeight,
+          totalNavBarHeight: totalNavBarHeight
+        });
+    
+        // 模拟登录状态和打卡状态
+        // this.setData({ isLoggedIn: true, hasCheckedInToday: false });
+  
+    
   },
 
   /**

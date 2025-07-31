@@ -34,12 +34,30 @@ Page({
     scaleList: [],
     isLoading: true,
     isError: false,
+    // 【新增】从聊天页面复制过来的导航栏尺寸数据
+    statusBarHeight: 0,
+    navBarHeight: 0,
+    totalNavBarHeight: 0,
   },
 
   // --- 2. 修改生命周期函数 ---
   
   onLoad(options) {
     // onLoad 中不再直接获取数据
+    // 【新增】从聊天页面复制过来的计算逻辑
+    const windowInfo = wx.getWindowInfo();
+    const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+    const extraPadding = 8; // 你可以保留这个自定义间距，设为0或你想要的值
+
+    const statusBarHeight = windowInfo.statusBarHeight;
+    const navBarHeight = (menuButtonInfo.top - statusBarHeight) * 2 + menuButtonInfo.height + extraPadding;
+    const totalNavBarHeight = statusBarHeight + navBarHeight;
+
+    this.setData({
+      statusBarHeight: statusBarHeight,
+      navBarHeight: navBarHeight,
+      totalNavBarHeight: totalNavBarHeight
+    });
   },
 
   onShow() {
