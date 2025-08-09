@@ -183,4 +183,10 @@ Page({
       url: './analysis'
     });
   },
+
+  goToPaperAirplane() {
+    wx.navigateTo({
+      url: '/pages/daily-checkin/paper-airplane/index'
+    });
+  },
 })

@@ -1,11 +1,12 @@
 {
   "pages": [
+    "pages/daily-checkin/index",
     "pages/ai-therapist/index",
     "pages/assessment/index",
     "pages/assessment/test",
     "pages/assessment/result",
-    "pages/daily-checkin/index",
     "pages/daily-checkin/record",
+    "pages/daily-checkin/paper-airplane/index",
     "pages/profile/index",
     "pages/profile/about",
     "pages/daily-checkin/analysis",

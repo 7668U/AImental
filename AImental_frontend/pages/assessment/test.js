@@ -126,8 +126,26 @@ Page({
    * Swiper切换时更新当前页码
    */
   onSwiperChange(e) {
-    if(e.detail.source === 'touch'){
-      this.setData({ currentIndex: e.detail.current });
+    if (e.detail.source === 'touch') {
+      const newIndex = e.detail.current;
+      const oldIndex = this.data.currentIndex;
+
+      // Swiping right (to next question)
+      if (newIndex > oldIndex) {
+        const currentQuestionOrder = this.data.questions[oldIndex].order;
+        if (!this.data.answers.hasOwnProperty(currentQuestionOrder)) {
+          // Current question not answered, prevent swipe
+          wx.showToast({
+            title: '请先回答当前题目',
+            icon: 'none'
+          });
+          // Revert swiper to oldIndex
+          this.setData({ currentIndex: oldIndex }); // This will force swiper back
+          return; // Stop further execution
+        }
+      }
+      // If swiping left, or if swiping right and question is answered, allow the change
+      this.setData({ currentIndex: newIndex });
     }
   },
 

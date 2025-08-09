@@ -148,12 +148,20 @@ Page({
     }
   },
 
+    formatDateToYYYYMMDD(timestamp) {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-indexed
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  },
+
   processHistoryData(records) {
     if (!records || records.length === 0) return [];
     const historyMap = new Map();
     records.forEach(record => {
       record.x_offset = 0;
-      record.completed_at_formatted = new Date(record.completed_at).toLocaleString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+      record.completed_at_formatted = this.formatDateToYYYYMMDD(record.completed_at);
       const scaleId = record.scale_info.id;
       if (historyMap.has(scaleId)) {
         historyMap.get(scaleId).records.push(record);

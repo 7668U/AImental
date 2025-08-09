@@ -441,10 +441,15 @@ Page({
           messageToUpdate.isLoading = false;
         }
         this.updateMessage(messageId, text.substring(0, currentIndex) + "▋");
+        // 流式传输时，确保滚动到底部
+        this.setData({ latestMessageId: `msg-${messageId}` });
       } else {
         this.updateMessage(messageId, text); // 显示最终完整文本
         clearInterval(timer);
         this.setData({ streamTimer: null });
+
+        // 流式传输完成后，确保滚动到底部
+        this.setData({ latestMessageId: `msg-${messageId}` });
       }
     }, interval);
 
