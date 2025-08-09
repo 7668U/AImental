@@ -1,4 +1,9 @@
 /**app.wxss**/
+@font-face {
+  font-family: 'Pacifico';
+  src: url('/fonts/Pacifico-Regular.ttf') format('truetype');
+}
+
 .container {
   height: 100%;
   display: flex;

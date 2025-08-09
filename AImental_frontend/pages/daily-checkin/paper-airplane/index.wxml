@@ -1,0 +1,46 @@
+<view class="page-container">
+  <!-- 背景元素 -->
+  <view class="sky-bg">
+    <!-- 云朵 -->
+    <image src="/images/cloud.png" class="cloud cloud-1"></image>
+  </view>
+  <!-- 屋顶/阳台元素已移除 -->
+
+  <!-- 纸飞机容器 -->
+  <view class="airplane-container">
+    <!-- 动态生成的纸飞机 -->
+    <image wx:for="{{airplanes}}" wx:key="id"
+           src="/images/paper_airplane.png"
+           class="airplane"
+           style="top: {{item.top}}%; left: {{item.left}}%; transform: rotate({{item.rotate}}deg);"
+           data-id="{{item.id}}"
+           bindtap="onAirplaneTap">
+    </image>
+  </view>
+
+  <!-- 底部操作区 -->
+  <view class="actions-bar">
+    <view class="action-button throw" bindtap="onThrowClick">
+      <image src="/images/send_airplane.png" class="action-icon"></image>
+      <text>扔一个</text>
+    </view>
+    <!-- 捡一个按钮已移除 -->
+  </view>
+
+  <!-- 写纸条的弹窗 -->
+  <view class="modal-mask" wx:if="{{showWriteModal}}" bindtap="hideModals"></view>
+  <view class="modal-content write-modal" wx:if="{{showWriteModal}}">
+    <textarea class="message-input" placeholder="把你的心事写在纸上，然后让它飞远吧..." maxlength="500" value="{{newMessage}}" bindinput="onMessageInput"></textarea>
+    <view class="modal-button" bindtap="sendAirplane">飞出去</view>
+  </view>
+
+  <!-- 查看纸条的弹窗 -->
+  <view class="modal-mask" wx:if="{{showReadModal}}" bindtap="hideModals"></view>
+  <view class="modal-content read-modal" wx:if="{{showReadModal}}">
+    <scroll-view scroll-y="true" class="message-display">
+      <text>{{openedMessage}}</text>
+    </scroll-view>
+    <view class="modal-button" bindtap="hideModals">收起来</view>
+  </view>
+
+</view>

@@ -1,7 +1,7 @@
 // pages/ai-therapist/index.js
 
 // --- 全局配置与网络请求封装 ---
-const API_BASE_URL = 'https://api.feelyourself.cn/api/v1';
+const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 
 function request(options) {
   return new Promise((resolve, reject) => {
@@ -441,10 +441,15 @@ Page({
           messageToUpdate.isLoading = false;
         }
         this.updateMessage(messageId, text.substring(0, currentIndex) + "▋");
+        // 流式传输时，确保滚动到底部
+        this.setData({ latestMessageId: `msg-${messageId}` });
       } else {
         this.updateMessage(messageId, text); // 显示最终完整文本
         clearInterval(timer);
         this.setData({ streamTimer: null });
+
+        // 流式传输完成后，确保滚动到底部
+        this.setData({ latestMessageId: `msg-${messageId}` });
       }
     }, interval);
 
