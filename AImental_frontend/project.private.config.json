@@ -2,7 +2,7 @@
   "libVersion": "3.8.10",
   "projectname": "aiii",
   "setting": {
-    "urlCheck": true,
+    "urlCheck": false,
     "coverView": true,
     "lazyloadPlaceholderEnable": false,
     "skylineRenderEnable": false,

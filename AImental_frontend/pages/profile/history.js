@@ -1,6 +1,6 @@
 // pages/profile/history.js
 
-const SERVER_BASE_URL = 'https://api.feelyourself.cn';
+const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 // ✅ 【修改】将 API URL 分得更细，方便调用不同模块的接口
 const ASSESSMENTS_API_URL = `${SERVER_BASE_URL}/api/v1/assessments`;
 const ANALYSIS_API_URL = `${SERVER_BASE_URL}/api/v1/history-analysis`;
