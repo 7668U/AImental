@@ -1,0 +1,10 @@
+<view class="covers-grid">
+  <block wx:for="{{covers}}" wx:key="*this">
+    <image 
+      class="cover-image {{selectedCover === item ? 'selected' : ''}}" 
+      src="{{item}}" 
+      mode="aspectFill" 
+      data-cover="{{item}}" 
+      bindtap="onCoverTap"></image>
+  </block>
+</view>

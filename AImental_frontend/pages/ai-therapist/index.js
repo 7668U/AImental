@@ -48,67 +48,47 @@ Page({
     statusBarHeight: 0,
     navBarHeight: 0,
     totalNavBarHeight: 0,
+    isSettingsVisible: false,
+    allowAiReadData: false,
   },
   
   // =================================================================
-  // 核心生命周期函数 (Lifecycle Hooks)
+  // 核心生命周期函数
   // =================================================================
 
   onLoad(options) {
-    console.log("页面首次加载 (onLoad)");
     this.checkLoginStatus();
-
-    
-    // --- 【修改】使用新的API来获取窗口信息 ---
-    // const systemInfo = wx.getSystemInfoSync(); // <-- 旧的、废弃的API
-    const windowInfo = wx.getWindowInfo(); // <-- 【推荐】使用新的、正确的API
-
+    const windowInfo = wx.getWindowInfo();
     const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
-
-    // 状态栏的高度
-    const extraPadding = 0; // <--- 你要修改的就是这个值！单位是px。
-                           //      把它调大，间距就变大；调小，间距就变小。
-    // const statusBarHeight = systemInfo.statusBarHeight; // <-- 旧的用法
-    const statusBarHeight = windowInfo.statusBarHeight; // <-- 【推荐】从 windowInfo 获取
-
-    // 【无需修改】下面的计算逻辑完全保持不变
-    const navBarHeight = (menuButtonInfo.top - statusBarHeight) * 2 + menuButtonInfo.height + extraPadding;
+    const statusBarHeight = windowInfo.statusBarHeight;
+    const navBarHeight = (menuButtonInfo.top - statusBarHeight) * 2 + menuButtonInfo.height;
     const totalNavBarHeight = statusBarHeight + navBarHeight;
-
-    this.setData({
-      statusBarHeight: statusBarHeight,
-      navBarHeight: navBarHeight,
-      totalNavBarHeight: totalNavBarHeight
-    });
+    this.setData({ statusBarHeight, navBarHeight, totalNavBarHeight });
   },
 
   onShow() {
-    console.log("页面显示 (onShow)，重新检查登录状态...");
     this.checkLoginStatus();
   },
 
   // =================================================================
-  // 登录与初始化 (Login & Initialization)
+  // 登录与初始化
   // =================================================================
   
   checkLoginStatus() {
     const token = wx.getStorageSync('token');
     if (token) {
       if (!this.data.isLoggedIn) {
-        console.log("检测到Token，更新为已登录状态并加载数据...");
         this.setData({ isLoggedIn: true });
         this.initializeChat();
+        // 【已修改】登录后，获取用户设置
+        this.loadUserSettings(); 
       }
     } else {
       if (this.data.isLoggedIn) {
-        console.log("未检测到Token，但页面状态为已登录，执行登出清理...");
         this.setData({
-          isLoggedIn: false,
-          messages: [],
-          chatHistory: [],
-          activeChatId: null,
-          isSidebarVisible: false,
-          inputValue: ''
+          isLoggedIn: false, messages: [], chatHistory: [],
+          activeChatId: null, isSidebarVisible: false, inputValue: '',
+          isSettingsVisible: false,
         });
       }
     }
@@ -119,20 +99,17 @@ Page({
     wx.login({
       success: (loginRes) => {
         if (loginRes.code) {
-          request({
-            url: '/users/login',
-            method: 'POST',
-            data: { code: loginRes.code }
-          }).then(tokenRes => {
-            wx.hideLoading();
-            wx.setStorageSync('token', tokenRes.access_token);
-            this.checkLoginStatus(); 
-            wx.showToast({ title: '登录成功', icon: 'success' });
-          }).catch(err => {
-            wx.hideLoading();
-            console.error("后端登录接口失败", err);
-            wx.showToast({ title: '登录失败，请稍后重试', icon: 'none' });
-          });
+          request({ url: '/users/login', method: 'POST', data: { code: loginRes.code } })
+            .then(tokenRes => {
+              wx.hideLoading();
+              wx.setStorageSync('token', tokenRes.access_token);
+              this.checkLoginStatus(); 
+              wx.showToast({ title: '登录成功', icon: 'success' });
+            }).catch(err => {
+              wx.hideLoading();
+              console.error("后端登录接口失败", err);
+              wx.showToast({ title: '登录失败', icon: 'none' });
+            });
         } else {
           wx.hideLoading();
           wx.showToast({ title: '凭证获取失败', icon: 'none' });
@@ -140,12 +117,9 @@ Page({
       },
       fail: (err) => {
         wx.hideLoading();
-        // 在控制台打印完整的错误对象
-        console.error("登录接口调用失败，详细错误:", err); 
-        
-        // 仍然给用户一个通用的提示
-        wx.showToast({ title: '登录失败，请检查网络', icon: 'none' }); 
-    }
+        console.error("登录接口调用失败:", err); 
+        wx.showToast({ title: '登录失败', icon: 'none' }); 
+      }
     });
   },
 
@@ -160,7 +134,7 @@ Page({
   },
 
   // =================================================================
-  // 聊天与侧边栏 (Chat & Sidebar)
+  // 聊天与侧边栏
   // =================================================================
   
   async loadChatHistory() {
@@ -180,17 +154,11 @@ Page({
     try {
       const newChat = await request({ url: '/chats/', method: 'POST' });
       const currentHistory = this.data.chatHistory;
-      const newHistoryItem = {
-        id: newChat.chat_id,
-        title: newChat.title 
-      };
+      const newHistoryItem = { id: newChat.chat_id, title: newChat.title };
       currentHistory.unshift(newHistoryItem);
       this.setData({
-        messages: [],
-        messageCounter: 0,
-        activeChatId: newChat.chat_id,
-        isSidebarVisible: false,
-        chatHistory: currentHistory
+        messages: [], messageCounter: 0, activeChatId: newChat.chat_id,
+        isSidebarVisible: false, chatHistory: currentHistory
       });
       this.addMessage('ai', '你好，我是你的AI心理伙伴，随时在这里倾听你的心声。');
     } catch (error) {
@@ -241,16 +209,10 @@ Page({
         text: msg.content
       }));
       if (messages.length === 0) {
-          messages.push({
-              id: 1,
-              sender: 'ai',
-              text: '你好，我是你的AI心理伙伴，随时在这里倾听你的心声。'
-          });
+          messages.push({ id: 1, sender: 'ai', text: '你好，我是你的AI心理伙伴，随时在这里倾听你的心声。' });
       }
       this.setData({
-        messages: messages,
-        messageCounter: messages.length,
-        activeChatId: chatId,
+        messages, messageCounter: messages.length, activeChatId: chatId,
         latestMessageId: `msg-${messages.length}`
       });
     } catch (error) {
@@ -270,27 +232,19 @@ Page({
     }
   },
 
-  // --- [新增] 聊天选项逻辑 (重命名与删除) ---
   showChatOptions(e) {
       const { id, title } = e.currentTarget.dataset;
-      const that = this; // 保存 this 上下文
-
       wx.showActionSheet({
           itemList: ['重命名', '删除'],
-          itemColor: '#333333', // 普通选项颜色
-          success(res) {
+          itemColor: '#333333',
+          success: (res) => {
               if (res.tapIndex === 0) {
-                  // 用户点击了 "重命名"
-                  that.handleRenameChat(id, title);
+                  this.handleRenameChat(id, title);
               } else if (res.tapIndex === 1) {
-                  // 用户点击了 "删除"，二次确认
                   wx.showActionSheet({
-                    itemList: ['确认删除'],
-                    itemColor: '#e64340', // 红色警告
-                    success(delRes) {
-                        if (delRes.tapIndex === 0) {
-                          that.handleDeleteChat(id);
-                        }
+                    itemList: ['确认删除'], itemColor: '#e64340',
+                    success: (delRes) => {
+                        if (delRes.tapIndex === 0) this.handleDeleteChat(id);
                     }
                   })
               }
@@ -299,37 +253,29 @@ Page({
   },
 
   handleRenameChat(chatId, currentTitle) {
-      const that = this;
       wx.showModal({
-          title: '重命名你的聊天',
-          content: '',
-          editable: true,
+          title: '重命名你的聊天', content: '', editable: true,
           placeholderText: currentTitle,
-          success(res) {
+          success: (res) => {
               if (res.confirm && res.content) {
                   const newTitle = res.content.trim();
                   if (newTitle && newTitle !== currentTitle) {
                       wx.showLoading({ title: '保存中...' });
-                      // 调用后端API
-                      request({
-                          url: `/chats/${chatId}`,
-                          method: 'PATCH',
-                          data: { title: newTitle }
-                      }).then(() => {
+                      request({ url: `/chats/${chatId}`, method: 'PATCH', data: { title: newTitle } })
+                        .then(() => {
                           wx.hideLoading();
-                          // 更新前端 chatHistory 数组中的数据
-                          const history = that.data.chatHistory;
+                          const history = this.data.chatHistory;
                           const chatIndex = history.findIndex(chat => chat.id === chatId);
                           if (chatIndex !== -1) {
                               history[chatIndex].title = newTitle;
-                              that.setData({ chatHistory: history });
+                              this.setData({ chatHistory: history });
                               wx.showToast({ title: '重命名成功', icon: 'success' });
                           }
-                      }).catch(err => {
+                        }).catch(err => {
                           wx.hideLoading();
                           console.error("重命名失败", err);
                           wx.showToast({ title: '操作失败', icon: 'none' });
-                      });
+                        });
                   }
               }
           }
@@ -337,33 +283,23 @@ Page({
   },
   
   handleDeleteChat(chatId) {
-      const that = this;
       wx.showLoading({ title: '删除中...' });
-      // 调用已有的删除API
-      request({
-          url: `/chats/${chatId}`,
-          method: 'DELETE'
-      }).then(() => {
+      request({ url: `/chats/${chatId}`, method: 'DELETE' })
+        .then(() => {
           wx.hideLoading();
-          // 从前端 chatHistory 数组中移除该项
-          const newHistory = that.data.chatHistory.filter(chat => chat.id !== chatId);
-          that.setData({ chatHistory: newHistory });
-
-          // [重要] 检查删除的是否是当前正在查看的聊天
-          if (that.data.activeChatId === chatId) {
-              // 如果是，则清空聊天界面或加载下一个聊天, 最简单的方式是重新初始化
-              that.initializeChat(); 
-          }
+          const newHistory = this.data.chatHistory.filter(chat => chat.id !== chatId);
+          this.setData({ chatHistory: newHistory });
+          if (this.data.activeChatId === chatId) this.initializeChat(); 
           wx.showToast({ title: '删除成功', icon: 'success' });
-      }).catch(err => {
+        }).catch(err => {
           wx.hideLoading();
           console.error("删除失败", err);
           wx.showToast({ title: '操作失败', icon: 'none' });
-      });
+        });
   },
 
   // =================================================================
-  // 消息处理 (Message Handling)
+  // 消息处理
   // =================================================================
 
   onInput(e) {
@@ -382,14 +318,8 @@ Page({
     this.setData({ inputValue: '' });
     const loadingMessageId = this.addMessage('ai', '', true);
     try {
-      const response = await request({
-        url: `/chats/${this.data.activeChatId}/respond`,
-        method: 'POST',
-        data: { message: text } 
-      });
-
+      const response = await request({ url: `/chats/${this.data.activeChatId}/respond`, method: 'POST', data: { message: text } });
       this.streamMessage(loadingMessageId, response.reply); 
-
       this.moveChatToTop(this.data.activeChatId);
       if (isFirstUserMessage && response.title) {
         this.updateChatTitle(this.data.activeChatId, response.title);
@@ -404,11 +334,7 @@ Page({
     const messages = this.data.messages;
     const newMessageId = this.data.messageCounter + 1;
     messages.push({ id: newMessageId, sender, text, isLoading });
-    this.setData({
-      messages,
-      messageCounter: newMessageId,
-      latestMessageId: `msg-${newMessageId}`
-    });
+    this.setData({ messages, messageCounter: newMessageId, latestMessageId: `msg-${newMessageId}` });
     return newMessageId;
   },
 
@@ -416,43 +342,90 @@ Page({
     const messages = this.data.messages;
     const messageIndex = messages.findIndex(msg => msg.id === messageId);
     if (messageIndex !== -1) {
-      const messageToUpdate = messages[messageIndex];
-      if (messageToUpdate.isLoading) {
-        messageToUpdate.isLoading = false;
-      }
-      messageToUpdate.text = newText;
+      messages[messageIndex].isLoading = false;
+      messages[messageIndex].text = newText;
       this.setData({ messages });
     }
   },
   
   streamMessage(messageId, text) {
     let currentIndex = 0;
-    const interval = 50; // 打字速度(毫秒)
-
-    if (this.data.streamTimer) {
-      clearInterval(this.data.streamTimer);
-    }
+    const interval = 50;
+    if (this.data.streamTimer) clearInterval(this.data.streamTimer);
 
     const timer = setInterval(() => {
       if (currentIndex < text.length) {
         currentIndex++;
         const messageToUpdate = this.data.messages.find(msg => msg.id === messageId);
-        if (messageToUpdate && messageToUpdate.isLoading) {
-          messageToUpdate.isLoading = false;
-        }
+        if (messageToUpdate && messageToUpdate.isLoading) messageToUpdate.isLoading = false;
         this.updateMessage(messageId, text.substring(0, currentIndex) + "▋");
-        // 流式传输时，确保滚动到底部
         this.setData({ latestMessageId: `msg-${messageId}` });
       } else {
-        this.updateMessage(messageId, text); // 显示最终完整文本
+        this.updateMessage(messageId, text);
         clearInterval(timer);
-        this.setData({ streamTimer: null });
-
-        // 流式传输完成后，确保滚动到底部
-        this.setData({ latestMessageId: `msg-${messageId}` });
+        this.setData({ streamTimer: null, latestMessageId: `msg-${messageId}` });
       }
     }, interval);
-
     this.setData({ streamTimer: timer });
+  },
+
+  // =================================================================
+  // 设置弹窗相关方法
+  // =================================================================
+  
+  // 【新增】加载用户设置
+  async loadUserSettings() {
+    try {
+      const userInfo = await request({ url: '/users/me' });
+      if (userInfo && typeof userInfo.allow_ai_read_data === 'boolean') {
+        this.setData({ allowAiReadData: userInfo.allow_ai_read_data });
+      }
+    } catch (error) {
+      console.error("加载用户设置失败", error);
+      // 加载失败时可以给一个默认值或提示
+      this.setData({ allowAiReadData: false });
+    }
+  },
+
+  toggleSettings() {
+    // 【新增】打开设置时，重新加载一次设置，确保状态最新
+    if (!this.data.isSettingsVisible) {
+      this.loadUserSettings();
+    }
+    this.setData({ isSettingsVisible: !this.data.isSettingsVisible });
+  },
+
+  closeSettings() {
+    this.setData({ isSettingsVisible: false });
+  },
+
+  preventClose() {},
+
+  // 【已修改】处理开关状态变化，并调用API
+  onAllowStatusChange(e) {
+    const newStatus = e.detail.value;
+    const oldStatus = this.data.allowAiReadData;
+
+    this.setData({ allowAiReadData: newStatus });
+
+    request({
+      url: '/users/me/settings',
+      method: 'PUT',
+      data: { allow_ai_read_data: newStatus }
+    }).then(() => {
+      wx.showToast({
+        title: newStatus ? '已开启个性化' : '已关闭个性化',
+        icon: 'success',
+        duration: 1500
+      });
+    }).catch(err => {
+      console.error("设置更新失败", err);
+      wx.showToast({
+        title: '设置失败，请重试',
+        icon: 'none'
+      });
+      // 【回滚】如果API调用失败，将开关恢复到之前的状态
+      this.setData({ allowAiReadData: oldStatus });
+    });
   },
 });

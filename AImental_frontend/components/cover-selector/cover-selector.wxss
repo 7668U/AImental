@@ -1,0 +1,20 @@
+.covers-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around; /* Use space-around for better spacing */
+  padding-top: 20rpx;
+}
+
+.cover-image {
+  width: 150rpx;
+  height: 200rpx; /* Adjust size to fit inside the modal */
+  border-radius: 8rpx;
+  border: 3rpx solid #eee;
+  margin-bottom: 20rpx;
+  transition: all 0.2s ease;
+}
+
+.cover-image.selected {
+  border-color: #07c160; /* Highlight color */
+  transform: scale(1.05);
+}

@@ -12,5 +12,7 @@ status_db = pw.SqliteDatabase('db/daily_status.db')
 feedback_db = pw.SqliteDatabase('db/feedback.db')
 promotion_db = pw.SqliteDatabase('db/promotion.db')
 
+cabinet_db = pw.SqliteDatabase('db/cabinet.db')
+
 # A list of all database connections for easy management in main.py
-all_dbs = [user_db, chat_db, assessment_db, status_db, feedback_db,promotion_db]
+all_dbs = [user_db, chat_db, assessment_db, status_db, feedback_db, promotion_db, cabinet_db]

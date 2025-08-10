@@ -1,0 +1,102 @@
+/* pages/daily-checkin/note/note.wxss */
+page {
+  background-color: #fff;
+}
+
+.page-container {
+  padding: 30rpx;
+}
+
+.title-container {
+  padding-bottom: 20rpx;
+}
+
+.title-input {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.divider {
+  height: 1rpx;
+  background-color: #eee;
+  margin: 20rpx 0;
+}
+
+/* Section styles */
+.section {
+  margin-bottom: 20rpx;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  cursor: pointer;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #555;
+}
+
+.collapse-icon {
+  width: 32rpx;
+  height: 32rpx;
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Todo Section */
+.todo-item {
+  display: flex;
+  align-items: flex-start; /* Align to top for multi-line text */
+  padding: 15rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.todo-item:last-child {
+  border-bottom: none;
+}
+
+.todo-checkbox {
+  margin-right: 20rpx;
+  transform: scale(0.9);
+  margin-top: 8rpx; /* Adjust to align with textarea */
+}
+
+.todo-content-textarea {
+  flex: 1;
+  font-size: 30rpx;
+  color: #333;
+  line-height: 1.5; /* Adjust for readability */
+  padding: 0;
+  width: 100%;
+}
+
+.todo-item.completed .todo-content-textarea {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.new-todo-item .plus-icon-placeholder {
+  width: 44rpx; /* approx checkbox width */
+  height: 44rpx; /* approx checkbox height */
+  margin-right: 20rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 40rpx;
+  color: #ccc;
+  margin-top: 8rpx; /* Adjust to align with textarea */
+}
+
+/* Note Section */
+.note-textarea {
+  width: 100%;
+  min-height: 400rpx;
+  font-size: 30rpx;
+  line-height: 1.6;
+  padding: 10rpx 0;
+}

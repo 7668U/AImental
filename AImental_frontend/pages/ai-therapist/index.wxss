@@ -62,7 +62,6 @@ page {
 }
 .history-title-icon { width: 32rpx; height: 32rpx; margin-right: 15rpx; }
 
-/* --- [SEÇÃO MODIFICADA] Início das alterações na lista de histórico --- */
 .history-list {
   flex-grow: 1;
   height: 100%;
@@ -74,12 +73,11 @@ page {
   border-radius: 16rpx;
   transition: background-color 0.2s;
 }
-/* Efeito de hover para todo o wrapper */
 .history-item-wrapper:hover {
   background-color: var(--hover-color);
 }
 .history-item {
-  flex-grow: 1; /* Permite que o item ocupe o espaço disponível */
+  flex-grow: 1;
   padding: 25rpx 20rpx;
   font-size: 28rpx;
   color: var(--text-primary);
@@ -87,38 +85,29 @@ page {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  /* O margin-bottom foi movido para o wrapper */
 }
 .history-item.active {
   background-color: var(--primary-orange);
   color: #ffffff;
   font-weight: bold;
 }
-/* Estilo para o botão de opções (três pontos) */
 .history-item-options {
   flex-shrink: 0; 
   width: 40rpx;
   height: 40rpx;
   padding: 10rpx; 
   margin: 0 20rpx 0 10rpx;
-  transition: opacity 0.2s, filter 0.2s; /* [优化] 增加过渡效果 */
-
-  /* [核心修改] 默认状态下，使用滤镜将橙色图标变为灰色，并降低不透明度 */
+  transition: opacity 0.2s, filter 0.2s;
   filter: grayscale(100%);
   opacity: 0.4;
 }
-
-/* 当历史项被激活(选中)时，让选项按钮恢复原色 */
 .history-item.active + .history-item-options {
-  /* [核心修改] 选中状态下，移除所有滤镜，让图标恢复原始的橙色，并让它完全不透明 */
   filter: none;
   opacity: 1;
 }
-/* --- [SEÇÃO MODIFICADA] Fim das alterações --- */
 
 /* --- Conteúdo Principal --- */
 .main-content {
-  /* 【修改】添加 position: relative，为背景图定位做准备 */
   position: relative; 
   width: 100%;
   height: 100%;
@@ -129,10 +118,8 @@ page {
 .main-content-pushed {
   transform: translateX(75vw);
 }
-/* index.wxss */
 
 .top-bar {
-  /* ...保留之前的 position, top, left, z-index, width, background等样式... */
   position: absolute;
   top: 0;
   left: 0;
@@ -142,13 +129,8 @@ page {
   backdrop-filter: blur(10px);
   border-bottom: 1rpx solid #f0f0f0;
   box-sizing: border-box; 
-  
-  /* 【删除】删除固定的 height 和 padding-top */
-  /* height: 128rpx;  <-- 删除 */
-  /* padding-top: 88rpx; <-- 删除 */
 }
 
-/* 【新增】为内容容器添加样式 */
 .nav-bar-content {
   width: 100%;
   display: flex;
@@ -157,29 +139,13 @@ page {
 }
 
 .message-list {
-  /* 占据父容器所有剩余空间 */
   flex-grow: 1;
-
-  /* 内容超出时允许垂直滚动 */
   overflow-y: auto;
-  
-  /* 【关键】修正盒子模型，让 padding-top 被正确计算 */
   box-sizing: border-box;
-
-  /* 背景透明，以显示后方的背景图 */
   background-color: transparent;
-
-  /* 用于层级控制 */
   position: relative;
   z-index: 2;
-  
-  /* 在列表底部留出一些空白，避免消息紧贴输入框 */
   padding-bottom: 30rpx;
-
-  /* 注意：这里没有 padding-top！
-    因为 padding-top 是在 .wxml文件中通过 style 动态设置的，
-    所以 .wxss 文件里一定不能有固定的 padding-top。
-  */
 }
 .top-bar-left,
 .top-bar-right {
@@ -205,7 +171,12 @@ page {
   height: 48rpx;
 }
 
-
+/* --- [新增] 设置图标样式 --- */
+.settings-icon {
+  width: 48rpx;
+  height: 48rpx;
+  margin-left: 40rpx; /* 与菜单图标的间距 */
+}
 
 .message-item {
   display: flex; 
@@ -241,12 +212,8 @@ page {
   animation: spin 1s linear infinite;
 }
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* --- Área de Entrada e Login --- */
@@ -276,8 +243,6 @@ page {
   opacity: 1; 
 }
 
-
-/* --- 【新增】背景图片样式 --- */
 .chat-background {
   position: absolute;
   top: 0;
@@ -294,4 +259,93 @@ page {
   width: 450rpx;
   height: 450rpx;
   opacity: 0.8;
+}
+
+.login-prompt-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 40rpx;
+  box-sizing: border-box;
+}
+.login-prompt-title {
+  font-size: 44rpx;
+  font-weight: bold;
+  color: var(--text-primary);
+  margin-bottom: 20rpx;
+}
+.login-prompt-subtitle {
+  font-size: 30rpx;
+  color: var(--text-secondary);
+  margin-bottom: 60rpx;
+}
+.login-btn {
+  background-color: var(--primary-orange);
+  color: white;
+  padding: 20rpx 80rpx;
+  border-radius: 50rpx;
+  font-size: 32rpx;
+}
+.login-btn:active {
+  background-color: #e08a40;
+}
+
+/* --- [新增] 设置弹窗样式 --- */
+.settings-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* 半透明遮罩 */
+  z-index: 200;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  width: 80vw;
+  max-width: 600rpx;
+  background-color: #fff;
+  border-radius: 24rpx;
+  padding: 40rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+}
+
+.setting-text {
+  display: flex;
+  flex-direction: column;
+  margin-right: 30rpx;
+}
+
+.setting-label {
+  font-size: 30rpx;
+  color: var(--text-primary);
+  margin-bottom: 8rpx;
+}
+
+.setting-desc {
+  font-size: 24rpx;
+  color: var(--text-secondary);
 }
