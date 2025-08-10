@@ -23,6 +23,7 @@ from model.history_analysis import HistoryAnalysis
 from model.feedback import Feedback # 【新增】导入 Feedback 模型    
 from model.promotion import TestRecord # 【新增】导入 promotion_table
 from model.airplane import PaperAirplane, paper_airplane_table # 【修改】导入纸飞机模型和表实例和默认数据函数
+from model import note as note_model # Added note_model
 
 # --- 3. Import All Routers ---
 from router import user as user_router
@@ -36,6 +37,7 @@ from router import history_analysis as history_analysis_router # 【新增】导
 from router import feedback as feedback_router # 【新增】导入 feedback 路由
 from router import promotion as promotion_router # 【新增】导入 promotion 路由
 from router import airplane as airplane_router # 【新增】导入纸飞机路由
+from router import note as note_router # Added note_router
 # ---------------------------------------------------
 # FastAPI Application Instance
 # ---------------------------------------------------
@@ -95,6 +97,11 @@ def on_startup():
         except Exception as e:
             print(f"❌ Error during table setup for '{model._meta.table_name}': {e}")
             
+    # Create tables for the new cabinet.db
+    print("🚀 Initializing cabinet database...")
+    note_model.create_tables()
+    print("✅ Cabinet database tables are ready!")
+
     print("✨ Database initialization process complete!")
 
     # --- 5. Seed Default Data ---
@@ -129,6 +136,7 @@ app.include_router(history_analysis_router.router, prefix=API_PREFIX) # 【新�
 app.include_router(feedback_router.router, prefix=API_PREFIX) # 【新增】注册 feedback 路由
 app.include_router(promotion_router.router, prefix=API_PREFIX) # 【新增】注册 promotion 路由
 app.include_router(airplane_router.router, prefix=API_PREFIX) # 【新增】注册纸飞机路由
+app.include_router(note_router.router, prefix=API_PREFIX) # Added note router
 
 # ---------------------------------------------------
 # Root endpoint for health checks

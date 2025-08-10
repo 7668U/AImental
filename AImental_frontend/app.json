@@ -3,6 +3,7 @@
     "pages/daily-checkin/index",
     "pages/ai-therapist/index",
     "pages/assessment/index",
+    "pages/assessment/intro/intro",
     "pages/assessment/test",
     "pages/assessment/result",
     "pages/daily-checkin/record",
@@ -14,7 +15,9 @@
     "pages/profile/inform",
     "pages/profile/history",
     "pages/profile/history_analysis",
-    "components/login-prompt/login-prompt"
+    "components/login-prompt/login-prompt",
+    "pages/daily-checkin/cabinet/cabinet",
+    "pages/daily-checkin/note/note"
   ],
   "window": {
     "backgroundTextStyle": "light",

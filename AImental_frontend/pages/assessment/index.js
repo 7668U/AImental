@@ -161,7 +161,7 @@ Page({
   goToTest(e) {
     const scaleId = e.currentTarget.dataset.id;
     wx.navigateTo({
-      url: `./test?id=${scaleId}`,
+      url: `./intro/intro?id=${scaleId}`,
     });
   },
   

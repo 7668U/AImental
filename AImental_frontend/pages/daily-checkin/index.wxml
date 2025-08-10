@@ -47,6 +47,13 @@
               <view class="card-subtitle">回顾点滴，发现情绪的流动</view>
             </view>
           </view>
+          <view class="card" bind:tap="goToCabinet">
+            <image class="card-icon" src="/images/icons/note.png" mode="aspectFit"></image>
+            <view class="card-content">
+              <view class="card-title">心灵记事簿</view>
+              <view class="card-subtitle">记录你的想法与感悟</view>
+            </view>
+          </view>
           <view class="card" bind:tap="goToPaperAirplane">
             <image class="card-icon" src="/images/airplane.png" mode="aspectFit"></image>
             <view class="card-content">

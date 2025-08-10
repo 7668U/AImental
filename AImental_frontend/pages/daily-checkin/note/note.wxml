@@ -1,0 +1,64 @@
+<page-meta>
+  <navigation-bar title="{{notebookName}}" back="{{true}}" bind:back="goBack"></navigation-bar>
+</page-meta>
+
+<view class="page-container" style="padding-top: {{navBarHeight}}px;">
+  <view class="title-container">
+    <input class="title-input" value="{{notebookName}}" bindblur="onTitleBlur" placeholder="输入笔记本标题" />
+  </view>
+
+  <view class="divider"></view>
+
+  <!-- Todo Section -->
+  <view class="section todo-section">
+    <view class="section-header" bindtap="toggleTodoSection">
+      <text class="section-title">待办清单</text>
+      <image class="collapse-icon" src="/images/icons/icon-arrow-{{isTodoCollapsed ? 'down' : 'up'}}.png"></image>
+    </view>
+    <view class="section-content" wx:if="{{!isTodoCollapsed}}">
+      <block wx:for="{{todos}}" wx:key="id">
+        <view class="todo-item {{item.is_completed ? 'completed' : ''}}">
+          <checkbox-group bindchange="onTodoChange" data-id="{{item.id}}">
+            <checkbox class="todo-checkbox" value="{{item.id}}" checked="{{item.is_completed}}"></checkbox>
+          </checkbox-group>
+          <textarea class="todo-content-textarea" 
+                    value="{{item.content}}" 
+                    bindinput="handleTodoInput" 
+                    data-id="{{item.id}}" 
+                    placeholder="记录待办事项、用药情况等"
+                    auto-height="true"
+                    show-confirm-bar="false"
+                    maxlength="100" />
+        </view>
+      </block>
+      <view class="todo-item new-todo-item">
+        <view class="plus-icon-placeholder">+</view>
+        <textarea class="todo-content-textarea" 
+                  placeholder="按回车新增待办" 
+                  confirm-type="send"
+                  bindconfirm="onTodoConfirm"
+                  auto-height="true"
+                  show-confirm-bar="false"
+                  maxlength="100" />
+      </view>
+    </view>
+  </view>
+
+  <view class="divider"></view>
+
+  <!-- Note Section -->
+  <view class="section note-section">
+    <view class="section-header" bindtap="toggleNoteSection">
+      <text class="section-title">笔记内容</text>
+      <image class="collapse-icon" src="/images/icons/icon-arrow-{{isNoteCollapsed ? 'down' : 'up'}}.png"></image>
+    </view>
+    <view class="section-content" wx:if="{{!isNoteCollapsed}}">
+      <textarea class="note-textarea" 
+                value="{{note.content}}" 
+                bindinput="handleNoteInput" 
+                placeholder="在此记录生活、心情、健康情况等"
+                auto-height
+                maxlength="-1"></textarea>
+    </view>
+  </view>
+</view>

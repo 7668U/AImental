@@ -189,4 +189,10 @@ Page({
       url: '/pages/daily-checkin/paper-airplane/index'
     });
   },
+
+  goToCabinet() {
+    wx.navigateTo({
+      url: '/pages/daily-checkin/cabinet/cabinet'
+    });
+  },
 })

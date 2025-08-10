@@ -1,4 +1,22 @@
 <view class="page-container">
+    <!-- 设置弹窗 -->
+    <view class="settings-modal" wx:if="{{isSettingsVisible}}" catchtap="closeSettings">
+        <view class="modal-content" catchtap="preventClose">
+            <view class="modal-title">对话设置</view>
+            <view class="setting-item">
+                <view class="setting-text">
+                    <view class="setting-label">启用个性化对话</view>
+                    <view class="setting-desc">允许AI了解您近期的心情与测评结果，以更好地对话。</view>
+                </view>
+                <switch 
+                    checked="{{allowAiReadData}}" 
+                    bindchange="onAllowStatusChange"
+                    color="#F2994A"
+                />
+            </view>
+        </view>
+    </view>
+
     <view class="sidebar {{ isSidebarVisible ? 'sidebar-visible' : '' }}">
         <view class="new-chat-btn" bindtap="startNewChat">
             <image src="/images/icons/plus.png" class="icon-plus"></image>
@@ -35,6 +53,8 @@
                 <view class="nav-bar-content" style="margin-top: {{statusBarHeight}}px; height: {{navBarHeight}}px;">
                     <view class="top-bar-left">
                         <image class="menu-icon" src="/images/icons/menu.png" catchtap="toggleSidebar"></image>
+                        <!-- 【新增】设置图标 -->
+                        <image class="settings-icon" src="/images/icons/setting.png" catchtap="toggleSettings"></image>
                     </view>
 
                     <view class="top-bar-center">
