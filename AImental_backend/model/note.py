@@ -1,116 +1,215 @@
-from peewee import Model, CharField, TextField, DateTimeField, BooleanField, ForeignKeyField, IntegerField, fn
-from datetime import datetime
-from db import cabinet_db # Import the new db instance
+# model/note.py
 
-# Base Model for cabinet_db
+from datetime import datetime
+from typing import List, Optional
+
+from peewee import (
+    Model, CharField, TextField, DateTimeField, BooleanField,
+    ForeignKeyField, IntegerField, fn
+)
+from playhouse.shortcuts import model_to_dict
+
+from db import cabinet_db
+
+
+# ---------------------------------------------------
+# 1) Peewee Models
+# ---------------------------------------------------
+
 class BaseModel(Model):
     class Meta:
         database = cabinet_db
 
-# Notebook Model
+
 class Notebook(BaseModel):
     user_id = CharField()
-    name = CharField()
+    name = CharField(max_length=100) # 建议为 CharField 加上最大长度
     cover_image = CharField(null=True)
     created_at = DateTimeField(default=datetime.now)
     updated_at = DateTimeField(default=datetime.now)
 
     class Meta:
-        table_name = 'notebooks'
+        table_name = "notebooks"
 
-# NoteItem Model (for to-dos and general notes within a notebook)
+
 class NoteItem(BaseModel):
-    notebook = ForeignKeyField(Notebook, backref='notes', on_delete='CASCADE')
-    item_type = CharField() # 'todo' or 'note'
+    """
+    既承载 todo，也承载分标题和内容的长文 note
+    """
+    notebook = ForeignKeyField(Notebook, backref="notes", on_delete="CASCADE")
+    item_type = CharField()          # 'todo' 或 'note'
+    
+    # --- 已新增 title 字段 ---
+    title = CharField(max_length=255, null=True) # 允许为空，因为 todo 不需要 title
+
     content = TextField()
-    is_completed = BooleanField(default=False) # For todo items
-    item_order = IntegerField(default=0) # To maintain order of items
+    is_completed = BooleanField(default=False)
+    item_order = IntegerField(default=0)
     created_at = DateTimeField(default=datetime.now)
     updated_at = DateTimeField(default=datetime.now)
 
     class Meta:
-        table_name = 'notes'
+        table_name = "notes"
 
-# --- Database Operations ---
 
-def create_tables():
-    """Creates the notebook and note_item tables if they don't exist."""
-    with cabinet_db:
-        cabinet_db.create_tables([Notebook, NoteItem])
+# ---------------------------------------------------
+# 2) Table Access Class
+# ---------------------------------------------------
 
-# Notebook CRUD operations
-def create_notebook(user_id: str, name: str, cover_image: str = None):
-    """Creates a new notebook."""
-    return Notebook.create(user_id=user_id, name=name, cover_image=cover_image)
+class NoteTable:
+    """
+    封装所有 notebook / note_item 的数据库操作
+    """
+    def __init__(self, db_connection):
+        self.db = db_connection
+        # 启动时自动创建表
+        self.db.create_tables([Notebook, NoteItem])
 
-def get_notebooks_by_user(user_id: str):
-    """Retrieves all notebooks for a given user, sorted by updated_at."""
-    return list(Notebook.select().where(Notebook.user_id == user_id).order_by(Notebook.updated_at.desc()))
+    # ---------- Notebook (以下方法保持不变) ----------
+    def create_notebook(self, user_id: str, name: str, cover_image: Optional[str] = None) -> Notebook:
+        nb = Notebook.create(user_id=user_id, name=name, cover_image=cover_image)
+        return nb
 
-def get_notebook_by_id(notebook_id: int):
-    """Retrieves a single notebook by its ID."""
-    return Notebook.get_or_none(Notebook.id == notebook_id)
+    def get_notebooks_by_user(self, user_id: str) -> List[Notebook]:
+        return list(
+            Notebook.select()
+            .where(Notebook.user_id == user_id)
+            .order_by(Notebook.updated_at.desc())
+        )
 
-def update_notebook(notebook_id: int, name: str = None, cover_image: str = None):
-    """Updates an existing notebook."""
-    notebook = get_notebook_by_id(notebook_id)
-    if notebook:
+    def get_notebook_by_id(self, notebook_id: int) -> Optional[Notebook]:
+        return Notebook.get_or_none(Notebook.id == notebook_id)
+
+    def update_notebook(self, notebook_id: int, name: Optional[str] = None, cover_image: Optional[str] = None) -> Optional[Notebook]:
+        nb = self.get_notebook_by_id(notebook_id)
+        if not nb:
+            return None
         if name is not None:
-            notebook.name = name
+            nb.name = name
         if cover_image is not None:
-            notebook.cover_image = cover_image
-        notebook.updated_at = datetime.now()
-        notebook.save()
-        return notebook
-    return None
+            nb.cover_image = cover_image
+        nb.updated_at = datetime.now()
+        nb.save()
+        return nb
 
-def delete_notebook(notebook_id: int):
-    """Deletes a notebook by its ID."""
-    notebook = get_notebook_by_id(notebook_id)
-    if notebook:
-        notebook.delete_instance(recursive=True) # recursive=True deletes associated notes
+    def delete_notebook(self, notebook_id: int) -> bool:
+        nb = self.get_notebook_by_id(notebook_id)
+        if not nb:
+            return False
+        # 级联删除 notes
+        nb.delete_instance(recursive=True)
         return True
-    return False
 
-# NoteItem CRUD operations
-def create_note_item(notebook_id: int, item_type: str, content: str, is_completed: bool = False, item_order: int = None):
-    """Creates a new note item within a notebook."""
-    notebook = get_notebook_by_id(notebook_id)
-    if not notebook:
-        return None
-    if item_order is None:
-        # Get the max order for the current notebook and add 1
-        max_order = NoteItem.select(fn.MAX(NoteItem.item_order)).where(NoteItem.notebook == notebook).scalar()
-        item_order = (max_order or 0) + 1
-    return NoteItem.create(notebook=notebook, item_type=item_type, content=content, is_completed=is_completed, item_order=item_order)
+    # ---------- NoteItem (以下方法已修改) ----------
+    def create_note_item(
+        self,
+        notebook_id: int,
+        item_type: str,
+        content: str,
+        title: Optional[str] = None, # <-- 已增加 title 参数
+        is_completed: bool = False,
+        item_order: Optional[int] = None
+    ) -> Optional[NoteItem]:
+        nb = self.get_notebook_by_id(notebook_id)
+        if not nb:
+            return None
 
-def get_note_items_by_notebook(notebook_id: int):
-    """Retrieves all note items for a given notebook, sorted by item_order."""
-    return list(NoteItem.select().where(NoteItem.notebook == notebook_id).order_by(NoteItem.item_order))
+        if item_type not in ("todo", "note"):
+            raise ValueError("item_type must be 'todo' or 'note'")
 
-def get_note_item_by_id(note_item_id: int):
-    """Retrieves a single note item by its ID."""
-    return NoteItem.get_or_none(NoteItem.id == note_item_id)
+        if item_order is None:
+            # 追加到末尾
+            max_order = (
+                NoteItem.select(fn.MAX(NoteItem.item_order))
+                .where(NoteItem.notebook == nb)
+                .scalar()
+            )
+            item_order = (max_order or 0) + 1
 
-def update_note_item(note_item_id: int, content: str = None, is_completed: bool = None, item_order: int = None):
-    """Updates an existing note item."""
-    note_item = get_note_item_by_id(note_item_id)
-    if note_item:
-        if content is not None:
-            note_item.content = content
-        if is_completed is not None:
-            note_item.is_completed = is_completed
-        if item_order is not None:
-            note_item.item_order = item_order
-        note_item.updated_at = datetime.now()
-        note_item.save()
-        return note_item
-    return None
+        ni = NoteItem.create(
+            notebook=nb,
+            item_type=item_type,
+            title=title,             # <-- 已保存 title
+            content=content,
+            is_completed=is_completed,
+            item_order=item_order
+        )
+        # 同步 notebook 的 updated_at
+        nb.updated_at = datetime.now()
+        nb.save()
+        return ni
 
-def delete_note_item(note_item_id: int):
-    """Deletes a note item by its ID."""
-    note_item = get_note_item_by_id(note_item_id)
-    if note_item:
-        note_item.delete_instance()
+    def get_note_items_by_notebook(self, notebook_id: int) -> List[NoteItem]:
+        return list(
+            NoteItem.select()
+            .where(NoteItem.notebook == notebook_id)
+            .order_by(NoteItem.updated_at.desc()) 
+        )
+
+    def get_note_item_by_id(self, note_item_id: int) -> Optional[NoteItem]:
+        return NoteItem.get_or_none(NoteItem.id == note_item_id)
+
+    def update_note_item(
+        self,
+        note_item_id: int,
+        **update_data: dict # <-- 已修改为接收字典，更灵活
+    ) -> Optional[NoteItem]:
+        ni = self.get_note_item_by_id(note_item_id)
+        if not ni:
+            return None
+
+        changed = False
+        # 动态更新传入的字段
+        for key, value in update_data.items():
+            if hasattr(ni, key):
+                setattr(ni, key, value)
+                changed = True
+        
+        if changed:
+            ni.updated_at = datetime.now()
+            ni.save()
+            # 触发父 notebook 更新时间
+            Notebook.update({Notebook.updated_at: datetime.now()}).where(
+                Notebook.id == ni.notebook_id
+            ).execute()
+        return ni
+
+    def delete_note_item(self, note_item_id: int) -> bool:
+        ni = self.get_note_item_by_id(note_item_id)
+        if not ni:
+            return False
+        nb_id = ni.notebook_id
+        ni.delete_instance()
+        # 删除条目也更新 notebook 时间
+        Notebook.update({Notebook.updated_at: datetime.now()}).where(
+            Notebook.id == nb_id
+        ).execute()
         return True
-    return False
+
+    # ---------- 可选：批量重排 (保持不变) ----------
+    def reorder_notes(self, notebook_id: int, orders: List[dict]) -> int:
+        """
+        批量更新 item_order
+        orders: [{'id': 1, 'item_order': 1}, ...]
+        return: 受影响行数
+        """
+        count = 0
+        with self.db.atomic():
+            for item in orders:
+                _id = item.get("id")
+                _order = item.get("item_order")
+                if _id is None or _order is None:
+                    continue
+                updated = NoteItem.update({NoteItem.item_order: _order}).where(
+                    (NoteItem.id == _id) & (NoteItem.notebook_id == notebook_id)
+                ).execute()
+                count += updated
+            # 更新父 notebook 时间
+            Notebook.update({Notebook.updated_at: datetime.now()}).where(
+                Notebook.id == notebook_id
+            ).execute()
+        return count
+
+
+# --- 单例实例化（供路由导入使用） ---
+note_table = NoteTable(cabinet_db)

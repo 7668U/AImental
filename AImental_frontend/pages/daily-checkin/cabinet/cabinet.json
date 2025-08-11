@@ -1,8 +1,9 @@
 {
   "usingComponents": {
-    "custom-navigation-bar": "../../../components/navigation-bar/navigation-bar",
-    "cover-selector": "../../../components/cover-selector/cover-selector",
-    "login-prompt": "../../../components/login-prompt/login-prompt"
+    "cover-selector": "../../../components/cover-selector/cover-selector"
   },
-  "navigationStyle": "custom"
+  "navigationBarTitleText": "",
+  "navigationBarTextStyle": "black",
+  "navigationBarBackgroundColor": "#ffffff",
+  "enablePullDownRefresh": true
 }
