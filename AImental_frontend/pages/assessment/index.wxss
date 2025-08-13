@@ -111,3 +111,13 @@ page {
   text-overflow: ellipsis;
   overflow-wrap: break-word;
 }
+
+/* [新增] 未登录页面的容器样式 */
+.login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  /* 使用 vh 单位确保在任何屏幕上都相对于视窗高度居中 */
+  height: 100vh;
+}
