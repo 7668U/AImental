@@ -1,37 +1,51 @@
-// note.js (The final, correct version)
+// pages/daily-checkin/note/note.js (The final, corrected version for the simplified backend)
 
-// --- 辅助函数 ---
+const BASE_URL = getApp().globalData?.apiBase || 'http://127.0.0.1:8000/api/v1';
+
 function request(options) {
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
     wx.request({
       ...options,
-      url: `http://127.0.0.1:8000/api/v1${options.url}`,
-      header: { ...options.header, 'Authorization': `Bearer ${token}` },
+      url: `${BASE_URL}${options.url}`,
+      header: {
+        'Authorization': token ? `Bearer ${token}` : '',
+        'Content-Type': 'application/json',
+        ...options.header
+      },
       success(res) {
-        if (res.statusCode >= 200 && res.statusCode < 300) { resolve(res.data); }
-        else {
-          console.error('Request failed with status:', res.statusCode, res.data);
+        if (res.statusCode === 401) {
+          wx.showToast({ title: '登录已过期', icon: 'none' });
+          reject(res);
+          return;
+        }
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve(res.data);
+        } else {
+          console.error('Request failed:', res.statusCode, res.data);
           reject(res);
         }
       },
       fail(err) {
-        console.error('Request failed:', err);
+        console.error('Request error:', err);
         reject(err);
       }
     });
   });
 }
 
-
 Page({
   data: {
     navBarHeight: getApp().globalData.navBarHeight,
-    notebookId: null,
-    notebookName: '',
+    statusBarHeight: getApp().globalData.statusBarHeight,
+    
+    // 【修正】笔记本名称固定，不再需要从后端获取
+    notebookName: '我的记事簿',
+    
     todos: [],
     notes: [],
     uncompletedTodoCount: 0,
+    
     isEditing: false,
     showTodoModal: false,
     currentTodo: { id: null, content: '' },
@@ -39,37 +53,38 @@ Page({
     currentNote: { id: null, title: '', content: '' },
   },
 
-  onLoad(options) {
-    const id = options.id || options.scene;
-    if (id) {
-      this.setData({ notebookId: id });
-      this.fetchNotebookDetails();
-    } else {
-      wx.showToast({ title: '无效的笔记本ID', icon: 'none' });
-    }
+  onLoad() {
+    this.fetchNotebookDetails();
   },
-  
+
+  onPullDownRefresh() {
+    this.fetchNotebookDetails().finally(() => wx.stopPullDownRefresh());
+  },
+
   onUnload() {
-    // 这是一个安全措施，确保在离开此页面时，
-    // 任何可能残留的 wx.showLoading 都会被强制关闭，
-    // 防止它影响到其他页面。
     wx.hideLoading();
   },
 
+  // ===================================================
+  // 【最终核心修正】修正数据获取函数以匹配最终的后端接口
+  // ===================================================
   async fetchNotebookDetails() {
     wx.showLoading({ title: '加载中...' });
     try {
-      const [notebookData, items] = await Promise.all([
-        request({ url: `/notebooks/${this.data.notebookId}` }),
-        request({ url: `/notebooks/${this.data.notebookId}/notes/` })
-      ]);
-      const todos = items.filter(item => item.item_type === 'todo');
-      const notes = items.filter(item => item.item_type === 'note');
+      // 【修正】请求正确的、最终的后端接口 GET /notes/
+      // 这个接口直接返回一个包含所有笔记和待办的数组
+      const allItems = await request({ url: '/notes/' });
+      
+      const todos = allItems.filter(item => item.item_type === 'todo');
+      const notes = allItems.filter(item => item.item_type === 'note');
+      
+      // 【修正】数据源已改变，不再有 notebook_name，直接设置 notes
       this.setData({
-        notebookName: notebookData.name,
         notes: notes
       });
+
       this.updateAndSortTodos(todos);
+
     } catch (error) {
       console.error("加载详情失败: ", error);
       wx.showToast({ title: '加载失败，请重试', icon: 'none' });
@@ -97,11 +112,7 @@ Page({
     if (this.data.showTodoModal) {
       this.setData({ 'currentTodo.content': value });
     } else if (this.data.showNoteModal) {
-      if (field === 'title') {
-        this.setData({ 'currentNote.title': value });
-      } else if (field === 'noteContent') {
-        this.setData({ 'currentNote.content': value });
-      }
+      this.setData({ [`currentNote.${field}`]: value });
     }
   },
 
@@ -115,13 +126,20 @@ Page({
   async handleTodoModalConfirm() {
     const todo = this.data.currentTodo;
     if (!todo.content.trim()) { return wx.showToast({ title: '内容不能为空', icon: 'none' }); }
+    
     this.hideModals();
     wx.showLoading({ title: '保存中...' });
+
     try {
       if (this.data.isEditing) {
         await request({ url: `/notes/${todo.id}`, method: 'PUT', data: { content: todo.content } });
       } else {
-        await request({ url: `/notebooks/${this.data.notebookId}/notes/`, method: 'POST', data: { item_type: 'todo', content: todo.content } });
+        // 这个创建逻辑已经是正确的，请求 /notes/
+        await request({
+          url: `/notes/`,
+          method: 'POST',
+          data: { item_type: 'todo', content: todo.content }
+        });
       }
       await this.fetchNotebookDetails();
       wx.showToast({ title: '已保存', icon: 'success' });
@@ -177,6 +195,33 @@ Page({
     if (note) { this.setData({ isEditing: true, currentNote: { ...note }, showNoteModal: true, }); }
   },
 
+  async handleNoteModalConfirm() {
+    const note = this.data.currentNote;
+    if (!note.title.trim()) { return wx.showToast({ title: '标题不能为空', icon: 'none' }); }
+    
+    this.hideModals();
+    wx.showLoading({ title: '保存中...' });
+
+    try {
+      const payload = { title: note.title, content: note.content };
+      if (this.data.isEditing) {
+        await request({ url: `/notes/${note.id}`, method: 'PUT', data: payload });
+      } else {
+        // 这个创建逻辑也已经是正确的
+        await request({
+          url: `/notes/`,
+          method: 'POST',
+          data: { ...payload, item_type: 'note' }
+        });
+      }
+      await this.fetchNotebookDetails();
+      wx.showToast({ title: '已保存', icon: 'success' });
+    } catch (err) {
+      wx.hideLoading();
+      wx.showToast({ title: '保存失败', icon: 'none' });
+    }
+  },
+
   onDeleteNote() {
     const noteId = this.data.currentNote.id;
     if (!noteId) return;
@@ -200,29 +245,6 @@ Page({
         }
       }
     });
-  },
-
-  async handleNoteModalConfirm() {
-    const note = this.data.currentNote;
-    if (!note.title.trim()) { return wx.showToast({ title: '标题不能为空', icon: 'none' }); }
-    this.hideModals();
-    wx.showLoading({ title: '保存中...' });
-    try {
-      const payload = {
-        title: note.title,
-        content: note.content
-      };
-      if (this.data.isEditing) {
-        await request({ url: `/notes/${note.id}`, method: 'PUT', data: payload });
-      } else {
-        await request({ url: `/notebooks/${this.data.notebookId}/notes/`, method: 'POST', data: { ...payload, item_type: 'note' } });
-      }
-      await this.fetchNotebookDetails();
-      wx.showToast({ title: '已保存', icon: 'success' });
-    } catch (err) {
-      wx.hideLoading();
-      wx.showToast({ title: '保存失败', icon: 'none' });
-    }
   },
   
   goBack() {

@@ -25,13 +25,17 @@
             <text class="test-count-number">{{group.count}} 次</text>
             <image class="arrow-icon {{group.is_expanded ? 'expanded' : ''}}" src="/images/icons/icon-arrow-down.png"></image>
           </view>
-        <view class="analysis-btn-container" catchtap="goToAnalysis" data-scale="{{group}}">
-          <block wx:if="{{group.count >= 5}}">
-            <image class="analysis-icon" src="/images/icons/icon-analysis-plane-orange.png"></image>
-            <text class="analysis-text">去分析</text>
+          
+          <block wx:if="{{group.assessment_type === 'scoring'}}">
+            <view class="analysis-btn-container" catchtap="goToAnalysis" data-scale="{{group}}">
+              <block wx:if="{{group.count >= 5}}">
+                <image class="analysis-icon" src="/images/icons/icon-analysis-plane-orange.png"></image>
+                <text class="analysis-text">去分析</text>
+              </block>
+              <text wx:else class="analysis-disabled-tip">(5次后可分析)</text>
+            </view>
           </block>
-          <text wx:else class="analysis-disabled-tip">(5次后可分析)</text>
-        </view>
+
         </view>
       </view>
 
@@ -46,7 +50,7 @@
           <view class="history-item-content" style="transform: translateX({{record.x_offset || 0}}px);" bindtouchstart="handleTouchStart" bindtouchmove="handleTouchMove" bindtouchend="handleTouchEnd" bindtap="goToResultDetail" data-record="{{record}}" data-group-index="{{groupIndex}}" data-record-index="{{recordIndex}}">
             <view class="item-left">
               <view class="item-time">{{record.completed_at_formatted}}</view>
-              <view class="item-score">得分：{{record.final_score}}</view>
+              <view class="item-score" wx:if="{{record.scale_info.assessment_type === 'scoring'}}">得分：{{record.final_score}}</view>
             </view>
             <view class="item-right">
               <view class="item-result">{{record.result_level}}</view>

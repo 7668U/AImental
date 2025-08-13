@@ -1,60 +1,143 @@
-// pages/assessment/result.js
+// pages/assessment/result/result.js (渐变条 + 文字标签最终版)
+
+const SERVER_BASE_URL = 'http://127.0.0.1:8000';
+const ASSESSMENTS_API_URL = `${SERVER_BASE_URL}/api/v1/assessments`;
+
 Page({
   data: {
-    result: {
-      final_score: 0,
-      result_level: '',
-      result_interpretation: '',
-      result_recommendation: '',
-    },
-    // ✅ 1. 增加一个数据字段，用于记录页面来源
-    source: '' 
+    isLoading: true,
+    source: '',
+    result: null,
+    totalScore: 0,
+    scoreSegments: [], // ✅ 【已加回】重新启用此数据，用于生成文字标签
+    pointerPosition: 0,
+    pointerLabelAlign: 'center',
+    scoreMarkers: [],
   },
 
   onLoad(options) {
-    // ✅ 2. 在页面加载时，检查并记录来源参数
     if (options.from) {
-      this.setData({
-        source: options.from
-      });
+      this.setData({ source: options.from });
     }
 
-    if (options.data) {
+    if (options.record_id) {
+      this.fetchResultById(options.record_id);
+    } else if (options.data) {
       try {
         const resultData = JSON.parse(decodeURIComponent(options.data));
-        this.setData({
-          result: resultData
-        });
+        this.processAndRender(resultData);
       } catch (e) {
-        console.error("解析结果数据失败", e);
+        console.error("解析初次结果数据失败", e);
         this.showErrorAndGoBack('结果加载失败');
       }
     } else {
-      console.error("未接收到测评结果数据");
       this.showErrorAndGoBack('无效的访问');
     }
   },
 
-  /**
-   * “我知道了”按钮的点击事件处理函数
-   * ✅ 3. 根据记录的 source 决定跳转行为
-   */
+  fetchResultById(recordId) {
+    wx.request({
+      url: `${ASSESSMENTS_API_URL}/history/${recordId}`,
+      method: 'GET',
+      header: {
+        'Authorization': 'Bearer ' + wx.getStorageSync('token')
+      },
+      success: (res) => {
+        if (res.statusCode === 200) {
+          this.processAndRender(res.data);
+        } else {
+          console.error("获取历史详情失败", res);
+          this.showErrorAndGoBack('加载历史详情失败');
+        }
+      },
+      fail: (err) => {
+        console.error("请求历史详情失败", err);
+        this.showErrorAndGoBack('网络请求失败');
+      }
+    });
+  },
+  
+  processAndRender(resultData) {
+    this.setData({ result: resultData });
+    
+    const type = resultData?.scale_details?.assessment_type;
+
+    if (type === 'scoring') {
+      const jsonData = resultData.scale_details.json_data;
+      const interpretations = jsonData.interpretations || [];
+      
+      if (interpretations.length === 0) {
+        this.showErrorAndGoBack('问卷分数段未定义');
+        return;
+      }
+
+      const userScore = resultData.final_score;
+      
+      const minPossibleScore = interpretations[0].min_score;
+      const maxPossibleScore = interpretations[interpretations.length - 1].max_score;
+      const totalScorableRange = maxPossibleScore - minPossibleScore;
+
+      if (totalScorableRange <= 0) {
+        this.showErrorAndGoBack('问卷分数范围无效');
+        return;
+      }
+      
+      // ✅ 【核心修改已集成】重新计算 scoreSegments 用于生成文字标签
+      const scoreSegments = interpretations.map((interp, index) => {
+        const prevMaxScore = index === 0 ? minPossibleScore : interpretations[index - 1].max_score;
+        const width = ((interp.max_score - prevMaxScore) / totalScorableRange) * 100;
+        // color 属性虽然不用，但保留也无妨
+        return {
+          level: interp.level,
+          width: width,
+          color: 'transparent' // 颜色不再重要
+        };
+      });
+
+      const pointerPosition = ((userScore - minPossibleScore) / totalScorableRange) * 100;
+
+      let pointerLabelAlign = 'center';
+      if (pointerPosition > 85) pointerLabelAlign = 'left';
+      else if (pointerPosition < 15) pointerLabelAlign = 'right';
+
+      const scoreMarkers = [];
+      for (let i = 0; i < interpretations.length - 1; i++) {
+        const interp = interpretations[i];
+        scoreMarkers.push({
+          score: interp.max_score,
+          position: ((interp.max_score - minPossibleScore) / totalScorableRange) * 100
+        });
+      }
+
+      this.setData({
+        totalScore: maxPossibleScore,
+        scoreSegments: scoreSegments, // ✅ 【已加回】将计算好的标签数据传给WXML
+        pointerPosition: pointerPosition,
+        pointerLabelAlign: pointerLabelAlign,
+        scoreMarkers: scoreMarkers,
+        isLoading: false
+      });
+
+    } else if (type === 'categorical') {
+      this.setData({
+        isLoading: false
+      });
+    } else {
+      console.error("无法识别的结果类型", resultData);
+      this.showErrorAndGoBack('结果类型无法识别');
+    }
+  },
+
   handleConfirm() {
     if (this.data.source === 'history') {
-      // 如果来源是历史页，则返回上一页
       wx.navigateBack();
     } else {
-      // 否则，执行默认行为（例如从答题页过来），跳转到测评列表
       wx.reLaunch({
         url: '/pages/assessment/index'
       });
     }
   },
 
-  /**
-   * 封装一个统一的错误处理函数，代码更简洁
-   * @param {string} title 
-   */
   showErrorAndGoBack(title) {
     wx.showToast({
       title: title,
@@ -63,8 +146,13 @@ Page({
     });
     
     setTimeout(() => {
-      // 无论哪种错误，都统一返回上一页
-      wx.navigateBack();
+      if (getCurrentPages().length > 1) {
+        wx.navigateBack();
+      } else {
+        wx.reLaunch({
+          url: '/pages/assessment/index'
+        });
+      }
     }, 2000);
   }
-})
+});

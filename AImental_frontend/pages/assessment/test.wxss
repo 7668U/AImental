@@ -1,5 +1,5 @@
 /* 页码: pages/assessment/test.wxss
-  功能: 测评问卷答题页面的样式表 (最终修正版)
+   功能: 测评问卷答题页面的样式表 (长文本最终修正版)
 */
 
 /* 1. 全局 & 页面基础 */
@@ -68,11 +68,14 @@
 
 .option-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start; 
   width: 100%;
   padding: 40rpx;
   border-bottom: 1rpx solid var(--border-color);
   transition: background-color 0.2s;
+  
+  /* ✅【修正1】切换盒模型，让 padding 向内计算，避免 flex 子项宽度计算错误 */
+  box-sizing: border-box; 
 }
 
 .option-row:last-child {
@@ -83,6 +86,17 @@
   font-size: 34rpx;
   color: var(--text-color-secondary);
   line-height: 1.5;
+  flex: 1; 
+
+  /* ✅【修正2】允许 flex 项收缩至小于其内容尺寸 */
+  min-width: 0;
+
+  /* ✅【修正3】处理长单词或连续字符串的强制换行 */
+  overflow-wrap: break-word;
+  word-break: break-all; /* 作为兼容性后备 */
+
+  /* ✅【修正4】同样统一为 border-box，确保行为一致 */
+  box-sizing: border-box;
 }
 
 .option-row.selected .option-text {
@@ -96,6 +110,9 @@
 
 .option-dot-wrapper {
   margin-right: 30rpx;
+  height: 51rpx; /* 与 option-text 的 line-height * font-size 接近，便于对齐 */
+  display: flex;
+  align-items: center;
 }
 
 .option-dot {
@@ -113,7 +130,7 @@
   border-color: var(--primary-color);
 }
 
-/* 4. 页内提交按钮 (最终修正版) */
+/* 4. 页内提交按钮 */
 .in-page-submit-container {
   width: 100%;
   margin-top: 80rpx;
@@ -121,7 +138,6 @@
   justify-content: center;
 }
 
-/* 直接给 View 组件设置样式 */
 .submit-btn-view {
   width: 100%;
   max-width: 600rpx;
@@ -129,23 +145,16 @@
   border-radius: 48rpx;
   box-shadow: 0 8rpx 16rpx rgba(249, 115, 22, 0.2);
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  
-  /* 关键修正: 直接使用十六进制颜色码，不再使用 CSS 变量 */
   background-color: #fa812b !important;
   color: #ffffff !important;
-  
   font-size: 38rpx;
   font-weight: bold;
-  
-  /* 使用 Flexbox 居中文字 */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* 禁用状态下的 View 样式 */
 .submit-btn-view.disabled {
-  /* 关键修正: 直接使用十六进制颜色码 */
   background-color: #fab47d !important;
   box-shadow: none;
 }

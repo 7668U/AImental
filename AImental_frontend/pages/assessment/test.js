@@ -1,23 +1,20 @@
-// pages/assessment/test.js
+// pages/assessment/test.js (兼容版)
 
 const API_BASE_URL = 'http://127.0.0.1:8000';
 
 Page({
   data: {
     scaleId: null,
-    scaleData: null,
+    scaleData: null, // 将在这里存储完整的量表信息，包括 assessment_type
     questions: [],
     totalQuestions: 0,
     currentIndex: 0,
     progress: 0,
     answers: {},
     isSubmitting: false,
-    answeredCount: 0, // 用于精确追踪已答题数量
+    answeredCount: 0,
   },
 
-  /**
-   * 页面加载
-   */
   onLoad(options) {
     if (options.id) {
       this.setData({ scaleId: options.id });
@@ -28,46 +25,35 @@ Page({
     }
   },
 
-  /**
-   * 从后端API获取测评问卷数据 (最终修正版)
-   * 能够同时处理“自带选项的问题”和“使用公共选项模板的问题”
-   */
   fetchScaleData(scaleId) {
     wx.showLoading({ title: '加载中...' });
     wx.request({
       url: `${API_BASE_URL}/api/v1/assessments/${scaleId}`,
       method: 'GET',
+      header: {
+        'Authorization': `Bearer ${wx.getStorageSync('token')}`
+      },
       success: (res) => {
         if (res.statusCode === 200) {
-          // res.data 的结构是 { id: '...', name: '...', json_data: { ... } }
           const scaleData = res.data;
-          
-          // 1. 直接获取已经由后端解析好的 json_data 对象
           const jsonData = scaleData.json_data || {};
-          
-          // 2.【关键逻辑】处理问题和选项
           let questions = jsonData.questions || [];
-          // 尝试从 json_data 的顶层获取公共选项模板
-          const commonChoices = jsonData.choices; 
+          const commonChoices = jsonData.choices;
 
-          // 检查是否存在共用选项模板
-          if (commonChoices && commonChoices.length > 0) {
-            // 遍历所有问题，为那些没有自带选项的问题“嫁接”上共用的选项
-            questions = questions.map(question => {
-              if (!question.choices || question.choices.length === 0) {
-                return {
-                  ...question,          // 保留问题原有的 text, order 等信息
-                  choices: commonChoices // 将公共选项模板赋给它
-                };
-              }
-              // 如果问题本身有选项，则优先使用它自己的
-              return question;
-            });
-          }
+          // 这个处理逻辑非常棒，它确保了无论是哪种测试，选项数组的字段名都统一为 'choices'
+          questions = questions.map(question => {
+            if (question.options && question.options.length > 0) {
+              question.choices = question.options;
+              delete question.options;
+            }
+            if ((!question.choices || question.choices.length === 0) && commonChoices) {
+              return { ...question, choices: commonChoices };
+            }
+            return question;
+          });
           
-          // 3. 将处理好的、确保带有选项的 questions 数组设置到页面
           this.setData({
-            scaleData: scaleData,
+            scaleData: scaleData, // 存储完整数据，供 WXML 判断类型
             questions: questions,
             totalQuestions: questions.length,
           });
@@ -87,22 +73,25 @@ Page({
     });
   },
 
-  /**
-   * 用户选择选项时的处理函数
-   */
   onRadioChange(e) {
     const questionOrder = e.currentTarget.dataset.order;
-    const optionScore = Number(e.detail.value);
+    // ✅ 【核心修正】
+    // 直接获取 e.detail.value，它就是我们在 WXML 中绑定的 <radio> 的 value
+    // 无论是 'scoring' 的分数(如"3")，还是 'categorical' 的ID(如"A")，都作为字符串处理
+    const selectedValue = e.detail.value;
     
-    // 更新答案
+    // 检查一下确保拿到了有效值
+    if (selectedValue === undefined || selectedValue === null) {
+        console.error("获取选项值失败，请检查WXML中radio的value绑定。");
+        return;
+    }
+
     this.setData({
-      [`answers.${questionOrder}`]: optionScore
+      [`answers.${questionOrder}`]: selectedValue
     });
 
-    // 答题后立刻更新进度和已答题数
     this.updateProgress();
 
-    // 自动跳转到下一题
     setTimeout(() => {
       if (this.data.currentIndex < this.data.totalQuestions - 1) {
         this.setData({ currentIndex: this.data.currentIndex + 1 });
@@ -110,11 +99,9 @@ Page({
     }, 200);
   },
   
-  /**
-   * 更新进度条
-   */
   updateProgress() {
-    const answeredCount = Object.keys(this.data.answers).length;
+    // 修正：确保答案不为空值时才计数
+    const answeredCount = Object.values(this.data.answers).filter(v => v !== '' && v !== null && v !== undefined).length;
     const progress = this.data.totalQuestions > 0 ? (answeredCount / this.data.totalQuestions) * 100 : 0;
     this.setData({ 
       progress: progress,
@@ -122,47 +109,35 @@ Page({
     });
   },
 
-  /**
-   * Swiper切换时更新当前页码
-   */
   onSwiperChange(e) {
     if (e.detail.source === 'touch') {
       const newIndex = e.detail.current;
       const oldIndex = this.data.currentIndex;
 
-      // Swiping right (to next question)
       if (newIndex > oldIndex) {
         const currentQuestionOrder = this.data.questions[oldIndex].order;
-        if (!this.data.answers.hasOwnProperty(currentQuestionOrder)) {
-          // Current question not answered, prevent swipe
+        if (!this.data.answers.hasOwnProperty(currentQuestionOrder) || this.data.answers[currentQuestionOrder] === '') {
           wx.showToast({
             title: '请先回答当前题目',
             icon: 'none'
           });
-          // Revert swiper to oldIndex
-          this.setData({ currentIndex: oldIndex }); // This will force swiper back
-          return; // Stop further execution
+          this.setData({ currentIndex: oldIndex });
+          return;
         }
       }
-      // If swiping left, or if swiping right and question is answered, allow the change
       this.setData({ currentIndex: newIndex });
     }
   },
 
-  /**
-   * 点击“上一题”
-   */
   prevQuestion() {
     if (this.data.currentIndex > 0) {
       this.setData({ currentIndex: this.data.currentIndex - 1 });
     }
   },
 
-  /**
-   * 点击“下一题”
-   */
   nextQuestion() {
-    if (this.data.answers.hasOwnProperty(this.data.questions[this.data.currentIndex].order)) {
+    const currentQuestionOrder = this.data.questions[this.data.currentIndex].order;
+    if (this.data.answers.hasOwnProperty(currentQuestionOrder) && this.data.answers[currentQuestionOrder] !== '') {
       if (this.data.currentIndex < this.data.totalQuestions - 1) {
         this.setData({ currentIndex: this.data.currentIndex + 1 });
       }
@@ -174,9 +149,6 @@ Page({
     }
   },
 
-  /**
-   * 提交测评
-   */
   submitAssessment() {
     if (this.data.isSubmitting) return;
 
@@ -189,10 +161,8 @@ Page({
     }
     
     this.setData({ isSubmitting: true });
-
-    // 【关键修正】将读取的键名从 'access_token' 改为 'token'
-    const token = wx.getStorageSync('token');
     
+    const token = wx.getStorageSync('token');
     if (!token) {
       wx.showToast({ title: '请先登录', icon: 'none' });
       this.setData({ isSubmitting: false });
@@ -219,7 +189,15 @@ Page({
             url: `./result?data=${encodeURIComponent(resultData)}`,
           });
         } else {
-          wx.showToast({ title: `提交失败: ${res.data.detail || '未知错误'}`, icon: 'none' });
+          let errorMsg = '未知错误';
+          if (res.data && res.data.detail) {
+            if (Array.isArray(res.data.detail)) {
+              errorMsg = res.data.detail.map(d => d.msg).join('; ');
+            } else {
+              errorMsg = res.data.detail;
+            }
+          }
+          wx.showToast({ title: `提交失败: ${errorMsg}`, icon: 'none', duration: 3000 });
         }
       },
       fail: (err) => {

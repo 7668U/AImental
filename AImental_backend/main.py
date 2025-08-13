@@ -11,21 +11,20 @@ load_dotenv()
 
 # --- 1. Import Database Connections ---
 from db import all_dbs, user_db, chat_db, assessment_db, status_db, feedback_db, promotion_db
-from model.airplane import airplane_db  # 【新增】导入纸飞机数据库
+from model.airplane import airplane_db
 
 # --- 2. Import All Peewee Models ---
 from model.user import User
 from model.chat import Chat
 from model.assessment import Scale, UserAssessment
 from model.status import Checkin
-from model.analysis import Analysis  # 【新增】导入 Analysis 模型
+from model.analysis import Analysis
 from model.history_analysis import HistoryAnalysis
-from model.feedback import Feedback  # 【新增】导入 Feedback 模型
-from model.promotion import TestRecord  # 【新增】导入 promotion_table
-from model.airplane import PaperAirplane, paper_airplane_table  # 【修改】导入纸飞机模型和表实例和默认数据函数
+from model.feedback import Feedback
+from model.promotion import TestRecord
+from model.airplane import PaperAirplane, paper_airplane_table
 
-# ✅ 按新风格导入 Note 模块（Table 实例 + 模型）
-from model.note import note_table, Notebook, NoteItem
+from model.note import note_table, NoteItem
 
 # --- 3. Import All Routers ---
 from router import user as user_router
@@ -33,12 +32,12 @@ from router import chat as chat_router
 from router import assessment as assessment_router
 from router import status as status_router
 from router import system as system_router
-from router import analysis as analysis_router  # 【新增】导入 analysis 路由
-from router import history_analysis as history_analysis_router  # 【新增】导入 history_analysis 路由
-from router import feedback as feedback_router  # 【新增】导入 feedback 路由
-from router import promotion as promotion_router  # 【新增】导入 promotion 路由
-from router import airplane as airplane_router  # 【新增】导入纸飞机路由
-from router import note as note_router  # Added note_router
+from router import analysis as analysis_router
+from router import history_analysis as history_analysis_router
+from router import feedback as feedback_router
+from router import promotion as promotion_router
+from router import airplane as airplane_router
+from router import note as note_router
 
 # ---------------------------------------------------
 # FastAPI Application Instance
@@ -57,10 +56,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static files directory
+# --- 静态文件挂载 ---
+
+# 挂载 "static" 目录到 "/static" URL路径
+# (例如，用于存放CSS, JS等前端资源)
 if not os.path.exists("static"):
     os.makedirs("static")
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# ✅ 【核心解决方案】
+# 挂载 "images" 目录到 "/images" URL路径
+# 这就是解决您图片404问题的关键代码
+app.mount("/images", StaticFiles(directory="images"), name="images")
+
 
 # ---------------------------------------------------
 # Application Startup and Shutdown Events
@@ -71,21 +79,17 @@ def on_startup():
     """
     Safely connects to databases, binds models, and creates tables.
     """
-    # 【修改】将 Analysis 模型添加到映射中，并把 Notebook/NoteItem 纳入统一初始化流程
     model_db_mapping = {
         User: user_db,
-        Feedback: feedback_db,   # 【新增】Feedback 模型使用 feedback_db
+        Feedback: feedback_db,
         Chat: chat_db,
         Scale: assessment_db,
         UserAssessment: assessment_db,
         HistoryAnalysis: assessment_db,
         Checkin: status_db,
-        Analysis: status_db,     # Analysis 数据也存在 status_db 中
+        Analysis: status_db,
         TestRecord: promotion_db,
         PaperAirplane: airplane_db,
-
-        # ✅ 新增：记事簿相关模型走与其它模型相同的初始化流程
-        Notebook: note_table.db,
         NoteItem: note_table.db,
     }
 
@@ -93,23 +97,14 @@ def on_startup():
     for model, db in model_db_mapping.items():
         if db.is_closed():
             db.connect()
-
         try:
-            # 与你原有风格一致：bind + create_tables（已存在则跳过）
             model.bind(db, bind_refs=False, bind_backrefs=False)
             db.create_tables([model])
             print(f"✅ Table '{model._meta.table_name}' is ready in DB '{db.database}'")
         except Exception as e:
             print(f"❌ Error during table setup for '{model._meta.table_name}': {e}")
-
-    # ❌【删除】旧版的 note_model.create_tables()（新风格里已不存在）
-    # print("🚀 Initializing cabinet database...")
-    # note_model.create_tables()
-    # print("✅ Cabinet database tables are ready!")
-
     print("✨ Database initialization process complete!")
 
-    # --- 5. Seed Default Data ---
     print("🚀 Checking if default data seeding is needed...")
     paper_airplane_table.add_default_airplanes_if_needed()
     print("✨ Seeding process complete!")
@@ -136,12 +131,12 @@ app.include_router(chat_router.router, prefix=API_PREFIX)
 app.include_router(assessment_router.router, prefix=API_PREFIX)
 app.include_router(status_router.router, prefix=API_PREFIX)
 app.include_router(system_router.router, prefix=API_PREFIX)
-app.include_router(analysis_router.router, prefix=API_PREFIX)           # 【新增】注册 analysis 路由
-app.include_router(history_analysis_router.router, prefix=API_PREFIX)   # 【新增】注册 history_analysis 路由
-app.include_router(feedback_router.router, prefix=API_PREFIX)           # 【新增】注册 feedback 路由
-app.include_router(promotion_router.router, prefix=API_PREFIX)          # 【新增】注册 promotion 路由
-app.include_router(airplane_router.router, prefix=API_PREFIX)           # 【新增】注册纸飞机路由
-app.include_router(note_router.router, prefix=API_PREFIX)               # Added note router
+app.include_router(analysis_router.router, prefix=API_PREFIX)
+app.include_router(history_analysis_router.router, prefix=API_PREFIX)
+app.include_router(feedback_router.router, prefix=API_PREFIX)
+app.include_router(promotion_router.router, prefix=API_PREFIX)
+app.include_router(airplane_router.router, prefix=API_PREFIX)
+app.include_router(note_router.router, prefix=API_PREFIX)
 
 # ---------------------------------------------------
 # Root endpoint for health checks
