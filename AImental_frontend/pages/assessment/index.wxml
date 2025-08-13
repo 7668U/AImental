@@ -1,49 +1,56 @@
-<view class="safe-area-top" style="padding-top: {{statusBarHeight}}px;">
-
-<view class="container">
-  <view class="page-title">选择一个测评开始</view>
-  <view class="page-subtitle">了解自己的内心世界</view>
-
-  <view class="tab-container" wx:if="{{!isLoading && !isError}}">
-    <view 
-      class="tab-button {{activeCategory === '专业测试' ? 'active' : ''}}"
-      bindtap="switchCategory"
-      data-category="专业测试">
-      专业测试
-    </view>
-    <view 
-      class="tab-button {{activeCategory === '趣味测试' ? 'active' : ''}}"
-      bindtap="switchCategory"
-      data-category="趣味测试">
-      趣味测试
-    </view>
-  </view>
-
-  <view class="feedback-container" wx:if="{{isLoading}}">
-    <text>正在加载测评列表...</text>
-  </view>
-  <view class="feedback-container" wx:if="{{isError}}">
-    <text>加载失败，请下拉刷新重试</text>
-  </view>
-
-  <view class="card-grid" wx:if="{{!isLoading && !isError && displayScaleList.length > 0}}">
-    <block wx:for="{{displayScaleList}}" wx:key="id">
-      <view class="card-item" bindtap="goToTest" data-id="{{item.id}}">
-        <image 
-          class="card-icon" 
-          src="{{item.iconPath}}" 
-          binderror="handleIconError" 
-          data-index="{{index}}"
-        />
-        <view class="card-name">
-          <text>{{item.name}}</text>
+<block wx:if="{{isLoggedIn}}">
+  <view class="safe-area-top" style="padding-top: {{statusBarHeight}}px;">
+    <view class="container">
+      <view class="page-title">选择一个测评开始</view>
+      <view class="page-subtitle">了解自己的内心世界</view>
+      <view class="tab-container" wx:if="{{!isLoading && !isError}}">
+        <view 
+          class="tab-button {{activeCategory === '专业测试' ? 'active' : ''}}"
+          bindtap="switchCategory"
+          data-category="专业测试">
+          专业测试
+        </view>
+        <view 
+          class="tab-button {{activeCategory === '趣味测试' ? 'active' : ''}}"
+          bindtap="switchCategory"
+          data-category="趣味测试">
+          趣味测试
         </view>
       </view>
-    </block>
+      <view class="feedback-container" wx:if="{{isLoading}}">
+        <text>正在加载测评列表...</text>
+      </view>
+      <view class="feedback-container" wx:if="{{isError}}">
+        <text>加载失败，请下拉刷新重试</text>
+      </view>
+      <view class="card-grid" wx:if="{{!isLoading && !isError && displayScaleList.length > 0}}">
+        <block wx:for="{{displayScaleList}}" wx:key="id">
+          <view class="card-item" bindtap="goToTest" data-id="{{item.id}}">
+            <image 
+              class="card-icon" 
+              src="{{item.iconPath}}" 
+              binderror="handleIconError" 
+              data-index="{{index}}"
+            />
+            <view class="card-name">
+              <text>{{item.name}}</text>
+            </view>
+          </view>
+        </block>
+      </view>
+      <view class="feedback-container" wx:if="{{!isLoading && !isError && displayScaleList.length === 0}}">
+        <text>该分类下暂无内容</text>
+      </view>
+    </view>
   </view>
+</block>
 
-  <view class="feedback-container" wx:if="{{!isLoading && !isError && displayScaleList.length === 0}}">
-    <text>该分类下暂无内容</text>
+<block wx:else>
+  <view class="login-wrapper">
+    <login-prompt 
+      title="欢迎来到心理测评"
+      subtitle="登录后开启你的内心探索之旅"
+      bind:loginevent="handleLogin" 
+    />
   </view>
-
-</view> </view> 
+</block>

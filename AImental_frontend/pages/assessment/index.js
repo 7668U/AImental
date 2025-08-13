@@ -1,90 +1,86 @@
 // pages/assessment/index/index.js
 
 const API_BASE_URL = 'http://127.0.0.1:8000';
-const DEFAULT_ICON_PATH = '/images/assessment/default.png'; // 默认图标路径
-const DEFAULT_CATEGORY = '专业测试'; // [新增] 默认显示的分类
+const DEFAULT_ICON_PATH = '/images/assessment/default.png';
+const DEFAULT_CATEGORY = '专业测试';
 
 Page({
   data: {
-    statusBarHeight: 0, // [新增] 状态栏高度
+    isLoggedIn: false,        // [新增] 登录状态，默认为未登录
+    statusBarHeight: 0,
     rawScaleList: [],
     displayScaleList: [],
-    activeCategory: '专业测试',
-    isLoading: true,
+    activeCategory: DEFAULT_CATEGORY,
+    isLoading: false,         // [修改] 初始状态不加载，等待登录检查后触发
     isError: false,
   },
 
-  onLoad(options) {
-    // [新增] 动态获取状态栏高度
+  /**
+   * [修改] 使用 onShow 代替 onLoad
+   * onShow 能保证每次进入页面（或从其他页面返回）时都检查登录状态，体验更佳
+   */
+  onShow() {
+    // 动态获取状态栏高度
     const systemInfo = wx.getSystemInfoSync();
     this.setData({
       statusBarHeight: systemInfo.statusBarHeight
     });
     
-    // 原有的逻辑保持不变
-    this.fetchScaleList();
+    // 每次显示页面时，都检查登录状态
+    this.checkLoginStatus();
+  },
+  
+  /**
+   * [新增] 检查登录状态的核心函数
+   */
+  checkLoginStatus() {
+    const token = wx.getStorageSync('token');
+    if (token) {
+      // 如果有token，则更新为已登录状态，并开始加载数据
+      this.setData({ isLoggedIn: true });
+      this.fetchScaleList();
+    } else {
+      // 如果没有token，则确保为未登录状态，页面会显示登录提示
+      this.setData({ isLoggedIn: false });
+    }
+  },
+
+  /**
+   * [新增] 处理来自 login-prompt 组件的登录成功事件
+   */
+  handleLogin() {
+    // 当用户在 login-prompt 组件中成功登录后，该组件会触发此函数
+    // 我们只需重新检查一遍登录状态，页面就会自动刷新为已登录界面
+    this.checkLoginStatus();
   },
 
   /**
    * 从后端API获取测评列表
    */
-/**
-   * 从后端API获取测评列表 (最终修正版：已添加授权Header)
-   */
   fetchScaleList() {
     this.setData({ isLoading: true, isError: false });
-
-    // [新增] 从本地缓存中获取登录后保存的Token
-    // 请确保 'token' 是您在登录成功后，使用 wx.setStorageSync 保存的键名
     const token = wx.getStorageSync('token');
-
-    // 如果没有token，说明用户未登录，可以直接处理，避免向后端发送无效请求
-    if (!token) {
-      this.setData({
-        isLoading: false,
-        isError: true, // 或者可以设置为一个特定的“未登录”状态
-      });
-      // 提示用户去登录
-      wx.showToast({
-        title: '请先登录',
-        icon: 'none',
-        duration: 2000
-      });
-      return; // 终止函数执行
-    }
-
+    
     wx.request({
       url: `${API_BASE_URL}/api/v1/assessments/`,
       method: 'GET',
-      // [新增] 加入包含用户凭证的请求头
       header: {
         'Authorization': `Bearer ${token}`
-        // 如果您的后端需要的不是Bearer类型，请修改这里
-        // 例如: 'Authorization': token
       },
       success: (res) => {
-        // [修改] 增加对401状态码的判断
         if (res.statusCode === 401) {
-          // Token可能已过期或无效，引导用户重新登录
-          this.setData({ isError: true, isLoading: false });
-          wx.showToast({
-            title: '登录状态已失效，请重新登录',
-            icon: 'none'
-          });
-          // 这里可以加上跳转到登录页的逻辑
-          // wx.navigateTo({ url: '/pages/login/index' });
+          // Token已过期或无效，切换回未登录状态
+          this.setData({ isLoggedIn: false, isLoading: false });
+          wx.showToast({ title: '登录已失效，请重新登录', icon: 'none' });
           return;
         }
 
         if (res.statusCode === 200) {
           const rawList = res.data || [];
-          const processedList = rawList.map(scale => {
-            const iconName = scale.short_name ? scale.short_name.toLowerCase() : 'default';
-            return {
-              ...scale,
-              iconPath: `/images/assessment/${iconName}.png`
-            };
-          });
+          const processedList = rawList.map(scale => ({
+            ...scale,
+            iconPath: `/images/assessment/${scale.short_name ? scale.short_name.toLowerCase() : 'default'}.png`
+          }));
           
           const filteredDisplayList = processedList.filter(scale => scale.category === this.data.activeCategory);
 
@@ -101,42 +97,45 @@ Page({
         console.error("fetchScaleList failed:", err);
       },
       complete: () => {
-        // complete回调中的setData是安全的
         this.setData({ isLoading: false });
-        wx.stopPullDownRefresh();
+        if (this.data.isLoggedIn) { // 只有在登录状态下才停止下拉刷新
+          wx.stopPullDownRefresh();
+        }
       }
     });
   },
+  
   /**
-   * [新增] 点击分类按钮时的处理函数
-   * @param {Object} e 事件对象，从wxml的data-category获取分类名
+   * [新增] 下拉刷新逻辑
+   */
+  onPullDownRefresh() {
+    if (this.data.isLoggedIn) {
+      this.fetchScaleList();
+    } else {
+      // 如果未登录，则不执行任何操作，并立即停止刷新动画
+      wx.stopPullDownRefresh();
+    }
+  },
+
+  /**
+   * 点击分类按钮时的处理函数
    */
   switchCategory(e) {
     const newCategory = e.currentTarget.dataset.category;
-    
-    // 如果点击的已经是当前分类，则不执行任何操作，避免不必要的重复渲染
     if (newCategory === this.data.activeCategory) {
       return;
     }
-
-    // 更新当前激活的分类
     this.setData({
       activeCategory: newCategory
     });
-    
-    // 调用方法，根据新的分类名来筛选和显示列表
     this.filterAndSetDisplayList(newCategory);
   },
 
   /**
-   * [新增] 根据分类名过滤并设置显示的列表
-   * @param {string} categoryName 需要显示的分类名称
+   * 根据分类名过滤并设置显示的列表
    */
   filterAndSetDisplayList(categoryName) {
-    // 从原始列表中筛选出所有符合当前分类的项
     const filteredList = this.data.rawScaleList.filter(scale => scale.category === categoryName);
-    
-    // 更新到页面显示列表
     this.setData({
       displayScaleList: filteredList
     });
@@ -154,11 +153,9 @@ Page({
   
   /**
    * 图标加载失败时的容错处理
-   * 如果某个图标不存在，就用默认图标替代
    */
   handleIconError(e) {
     const errorIndex = e.currentTarget.dataset.index;
-    // [修改] 更新路径，确保作用于当前显示的列表 displayScaleList
     const updatedPath = `displayScaleList[${errorIndex}].iconPath`;
     this.setData({
       [updatedPath]: DEFAULT_ICON_PATH
