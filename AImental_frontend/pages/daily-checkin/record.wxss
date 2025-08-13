@@ -21,7 +21,7 @@ page {
 }
 .sub-title {
   font-size: 28rpx;
-  color: #aaa;
+  color: rgb(117, 117, 117);
   margin-top: 10rpx;
 }
 
