@@ -1,5 +1,3 @@
-// pages/ai-therapist/index.js
-
 // --- 全局配置与网络请求封装 ---
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 
@@ -80,7 +78,7 @@ Page({
       if (!this.data.isLoggedIn) {
         this.setData({ isLoggedIn: true });
         this.initializeChat();
-        // 【已修改】登录后，获取用户设置
+        // 登录后，获取用户设置
         this.loadUserSettings(); 
       }
     } else {
@@ -152,7 +150,17 @@ Page({
   async startNewChat() {
     wx.showLoading({ title: '创建中...' });
     try {
-      const newChat = await request({ url: '/chats/', method: 'POST' });
+      // 【核心修改】: 在创建新聊天时，将当前的设置状态作为请求体发送给后端
+      const requestBody = {
+        with_context: this.data.allowAiReadData
+      };
+      
+      const newChat = await request({ 
+        url: '/chats/', 
+        method: 'POST',
+        data: requestBody // 将请求体传给后端
+      });
+      
       const currentHistory = this.data.chatHistory;
       const newHistoryItem = { id: newChat.chat_id, title: newChat.title };
       currentHistory.unshift(newHistoryItem);
@@ -173,7 +181,7 @@ Page({
     const history = this.data.chatHistory;
     const chatIndex = history.findIndex(chat => chat.id === chatId);
     if (chatIndex > 0) {
-      const chatToMove = history.splice(chatIndex, 1)[0];
+      const [chatToMove] = history.splice(chatIndex, 1);
       history.unshift(chatToMove);
       this.setData({ chatHistory: history });
     }
@@ -373,7 +381,6 @@ Page({
   // 设置弹窗相关方法
   // =================================================================
   
-  // 【新增】加载用户设置
   async loadUserSettings() {
     try {
       const userInfo = await request({ url: '/users/me' });
@@ -382,13 +389,11 @@ Page({
       }
     } catch (error) {
       console.error("加载用户设置失败", error);
-      // 加载失败时可以给一个默认值或提示
       this.setData({ allowAiReadData: false });
     }
   },
 
   toggleSettings() {
-    // 【新增】打开设置时，重新加载一次设置，确保状态最新
     if (!this.data.isSettingsVisible) {
       this.loadUserSettings();
     }
@@ -401,7 +406,6 @@ Page({
 
   preventClose() {},
 
-  // 【已修改】处理开关状态变化，并调用API
   onAllowStatusChange(e) {
     const newStatus = e.detail.value;
     const oldStatus = this.data.allowAiReadData;
@@ -424,7 +428,6 @@ Page({
         title: '设置失败，请重试',
         icon: 'none'
       });
-      // 【回滚】如果API调用失败，将开关恢复到之前的状态
       this.setData({ allowAiReadData: oldStatus });
     });
   },

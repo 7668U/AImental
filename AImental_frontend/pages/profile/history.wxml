@@ -20,10 +20,10 @@
           <image class="scale-icon" src="{{group.iconPath}}" binderror="handleIconError" data-index="{{groupIndex}}" mode="aspectFit"></image>
           <text class="scale-name">{{group.scale_name}}</text>
         </view>
-        <view class="card-right">
-          <view class="expand-trigger" bindtap="toggleExpand" data-index="{{groupIndex}}">
-            <text class="test-count-number">{{group.count}} 次</text>
-            <image class="arrow-icon {{group.is_expanded ? 'expanded' : ''}}" src="/images/icons/icon-arrow-down.png"></image>
+          <view class="card-right">
+            <view class="expand-trigger" catchtap="toggleExpand" data-index="{{groupIndex}}">
+              <text class="test-count-number">{{group.count}} 次</text>
+              <image class="arrow-icon {{group.is_expanded ? 'expanded' : ''}}" src="/images/icons/icon-arrow-down.png"></image>
           </view>
           
           <block wx:if="{{group.assessment_type === 'scoring'}}">
@@ -39,21 +39,27 @@
         </view>
       </view>
 
-      <view class="history-list {{group.is_expanded ? 'expanded' : ''}}">
-        <view class="history-item" wx:for="{{group.records}}" wx:for-item="record" wx:for-index="recordIndex" wx:key="id">
-          <view class="delete-action">
-            <view class="delete-btn" catchtap="handleConfirmDelete" data-group-index="{{groupIndex}}" data-record-index="{{recordIndex}}" data-record-id="{{record.id}}">
-              <image class="delete-icon" src="/images/assessment/delete.png"></image>
-            </view>
-          </view>
-          
-          <view class="history-item-content" style="transform: translateX({{record.x_offset || 0}}px);" bindtouchstart="handleTouchStart" bindtouchmove="handleTouchMove" bindtouchend="handleTouchEnd" bindtap="goToResultDetail" data-record="{{record}}" data-group-index="{{groupIndex}}" data-record-index="{{recordIndex}}">
+        <view class="history-list {{group.is_expanded ? 'expanded' : ''}}">
+          <view class="history-item" wx:for="{{group.records}}" wx:for-item="record" wx:for-index="recordIndex" wx:key="id">
+            <view class="delete-action">
+              </view>
+            
+            <view 
+              class="history-item-content" 
+              style="transform: translateX({{record.x_offset || 0}}px) translateZ(0);" 
+              bindtouchstart="handleTouchStart" 
+              bindtouchmove="handleTouchMove" 
+              bindtouchend="handleTouchEnd" 
+              bindtap="goToResultDetail" 
+              data-record="{{record}}" 
+              data-group-index="{{groupIndex}}" 
+              data-record-index="{{recordIndex}}">
             <view class="item-left">
               <view class="item-time">{{record.completed_at_formatted}}</view>
               <view class="item-score" wx:if="{{record.scale_info.assessment_type === 'scoring'}}">得分：{{record.final_score}}</view>
             </view>
             <view class="item-right">
-              <view class="item-result">{{record.result_level}}</view>
+              <view class="item-result {{record.scale_info.assessment_type === 'scoring' ? 'item-result-scoring' : ''}}">{{record.result_level}}</view>
               <image class="item-arrow" src="/images/right.png"></image>
             </view>
           </view>

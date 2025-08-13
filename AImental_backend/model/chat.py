@@ -1,12 +1,11 @@
-# models/chat.py
-
 import uuid
 import time
 import json
 from typing import Optional, List, Dict, Any
 
 # Import necessary types from peewee and pydantic
-from peewee import Model, CharField, TextField, IntegerField
+# 【第1步】: 导入 BooleanField
+from peewee import Model, CharField, TextField, IntegerField, BooleanField
 from pydantic import BaseModel, Field
 
 # Import the database connection for the chat module
@@ -22,10 +21,11 @@ class Chat(Model):
     """
     id = CharField(primary_key=True, max_length=36, default=lambda: str(uuid.uuid4()))
     user_id = CharField(index=True)
-    # --- [MODIFIED] Added the title field ---
-    title = CharField(default="New Chat")  # Add a default title
+    title = CharField(default="New Chat")
     message = TextField(default='[]')
     timestamp = IntegerField(default=lambda: int(time.time()))
+    # 【第2步】: 新增 with_context 字段，记录此会话是否加载历史背景
+    with_context = BooleanField(default=True, help_text="是否在对话中引入用户历史背景")
 
     class Meta:
         database = chat_db
@@ -38,10 +38,11 @@ class ChatModel(BaseModel):
     """
     id: str
     user_id: str
-    # --- [MODIFIED] Added the title field ---
     title: str
     message: str
     timestamp: int
+    # 【第3步】: 在 Pydantic 模型中也同步添加该字段
+    with_context: bool
 
     class Config:
         from_attributes = True
@@ -61,49 +62,44 @@ class ChatTable:
     """
     def __init__(self, db_connection):
         self.db = db_connection
-        # The create_tables call will now handle the new 'title' column
+        # The create_tables call will now handle the new 'with_context' column
         self.db.create_tables([Chat])
 
-    # --- [MODIFIED] Function renamed and logic updated ---
     def get_chat_summaries_for_user(self, user_id: str) -> List[Dict[str, str]]:
         """
         Retrieves a list of all chat summaries (id and title) for a specific user,
         sorted with the most recent chat first.
         """
         query = (Chat
-                   .select(Chat.id, Chat.title)  # Select both id and title
-                   .where(Chat.user_id == user_id)
-                   .order_by(Chat.timestamp.desc()))
+                 .select(Chat.id, Chat.title)
+                 .where(Chat.user_id == user_id)
+                 .order_by(Chat.timestamp.desc()))
         
-        # Return a list of dictionaries, each with an id and a title
         return [{'id': chat.id, 'title': chat.title} for chat in query]
 
-    # --- [MODIFIED] Function signature and create logic updated ---
-    def create_new_chat(self, user_id: str, title: str = "New Chat") -> Chat:
+    # 【第4步】: 修改 create_new_chat 函数签名，使其可以接收 with_context 参数
+    def create_new_chat(self, user_id: str, with_context: bool = True) -> Chat:
         """
         Creates a new chat session for a given user with a title.
-        If no title is provided, it uses the default "New Chat".
         """
         new_chat = Chat.create(
             id=str(uuid.uuid4()),
             user_id=user_id,
-            title=title,                # Use the provided title
+            title="新对话",  # 统一初始标题
             message="[]",
-            timestamp=int(time.time())
+            timestamp=int(time.time()),
+            # 【第5步】: 将传入的参数值保存到数据库的新字段中
+            with_context=with_context
         )
         return new_chat
     
-    # --- [新增] 更新聊天标题的函数 ---
     def update_chat_title(self, chat_id: str, new_title: str) -> bool:
         """
         Updates the title of a specific chat session.
         Returns True if the update was successful, False otherwise.
         """
-        # 使用 Peewee 的 update() 方法，更高效
         query = Chat.update(title=new_title).where(Chat.id == chat_id)
         rows_updated = query.execute()
-        
-        # execute() 返回受影响的行数，大于0表示更新成功
         return rows_updated > 0
 
     def add_message_to_chat(self, chat_id: str, new_message: NewMessageForm) -> Optional[Chat]:
