@@ -1,64 +1,80 @@
-<page-meta>
-  <navigation-bar title="我的记事簿" back="{{true}}" bind:back="goBack"></navigation-bar>
-</page-meta>
+<!-- 系统导航栏版本 -->
+<view class="page-root" style="padding-top: {{contentTopLift}}rpx;">
+  <view class="container">
 
-<view class="page-root">
-  <view class="container" style="padding-top: {{navBarHeight}}px;">
-    <view class="page-title">我的记事簿</view>
-    <view class="bookshelf">
-      <!-- 循环渲染已创建的笔记本 -->
+    <!-- 标题 -->
+    <view class="page-title" style="margin-bottom: {{titleBottomGap}}rpx;">我的记事簿</view>
+
+    <!-- 书架（无论是否有数据都显示，确保“新建笔记本”按钮可见） -->
+    <view class="bookshelf" style="margin-top: {{shelfPullUp}}rpx;">
+
+      <!-- 已有笔记本 -->
       <view class="notebook-item" wx:for="{{notebooks}}" wx:key="id">
-        <view class="notebook-cover-wrapper" bindtap="navigateToNote" data-id="{{item.id}}">
-          <image class="notebook-cover" src="{{item.cover_image}}" mode="aspectFill"></image>
-          <image class="more-icon" src="/images/icons/more.png" catchtap="showActionMenu" data-id="{{item.id}}" data-name="{{item.name}}"></image>
-          <!-- 叠加在封面上的竖排名称 -->
-          <view class="notebook-name-on-cover">
-            <block wx:for="{{item.formattedName}}" wx:for-item="nameChunk" wx:key="*this">
-              <text class="notebook-name-chunk">{{nameChunk}}</text>
-            </block>
+        <view class="notebook-frame">
+          <view class="notebook-cover-wrapper"
+                bindtap="navigateToNote"
+                bindlongpress="showActionMenu"
+                data-id="{{item.id}}"
+                data-name="{{item.name}}"
+                data-cover="{{item.cover_image}}">
+
+            <image class="notebook-cover" src="{{item.cover_image}}" mode="aspectFill" />
+            <image class="more-icon"
+                   src="/images/icons/more.png"
+                   catchtap="showActionMenu"
+                   data-id="{{item.id}}"
+                   data-name="{{item.name}}"
+                   data-cover="{{item.cover_image}}" />
+
+            <!-- 竖排标题 -->
+            <view class="notebook-name-on-cover">
+              <block wx:for="{{item.formattedName}}" wx:key="*this" wx:for-item="nameChunk">
+                <text class="notebook-name-chunk">{{nameChunk}}</text>
+              </block>
+            </view>
           </view>
         </view>
       </view>
 
-      <!-- “新建笔记本”按钮 -->
+      <!-- 新建笔记本：始终显示 -->
       <view class="notebook-item add-new-notebook" bindtap="showCreateModal">
-        <view class="add-new-box">
-          <image class="add-icon" src="/images/icons/plus.png"></image>
+        <view class="notebook-frame">
+          <view class="add-box-area">
+            <image class="add-icon" src="/images/icons/plus.png" />
+          </view>
         </view>
-        <text class="notebook-name">新建笔记本</text>
+        <text class="notebook-name"></text>
       </view>
+
     </view>
   </view>
 
-  <!-- 操作菜单 -->
+  <!-- Action Sheet -->
   <view class="action-sheet-mask" wx:if="{{showActionSheet}}" bindtap="hideActionSheet">
     <view class="action-sheet" catchtap="preventMaskTap">
       <view class="action-sheet-item" bindtap="showRenameModal">重命名</view>
       <view class="action-sheet-item" bindtap="openCoverSelector">更换封面</view>
-      <view class="action-sheet-item danger" bindtap="confirmDeleteNotebook">删除笔记</view>
+      <view class="action-sheet-item danger" bindtap="confirmDeleteNotebook">删除笔记本</view>
       <view class="action-sheet-gap"></view>
       <view class="action-sheet-item" bindtap="hideActionSheet">取消</view>
     </view>
   </view>
 
-  <!-- 封面选择器 (用于更换封面) -->
-  <cover-selector wx:if="{{showCoverSelectorForUpdate}}" selected-cover="{{item.cover_image}}" bind:select="handleUpdateCover" bind:close="hideCoverSelector"></cover-selector>
+  <!-- 封面选择器 / 弹窗保留你现有实现 -->
+  <cover-selector wx:if="{{showCoverSelectorForUpdate}}"
+                  selected-cover="{{currentNotebookCover}}"
+                  bind:select="handleUpdateCover"
+                  bind:close="hideCoverSelector" />
 
-  <!-- 创建/重命名弹窗 -->
+  <!-- 新建/重命名 Modal -->
   <view class="modal-mask" wx:if="{{showModal}}" bindtap="hideModal">
     <view class="modal-content" catchtap="preventMaskTap">
       <view class="modal-title">{{modalMode === 'create' ? '新建笔记本' : '重命名'}}</view>
-      
-      <input class="name-input" 
-             maxlength="6" 
-             placeholder="请输入笔记本名称(最多6个字)" 
-             value="{{notebookNameInput}}"
-             bindinput="handleNameInput" />
-
+      <input class="name-input" maxlength="6" placeholder="请输入笔记本名称(最多6个字)"
+             value="{{notebookNameInput}}" bindinput="handleNameInput" />
       <view wx:if="{{modalMode === 'create'}}">
-        <cover-selector selected-cover="{{selectedCoverForCreate}}" bind:select="onCoverSelectForCreate"></cover-selector>
+        <cover-selector selected-cover="{{selectedCoverForCreate}}" bind:select="onCoverSelectForCreate" />
       </view>
-
       <view class="modal-actions">
         <button class="modal-btn cancel" bindtap="hideModal">取消</button>
         <button class="modal-btn confirm" bindtap="handleConfirm">确定</button>

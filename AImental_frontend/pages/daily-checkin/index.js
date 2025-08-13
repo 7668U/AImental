@@ -192,7 +192,7 @@ Page({
 
   goToCabinet() {
     wx.navigateTo({
-      url: '/pages/daily-checkin/cabinet/cabinet'
+      url: '/pages/daily-checkin/note/note'
     });
   },
 })

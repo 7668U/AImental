@@ -1,102 +1,298 @@
-/* pages/daily-checkin/note/note.wxss */
-page {
+/* note.wxss */
+
+/* 【推荐实践】
+  将 page 选择器改为了 .note-container 类。
+  请记得在 note.wxml 的最外层 <view> 上添加 class="note-container"。
+  这能避免小程序报出样式选择器不规范的警告。
+*/
+.note-container {
+  background-color: #f3ba50;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh; /* 确保背景色铺满全屏 */
+}
+
+.container {
+  padding: 32rpx;
+  box-sizing: border-box;
+}
+
+.card {
+  width: 100%;
+  box-sizing: border-box;
   background-color: #fff;
+  border-radius: 24rpx;
+  margin-bottom: 32rpx;
+  box-shadow: 0 8rpx 16rpx rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
-.page-container {
-  padding: 30rpx;
-}
-
-.title-container {
-  padding-bottom: 20rpx;
-}
-
-.title-input {
-  font-size: 48rpx;
-  font-weight: bold;
-  color: #333;
-}
-
-.divider {
-  height: 1rpx;
-  background-color: #eee;
-  margin: 20rpx 0;
-}
-
-/* Section styles */
-.section {
-  margin-bottom: 20rpx;
-}
-
-.section-header {
+.card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20rpx 0;
-  cursor: pointer;
+  padding: 32rpx;
 }
 
-.section-title {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #555;
-}
-
-.collapse-icon {
-  width: 32rpx;
-  height: 32rpx;
-  transition: transform 0.2s ease-in-out;
-}
-
-/* Todo Section */
-.todo-item {
+.card-header-left {
   display: flex;
-  align-items: flex-start; /* Align to top for multi-line text */
-  padding: 15rpx 0;
-  border-bottom: 1rpx solid #f5f5f5;
+  align-items: center;
+  gap: 16rpx;
 }
 
-.todo-item:last-child {
+.card-icon {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+.add-item-icon {
+  width: 44rpx;
+  height: 44rpx;
+  opacity: 0.7;
+}
+
+.card-title {
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.card-counter {
+  font-size: 24rpx;
+  color: #fff;
+  background-color: #4A90E2;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  margin-left: 8rpx;
+}
+
+.card-content-wrapper.expanded {
+  max-height: 2000rpx;
+  transition: max-height 0.4s ease-in-out;
+}
+
+.card-content {
+  padding: 0 32rpx 32rpx 32rpx;
+}
+
+.empty-placeholder {
+  color: #999;
+  font-size: 28rpx;
+  text-align: center;
+  padding: 40rpx 0;
+}
+
+.todo-item,
+.note-item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #F2F3F5;
+}
+
+.todo-item:last-child,
+.note-item:last-child {
   border-bottom: none;
 }
 
-.todo-checkbox {
-  margin-right: 20rpx;
-  transform: scale(0.9);
-  margin-top: 8rpx; /* Adjust to align with textarea */
+.checkbox-icon {
+  width: 44rpx;
+  height: 44rpx;
+  margin-right: 24rpx;
 }
 
-.todo-content-textarea {
+.todo-text {
   flex: 1;
   font-size: 30rpx;
   color: #333;
-  line-height: 1.5; /* Adjust for readability */
-  padding: 0;
-  width: 100%;
 }
 
-.todo-item.completed .todo-content-textarea {
-  text-decoration: line-through;
+.todo-item.completed .todo-text {
   color: #999;
+  text-decoration: line-through;
 }
 
-.new-todo-item .plus-icon-placeholder {
-  width: 44rpx; /* approx checkbox width */
-  height: 44rpx; /* approx checkbox height */
-  margin-right: 20rpx;
+.delete-icon {
+  width: 40rpx;
+  height: 40rpx;
+  opacity: 0.4;
+  margin-left: 20rpx;
+}
+
+.note-title {
+  flex: 1;
+  font-size: 30rpx;
+  color: #333;
+}
+
+.arrow-right-icon {
+  width: 36rpx;
+  height: 36rpx;
+  opacity: 0.4;
+}
+
+/* --- 模态框 (Modal) 样式 --- */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 40rpx;
-  color: #ccc;
-  margin-top: 8rpx; /* Adjust to align with textarea */
+  z-index: 1000;
 }
 
-/* Note Section */
-.note-textarea {
+.modal-content {
+  width: 85%;
+  background-color: #fff;
+  border-radius: 24rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =======================================================
+  【修改处】为 modal-header 增加 flex 布局
+  =======================================================
+*/
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx;
+  border-bottom: 1rpx solid #eee;
+}
+/* text-align: center; 已被 flex 布局取代，可以移除 */
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+/* =======================================================
+  【新增】笔记弹窗右上角删除图标的样式
+  =======================================================
+*/
+.modal-delete-icon {
+  width: 40rpx;
+  height: 40rpx;
+  opacity: 0.5;
+}
+.modal-delete-icon:active {
+  opacity: 0.9;
+}
+/* ======================================================= */
+
+.modal-body {
+  padding: 30rpx 40rpx;
+}
+
+.modal-input {
   width: 100%;
-  min-height: 400rpx;
+  height: 88rpx;
+  line-height: 88rpx;
   font-size: 30rpx;
-  line-height: 1.6;
-  padding: 10rpx 0;
+  background-color: #F7F8FA;
+  border-radius: 16rpx;
+  padding: 0 24rpx;
+  box-sizing: border-box;
+  border: none;
+}
+
+.modal-footer {
+  display: flex;
+  border-top: 1rpx solid #eee;
+}
+
+.modal-btn {
+  flex: 1;
+  line-height: 90rpx;
+  text-align: center;
+  font-size: 32rpx;
+  border-radius: 0;
+  background-color: #fff;
+}
+
+.modal-btn::after {
+  border: none;
+}
+
+.modal-btn.cancel {
+  color: #666;
+  border-bottom-left-radius: 24rpx;
+}
+
+.modal-btn.confirm {
+  color: #4A90E2;
+  font-weight: 500;
+  border-bottom-right-radius: 24rpx;
+}
+
+.modal-btn.cancel:active,
+.modal-btn.confirm:active {
+  background-color: #f2f2f2;
+}
+
+
+/* --- 笔记模态框的特殊样式 (已更新) --- */
+.note-modal {
+  width: 90%;
+  max-height: 80vh;
+  background-color: #FDF6E3;
+}
+
+/* 让头部、底部、按钮的背景透明，以继承米色 */
+/* =======================================================
+  【修改处】调整 note-modal 的 header 样式
+  =======================================================
+*/
+.note-modal .modal-header {
+  background-color: transparent;
+  border-bottom: 1rpx solid #e6e0d8; /* 分割线颜色与米色背景更协调 */
+}
+
+.note-modal .modal-footer,
+.note-modal .modal-btn {
+  background-color: transparent;
+}
+
+/* 让标题输入框的背景也透明 */
+.note-modal .note-title-input {
+  margin-bottom: 30rpx;
+  font-weight: 500;
+  background-color: transparent;
+  border-bottom: 1rpx solid #e6e0d8;
+  border-radius: 0;
+  padding: 0;
+  height: 90rpx;
+  line-height: 90rpx;
+}
+
+/* 让信笺纸区域背景也透明，只保留横线效果 */
+.note-textarea-modal {
+  width: 100%;
+  height: 400rpx;
+  font-size: 30rpx;
+  line-height: 2;
+  color: #4a4a4a;
+  padding: 10rpx 5rpx;
+  box-sizing: border-box;
+  background-color: transparent;
+  /* 横线效果不变 */
+  background-image: linear-gradient(to bottom, transparent 96%, #e6e0d8 96%);
+  background-size: 100% 2em;
+  background-attachment: local;
+  border: none;
+}
+
+.custom-back-btn {
+  position: fixed;
+  left: 10rpx;
+  z-index: 999;
+  padding: 10rpx;
+}
+
+.back-icon {
+  width: 40rpx;
+  height: 40rpx;
 }

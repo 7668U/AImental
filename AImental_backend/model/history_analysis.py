@@ -2,41 +2,39 @@
 
 import uuid
 import json
-import hashlib
+import hashlib # ✅ 1. 【新增导入】导入哈希库
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 
 from peewee import Model, CharField, DateTimeField, TextField, ForeignKeyField
 from pydantic import BaseModel, Field
 
-from db import assessment_db
+from db import assessment_db 
 from .user import User
-
-# --- 【新增导入】导入需要用到的数据查询模块 ---
-from .status import checkin_table
-from .assessment import assessment_tables, personality_test_manager
-# --------------------------------------------
 
 # ---------------------------------------------------
 # 1. Peewee 数据模型 (数据库表结构)
 # ---------------------------------------------------
 
 class HistoryAnalysis(Model):
+    """
+    用户历史记录AI分析表。
+    """
     id = CharField(primary_key=True, max_length=36, default=lambda: str(uuid.uuid4()))
     user = ForeignKeyField(User, backref='history_analyses', field='id', on_delete='CASCADE')
-    analysis_signature = CharField(max_length=64, unique=True, index=True)
-    analyzed_history_ids = TextField()
-    content = TextField()
+    
+    # ✅ 2. 【新增字段】用于存储ID列表的唯一签名，这是实现缓存的关键
+    analysis_signature = CharField(max_length=64, unique=True, index=True, help_text="SHA256 hash of sorted history IDs")
+    
+    analyzed_history_ids = TextField(help_text="被分析的用户测评历史记录ID列表的JSON字符串")
+    content = TextField(help_text="AI生成的分析报告内容的JSON字符串")
     created_at = DateTimeField(default=datetime.now)
 
     class Meta:
         database = assessment_db
         table_name = 'history_analyses'
 
-# ---------------------------------------------------
-# 2. Pydantic 模型
-# ---------------------------------------------------
-
+# ... (Pydantic 模型部分保持不变) ...
 class HistoryAnalysisContentResponse(BaseModel):
     comprehensive_evaluation: str
     trend_analysis: str
@@ -51,43 +49,65 @@ class HistoryAnalysisResponse(BaseModel):
     analyzed_history_ids: List[str]
     content: HistoryAnalysisContentResponse
     created_at: datetime
-    class Config: from_attributes = True
+    
+    class Config:
+        from_attributes = True
 
 # ---------------------------------------------------
-# 3. 数据表访问类
+# 3. 数据表访问类 (封装所有数据库操作)
 # ---------------------------------------------------
 
 class HistoryAnalysisTables:
+    """封装所有与历史记录分析相关的数据库操作"""
     def __init__(self, db_connection):
         self.db = db_connection
+        # 确保新字段的表被创建、
+        self.db.drop_tables([HistoryAnalysis], safe=True)
         self.db.create_tables([HistoryAnalysis])
 
+    # ✅ 3. 【新增辅助函数】用于创建唯一签名
     def _create_signature(self, history_ids: List[str]) -> str:
+        """对排序后的ID列表进行哈希，生成唯一签名"""
+        # 先排序，确保 ['id1', 'id2'] 和 ['id2', 'id1'] 的签名一致
         sorted_ids = sorted(history_ids)
+        # 将列表转换为一个紧凑的JSON字符串
         ids_string = json.dumps(sorted_ids, separators=(',', ':'))
-        return hashlib.sha256(ids_string.encode('utf-8')).hexdigest()
+        # 计算SHA256哈希值
+        signature = hashlib.sha256(ids_string.encode('utf-8')).hexdigest()
+        return signature
 
+    # ✅ 4. 【新增查询函数】根据签名查找已有的分析报告
     def get_analysis_by_signature(self, user_id: str, signature: str) -> Optional[HistoryAnalysis]:
+        """根据签名查找记录"""
         return HistoryAnalysis.get_or_none(
             (HistoryAnalysis.analysis_signature == signature) &
             (HistoryAnalysis.user == user_id)
         )
 
+    # ✅ 5. 【新增保存函数】将新生成的报告存入数据库
     def save_new_analysis(
-        self, user_id: str, history_ids: List[str],
-        signature: str, report_content: Dict[str, str]
+        self,
+        user_id: str,
+        history_ids: List[str],
+        signature: str,
+        report_content: Dict[str, str]
     ) -> HistoryAnalysis:
-        return HistoryAnalysis.create(
+        """将新的分析结果保存到数据库"""
+        record = HistoryAnalysis.create(
             user=user_id,
             analysis_signature=signature,
-            analyzed_history_ids=json.dumps(sorted(history_ids)),
+            analyzed_history_ids=json.dumps(sorted(history_ids)), # 存排序后的ID
             content=json.dumps(report_content, ensure_ascii=False)
         )
+        return record
 
+    # ... (旧的 get_analysis_by_id, get_analyses_by_user, delete_history_analysis 等函数可以保留，无需修改) ...
     def get_analysis_by_id(self, analysis_id: str) -> Optional[HistoryAnalysis]:
+        """根据主键ID获取单个分析报告"""
         return HistoryAnalysis.get_or_none(HistoryAnalysis.id == analysis_id)
 
     def get_analyses_by_user(self, user_id: str) -> List[HistoryAnalysis]:
+        """获取一个用户的所有历史分析报告，按时间倒序"""
         return list(
             HistoryAnalysis.select()
             .where(HistoryAnalysis.user == user_id)
@@ -95,75 +115,12 @@ class HistoryAnalysisTables:
         )
     
     def delete_history_analysis(self, user_id: str, analysis_id: str) -> bool:
+        """删除一条属于特定用户的分析报告"""
         query = HistoryAnalysis.delete().where(
             (HistoryAnalysis.id == analysis_id) & (HistoryAnalysis.user == user_id)
         )
-        return query.execute() > 0
+        deleted_rows = query.execute()
+        return deleted_rows > 0
 
+# --- 实例化数据表访问对象 ---
 history_analysis_tables = HistoryAnalysisTables(assessment_db)
-
-# ---------------------------------------------------
-# 4. 【新增】为Prompt整合用户数据的工具函数
-# ---------------------------------------------------
-
-def format_user_data_for_prompt(user_id: str) -> str:
-    """
-    获取并格式化一个用户的所有相关数据，用于构建Prompt。
-    """
-    summary_parts = []
-
-    # 1. 获取最近7天的心情记录
-    try:
-        recent_checkins = checkin_table.get_recent_checkins(user_id, days=7)
-        if recent_checkins:
-            mood_summary = "- 最近7天心情记录：\n"
-            for checkin in recent_checkins:
-                checkin_date = datetime.fromtimestamp(checkin.timestamp).strftime('%Y-%m-%d')
-                mood_summary += f"  - {checkin_date}: 心情为“{checkin.mood}”。"
-                if checkin.text_content:
-                    mood_summary += f" 当天ta记录道：“{checkin.text_content[:50]}...”。\n"
-                else:
-                    mood_summary += "\n"
-            summary_parts.append(mood_summary)
-    except Exception as e:
-        print(f"[Prompt Data] Error fetching mood data: {e}")
-
-    # 2. 获取所有心理测评结果
-    try:
-        assessments = assessment_tables.get_assessments_by_user(user_id)
-        if assessments:
-            assessment_summary = "- 过往心理测评结果摘要：\n"
-            for assessment in assessments:
-                # 使用 hasattr 检查是否存在 scale_name，因为它是通过 join 别名添加的
-                scale_name = getattr(assessment, 'scale_name', '未知量表')
-                assessment_summary += f"  - {assessment.completed_at.strftime('%Y-%m-%d')} 完成了“{scale_name}”测评，"
-                assessment_summary += f"结果为“{assessment.result_level}”，得分为 {assessment.final_score}分。\n"
-            summary_parts.append(assessment_summary)
-    except Exception as e:
-        print(f"[Prompt Data] Error fetching assessment data: {e}")
-
-    # 3. 获取所有人格测试结果
-    try:
-        personality_tests = personality_test_manager.get_personality_tests_by_user(user_id)
-        if personality_tests:
-            personality_summary = "- 过往人格/趣味测试结果摘要：\n"
-            for test in personality_tests:
-                test_name = getattr(test, 'test_name', '未知测试')
-                personality_summary += f"  - {test.completed_at.strftime('%Y-%m-%d')} 完成了“{test_name}”，"
-                personality_summary += f"结果为“{test.result_major}”。\n"
-            summary_parts.append(personality_summary)
-    except Exception as e:
-        print(f"[Prompt Data] Error fetching personality test data: {e}")
-
-    # 4. 组合所有信息
-    if not summary_parts:
-        return "该用户暂无更多信息。"
-
-    # 使用新的、更明确的引导语
-    full_summary = (
-        "这是由用户授权提供给你的，关于ta最近一段时间的个人信息。"
-        "请你仔细阅读并基于这些信息来感受和理解用户当前的情绪状态与潜在问题，从而更好地进行对话，帮助用户解决问题。建议你适当地基于这些信息主动发问。\n\n"
-        "--- 用户背景信息如下 ---"
-        + "\n".join(summary_parts)
-    )
-    return full_summary

@@ -1,216 +1,92 @@
-/* pages/daily-checkin/cabinet/cabinet.wxss */
-page {
-  background-color: #f7f8fa; /* 设置页面背景色 */
-}
+/* 背景 */
+page { background-color: #F9F7F3; }
 
-.container {
-  padding-left: 30rpx;
-  padding-right: 30rpx;
-  box-sizing: border-box;
-  min-height: 100vh;
-}
+/* 顶距用 page-root 的 padding-top 控制（行内） */
+.page-root { display: flex; flex-direction: column; min-height: 100vh; }
 
+/* 内容容器 */
+.container { padding: 0 30rpx; box-sizing: border-box; }
+
+/* 标题 */
 .page-title {
-  font-size: 44rpx;
-  font-weight: bold;
-  color: #333;
-  padding: 20rpx 10rpx 10rpx;
+  font-size: 44rpx; font-weight: bold; color: #333;
+  padding: 0 10rpx; margin: 8rpx 0 0 0; line-height: 1.1;
 }
 
-.bookshelf {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  padding-top: 10rpx; /* Adjusted padding */
-}
-
+/* 书架 */
+.bookshelf { display: flex; flex-wrap: wrap; justify-content: flex-start; margin-top: 0; }
 .notebook-item {
-  width: calc(50% - 20rpx); /* 每行显示两个，并留出间隙 */
-  margin: 10rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 40rpx;
-  cursor: pointer;
+  margin: 0 10rpx 32rpx 10rpx;
+  width: calc(50% - 20rpx);
+  display: flex; flex-direction: column; align-items: center;
 }
 
-.notebook-cover-wrapper {
+/* ✅ 统一的虚线相框：已有/新建公用 */
+.notebook-frame {
+  padding: 12rpx;
+  border: 2rpx dashed #E5B88C;
+  border-radius: 16rpx;
+  background-color: #F9F7F3; /* 与页面同色 */
+}
+
+/* 内部内容区域（固定 300x400） */
+.notebook-cover-wrapper,
+.add-box-area {
   position: relative;
   width: 300rpx;
   height: 400rpx;
+  border-radius: 12rpx;
 }
 
+/* 封面图片：透明、无阴影 */
 .notebook-cover {
-  width: 100%;
-  height: 100%;
-  border-radius: 10rpx;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  background-color: #fff;
-  transition: transform 0.2s ease-in-out;
+  width: 100%; height: 100%;
+  border-radius: 12rpx;
+  background: transparent;
+  box-shadow: none;
+  transition: transform .16s ease-in-out;
 }
+.notebook-item:active .notebook-cover { transform: scale(0.96); }
 
-.notebook-item:active .notebook-cover {
-  transform: scale(0.95); /* 点击时轻微缩小 */
-}
+/* 新建按钮里的加号居中 */
+.add-box-area { display: flex; justify-content: center; align-items: center; background: transparent; }
+.add-icon { width: 80rpx; height: 80rpx; opacity: .7; }
 
+/* 更多按钮 */
 .more-icon {
-  position: absolute;
-  top: 10rpx;
-  right: 10rpx;
-  width: 50rpx;
-  height: 50rpx;
-  padding: 10rpx;
-  background-color: rgba(0, 0, 0, 0.3);
-  border-radius: 50%;
+  position: absolute; top: 10rpx; right: 10rpx;
+  width: 50rpx; height: 50rpx; padding: 10rpx;
+  background: rgb(251, 250, 250); border-radius: 50%;
 }
 
+/* 封面竖排标题（可调 top 百分比微移） */
 .notebook-name-on-cover {
-  position: absolute;
-  top: 48%; /* Adjusted from 50% to move text up */
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  pointer-events: none; /* 让文字不阻挡封面点击事件 */
+  position: absolute; top: 46%; left: 50%;
+  transform: translate(-50%, -50%); z-index: 2;
+  display: flex; flex-direction: column; align-items: center; pointer-events: none;
 }
-
 .notebook-name-chunk {
-  font-size: 40rpx;
-  font-weight: bold;
-  color: white;
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
-  line-height: 1.4;
-  text-align: center;
+  font-size: 40rpx; font-weight: 700; color: #fff;
+  text-shadow: 0 1px 6px rgba(0,0,0,.35); line-height: 1.36; text-align: center;
 }
 
-.add-new-notebook .add-new-box {
-  width: 300rpx;
-  height: 400rpx;
-  border-radius: 10rpx;
-  border: 2px dashed #CCCCCC;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #FFFFFF;
-  transition: background-color 0.2s;
-}
+/* 第一行不留上边距 */
+.bookshelf .notebook-item:nth-child(-n+2) { margin-top: 0 !important; }
 
-.add-new-notebook:active .add-new-box {
-  background-color: #f2f2f2;
-}
+/* Action Sheet / Modal */
+.action-sheet-mask { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; display:flex; justify-content:center; align-items:flex-end; }
+.action-sheet { width: 100%; background: #faf6f1; border-top-left-radius: 20rpx; border-top-right-radius: 20rpx; padding-bottom: env(safe-area-inset-bottom); }
+.action-sheet-item { padding: 30rpx; text-align: center; font-size: 32rpx; color: #333; border-bottom: 1px solid #efe7dc; }
+.action-sheet-item:last-child { border-bottom: none; }
+.action-sheet-item.danger { color: #ee0a24; }
+.action-sheet-item:active { background: #efe7dc; }
+.action-sheet-gap { height: 10rpx; background: #f3eee7; border-bottom: 1px solid #efe7dc; }
 
-.add-icon {
-  width: 80rpx;
-  height: 80rpx;
-  opacity: 0.7;
-}
-
-/* --- Action Sheet --- */
-.action-sheet-mask {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-}
-
-.action-sheet {
-  width: 100%;
-  background-color: #f7f8fa;
-  border-top-left-radius: 20rpx;
-  border-top-right-radius: 20rpx;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.action-sheet-item {
-  padding: 30rpx;
-  text-align: center;
-  font-size: 32rpx;
-  color: #333;
-  border-bottom: 1px solid #ebedf0;
-}
-
-.action-sheet-item:last-child {
-  border-bottom: none;
-}
-
-.action-sheet-item.danger {
-  color: #ee0a24;
-}
-
-.action-sheet-item:active {
-  background-color: #e9eaec;
-}
-
-.action-sheet-gap {
-  height: 10rpx;
-  background-color: #f0f1f3;
-  border-bottom: 1px solid #ebedf0;
-}
-
-/* Modal */
-.modal-mask {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1001;
-}
-
-.modal-content {
-  background-color: white;
-  width: 80%;
-  border-radius: 20rpx;
-  padding: 40rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.1);
-}
-
-.modal-title {
-  font-size: 36rpx;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 30rpx;
-}
-
-.name-input {
-  border: 1rpx solid #ddd;
-  border-radius: 10rpx;
-  padding: 20rpx;
-  width: auto;
-  margin-bottom: 30rpx;
-  text-align: center;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 40rpx;
-}
-
-.modal-btn {
-  flex: 1;
-  margin: 0 10rpx;
-  font-size: 32rpx;
-}
-
-.modal-btn.cancel {
-  background-color: #f0f0f0;
-  color: #333;
-}
-
-.modal-btn.confirm {
-  background-color: #07c160;
-  color: white;
-}
+.modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,.5); display:flex; justify-content:center; align-items:center; z-index: 1001; }
+.modal-content { background: #fff; width: 80%; border-radius: 20rpx; padding: 40rpx; box-shadow: 0 4rpx 12rpx rgba(0,0,0,.1); }
+.modal-title { font-size: 36rpx; font-weight: bold; text-align: center; margin-bottom: 30rpx; }
+.name-input { border: 1rpx solid #ddd; border-radius: 10rpx; padding: 20rpx; width: auto; margin-bottom: 30rpx; text-align: center; }
+.modal-actions { display: flex; justify-content: space-between; margin-top: 40rpx; }
+.modal-btn { flex: 1; margin: 0 10rpx; font-size: 32rpx; }
+.modal-btn.cancel { background: #f0f0f0; color: #333; }
+.modal-btn.confirm { background: #07c160; color: #fff; }

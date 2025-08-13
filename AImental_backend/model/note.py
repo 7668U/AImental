@@ -1,116 +1,128 @@
-from peewee import Model, CharField, TextField, DateTimeField, BooleanField, ForeignKeyField, IntegerField, fn
-from datetime import datetime
-from db import cabinet_db # Import the new db instance
+# model/note.py (彻底重构版)
 
-# Base Model for cabinet_db
+from datetime import datetime
+from typing import List, Optional
+
+from peewee import (
+    Model, CharField, TextField, DateTimeField, BooleanField, IntegerField, fn
+)
+from db import cabinet_db
+
+# ---------------------------------------------------
+# 1) Peewee Models (模型已重构)
+# ---------------------------------------------------
+
 class BaseModel(Model):
     class Meta:
         database = cabinet_db
 
-# Notebook Model
-class Notebook(BaseModel):
-    user_id = CharField()
-    name = CharField()
-    cover_image = CharField(null=True)
-    created_at = DateTimeField(default=datetime.now)
-    updated_at = DateTimeField(default=datetime.now)
+# --- 【重要】Notebook 模型已被彻底移除 ---
 
-    class Meta:
-        table_name = 'notebooks'
-
-# NoteItem Model (for to-dos and general notes within a notebook)
 class NoteItem(BaseModel):
-    notebook = ForeignKeyField(Notebook, backref='notes', on_delete='CASCADE')
-    item_type = CharField() # 'todo' or 'note'
+    # --- 【修改】不再有关联到 Notebook 的外键 ---
+    # notebook = ForeignKeyField(Notebook, backref="notes", on_delete="CASCADE")
+
+    # --- 【新增】直接将 user_id 存储在每个条目上 ---
+    user_id = CharField(index=True)
+
+    # --- 其他字段保持不变 ---
+    item_type = CharField()
+    title = CharField(max_length=255, null=True)
     content = TextField()
-    is_completed = BooleanField(default=False) # For todo items
-    item_order = IntegerField(default=0) # To maintain order of items
+    is_completed = BooleanField(default=False)
+    item_order = IntegerField(default=0)
     created_at = DateTimeField(default=datetime.now)
     updated_at = DateTimeField(default=datetime.now)
 
     class Meta:
-        table_name = 'notes'
+        table_name = "notes"
 
-# --- Database Operations ---
 
-def create_tables():
-    """Creates the notebook and note_item tables if they don't exist."""
-    with cabinet_db:
-        cabinet_db.create_tables([Notebook, NoteItem])
+# ---------------------------------------------------
+# 2) Table Access Class (数据库操作层已重构)
+# ---------------------------------------------------
 
-# Notebook CRUD operations
-def create_notebook(user_id: str, name: str, cover_image: str = None):
-    """Creates a new notebook."""
-    return Notebook.create(user_id=user_id, name=name, cover_image=cover_image)
+class NoteTable:
+    def __init__(self, db_connection):
+        self.db = db_connection
+        # --- 【修改】现在只创建 NoteItem 表 ---
+        self.db.create_tables([NoteItem])
 
-def get_notebooks_by_user(user_id: str):
-    """Retrieves all notebooks for a given user, sorted by updated_at."""
-    return list(Notebook.select().where(Notebook.user_id == user_id).order_by(Notebook.updated_at.desc()))
+    # --- 【移除】所有和 Notebook 相关的方法都被移除了 ---
+    # get_or_create_default_notebook, create_notebook, get_notebook_by_id 等...
 
-def get_notebook_by_id(notebook_id: int):
-    """Retrieves a single notebook by its ID."""
-    return Notebook.get_or_none(Notebook.id == notebook_id)
+    # ---------- NoteItem (所有方法都已重构，直接使用 user_id) ----------
+    def create_note_item(
+        self,
+        user_id: str, # <--- 直接传入 user_id
+        item_type: str,
+        content: str,
+        title: Optional[str] = None,
+        is_completed: bool = False,
+        item_order: Optional[int] = None
+    ) -> NoteItem:
 
-def update_notebook(notebook_id: int, name: str = None, cover_image: str = None):
-    """Updates an existing notebook."""
-    notebook = get_notebook_by_id(notebook_id)
-    if notebook:
-        if name is not None:
-            notebook.name = name
-        if cover_image is not None:
-            notebook.cover_image = cover_image
-        notebook.updated_at = datetime.now()
-        notebook.save()
-        return notebook
-    return None
+        if item_type not in ("todo", "note"):
+            raise ValueError("item_type must be 'todo' or 'note'")
 
-def delete_notebook(notebook_id: int):
-    """Deletes a notebook by its ID."""
-    notebook = get_notebook_by_id(notebook_id)
-    if notebook:
-        notebook.delete_instance(recursive=True) # recursive=True deletes associated notes
+        if item_order is None:
+            # 找到该用户下最大的 item_order
+            max_order = (
+                NoteItem.select(fn.MAX(NoteItem.item_order))
+                .where(NoteItem.user_id == user_id) # <--- 按 user_id 查找
+                .scalar()
+            )
+            item_order = (max_order or 0) + 1
+
+        ni = NoteItem.create(
+            user_id=user_id, # <--- 保存 user_id
+            item_type=item_type,
+            title=title,
+            content=content,
+            is_completed=is_completed,
+            item_order=item_order
+        )
+        return ni
+
+    def get_note_items_by_user(self, user_id: str) -> List[NoteItem]:
+        """
+        根据 user_id 获取所有条目。
+        """
+        return list(
+            NoteItem.select()
+            .where(NoteItem.user_id == user_id) # <--- 按 user_id 查找
+            .order_by(NoteItem.updated_at.desc())
+        )
+
+    def get_note_item_by_id(self, note_item_id: int) -> Optional[NoteItem]:
+        return NoteItem.get_or_none(NoteItem.id == note_item_id)
+
+    def update_note_item(self, note_item_id: int, **update_data: dict) -> Optional[NoteItem]:
+        ni = self.get_note_item_by_id(note_item_id)
+        if not ni: return None
+
+        changed = False
+        for key, value in update_data.items():
+            if hasattr(ni, key):
+                setattr(ni, key, value)
+                changed = True
+
+        if changed:
+            ni.updated_at = datetime.now()
+            ni.save()
+            
+        # --- 【移除】不再需要更新父笔记本的时间 ---
+        return ni
+
+    def delete_note_item(self, note_item_id: int) -> bool:
+        ni = self.get_note_item_by_id(note_item_id)
+        if not ni:
+            return False
+        
+        ni.delete_instance()
+        # --- 【移除】不再需要更新父笔记本的时间 ---
         return True
-    return False
 
-# NoteItem CRUD operations
-def create_note_item(notebook_id: int, item_type: str, content: str, is_completed: bool = False, item_order: int = None):
-    """Creates a new note item within a notebook."""
-    notebook = get_notebook_by_id(notebook_id)
-    if not notebook:
-        return None
-    if item_order is None:
-        # Get the max order for the current notebook and add 1
-        max_order = NoteItem.select(fn.MAX(NoteItem.item_order)).where(NoteItem.notebook == notebook).scalar()
-        item_order = (max_order or 0) + 1
-    return NoteItem.create(notebook=notebook, item_type=item_type, content=content, is_completed=is_completed, item_order=item_order)
 
-def get_note_items_by_notebook(notebook_id: int):
-    """Retrieves all note items for a given notebook, sorted by item_order."""
-    return list(NoteItem.select().where(NoteItem.notebook == notebook_id).order_by(NoteItem.item_order))
-
-def get_note_item_by_id(note_item_id: int):
-    """Retrieves a single note item by its ID."""
-    return NoteItem.get_or_none(NoteItem.id == note_item_id)
-
-def update_note_item(note_item_id: int, content: str = None, is_completed: bool = None, item_order: int = None):
-    """Updates an existing note item."""
-    note_item = get_note_item_by_id(note_item_id)
-    if note_item:
-        if content is not None:
-            note_item.content = content
-        if is_completed is not None:
-            note_item.is_completed = is_completed
-        if item_order is not None:
-            note_item.item_order = item_order
-        note_item.updated_at = datetime.now()
-        note_item.save()
-        return note_item
-    return None
-
-def delete_note_item(note_item_id: int):
-    """Deletes a note item by its ID."""
-    note_item = get_note_item_by_id(note_item_id)
-    if note_item:
-        note_item.delete_instance()
-        return True
-    return False
+# --- 单例实例化 ---
+note_table = NoteTable(cabinet_db)

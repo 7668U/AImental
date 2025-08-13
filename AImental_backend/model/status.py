@@ -15,7 +15,12 @@ from fastapi import UploadFile
 import random
 
 # Import the database connection as requested
-from db import status_db
+try:
+    from db import status_db
+except ImportError:
+    # Fallback for standalone execution or if db.py is not set up yet
+    import peewee as pw
+    status_db = pw.SqliteDatabase('db/daily_status.db')
 
 # ---------------------------------------------------
 # 1. Peewee Database Model
@@ -67,9 +72,55 @@ class CheckinTable:
     """Encapsulates all database operations for the 'checkins' table."""
     def __init__(self, db_connection):
         self.db = db_connection
+        # This safely creates the table if it doesn't exist.
         self.db.create_tables([Checkin], safe=True)
+        # self.create_dummy_data_for_month()
         
+    def create_dummy_data_for_month(self, user_id: str = "c959d470-64e7-45fe-8942-45ee05d0f153"):
+        """
+        Generates a full month of random check-in data for a user.
+        """
+        mood_choices = ['开心', '平静', '难过', '生气', '放松', '迷茫', '尴尬', '疲惫', '兴奋']
+        tag_choices = ['工作', '学习', '美食', '生病', '远足', '娱乐', '躺平', '运动']
+        color_choices = ['#FFC107', '#81D4FA', '#A5D6A7', '#B0BEC5', '#F48FB1', '#C5CAE9', '#FF8A80', '#FFF59D', '#80CBC4', '#7986CB', '#BCAAA4', '#F5F5F5']
+
+        today = datetime.datetime.now()
+        year, month = today.year, today.month
+        num_days = calendar.monthrange(year, month)[1]
+
+        print(f"Attempting to generate dummy data for {year}-{month} for user {user_id}...")
+        
+        created_count = 0
+        for day in range(1, num_days + 1):
+            target_date_str = f"{year}-{month:02d}-{day:02d}"
+            existing_checkin = self.get_checkin_by_date(user_id, target_date_str)
+            if existing_checkin:
+                continue
+
+            date_part = datetime.datetime(year, month, day)
+            time_part = datetime.time(12, 0)
+            checkin_dt_obj = datetime.datetime.combine(date_part, time_part)
+            
+            checkin_timestamp = int(checkin_dt_obj.timestamp())
+
+            dummy_record = {
+                "user_id": user_id,
+                "mood": random.choice(mood_choices),
+                "tags": random.choice(tag_choices),
+                "color": random.choice(color_choices),
+                "text_content": f"这是{month}月{day}日的自动生成记录。",
+                "timestamp": checkin_timestamp,
+                "updated_at": checkin_timestamp
+            }
+            
+            Checkin.create(**dummy_record)
+            created_count += 1
+        
+        print(f"Dummy data generation complete. Created {created_count} new records.")
+        return {"message": f"Process complete. Created {created_count} new records."}
+
     def create_checkin(self, user_id: str, data: CheckinBaseModel) -> Optional[Checkin]:
+        """Creates a new checkin record."""
         try:
             checkin = Checkin.create(
                 user_id=user_id,
@@ -80,9 +131,13 @@ class CheckinTable:
             return None
 
     def get_checkin_by_id(self, checkin_id: str) -> Optional[Checkin]:
+        """Retrieves a single checkin by its primary key."""
         return Checkin.get_or_none(Checkin.id == checkin_id)
 
     def get_checkin_by_date(self, user_id: str, target_date_str: str) -> Optional[Checkin]:
+        """
+        Gets the checkin for a specific user on a specific date.
+        """
         try:
             query = Checkin.select().where(
                 (Checkin.user_id == user_id) &
@@ -94,6 +149,10 @@ class CheckinTable:
             return None
 
     def get_checkins_by_month(self, user_id: str, year: int, month: int) -> Dict[str, Dict]:
+        """
+        Gets all checkins for a specific user in a given month and returns them
+        as a dictionary keyed by the day of the month.
+        """
         start_date = datetime.datetime(year, month, 1)
         if month == 12:
             end_date = datetime.datetime(year + 1, 1, 1)
@@ -117,22 +176,21 @@ class CheckinTable:
             
         return checkins_map
 
-    # --- 【新增方法】 ---
-    def get_recent_checkins(self, user_id: str, days: int = 7) -> List[Checkin]:
+    def get_checkins_by_period(self, user_id: str, start_timestamp: int, end_timestamp: int) -> List[Dict]:
         """
-        获取用户最近N天的打卡记录。
+        Gets all checkins for a user within a given timestamp range.
+        Returns a list of dictionaries, suitable for multi-month, quarterly, or yearly queries.
         """
-        start_timestamp = int((datetime.datetime.now() - datetime.timedelta(days=days)).timestamp())
-        
         query = Checkin.select().where(
             (Checkin.user_id == user_id) &
-            (Checkin.timestamp >= start_timestamp)
-        ).order_by(Checkin.timestamp.desc())
-        
-        return list(query)
-    # --- ----------- ---
+            (Checkin.timestamp >= start_timestamp) &
+            (Checkin.timestamp < end_timestamp)
+        ).order_by(Checkin.timestamp.asc())
+
+        return [model_to_dict(c) for c in query]
 
     def update_checkin(self, checkin_id: str, data: CheckinBaseModel) -> Optional[Checkin]:
+        """Updates an existing checkin record."""
         update_data = data.model_dump(exclude_unset=True)
         update_data['updated_at'] = int(time.time())
 
@@ -144,19 +202,25 @@ class CheckinTable:
         return None
 
     def delete_checkin(self, checkin_id: str) -> bool:
+        """Deletes a checkin record by its ID."""
         query = Checkin.delete().where(Checkin.id == checkin_id)
         rows_affected = query.execute()
         return rows_affected > 0
     
     def save_checkin_image(self, user_id: str, image_file: UploadFile) -> Optional[str]:
+        """
+        Saves an uploaded image for a check-in into a structured directory.
+        """
         try:
             base_upload_dir = "static/status"
-            user_specific_dir = os.path.join(base_upload_dir, user_id)
+            today_str = datetime.datetime.now().strftime('%Y-%m-%d')
+            user_specific_dir = os.path.join(base_upload_dir, user_id, today_str)
             os.makedirs(user_specific_dir, exist_ok=True)
             file_extension = os.path.splitext(image_file.filename)[1]
             new_filename = f"{int(time.time())}{file_extension}"
             save_path = os.path.join(user_specific_dir, new_filename)
             
+            # --- FIX: Perform the string replacement outside of the f-string ---
             clean_path = save_path.replace('\\', '/')
             web_path = f"/{clean_path}"
             
@@ -170,6 +234,7 @@ class CheckinTable:
             image_file.file.close()
             
     def update_image_url(self, checkin_id: str, image_url: str) -> bool:
+        """Updates only the image_url for a given check-in."""
         query = Checkin.update(image_url=image_url).where(Checkin.id == checkin_id)
         rows_affected = query.execute()
         return rows_affected > 0
@@ -179,6 +244,7 @@ class CheckinTable:
 # ---------------------------------------------------
 
 def model_to_dict(model_instance: Model) -> Dict:
+    """A helper function to convert a Peewee model instance to a dictionary."""
     return {
         "id": model_instance.id,
         "user_id": model_instance.user_id,

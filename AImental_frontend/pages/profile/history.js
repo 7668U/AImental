@@ -1,7 +1,6 @@
 // pages/profile/history.js
 
 const SERVER_BASE_URL = 'http://127.0.0.1:8000';
-// ✅ 【修改】将 API URL 分得更细，方便调用不同模块的接口
 const ASSESSMENTS_API_URL = `${SERVER_BASE_URL}/api/v1/assessments`;
 const ANALYSIS_API_URL = `${SERVER_BASE_URL}/api/v1/history-analysis`;
 
@@ -19,24 +18,21 @@ Page({
     this.fetchHistory();
   },
 
-  // ✅ 【核心修改】重写 goToAnalysis 函数
   goToAnalysis(e) {
     const { scale, records } = e.currentTarget.dataset.scale;
+    // 此处的判断在WXML中已经处理，但为保险起见，JS中也可以保留
     if (records.length < 5) {
       wx.showToast({ title: '测试次数不足5次，暂时无法分析', icon: 'none' });
       return;
     }
 
-    // 1. 提取当前分组下所有记录的ID
     const history_ids = records.map(r => r.id);
 
-    // 2. 显示加载提示，因为AI分析需要时间
     wx.showLoading({
       title: '正在生成报告...',
       mask: true
     });
 
-    // 3. 调用我们新建的后端AI分析接口
     wx.request({
       url: `${ANALYSIS_API_URL}/synthesize`,
       method: 'POST',
@@ -49,16 +45,14 @@ Page({
       },
       success: (res) => {
         if (res.statusCode === 200) {
-          // 4. 成功获取报告后，跳转页面并通过 eventChannel 传递数据
           const analysisReport = res.data;
           
           wx.navigateTo({
             url: `/pages/profile/history_analysis`,
             success: (navRes) => {
-              // 使用 eventChannel “投喂”数据给下一个页面
               navRes.eventChannel.emit('acceptDataFromHistoryPage', { 
-                groupData: e.currentTarget.dataset.scale, // 传递包含记录和量表信息的整个分组
-                reportData: analysisReport // 传递AI分析报告
+                groupData: e.currentTarget.dataset.scale,
+                reportData: analysisReport
               });
             }
           });
@@ -78,8 +72,6 @@ Page({
       }
     });
   },
-
-  // --- 以下是原有的其他函数，保持不变 ---
 
   fetchHistory() {
     this.setData({ isLoading: true });
@@ -131,19 +123,16 @@ Page({
     this.closeOtherSwipedItems(-1, -1);
     try {
       const { record } = e.currentTarget.dataset;
-      if (!record) { return; }
-      const recordString = JSON.stringify(record);
-      const encodedRecord = encodeURIComponent(recordString);
-      const url = `/pages/assessment/result?data=${encodedRecord}&from=history`;
-      wx.navigateTo({
-        url: url,
-        fail: (err) => {
-          if (err.errMsg && err.errMsg.includes('too large')) {
-            wx.showToast({ title: '结果数据过大，无法跳转', icon: 'none' });
-          }
-        }
-      });
+      if (!record || !record.id) { 
+        console.error("无法跳转：记录或记录ID无效", record);
+        return;
+      }
+      // ✅ 【核心修改】不再传递整个对象，只传递 record_id
+      const url = `/pages/assessment/result?record_id=${record.id}&from=history`;
+      wx.navigateTo({ url: url });
+
     } catch (err) {
+      console.error("跳转到结果页时发生错误", err);
       wx.showToast({ title: '发生未知错误', icon: 'none' });
     }
   },
@@ -151,7 +140,7 @@ Page({
     formatDateToYYYYMMDD(timestamp) {
     const date = new Date(timestamp);
     const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-indexed
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
     return `${year}-${month}-${day}`;
   },
@@ -159,9 +148,17 @@ Page({
   processHistoryData(records) {
     if (!records || records.length === 0) return [];
     const historyMap = new Map();
+
     records.forEach(record => {
+      // 增加一个安全检查，如果记录没有 scale_info，则跳过
+      if (!record.scale_info) {
+        console.warn("记录缺少 scale_info，已跳过:", record);
+        return;
+      }
+        
       record.x_offset = 0;
       record.completed_at_formatted = this.formatDateToYYYYMMDD(record.completed_at);
+      
       const scaleId = record.scale_info.id;
       if (historyMap.has(scaleId)) {
         historyMap.get(scaleId).records.push(record);
@@ -170,13 +167,17 @@ Page({
         const shortName = record.scale_info.short_name;
         const iconName = shortName ? shortName.toLowerCase() : 'default';
         const iconPath = `/images/assessment/${iconName}.png`;
+        
         historyMap.set(scaleId, {
           scale_id: scaleId,
           scale_name: record.scale_info.name,
           iconPath: iconPath,
           count: 1,
           is_expanded: false,
-          records: [record]
+          records: [record],
+          // ✅ 【核心修改已集成】
+          // 从当前记录的 scale_info 中获取 assessment_type，并存入分组信息
+          assessment_type: record.scale_info.assessment_type 
         });
       }
     });

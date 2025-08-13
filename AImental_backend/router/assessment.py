@@ -1,31 +1,27 @@
-# router/assessment.py
+# router/assessment.py (图片URL拼接最终版)
 
 import json
-from fastapi import APIRouter, Depends, HTTPException
-from typing import List, Dict, Any
+from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List
 
 # 1. 导入项目模块
-# 假设你的 auth.py 在同一个 router 目录下
 try:
     from .auth import get_current_user_id
-except ImportError:
-    # 如果结构不同，请相应调整
-    # 这是一个备用导入，以防你的 auth 逻辑在项目根的 auth.py 中
+except (ImportError, ModuleNotFoundError):
     from auth import get_current_user_id
 
-# 从 model 层导入数据访问对象和 Pydantic 模型
 from model.assessment import (
     assessment_tables,
     ScaleInfoResponse,
     ScaleDetailResponse,
     SubmitAnswersRequest,
-    UserAssessmentResponse,
-    personality_test_manager,  # 重点：使用新的 manager
-    PersonalityTestInfoResponse,
-    SubmitPersonalityTestRequest,
-    UserPersonalityTestResponse
+    UserAssessmentResponse
 )
-from model.user import User  # 导入User模型以便在响应中获取用户信息
+
+# ✅ 【第 1 步】: 在这里定义您的服务器基地址
+# 部署时请务必替换为您的实际公网域名和端口
+# 例如: "https://www.your-domain.com"
+SERVER_BASE_URL = "http://127.0.0.1:8000"
 
 # ---------------------------------------------------
 # Router 设置
@@ -39,30 +35,35 @@ router = APIRouter(
 # API 端点
 # ---------------------------------------------------
 
-@router.get("/", response_model=List[ScaleInfoResponse], summary="获取所有量表列表")
-def get_all_available_scales():
-    """
-    提供给前端，用于展示所有可用的心理测评量表。
-    返回一个包含所有量表基本信息的列表。
-    """
+@router.get(
+    "/", 
+    response_model=List[ScaleInfoResponse], 
+    summary="获取所有可用的测评量表列表"
+)
+def get_all_available_scales(
+    current_user_id: str = Depends(get_current_user_id)
+):
     scales = assessment_tables.get_all_scales()
     return scales
 
-@router.get("/{scale_id}", response_model=ScaleDetailResponse, summary="获取单个量表详情")
+@router.get(
+    "/{scale_id}", 
+    response_model=ScaleDetailResponse, 
+    summary="获取单个量表的完整详情"
+)
 def get_single_scale_details(scale_id: str):
-    """
-    当用户选择一个特定的量表时，前端调用此接口获取完整的题目、选项和规则。
-    """
     scale = assessment_tables.get_scale_by_id(scale_id)
     if not scale:
-        raise HTTPException(status_code=404, detail="Scale not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scale not found")
     
-    # 将从数据库取出的JSON字符串解析为字典
     scale.json_data = json.loads(scale.json_data)
-    
     return scale
 
-@router.post("/submit", response_model=UserAssessmentResponse, summary="提交测评答案并获取结果")
+@router.post(
+    "/submit", 
+    response_model=UserAssessmentResponse, 
+    summary="提交测评答案并获取结果"
+)
 def submit_assessment_answers(
     request_data: SubmitAnswersRequest,
     current_user_id: str = Depends(get_current_user_id)
@@ -71,167 +72,139 @@ def submit_assessment_answers(
         user_id=current_user_id,
         request_data=request_data
     )
-    
     if not result_record:
-        raise HTTPException(status_code=400, detail="Failed to process assessment. Check scale_id or answers.")
-    
-    # 【关键修正】在返回前，将 answers 字符串解析回字典
-    if isinstance(result_record.answers, str):
-        result_record.answers = json.loads(result_record.answers)
-    
-    return result_record
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Failed to process assessment. Check scale_id or answers format."
+        )
 
-@router.get("/history/", response_model=List[UserAssessmentResponse], summary="获取当前用户的测评历史")
+    response_dict = {
+        "id": result_record.id,
+        "user_id": result_record.user_id,
+        "scale_id": result_record.scale_id,
+        "answers": json.loads(result_record.answers) if result_record.answers else {},
+        "raw_score": result_record.raw_score,
+        "final_score": result_record.final_score,
+        "result_level": result_record.result_level,
+        "result_interpretation": result_record.result_interpretation,
+        "result_recommendation": result_record.result_recommendation,
+        "result_details": json.loads(result_record.result_details) if result_record.result_details else None,
+        "completed_at": result_record.completed_at,
+        "scale_info": None,
+        "scale_details": None
+    }
+    
+    scale_obj = assessment_tables.get_scale_by_id(request_data.scale_id)
+    if scale_obj:
+        response_dict['scale_details'] = {
+            "id": scale_obj.id, "short_name": scale_obj.short_name,
+            "name": scale_obj.name, "description": scale_obj.description,
+            "category": scale_obj.category, "assessment_type": scale_obj.assessment_type,
+            "json_data": json.loads(scale_obj.json_data)
+        }
+    
+    # ✅ 【第 2 步】: 在返回前，为图片URL添加服务器地址前缀
+    if response_dict.get("result_details") and isinstance(response_dict["result_details"], dict):
+        image_url = response_dict["result_details"].get("image_url")
+        # 如果 image_url 存在，且不是以 http 开头的完整路径
+        if image_url and not image_url.startswith("http"):
+            response_dict["result_details"]["image_url"] = f"{SERVER_BASE_URL}{image_url}"
+
+    return response_dict
+
+@router.get(
+    "/history/", 
+    response_model=List[UserAssessmentResponse], 
+    summary="获取当前用户的测评历史记录"
+)
 def get_user_assessment_history(current_user_id: str = Depends(get_current_user_id)):
-    """
-    获取当前登录用户的所有历史测评记录，按时间倒序排列。
-    这是一个受保护的路由。
-    """
     history = assessment_tables.get_assessments_by_user(user_id=current_user_id)
     
-    # 丰富返回信息，将 scale 的基本信息也一并返回
     response_list = []
     for record in history:
-        # 将答案字符串解析为字典
-        record.answers = json.loads(record.answers)
+        item = {
+            "id": record.id, "user_id": record.user_id, "scale_id": record.scale_id,
+            "answers": json.loads(record.answers) if record.answers else {},
+            "raw_score": record.raw_score, "final_score": record.final_score,
+            "result_level": record.result_level,
+            "result_interpretation": record.result_interpretation,
+            "result_recommendation": record.result_recommendation,
+            "result_details": json.loads(record.result_details) if record.result_details else None,
+            "completed_at": record.completed_at,
+            "scale_details": None, "scale_info": None,
+        }
         
-        # 附加量表信息
         if record.scale:
-             record.scale_info = {
-                "id": record.scale.id,
-                "short_name": record.scale.short_name,
-                "name": record.scale.name,
-                "description": record.scale.description
-             }
-        response_list.append(record)
+            item['scale_info'] = ScaleInfoResponse.from_orm(record.scale).model_dump()
         
+        # ✅ 【第 2 步】: 对列表中的每一项都进行URL拼接处理
+        if item.get("result_details") and isinstance(item["result_details"], dict):
+            image_url = item["result_details"].get("image_url")
+            if image_url and not image_url.startswith("http"):
+                item["result_details"]["image_url"] = f"{SERVER_BASE_URL}{image_url}"
+        
+        response_list.append(item)
+            
     return response_list
 
-
-@router.delete("/history/{record_id}", status_code=204, summary="删除一条测评记录")
+@router.delete(
+    "/history/{record_id}", 
+    status_code=status.HTTP_204_NO_CONTENT, 
+    summary="删除一条测评记录"
+)
 def delete_assessment_record(
     record_id: str,
     current_user_id: str = Depends(get_current_user_id)
 ):
-    """
-    删除属于当前用户的一条指定的测评历史记录。
-    这是一个受保护的路由。
-    """
     success = assessment_tables.delete_user_assessment(
         user_id=current_user_id,
         record_id=record_id
     )
-    
     if not success:
-        raise HTTPException(status_code=404, detail="Record not found or you do not have permission to delete it.")
-    
-    # 成功时，FastAPI 会自动返回 204 No Content 状态码
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Record not found or you do not have permission to delete it."
+        )
     return
 
-
-
-
-# ---------------------------------------------------
-# 针对人格测试的全新 API 端点
-# ---------------------------------------------------
-
-# ---------------------------------------------------
-# 新增 Pydantic 模型 (用于“获取详情”接口)
-# ---------------------------------------------------
-
-class PersonalityTestDetailResponse(PersonalityTestInfoResponse):
-    """用于API返回的人格测试完整详情模型"""
-    # 将json_data字段解析为Python字典返回给前端
-    json_data: Dict[str, Any]
-
-@router.get("/", response_model=List[PersonalityTestInfoResponse], summary="获取所有人格/趣味测试列表")
-def get_all_available_personality_tests():
-    """
-    提供给前端，用于展示所有可用的人格/趣味测试，比如“真实专业测试”。
-    """
-    tests = personality_test_manager.get_all_personality_tests()
-    return tests
-
-@router.get("/{test_id}", response_model=PersonalityTestDetailResponse, summary="获取单个人格测试详情")
-def get_single_personality_test_details(test_id: str):
-    """
-    当用户选择一个特定的人格测试时，前端调用此接口获取完整的题目、选项和定义。
-    """
-    test = personality_test_manager.get_personality_test_by_id(test_id)
-    if not test:
-        raise HTTPException(status_code=404, detail="Personality test not found")
-    
-    # 将从数据库取出的JSON字符串解析为字典
-    test.json_data = json.loads(test.json_data)
-    
-    return test
-
-@router.post("/submit", response_model=UserPersonalityTestResponse, summary="提交人格测试答案并获取结果")
-def submit_personality_test_answers(
-    request_data: SubmitPersonalityTestRequest,
-    current_user_id: str = Depends(get_current_user_id)
-):
-    """
-    用户提交“真实专业测试”的答案后，调用此接口计算并返回最终的“专业”结果。
-    这是一个受保护的路由。
-    """
-    result_record = personality_test_manager.create_user_personality_test(
-        user_id=current_user_id,
-        request_data=request_data
-    )
-    
-    if not result_record:
-        raise HTTPException(status_code=400, detail="Failed to process personality test. Check test_id or answers.")
-    
-    # 【关键】在返回前，将 scores_details 字符串解析回字典，以便 response_model 正确校验
-    if isinstance(result_record.scores_details, str):
-        result_record.scores_details = json.loads(result_record.scores_details)
-    
-    return result_record
-
-@router.get("/history/", response_model=List[UserPersonalityTestResponse], summary="获取当前用户的人格测试历史")
-def get_user_personality_test_history(current_user_id: str = Depends(get_current_user_id)):
-    """
-    获取当前登录用户的所有人格测试历史记录，按时间倒序排列。
-    这是一个受保护的路由。
-    """
-    history = personality_test_manager.get_personality_tests_by_user(user_id=current_user_id)
-    
-    # 丰富返回信息，将 test 的基本信息也一并返回
-    response_list = []
-    for record in history:
-        # 将分数详情字符串解析为字典
-        if isinstance(record.scores_details, str):
-            record.scores_details = json.loads(record.scores_details)
-        
-        # 附加测试的基本信息
-        if record.test:
-            record.test_info = {
-                "id": record.test.id,
-                "short_name": record.test.short_name,
-                "name": record.test.name,
-                "description": record.test.description
-            }
-        response_list.append(record)
-        
-    return response_list
-
-@router.delete("/history/{record_id}", status_code=204, summary="删除一条人格测试记录")
-def delete_personality_test_record(
+@router.get(
+    "/history/{record_id}", 
+    response_model=UserAssessmentResponse, 
+    summary="获取单条完整的测评历史记录详情"
+)
+def get_single_assessment_record(
     record_id: str,
     current_user_id: str = Depends(get_current_user_id)
 ):
-    """
-    删除属于当前用户的一条指定的人格测试历史记录。
-    这是一个受保护的路由。
-    """
-    success = personality_test_manager.delete_user_personality_test(
-        user_id=current_user_id,
-        record_id=record_id
-    )
+    record = assessment_tables.get_assessment_by_id(record_id)
+    if not record or record.user_id != current_user_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Record not found")
+
+    response_dict = {
+        "id": record.id, "user_id": record.user_id, "scale_id": record.scale_id,
+        "answers": json.loads(record.answers) if record.answers else {},
+        "raw_score": record.raw_score, "final_score": record.final_score,
+        "result_level": record.result_level,
+        "result_interpretation": record.result_interpretation,
+        "result_recommendation": record.result_recommendation,
+        "result_details": json.loads(record.result_details) if record.result_details else None,
+        "completed_at": record.completed_at,
+        "scale_info": None, "scale_details": None
+    }
     
-    if not success:
-        raise HTTPException(status_code=404, detail="Record not found or you do not have permission to delete it.")
+    if record.scale:
+        scale_obj = record.scale
+        response_dict['scale_details'] = {
+            "id": scale_obj.id, "short_name": scale_obj.short_name,
+            "name": scale_obj.name, "description": scale_obj.description,
+            "category": scale_obj.category, "assessment_type": scale_obj.assessment_type,
+            "json_data": json.loads(scale_obj.json_data)
+        }
     
-    # 成功时，FastAPI 会自动返回 204 No Content 状态码
-    return
+    # ✅ 【第 2 步】: 同样地，为这个接口也添加URL拼接逻辑
+    if response_dict.get("result_details") and isinstance(response_dict["result_details"], dict):
+        image_url = response_dict["result_details"].get("image_url")
+        if image_url and not image_url.startswith("http"):
+            response_dict["result_details"]["image_url"] = f"{SERVER_BASE_URL}{image_url}"
+
+    return response_dict

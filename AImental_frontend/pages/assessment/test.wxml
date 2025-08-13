@@ -1,40 +1,41 @@
-<!-- 
-  页码: pages/assessment/test.wxml
-  功能: 测评问卷答题页面 (终极修正版)
--->
 <view class="container">
-  <!-- 加载状态 -->
   <view class="loading-container" wx:if="{{!scaleData}}">
     <text>正在为您加载题目...</text>
   </view>
 
-  <!-- 主内容区域 -->
   <view class="main-content" wx:else>
-    <!-- 问题滑动区域 -->
     <swiper class="question-swiper" current="{{currentIndex}}" bindchange="onSwiperChange" duration="300">
       <block wx:for="{{questions}}" wx:key="order" wx:for-index="index">
         <swiper-item>
           <view class="swiper-item-content">
-            <!-- 问题文本 -->
             <view class="question-text">{{item.order}}. {{item.text}}</view>
             
-            <!-- 选项容器 -->
             <view class="options-container">
               <radio-group class="option-group" bindchange="onRadioChange" data-order="{{item.order}}">
-                <label class="option-row {{answers[item.order] == option.score ? 'selected' : ''}}" wx:for="{{item.choices}}" wx:key="score" wx:for-item="option">
-                  <view class="option-dot-wrapper">
-                    <view class="option-dot {{answers[item.order] == option.score ? 'selected' : ''}}"></view>
-                  </view>
-                  <view class="option-text">{{option.text}}</view>
-                  <radio class="option-radio-hidden" value="{{option.score}}" checked="{{answers[item.order] == option.score}}"></radio>
-                </label>
+                
+                <block wx:if="{{scaleData.assessment_type === 'scoring'}}">
+                  <label class="option-row {{answers[item.order] == option.score ? 'selected' : ''}}" wx:for="{{item.choices}}" wx:key="score" wx:for-item="option">
+                    <view class="option-dot-wrapper">
+                      <view class="option-dot {{answers[item.order] == option.score ? 'selected' : ''}}"></view>
+                    </view>
+                    <view class="option-text">{{option.text}}</view>
+                    <radio class="option-radio-hidden" value="{{option.score}}" checked="{{answers[item.order] == option.score}}"></radio>
+                  </label>
+                </block>
+
+                <block wx:else>
+                   <label class="option-row {{answers[item.order] == option.id ? 'selected' : ''}}" wx:for="{{item.choices}}" wx:key="id" wx:for-item="option">
+                    <view class="option-dot-wrapper">
+                      <view class="option-dot {{answers[item.order] == option.id ? 'selected' : ''}}"></view>
+                    </view>
+                    <view class="option-text">{{option.text}}</view>
+                    <radio class="option-radio-hidden" value="{{option.id}}" checked="{{answers[item.order] == option.id}}"></radio>
+                  </label>
+                </block>
+
               </radio-group>
             </view>
 
-            <!-- 
-              终极修复: 不再使用 button，改用 view 来模拟按钮，彻底避免样式冲突。
-              功能上，view 的 bindtap 事件和 button 完全一样。
-            -->
             <view class="in-page-submit-container" wx:if="{{index === totalQuestions - 1}}">
               <view 
                 class="submit-btn-view {{ (isSubmitting || answeredCount < totalQuestions) ? 'disabled' : '' }}"
@@ -48,7 +49,6 @@
       </block>
     </swiper>
     
-    <!-- 底部固定导航栏 -->
     <view class="footer">
       <view class="progress-bar-container">
         <view class="progress-wrapper">
@@ -57,10 +57,9 @@
           </view>
           <image class="runner-icon" src="/images/assessment/run.png" style="left: {{progress}}%;"></image>
         </view>
-        <view class="progress-text">{{answeredCount}} / {{totalQuestions}}</view>
+        <view class="progress-text">{{answeredCount}}/{{totalQuestions}}</view>
       </view>
       
-      <!-- 上一题/下一题导航 -->
       <view class="action-buttons">
         <image class="nav-icon" src="/images/left.png" bindtap="prevQuestion" />
         <image class="nav-icon" src="/images/right.png" bindtap="nextQuestion" />
