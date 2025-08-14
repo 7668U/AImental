@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心灵社区 - 后端功能测试页面</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; display: flex; flex-direction: column; height: 100vh; margin: 0; background-color: #f4f4f9; }
+        .header { background-color: #4a4a4a; color: white; padding: 10px 20px; text-align: center; }
+        .container { display: flex; flex: 1; overflow: hidden; }
+        #left-panel { width: 250px; border-right: 1px solid #ddd; display: flex; flex-direction: column; background-color: #fff; }
+        #right-panel { flex: 1; display: flex; flex-direction: column; }
+        #login-section, #character-list-section { padding: 15px; }
+        #login-section { border-bottom: 1px solid #ddd; }
+        #character-list-section { flex: 1; overflow-y: auto; }
+        #character-list .character { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; }
+        #character-list .character:hover { background-color: #f0f0f0; }
+        #character-list .character.active { background-color: #dbeafe; }
+        #character-list img { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; object-fit: cover; }
+        #character-list button { font-size: 12px; padding: 2px 6px; margin-left: auto; }
+        #chat-header { padding: 15px; border-bottom: 1px solid #ddd; background-color: #fafafa; }
+        #chat-window { flex: 1; padding: 15px; overflow-y: auto; background-color: #f9f9f9; display: flex; flex-direction: column; }
+        .message { margin-bottom: 10px; padding: 8px 12px; border-radius: 18px; max-width: 70%; line-height: 1.4; white-space: pre-wrap; }
+        .ai-message { background-color: #fff; border: 1px solid #e5e5e5; align-self: flex-start; }
+        .user-message { background-color: #95ec69; align-self: flex-end; }
+        #message-form { display: flex; padding: 15px; border-top: 1px solid #ddd; background-color: #fff; }
+        #message-input { flex: 1; border: 1px solid #ccc; border-radius: 15px; padding: 8px 12px; }
+        #send-btn { background-color: #007bff; color: white; border: none; border-radius: 15px; padding: 8px 15px; margin-left: 10px; cursor: pointer; }
+        #send-btn:disabled { background-color: #aaa; }
+        #status-log { position: fixed; bottom: 0; left: 0; width: 100%; background: #333; color: lime; font-family: monospace; font-size: 12px; z-index: 100; }
+        #status-log-header { display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; background-color: #444; border-bottom: 1px solid #555; font-size: 14px; }
+        #close-log-btn { background: none; border: none; color: white; font-size: 24px; line-height: 1; cursor: pointer; padding: 0 5px; }
+        #close-log-btn:hover { color: #ff7b7b; }
+        #status-log-content { max-height: 100px; overflow-y: auto; padding: 5px; }
+        .hidden { display: none !important; }
+        input { padding: 5px; }
+        button { cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>心灵社区 - 后端功能测试</h1>
+    </div>
+
+    <div class="container">
+        <div id="left-panel">
+            <div id="login-section">
+                <h3>用户登录</h3>
+                <input type="text" id="user-id-input" placeholder="输入一个用户ID (例如 my-user)">
+                <button id="login-btn">登录</button>
+            </div>
+            <div id="character-list-section">
+                <h3>AI角色列表</h3>
+                <div id="character-list">
+                    </div>
+            </div>
+        </div>
+
+        <div id="right-panel">
+            <div id="chat-header">
+                <h2 id="chat-title">请先登录并选择一个AI角色</h2>
+            </div>
+            <div id="chat-window">
+                </div>
+            <form id="message-form" onsubmit="event.preventDefault(); sendMessage();">
+                <input type="text" id="message-input" placeholder="输入消息..." autocomplete="off" disabled>
+                <button id="send-btn" type="submit" disabled>发送</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="status-log" class="hidden"> <div id="status-log-header">
+            <span>状态日志</span>
+            <button id="close-log-btn" title="关闭日志">×</button>
+        </div>
+        <div id="status-log-content">
+            </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
