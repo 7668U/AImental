@@ -1,7 +1,7 @@
 # models/ai_task.py
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, List, Dict
 
 # 导入Peewee和Pydantic的核心组件
@@ -52,12 +52,12 @@ class AITask(Model):
     # 计划执行时间，异步回复的关键
     execute_at = DateTimeField(index=True)
     
-    created_at = DateTimeField(default=datetime.now)
-    updated_at = DateTimeField(default=datetime.now)
+    created_at = DateTimeField(default=lambda: datetime.utcnow() + timedelta(hours=8))
+    updated_at = DateTimeField(default=lambda: datetime.utcnow() + timedelta(hours=8))
 
     def save(self, *args, **kwargs):
         """重写save方法，自动更新updated_at时间戳"""
-        self.updated_at = datetime.now()
+        self.updated_at = datetime.utcnow() + timedelta(hours=8)
         return super(AITask, self).save(*args, **kwargs)
 
     class Meta:
@@ -127,7 +127,7 @@ class AITaskTable:
         获取所有已到期且待处理的任务。
         这是后台工作进程(background_worker)需要调用的主要函数。
         """
-        now = datetime.now()
+        now = datetime.utcnow() + timedelta(hours=8)
         query = (AITask
                  .select()
                  .where(

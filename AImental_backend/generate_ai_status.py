@@ -141,6 +141,7 @@ def generate_daily_schedule(
             ],
             response_format={"type": "json_object"}, # 强制要求返回JSON对象
             temperature=0.7,
+            max_tokens=2048  # <-- 【核心修复】在这里增加 max_tokens 参数
         )
         
         raw_response_content = response.choices[0].message.content

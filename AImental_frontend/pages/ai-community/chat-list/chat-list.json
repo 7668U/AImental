@@ -1,0 +1,6 @@
+{
+  "usingComponents": {},
+  "navigationBarTitleText": "心灵社区",
+  "enablePullDownRefresh": true,
+  "navigationStyle": "custom"
+}

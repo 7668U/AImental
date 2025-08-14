@@ -1,0 +1,336 @@
+2025-08-14 12:25:34,941 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 12:38:08,603 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 12:38:15,729 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 12:38:18,450 - SoulCommunityLogger - INFO - background_worker:38 - ✅ 后台工作进程已成功连接到Redis。
+2025-08-14 12:38:18,493 - SoulCommunityLogger - INFO - background_worker:294 - 后台工作进程 (`background_worker`) 已启动。
+2025-08-14 12:38:18,501 - SoulCommunityLogger - INFO - background_worker:295 - 已注册的计划任务:
+2025-08-14 12:39:28,499 - SoulCommunityLogger - INFO - background_worker:168 - JOB_TASK_PROC: 发现 1 个到期任务，开始处理...
+2025-08-14 12:39:28,531 - SoulCommunityLogger - INFO - background_worker:177 - -> 正在处理任务 cb7fbf4e-cba3-4668-8d1f-eff65f0887ae (类型: reply)
+2025-08-14 12:39:32,475 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 12:39:34,567 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 12:39:37,150 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 12:39:38,695 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 12:39:41,150 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 12:39:42,997 - SoulCommunityLogger - INFO - background_worker:207 - ✅ 回复任务 cb7fbf4e-cba3-4668-8d1f-eff65f0887ae 处理完成。
+2025-08-14 12:40:58,496 - SoulCommunityLogger - INFO - background_worker:168 - JOB_TASK_PROC: 发现 1 个到期任务，开始处理...
+2025-08-14 12:40:58,531 - SoulCommunityLogger - INFO - background_worker:177 - -> 正在处理任务 4f771fae-6c3d-44ed-9853-08e0d8d214c7 (类型: reply)
+2025-08-14 12:41:31,218 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 12:41:33,890 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 12:41:36,315 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 12:41:38,727 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 12:41:41,058 - SoulCommunityLogger - INFO - background_worker:207 - ✅ 回复任务 4f771fae-6c3d-44ed-9853-08e0d8d214c7 处理完成。
+2025-08-14 12:48:08,499 - SoulCommunityLogger - INFO - background_worker:168 - JOB_TASK_PROC: 发现 1 个到期任务，开始处理...
+2025-08-14 12:48:08,595 - SoulCommunityLogger - INFO - background_worker:177 - -> 正在处理任务 81121291-5033-4e0f-bd49-ad244f7fda04 (类型: reply)
+2025-08-14 12:48:12,248 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 12:48:14,359 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 12:48:16,435 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 12:48:19,000 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 12:48:21,254 - SoulCommunityLogger - INFO - background_worker:207 - ✅ 回复任务 81121291-5033-4e0f-bd49-ad244f7fda04 处理完成。
+2025-08-14 12:53:27,795 - SoulCommunityLogger - INFO - background_worker:306 - 收到退出信号，正在关闭调度器...
+2025-08-14 12:53:27,837 - SoulCommunityLogger - INFO - background_worker:308 - 调度器已关闭。正在断开数据库连接...
+2025-08-14 12:53:27,868 - SoulCommunityLogger - INFO - background_worker:312 - 数据库 db/user_account.db 已断开。
+2025-08-14 12:53:27,917 - SoulCommunityLogger - INFO - background_worker:312 - 数据库 db/community_chat.db 已断开。
+2025-08-14 12:53:27,922 - SoulCommunityLogger - INFO - background_worker:312 - 数据库 db/ai_status.db 已断开。
+2025-08-14 12:53:27,923 - SoulCommunityLogger - INFO - background_worker:313 - 后台进程已安全退出。
+2025-08-14 12:53:36,118 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 12:53:36,148 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 12:53:37,429 - SoulCommunityLogger - INFO - background_worker:38 - ✅ 后台工作进程已成功连接到Redis。
+2025-08-14 12:53:37,436 - SoulCommunityLogger - INFO - background_worker:294 - 后台工作进程 (`background_worker`) 已启动。
+2025-08-14 12:53:37,437 - SoulCommunityLogger - INFO - background_worker:295 - 已注册的计划任务:
+2025-08-14 12:54:09,288 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 12:55:46,254 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 12:55:58,630 - SoulCommunityLogger - INFO - background_worker:306 - 收到退出信号，正在关闭调度器...
+2025-08-14 12:55:58,633 - SoulCommunityLogger - INFO - background_worker:308 - 调度器已关闭。正在断开数据库连接...
+2025-08-14 12:55:58,638 - SoulCommunityLogger - INFO - background_worker:312 - 数据库 db/user_account.db 已断开。
+2025-08-14 12:55:58,643 - SoulCommunityLogger - INFO - background_worker:312 - 数据库 db/community_chat.db 已断开。
+2025-08-14 12:55:58,675 - SoulCommunityLogger - INFO - background_worker:312 - 数据库 db/ai_status.db 已断开。
+2025-08-14 12:55:58,675 - SoulCommunityLogger - INFO - background_worker:313 - 后台进程已安全退出。
+2025-08-14 12:56:03,515 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 12:56:04,886 - SoulCommunityLogger - INFO - background_worker:38 - ✅ 后台工作进程已成功连接到Redis。
+2025-08-14 12:56:04,891 - SoulCommunityLogger - INFO - background_worker:294 - 后台工作进程 (`background_worker`) 已启动。
+2025-08-14 12:56:04,891 - SoulCommunityLogger - INFO - background_worker:295 - 已注册的计划任务:
+2025-08-14 12:56:34,896 - SoulCommunityLogger - INFO - background_worker:168 - JOB_TASK_PROC: 发现 1 个到期任务，开始处理...
+2025-08-14 12:56:34,921 - SoulCommunityLogger - INFO - background_worker:177 - -> 正在处理任务 3664f954-06dd-45ab-a08e-c93a51d527b1 (类型: reply)
+2025-08-14 12:56:49,654 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 12:56:51,961 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 12:56:54,036 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 12:56:56,911 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 12:56:58,530 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 12:57:00,880 - SoulCommunityLogger - INFO - background_worker:207 - ✅ 回复任务 3664f954-06dd-45ab-a08e-c93a51d527b1 处理完成。
+2025-08-14 13:07:52,114 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 13:09:04,901 - SoulCommunityLogger - INFO - background_worker:168 - JOB_TASK_PROC: 发现 1 个到期任务，开始处理...
+2025-08-14 13:09:04,920 - SoulCommunityLogger - INFO - background_worker:177 - -> 正在处理任务 d09edf33-c37e-4c34-ad05-ee255cd4778a (类型: reply)
+2025-08-14 13:09:09,507 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:09:11,621 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:09:13,217 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:09:15,896 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:09:17,440 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:09:19,887 - SoulCommunityLogger - INFO - background_worker:207 - ✅ 回复任务 d09edf33-c37e-4c34-ad05-ee255cd4778a 处理完成。
+2025-08-14 13:09:50,473 - SoulCommunityLogger - INFO - background_worker:306 - 收到退出信号，正在关闭调度器...
+2025-08-14 13:09:50,493 - SoulCommunityLogger - INFO - background_worker:308 - 调度器已关闭。正在断开数据库连接...
+2025-08-14 13:09:50,515 - SoulCommunityLogger - INFO - background_worker:312 - 数据库 db/user_account.db 已断开。
+2025-08-14 13:09:50,548 - SoulCommunityLogger - INFO - background_worker:312 - 数据库 db/community_chat.db 已断开。
+2025-08-14 13:09:50,566 - SoulCommunityLogger - INFO - background_worker:312 - 数据库 db/ai_status.db 已断开。
+2025-08-14 13:09:50,570 - SoulCommunityLogger - INFO - background_worker:313 - 后台进程已安全退出。
+2025-08-14 13:10:01,012 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 13:10:03,638 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 13:10:05,067 - SoulCommunityLogger - INFO - background_worker:38 - ✅ 后台工作进程已成功连接到Redis。
+2025-08-14 13:10:05,078 - SoulCommunityLogger - INFO - background_worker:311 - 后台工作进程 (`background_worker`) 已启动。
+2025-08-14 13:10:05,079 - SoulCommunityLogger - INFO - background_worker:312 - 已注册的计划任务:
+2025-08-14 13:11:15,082 - SoulCommunityLogger - INFO - background_worker:185 - JOB_TASK_PROC: 发现 1 个到期任务，开始处理...
+2025-08-14 13:11:15,088 - SoulCommunityLogger - INFO - background_worker:194 - -> 正在处理任务 2e99b2b4-a8ab-4b9f-bb06-facf55245a32 (类型: reply)
+2025-08-14 13:11:22,227 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:11:23,931 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:11:25,908 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:11:28,808 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:11:31,849 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:11:34,675 - SoulCommunityLogger - INFO - background_worker:224 - ✅ 回复任务 2e99b2b4-a8ab-4b9f-bb06-facf55245a32 处理完成。
+2025-08-14 13:12:22,134 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 13:13:25,081 - SoulCommunityLogger - INFO - background_worker:185 - JOB_TASK_PROC: 发现 1 个到期任务，开始处理...
+2025-08-14 13:13:25,085 - SoulCommunityLogger - INFO - background_worker:194 - -> 正在处理任务 70ff4528-1236-4208-ad7f-5ccd027c7913 (类型: reply)
+2025-08-14 13:13:30,921 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:13:33,296 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:13:35,528 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:13:38,204 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:13:40,385 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:13:42,755 - SoulCommunityLogger - INFO - background_worker:224 - ✅ 回复任务 70ff4528-1236-4208-ad7f-5ccd027c7913 处理完成。
+2025-08-14 13:46:02,568 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 13:49:45,099 - SoulCommunityLogger - INFO - background_worker:185 - JOB_TASK_PROC: 发现 1 个到期任务，开始处理...
+2025-08-14 13:49:45,127 - SoulCommunityLogger - INFO - background_worker:194 - -> 正在处理任务 79a019c0-4080-434f-b505-b8fc2eea4e2d (类型: reply)
+2025-08-14 13:49:50,873 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:49:53,346 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:49:55,573 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:49:58,388 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:50:01,285 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:50:05,057 - SoulCommunityLogger - INFO - background_worker:224 - ✅ 回复任务 79a019c0-4080-434f-b505-b8fc2eea4e2d 处理完成。
+2025-08-14 13:58:37,504 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 13:59:45,096 - SoulCommunityLogger - INFO - background_worker:185 - JOB_TASK_PROC: 发现 1 个到期任务，开始处理...
+2025-08-14 13:59:45,109 - SoulCommunityLogger - INFO - background_worker:194 - -> 正在处理任务 16f9a827-e632-416f-8e7e-05928069f42c (类型: reply)
+2025-08-14 13:59:50,356 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:59:52,706 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:59:54,866 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:59:57,298 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 13:59:59,904 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 14:00:02,328 - SoulCommunityLogger - INFO - background_worker:224 - ✅ 回复任务 16f9a827-e632-416f-8e7e-05928069f42c 处理完成。
+2025-08-14 14:00:55,094 - SoulCommunityLogger - INFO - background_worker:185 - JOB_TASK_PROC: 发现 1 个到期任务，开始处理...
+2025-08-14 14:00:55,108 - SoulCommunityLogger - INFO - background_worker:194 - -> 正在处理任务 89f36a0f-c2b7-4739-b114-51d9a5b9b955 (类型: reply)
+2025-08-14 14:01:00,031 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 14:01:03,034 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 14:01:05,250 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 14:01:06,920 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 14:01:08,989 - SoulCommunityLogger - INFO - chat_community:112 - 角色匹配成功 ('ai')，正在为会话(user:6d119d41-f554-44ca-a03b-09d9a81bf9be)增加未读数...
+2025-08-14 14:01:12,017 - SoulCommunityLogger - INFO - background_worker:224 - ✅ 回复任务 89f36a0f-c2b7-4739-b114-51d9a5b9b955 处理完成。
+2025-08-14 16:04:35,149 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 16:04:41,386 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 16:04:41,986 - SoulCommunityLogger - ERROR - background_worker:41 - ❌ 后台工作进程无法连接到Redis: Error 111 connecting to localhost:6379. Connection refused.
+2025-08-14 16:04:41,996 - SoulCommunityLogger - INFO - background_worker:320 - 后台工作进程 (`background_worker`) 已启动。
+2025-08-14 16:04:41,996 - SoulCommunityLogger - INFO - background_worker:321 - 已注册的计划任务:
+2025-08-14 16:10:23,824 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 16:10:25,140 - SoulCommunityLogger - INFO - background_worker:332 - 收到退出信号，正在关闭调度器...
+2025-08-14 16:10:25,140 - SoulCommunityLogger - INFO - background_worker:334 - 调度器已关闭。正在断开数据库连接...
+2025-08-14 16:10:25,142 - SoulCommunityLogger - INFO - background_worker:338 - 数据库 db/user_account.db 已断开。
+2025-08-14 16:10:25,146 - SoulCommunityLogger - INFO - background_worker:338 - 数据库 db/community_chat.db 已断开。
+2025-08-14 16:10:25,149 - SoulCommunityLogger - INFO - background_worker:338 - 数据库 db/ai_status.db 已断开。
+2025-08-14 16:10:25,150 - SoulCommunityLogger - INFO - background_worker:339 - 后台进程已安全退出。
+2025-08-14 16:10:27,934 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 16:10:28,381 - SoulCommunityLogger - INFO - background_worker:38 - ✅ 后台工作进程已成功连接到Redis。
+2025-08-14 16:10:28,385 - SoulCommunityLogger - INFO - background_worker:320 - 后台工作进程 (`background_worker`) 已启动。
+2025-08-14 16:10:28,385 - SoulCommunityLogger - INFO - background_worker:321 - 已注册的计划任务:
+2025-08-14 16:11:50,404 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 16:11:54,155 - SoulCommunityLogger - INFO - background_worker:332 - 收到退出信号，正在关闭调度器...
+2025-08-14 16:11:54,155 - SoulCommunityLogger - INFO - background_worker:334 - 调度器已关闭。正在断开数据库连接...
+2025-08-14 16:11:54,167 - SoulCommunityLogger - INFO - background_worker:338 - 数据库 db/user_account.db 已断开。
+2025-08-14 16:11:54,169 - SoulCommunityLogger - INFO - background_worker:338 - 数据库 db/community_chat.db 已断开。
+2025-08-14 16:11:54,170 - SoulCommunityLogger - INFO - background_worker:338 - 数据库 db/ai_status.db 已断开。
+2025-08-14 16:11:54,170 - SoulCommunityLogger - INFO - background_worker:339 - 后台进程已安全退出。
+2025-08-14 16:11:56,386 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 16:11:56,850 - SoulCommunityLogger - INFO - background_worker:38 - ✅ 后台工作进程已成功连接到Redis。
+2025-08-14 16:11:56,853 - SoulCommunityLogger - INFO - background_worker:320 - 后台工作进程 (`background_worker`) 已启动。
+2025-08-14 16:11:56,853 - SoulCommunityLogger - INFO - background_worker:321 - 已注册的计划任务:
+2025-08-14 16:20:16,855 - SoulCommunityLogger - INFO - background_worker:194 - JOB_TASK_PROC: 发现 1 个到期任务，开始处理...
+2025-08-14 16:20:16,859 - SoulCommunityLogger - INFO - background_worker:203 - -> 正在处理任务 970399b2-6eb8-4cc5-9e44-1c68f08fd5eb (类型: friend_request_response)
+2025-08-14 16:20:20,286 - SoulCommunityLogger - INFO - background_worker:254 - - AI决定: accepted。好友关系数据库已更新。
+2025-08-14 16:20:20,297 - SoulCommunityLogger - INFO - chat_community:113 - AI向用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)发送新消息，将'user_has_peeked'状态置为 False。
+2025-08-14 16:20:20,301 - SoulCommunityLogger - INFO - background_worker:268 - - 初始聊天记录创建完毕。
+2025-08-14 16:20:20,310 - SoulCommunityLogger - INFO - background_worker:279 - ✅ 好友请求任务 970399b2-6eb8-4cc5-9e44-1c68f08fd5eb 处理完成。
+2025-08-14 16:21:15,723 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:21:29,973 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:21:45,665 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:21:59,997 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:22:15,053 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:22:30,744 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:22:45,808 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:23:00,084 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:23:15,846 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:23:30,158 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:23:45,879 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:36:37,687 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:40:04,415 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 16:40:38,850 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 16:40:46,262 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 16:40:52,912 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:40:53,341 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:41:08,471 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:41:22,848 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:41:38,502 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:41:53,101 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:42:08,594 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:42:19,647 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 16:42:22,971 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:42:29,543 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:42:29,951 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:43:24,265 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 16:43:28,916 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:43:28,919 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:43:45,070 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:44:07,516 - SoulCommunityLogger - INFO - background_worker:194 - JOB_TASK_PROC: 发现 1 个到期任务，开始处理...
+2025-08-14 16:44:07,520 - SoulCommunityLogger - INFO - background_worker:203 - -> 正在处理任务 2e5e9325-7ba8-4d45-a294-d21cc7d59718 (类型: reply)
+2025-08-14 16:46:01,301 - SoulCommunityLogger - INFO - background_worker:332 - 收到退出信号，正在关闭调度器...
+2025-08-14 16:46:01,305 - SoulCommunityLogger - INFO - background_worker:334 - 调度器已关闭。正在断开数据库连接...
+2025-08-14 16:46:01,308 - SoulCommunityLogger - INFO - background_worker:338 - 数据库 db/user_account.db 已断开。
+2025-08-14 16:46:01,316 - SoulCommunityLogger - INFO - background_worker:338 - 数据库 db/community_chat.db 已断开。
+2025-08-14 16:46:01,319 - SoulCommunityLogger - INFO - background_worker:338 - 数据库 db/ai_status.db 已断开。
+2025-08-14 16:46:01,319 - SoulCommunityLogger - INFO - background_worker:339 - 后台进程已安全退出。
+2025-08-14 16:46:09,046 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 16:46:09,932 - SoulCommunityLogger - INFO - background_worker:38 - ✅ 后台工作进程已成功连接到Redis。
+2025-08-14 16:46:09,940 - SoulCommunityLogger - INFO - background_worker:320 - 后台工作进程 (`background_worker`) 已启动。
+2025-08-14 16:46:09,940 - SoulCommunityLogger - INFO - background_worker:321 - 已注册的计划任务:
+2025-08-14 16:46:38,492 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:46:38,500 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:46:54,023 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:47:08,449 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 16:47:29,944 - SoulCommunityLogger - INFO - background_worker:194 - JOB_TASK_PROC: 发现 1 个到期任务，开始处理...
+2025-08-14 16:47:29,963 - SoulCommunityLogger - INFO - background_worker:203 - -> 正在处理任务 aa271089-1e63-4186-b054-e583a7f24507 (类型: reply)
+2025-08-14 16:54:15,747 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 17:00:53,375 - SoulCommunityLogger - INFO - background_worker:332 - 收到退出信号，正在关闭调度器...
+2025-08-14 17:00:53,376 - SoulCommunityLogger - INFO - background_worker:334 - 调度器已关闭。正在断开数据库连接...
+2025-08-14 17:00:53,378 - SoulCommunityLogger - INFO - background_worker:338 - 数据库 db/user_account.db 已断开。
+2025-08-14 17:00:53,380 - SoulCommunityLogger - INFO - background_worker:338 - 数据库 db/community_chat.db 已断开。
+2025-08-14 17:00:53,382 - SoulCommunityLogger - INFO - background_worker:338 - 数据库 db/ai_status.db 已断开。
+2025-08-14 17:00:53,383 - SoulCommunityLogger - INFO - background_worker:339 - 后台进程已安全退出。
+2025-08-14 17:00:53,622 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 17:00:56,415 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 17:00:57,064 - SoulCommunityLogger - INFO - background_worker:38 - ✅ 后台工作进程已成功连接到Redis。
+2025-08-14 17:00:57,069 - SoulCommunityLogger - INFO - background_worker:358 - 后台工作进程 (`background_worker`) 已启动。
+2025-08-14 17:00:57,070 - SoulCommunityLogger - INFO - background_worker:359 - 已注册的计划任务:
+2025-08-14 17:01:02,538 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:01:02,558 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:01:27,074 - SoulCommunityLogger - INFO - background_worker:195 - JOB_TASK_PROC: 发现 1 个到期任务，开始处理...
+2025-08-14 17:01:27,076 - SoulCommunityLogger - INFO - background_worker:206 - -> 正在处理任务 90f45f5c-311b-486c-a549-c245700b8676 (类型: reply)
+2025-08-14 17:01:27,085 - SoulCommunityLogger - WARNING - background_worker:217 - 任务 90f45f5c-311b-486c-a549-c245700b8676 失败: 获取上下文不完整。 角色: OK, 状态: 缺失, 历史: OK
+2025-08-14 17:03:02,763 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 17:03:37,057 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 17:03:37,090 - SoulCommunityLogger - INFO - background_worker:370 - 收到退出信号，正在关闭调度器...
+2025-08-14 17:03:37,091 - SoulCommunityLogger - INFO - background_worker:372 - 调度器已关闭。正在断开数据库连接...
+2025-08-14 17:03:37,093 - SoulCommunityLogger - INFO - background_worker:376 - 数据库 db/user_account.db 已断开。
+2025-08-14 17:03:37,095 - SoulCommunityLogger - INFO - background_worker:376 - 数据库 db/community_chat.db 已断开。
+2025-08-14 17:03:37,096 - SoulCommunityLogger - INFO - background_worker:376 - 数据库 db/ai_status.db 已断开。
+2025-08-14 17:03:37,097 - SoulCommunityLogger - INFO - background_worker:377 - 后台进程已安全退出。
+2025-08-14 17:03:45,723 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 17:03:46,288 - SoulCommunityLogger - INFO - background_worker:38 - ✅ 后台工作进程已成功连接到Redis。
+2025-08-14 17:03:46,291 - SoulCommunityLogger - INFO - background_worker:358 - 后台工作进程 (`background_worker`) 已启动。
+2025-08-14 17:03:46,291 - SoulCommunityLogger - INFO - background_worker:359 - 已注册的计划任务:
+2025-08-14 17:04:23,528 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:04:42,803 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(bfc5226d-c8cd-4713-9afa-433504598ea2)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:05:06,299 - SoulCommunityLogger - INFO - background_worker:195 - JOB_TASK_PROC: 发现 1 个到期任务，开始处理...
+2025-08-14 17:05:06,304 - SoulCommunityLogger - INFO - background_worker:206 - -> 正在处理任务 50748ffb-bd06-45e5-8a28-18f15a73f103 (类型: friend_request_response)
+2025-08-14 17:05:09,032 - SoulCommunityLogger - INFO - background_worker:284 - 任务 50748ffb-bd06-45e5-8a28-18f15a73f103: AI决定: accepted。好友关系数据库已更新。
+2025-08-14 17:05:09,037 - SoulCommunityLogger - INFO - chat_community:113 - AI向用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)发送新消息，将'user_has_peeked'状态置为 False。
+2025-08-14 17:05:09,038 - SoulCommunityLogger - INFO - background_worker:297 - 任务 50748ffb-bd06-45e5-8a28-18f15a73f103: 初始聊天记录创建完毕。
+2025-08-14 17:05:09,043 - SoulCommunityLogger - INFO - background_worker:307 - ✅ 好友请求任务 50748ffb-bd06-45e5-8a28-18f15a73f103 处理完成。
+2025-08-14 17:05:15,268 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:05:15,633 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:05:31,117 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:05:45,728 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:06:01,182 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:06:06,292 - SoulCommunityLogger - INFO - background_worker:195 - JOB_TASK_PROC: 发现 1 个到期任务，开始处理...
+2025-08-14 17:06:06,294 - SoulCommunityLogger - INFO - background_worker:206 - -> 正在处理任务 f7678bd2-ae46-4800-81c9-ff6615127b61 (类型: reply)
+2025-08-14 17:06:06,305 - SoulCommunityLogger - WARNING - background_worker:217 - 任务 f7678bd2-ae46-4800-81c9-ff6615127b61 失败: 获取上下文不完整。 角色: OK, 状态: 缺失, 历史: OK
+2025-08-14 17:06:15,581 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:06:31,173 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:06:45,613 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:07:01,262 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:07:15,568 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:07:31,303 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:07:45,690 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:08:01,605 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:08:15,789 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:08:30,230 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:08:45,815 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:09:00,185 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:09:15,831 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:09:30,317 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:09:45,968 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:10:00,391 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:10:15,942 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:10:30,376 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:10:46,028 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:10:58,648 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 17:11:00,277 - SoulCommunityLogger - INFO - background_worker:370 - 收到退出信号，正在关闭调度器...
+2025-08-14 17:11:00,279 - SoulCommunityLogger - INFO - background_worker:372 - 调度器已关闭。正在断开数据库连接...
+2025-08-14 17:11:00,282 - SoulCommunityLogger - INFO - background_worker:376 - 数据库 db/user_account.db 已断开。
+2025-08-14 17:11:00,287 - SoulCommunityLogger - INFO - background_worker:376 - 数据库 db/community_chat.db 已断开。
+2025-08-14 17:11:00,289 - SoulCommunityLogger - INFO - background_worker:376 - 数据库 db/ai_status.db 已断开。
+2025-08-14 17:11:00,291 - SoulCommunityLogger - INFO - background_worker:377 - 后台进程已安全退出。
+2025-08-14 17:11:00,735 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:11:03,402 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 17:11:04,650 - SoulCommunityLogger - INFO - background_worker:38 - ✅ 后台工作进程已成功连接到Redis。
+2025-08-14 17:11:04,656 - SoulCommunityLogger - INFO - background_worker:373 - 后台工作进程 (`background_worker`) 已启动。
+2025-08-14 17:11:04,656 - SoulCommunityLogger - INFO - background_worker:374 - 已注册的计划任务:
+2025-08-14 17:11:16,082 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:11:30,430 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:11:34,660 - SoulCommunityLogger - INFO - background_worker:195 - JOB_TASK_PROC: 发现 1 个到期任务，开始处理...
+2025-08-14 17:11:34,665 - SoulCommunityLogger - INFO - background_worker:206 - -> 正在处理任务 5604d566-dbd6-4da7-bb23-9f040df38936 (类型: reply)
+2025-08-14 17:11:34,757 - SoulCommunityLogger - WARNING - background_worker:232 - 任务 5604d566-dbd6-4da7-bb23-9f040df38936 失败: 获取上下文不完整。 角色: OK, 状态: 缺失, 历史: OK
+2025-08-14 17:11:46,223 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:12:00,535 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:12:16,126 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:12:30,532 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:12:46,131 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:13:00,575 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:13:17,281 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:13:30,705 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:13:46,273 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:14:00,929 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:14:16,451 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:14:30,743 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:14:45,262 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:15:00,956 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:15:15,210 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:15:30,819 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:15:45,756 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:16:00,963 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:16:15,361 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:16:31,063 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:16:45,395 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:17:01,100 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:17:10,924 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 17:17:12,471 - SoulCommunityLogger - INFO - background_worker:385 - 收到退出信号，正在关闭调度器...
+2025-08-14 17:17:12,472 - SoulCommunityLogger - INFO - background_worker:387 - 调度器已关闭。正在断开数据库连接...
+2025-08-14 17:17:12,477 - SoulCommunityLogger - INFO - background_worker:391 - 数据库 db/user_account.db 已断开。
+2025-08-14 17:17:12,480 - SoulCommunityLogger - INFO - background_worker:391 - 数据库 db/community_chat.db 已断开。
+2025-08-14 17:17:12,484 - SoulCommunityLogger - INFO - background_worker:391 - 数据库 db/ai_status.db 已断开。
+2025-08-14 17:17:12,484 - SoulCommunityLogger - INFO - background_worker:392 - 后台进程已安全退出。
+2025-08-14 17:17:39,412 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:17:39,416 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:17:45,575 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-14 17:17:45,663 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:17:46,405 - SoulCommunityLogger - INFO - background_worker:38 - ✅ 后台工作进程已成功连接到Redis。
+2025-08-14 17:17:46,409 - SoulCommunityLogger - INFO - background_worker:373 - 后台工作进程 (`background_worker`) 已启动。
+2025-08-14 17:17:46,410 - SoulCommunityLogger - INFO - background_worker:374 - 已注册的计划任务:
+2025-08-14 17:18:00,773 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:18:16,415 - SoulCommunityLogger - INFO - background_worker:195 - JOB_TASK_PROC: 发现 1 个到期任务，开始处理...
+2025-08-14 17:18:16,417 - SoulCommunityLogger - INFO - background_worker:206 - -> 正在处理任务 9da01223-0622-4cfd-9805-a7fb0ef35f66 (类型: reply)
+2025-08-14 17:18:18,679 - SoulCommunityLogger - INFO - chat_community:113 - AI向用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)发送新消息，将'user_has_peeked'状态置为 False。
+2025-08-14 17:18:20,852 - SoulCommunityLogger - INFO - chat_community:113 - AI向用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)发送新消息，将'user_has_peeked'状态置为 False。
+2025-08-14 17:18:22,510 - SoulCommunityLogger - INFO - chat_community:113 - AI向用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)发送新消息，将'user_has_peeked'状态置为 False。
+2025-08-14 17:18:24,411 - SoulCommunityLogger - INFO - chat_community:113 - AI向用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)发送新消息，将'user_has_peeked'状态置为 False。
+2025-08-14 17:18:27,389 - SoulCommunityLogger - INFO - background_worker:270 - ✅ 回复任务 9da01223-0622-4cfd-9805-a7fb0ef35f66 处理成功。
+2025-08-14 17:18:40,110 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:18:40,115 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:18:54,438 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:19:10,179 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:19:24,637 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:19:40,145 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:19:54,533 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。
+2025-08-14 17:20:10,172 - SoulCommunityLogger - INFO - chat_community:161 - 用户(b8e98d3e-23de-4bc5-b53a-cb99cc5dfa83)正在窥视与角色(8cb47608-9b54-45d8-a619-a15d34edbb11)的聊天，将'user_has_peeked'置为 True。

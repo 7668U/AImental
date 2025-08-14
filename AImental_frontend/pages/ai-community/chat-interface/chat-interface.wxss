@@ -1,0 +1,128 @@
+/* chat-interface.wxss (最终版) */
+.chat-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #ededed;
+  /* 【核心改动】确保增加的动态 padding-top 不会撑破页面 */
+  box-sizing: border-box; 
+}
+
+/* 自定义导航栏 */
+.custom-nav-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 10rpx 20rpx; /* 只控制内部元素的上下边距 */
+  background-color: #ededed;
+  border-bottom: 1rpx solid #dcdcdc;
+}
+.back-icon { width: 48rpx; height: 48rpx; padding: 10rpx; }
+.nav-title-container { flex: 1; display: flex; flex-direction: column; align-items: center; margin-right: 68rpx; }
+.nav-title { font-size: 34rpx; font-weight: 500; color: #000; }
+.nav-status { font-size: 24rpx; color: #888; }
+
+/* 聊天记录 */
+.message-list {
+  flex: 1;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 0 0 0 0; 
+}
+.message-item {
+  padding: 0 20rpx;
+  margin-top: 30rpx;
+}
+.message-row { display: flex; width: 100%; align-items: flex-start; }
+.avatar { width: 80rpx; height: 80rpx; border-radius: 10rpx; flex-shrink: 0; }
+.bubble-wrapper { display: flex; flex-direction: column; }
+.bubble {
+  max-width: calc(100vw - 220rpx);
+  padding: 20rpx;
+  border-radius: 10rpx;
+  font-size: 32rpx;
+  line-height: 1.5;
+  word-wrap: break-word;
+  word-break: break-all;
+}
+.message-time-ai, .message-time-user {
+  font-size: 22rpx;
+  color: #aaa;
+  margin-top: 8rpx;
+}
+.message-row.ai { justify-content: flex-start; }
+.message-row.ai .avatar { margin-right: 20rpx; }
+.message-row.ai .bubble { background-color: #ffffff; }
+.message-row.ai .message-time-ai { align-self: flex-start; }
+.message-row.user { justify-content: flex-end; }
+.message-row.user .avatar { margin-left: 20rpx; }
+.message-row.user .bubble { background-color: #95ec69; }
+.message-row.user .message-time-user { align-self: flex-end; }
+
+
+/* 消息状态样式 */
+.message-status {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  align-self: flex-end;
+  margin-right: 10rpx;
+  margin-bottom: 10rpx;
+  height: 40rpx;
+  /* 【核心修改】把宽度改大，比如 120rpx，以容纳图标和文字 */
+  width: 120rpx; 
+}
+
+/* 【新增】为图标和文字的容器 .status-unit 添加样式 */
+.status-unit {
+  display: flex;
+  align-items: center;
+}
+
+/* 【新增】为状态文字 .status-text 添加样式 */
+.status-text {
+  font-size: 24rpx;
+  color: #aaa;
+  margin-left: 8rpx; /* 让文字和图标之间有一点空隙 */
+}
+.sent-icon, .read-icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+.sending-icon { 
+  width: 30rpx; 
+  height: 30rpx; 
+  /* animation: spin 1s linear infinite;  */
+}
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.failed-icon { 
+  width: 30rpx; 
+  height: 30rpx; 
+}
+
+/* 底部输入栏 */
+.input-bar-wrapper {
+  flex-shrink: 0;
+  background-color: #f7f7f7;
+  padding: 20rpx 20rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  border-top: 1rpx solid #ddd;
+}
+.input-bar { display: flex; align-items: center; width: 100%; }
+.input-field {
+  flex: 1;
+  background-color: #ffffff;
+  height: 80rpx;
+  padding: 0 20rpx;
+  border-radius: 10rpx;
+}
+.send-btn {
+  width: 140rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  margin-left: 20rpx;
+  background-color: #07c160;
+  color: white;
+  font-size: 30rpx;
+}
+.send-btn[disabled] { background-color: #9edd98; color: #e0e0e0; }

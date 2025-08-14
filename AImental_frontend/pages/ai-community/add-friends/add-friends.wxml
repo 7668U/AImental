@@ -1,0 +1,67 @@
+<view class="page">
+  <view class="history-btn" bindtap="goToHistory">
+    <image class="history-btn__icon" src="/images/request-history.png" mode="aspectFit" />
+  </view>
+  
+  <block wx:if="{{!isEmpty}}">
+    <swiper class="card-swiper" bindchange="onSwiperChange" current="{{currentIndex}}">
+      <block wx:for="{{aiList}}" wx:key="id">
+        <swiper-item class="card-swiper-item">
+          <view class="ai-card {{item.animationClass}}">
+            
+            <view class="ai-card__header">
+              <view class="ai-card__name">{{item.name}}</view>
+              <view class="ai-card__info-block">
+                <view class="info-item">
+                  <text class="info-item__label">年龄</text>
+                  <text class="info-item__value">: {{item.profile.identity_core.age}}</text>
+                </view>
+                <view class="info-item">
+                  <text class="info-item__label">职业</text>
+                  <text class="info-item__value">: {{item.profile.identity_core.occupation}}</text>
+                </view>
+                 <view class="info-item">
+                  <text class="info-item__label">MBTI</text>
+                  <text class="info-item__value">: {{item.profile.personality_traits.mbti}}</text>
+                </view>
+              </view>
+            </view>
+            
+            <view class="ai-card__body">
+              <image class="ai-card__avatar" src="{{serverUrl + item.avatar_url}}" mode="aspectFill" />
+              <view class="ai-card__motto">"{{item.profile.personality_traits.philosophy}}"</view>
+              <view class="ai-card__tags">
+                <text class="tag" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
+              </view>
+            </view>
+
+            <view class="ai-card__footer">
+              <view class="add-btn-circular" bindtap="showVerificationModal" data-id="{{item.id}}" data-index="{{index}}" data-name="{{item.name}}">
+                <view class="add-btn__plus"></view>
+              </view>
+            </view>
+
+          </view>
+        </swiper-item>
+      </block>
+    </swiper>
+  </block>
+  
+  <view class="bottom-hint-text">{{hintText}}</view>
+
+  <view class="modal-overlay {{isModalVisible ? 'visible' : ''}}" bindtap="onModalCancel">
+    <view class="modal-content" catchtap> 
+      <view class="modal-title">添加 {{modalCharacterName}} 为好友</view>
+      <input 
+        class="modal-input" 
+        placeholder="发送一句真诚的问候吧"
+        value="{{verificationMessage}}"
+        bindinput="onVerificationInput"
+      />
+      <view class="modal-actions">
+        <button class="modal-button cancel" bindtap="onModalCancel">取消</button>
+        <button class="modal-button confirm" bindtap="onModalConfirm">发送</button>
+      </view>
+    </view>
+  </view>
+</view>

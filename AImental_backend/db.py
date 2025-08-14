@@ -15,12 +15,19 @@ os.makedirs(DB_DIRECTORY, exist_ok=True)
 user_db = pw.SqliteDatabase(os.path.join(DB_DIRECTORY, 'user_account.db'))
 
 # 2. 社区与聊天数据库
-# 存储AI社区的聊天记录、AI任务队列、AI角色定义等
-chat_db = pw.SqliteDatabase(os.path.join(DB_DIRECTORY, 'community_chat.db'))
+chat_db = pw.SqliteDatabase(
+    os.path.join(DB_DIRECTORY, 'community_chat.db'),
+    # --- 【新增这行代码】 ---
+    pragmas={'journal_mode': 'wal'}
+)
 
 # 3. AI状态数据库
-# 高频读写AI的实时状态，单独存放可以提升性能，避免锁住主聊天库
-status_db = pw.SqliteDatabase(os.path.join(DB_DIRECTORY, 'ai_status.db'))
+# 为了保险起见，也为 status_db 加上
+status_db = pw.SqliteDatabase(
+    os.path.join(DB_DIRECTORY, 'ai_status.db'),
+    # --- 【新增这行代码】 ---
+    pragmas={'journal_mode': 'wal'}
+)
 
 # 4. 您项目中已有的其他数据库
 # 保留您原有的数据库结构，确保其他功能不受影响

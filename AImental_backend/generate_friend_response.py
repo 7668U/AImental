@@ -14,7 +14,6 @@ from openai import OpenAI
 # 1. API客户端设置
 # ---------------------------------------------------
 # 强烈建议将API密钥存储在环境变量中，而不是硬编码在代码里
-# 例如: export MOONSHOT_API_KEY="sk-..."
 MOONSHOT_API_KEY = os.getenv("MOONSHOT_API_KEY", "sk-6gGW4lyWgHbvwFO8My2d1ivCkFY77iFBthp3J6TIolfAtJm3")
 MOONSHOT_BASE_URL = "https://api.moonshot.cn/v1"
 
@@ -45,7 +44,7 @@ class FriendRequestDecision(BaseModel):
 
 
 # ---------------------------------------------------
-# 3. 核心函数：生成好友申请的回复
+# 3. 核心函数：生成好友申请的回复 (已更新Prompt)
 # ---------------------------------------------------
 
 def generate_friend_request_decision(
@@ -54,23 +53,14 @@ def generate_friend_request_decision(
 ) -> Optional[FriendRequestDecision]:
     """
     调用大模型，让AI角色决定是否接受好友申请。
-
-    Args:
-        character_profile (dict): 角色的完整设定信息。
-        user_verification_message (str): 用户发送的验证消息。
-
-    Returns:
-        Optional[FriendRequestDecision]: 一个经过验证的Pydantic对象，如果失败则返回None。
     """
     if not client:
         print("错误: LLM客户端未初始化。")
         return None
 
-    # 将Pydantic模型转换为JSON Schema字符串，作为给AI的格式指令
-    schema_definition = json.dumps(FriendRequestDecision.model_json_schema(), indent=2, ensure_ascii=False)
     character_name = character_profile.get('identity_core', {}).get('name', 'AI')
     
-    # --- 精心设计的Prompt ---
+    # --- 【核心修改】我们重新设计了Prompt，使其更清晰 ---
     prompt = f"""
 # 角色
 你正在扮演虚拟角色“{character_name}”。
@@ -87,47 +77,63 @@ def generate_friend_request_decision(
 "{user_verification_message}"
 
 # 核心任务：做出决定
-你需要根据你的性格和对方的留言，决定是否同意这个好友申请。
+你需要根据你的性格和对方的留言，决定是否同意这个好友申请，并严格按照下面的JSON格式给出你的“内心决策”。
 1.  **性格判断**: 如果你的性格是外向、好奇的，你可能更容易同意。如果你的性格是内向、谨慎或高冷的，你可能会更挑剔，甚至拒绝。
 2.  **留言判断**: 对方的留言是否真诚、有趣或让你产生好奇？
-3.  **生成内心独白**: 简单说明你为什么会做出这个决定。
-4.  **撰写初次问候**: 如果你同意了，写一句符合你风格的、作为初次见面的问候语。
+3.  **生成内心独白**: 在 `reasoning` 字段中，简单说明你为什么会做出这个决定。
+4.  **撰写初次问候**: 如果你同意了，在 `initial_message` 字段中写一句符合你风格的、作为初次见面的问候语。如果拒绝，`initial_message` 必须为 `null`。
 
-# 输出格式 (Output Format)
-你的回答必须是严格遵循以下JSON Schema的JSON对象，不要包含任何其他文字。
+# 输出格式与示例
+你的回答必须是一个严格的、不包含任何其他文字的JSON对象。
+
+## 这是一个【同意】时的输出示例:
 ```json
-{schema_definition}
+{{
+  "decision": true,
+  "reasoning": "唔...听起来是个有趣的人，验证消息也挺真诚的，那就认识一下吧。",
+  "initial_message": "你好，我是{character_name}。很高兴认识你。"
+}}
+```
+
+## 这是一个【拒绝】时的输出示例:
+```json
+{{
+  "decision": false,
+  "reasoning": "感觉有点随意，还是先保持距离吧，我不太喜欢和陌生人说话。",
+  "initial_message": null
+}}
 ```
 """
+    # 注意: 上面示例中的 {{ 和 }} 是为了在f-string中正确显示花括号
 
     try:
         if IS_MOCK_API:
-            # --- 用于在没有API密钥时测试的模拟API调用 ---
             print("警告: 正在使用模拟API返回。")
-            # 模拟一个容易同意的AI的回复
             mock_response_content = json.dumps({
                 "decision": True,
                 "reasoning": "唔...听起来是个有趣的人，验证消息也挺真诚的，那就认识一下吧。",
                 "initial_message": f"你好，我是{character_name}。很高兴认识你。"
             })
+            raw_response_content = mock_response_content
         else:
             # --- 真实的API调用 ---
             response = client.chat.completions.create(
                 model="moonshot-v1-8k",
                 messages=[{"role": "system", "content": prompt}],
                 response_format={"type": "json_object"}, # 强制要求返回JSON对象
-                temperature=1.0 # 使用较高的温度让决策更多样化，更像真人
+                temperature=1.0, # 使用较高的温度让决策更多样化，更像真人
+                max_tokens=512 # 给决策任务一个合理的token限制
             )
-            mock_response_content = response.choices[0].message.content
+            raw_response_content = response.choices[0].message.content
         
         # 使用Pydantic进行验证和解析，这是最关键的一步
-        return FriendRequestDecision.model_validate_json(mock_response_content)
+        return FriendRequestDecision.model_validate_json(raw_response_content)
         
     except ValidationError as e:
         print(f"[错误] AI返回的JSON格式不正确或字段不匹配: \n{e}")
-        print(f"原始响应内容: {mock_response_content}")
+        # 在Pydantic v2中，e.json()可以更清晰地打印错误
+        print(f"原始响应内容: {raw_response_content}")
         return None
     except Exception as e:
         print(f"[错误] 调用API或处理数据时发生未知错误: {e}")
         return None
-
