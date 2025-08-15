@@ -62,14 +62,17 @@ page {
   color: #fda013;
 }.analysis-disabled-tip{font-size:24rpx;color:#c0c4cc;white-space:nowrap}
 
+/* ... 其他代码 ... */
 .history-list {
   background-color: #fafafa;
   border-top: 1rpx solid #f2f2f2;
-  /* 移除内边距，交给 history-item-content 处理 */
   padding: 0; 
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease-out;
+  /* ✅ 修改点 1: 统一并优化过渡效果 */
+  transition: max-height 0.3s ease-in-out; 
+  /* ✅ 修改点 2: 开启硬件加速，减少动画闪烁 */
+  transform: translateZ(0);
 }
 .history-list.expanded {
   max-height: 1000rpx;
@@ -146,9 +149,41 @@ page {
 .item-left { flex-shrink: 0; margin-right: 20rpx; }
 .item-time { font-size: 28rpx; color: #606266; }
 .item-score { font-size: 24rpx; color: #909399; margin-top: 8rpx; }
-.item-right { display: flex; align-items: center; flex: 1; min-width: 0; justify-content: flex-end; }
-.item-result { font-size: 30rpx; font-weight: 600; color: var(--theme-color); text-align: right; word-break: break-all; max-width: 12ch; }
-.item-arrow { width: 28rpx; height: 28rpx; opacity: 0.5; flex-shrink: 0; margin-left: 15rpx; }
+.item-right { 
+  display: flex; 
+  align-items: center; 
+  flex: 1; 
+  min-width: 0; 
+  justify-content: flex-end; 
+}
+.item-result {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--theme-color);
+  text-align: right; /* 分类型默认右对齐 */
+  
+  /* 以下为实现单行截断的核心样式 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* 2. 新增修饰类，用于打分型问卷（换行、左对齐） */
+.item-result-scoring {
+  text-align: left; /* 打分型要求左对齐 */
+  
+  /* 覆盖基础样式，允许内容换行 */
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip; /* 或 'unset' */
+  word-break: break-all;
+}
+.item-arrow { 
+  width: 28rpx; 
+  height: 28rpx; 
+  opacity: 0.5; 
+  flex-shrink: 0; 
+  margin-left: 15rpx; 
+}
 .loading-tip, .empty-container { text-align: center; padding-top: 200rpx; color: #909399; }
 .empty-icon { width: 200rpx; height: 200rpx; margin-bottom: 20rpx; }
 .empty-text { display: block; font-size: 32rpx; margin-bottom: 10rpx; }

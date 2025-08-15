@@ -1,11 +1,10 @@
-# routers/chat.py
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from typing import List, Optional
 import json
 
 from .auth import get_current_user_id
+# 【第1步】: 确保导入的是更新后的 ChatModel
 from model.chat import chat_table, Chat, ChatModel
 from LLM import get_ai_response_and_update_history, generate_chat_title
 
@@ -21,10 +20,16 @@ router = APIRouter(
 # 2. Pydantic模型
 # ---------------------------------------------------
 
+# 【第2步】: 新增一个用于创建聊天的请求体模型
+class CreateChatRequest(BaseModel):
+    with_context: Optional[bool] = True
+
+# 【第3步】: 修改创建聊天的响应模型，加入 with_context
 class CreateChatResponse(BaseModel):
     chat_id: str
     title: str
     message: str
+    with_context: bool
 
 class ChatSummary(BaseModel):
     id: str
@@ -44,15 +49,29 @@ class UpdateChatTitleRequest(BaseModel):
 # 3. API 接口
 # ---------------------------------------------------
 
+# 【第4步】: 大幅修改创建新聊天的接口
 @router.post("/", response_model=CreateChatResponse, status_code=status.HTTP_201_CREATED)
-def create_a_new_chat_session(current_user_id: str = Depends(get_current_user_id)):
-    new_chat = chat_table.create_new_chat(user_id=current_user_id)
+def create_a_new_chat_session(
+    request_data: CreateChatRequest, # 使用新的请求模型
+    current_user_id: str = Depends(get_current_user_id)
+):
+    """
+    根据用户设置（是否携带历史背景）创建一个新的聊天会话。
+    """
+    # 将前端传来的值传递给数据库操作函数
+    new_chat = chat_table.create_new_chat(
+        user_id=current_user_id,
+        with_context=request_data.with_context
+    )
     if not new_chat:
         raise HTTPException(status_code=500, detail="Could not create a new chat session.")
+    
+    # 在响应中也返回创建的状态
     return CreateChatResponse(
         chat_id=new_chat.id,
         title=new_chat.title,
-        message="New empty chat session created successfully."
+        message="New chat session created successfully.",
+        with_context=new_chat.with_context
     )
 
 @router.post("/{chat_id}/respond", response_model=RespondResponse)
@@ -61,10 +80,6 @@ def chat_respond(
     request_data: RespondRequest,
     current_user_id: str = Depends(get_current_user_id)
 ):
-    """
-    处理用户消息，获取AI回复，并在需要时生成和更新标题。
-    【已更新】现在会将 user_id 传递给 LLM 函数。
-    """
     chat_session = chat_table.get_chat_history_by_id(chat_id)
     if not chat_session or chat_session.user_id != current_user_id:
         raise HTTPException(status_code=404, detail="Chat not found or permission denied.")
@@ -72,8 +87,7 @@ def chat_respond(
     history = json.loads(chat_session.message)
     is_first_user_message = len(history) == 0
 
-    # --- 【修改】将 current_user_id 传递下去 ---
-    reply_content = get_ai_response_and_update_history(chat_id, current_user_id, request_data.message)
+    reply_content = get_ai_response_and_update_history(chat_id, request_data.message)
     if not reply_content:
         raise HTTPException(status_code=500, detail="Failed to get AI response.")
 
@@ -100,6 +114,7 @@ def get_a_specific_chat_history(
     chat_session = chat_table.get_chat_history_by_id(chat_id=chat_id)
     if not chat_session or chat_session.user_id != current_user_id:
         raise HTTPException(status_code=404, detail="Chat not found or permission denied.")
+    # 因为 ChatModel 已经更新，这里会自动返回 with_context 字段
     return chat_session
 
 
@@ -107,7 +122,7 @@ def get_a_specific_chat_history(
 def delete_a_chat_session(chat_id: str, current_user_id: str = Depends(get_current_user_id)):
     chat_to_delete = chat_table.get_chat_history_by_id(chat_id=chat_id)
     if not chat_to_delete or chat_to_delete.user_id != current_user_id:
-        raise HTTPException(status_code=4.04, detail="Chat not found or permission denied.")
+        raise HTTPException(status_code=404, detail="Chat not found or permission denied.")
 
     if not chat_table.delete_chat_by_id(chat_id=chat_id):
         raise HTTPException(status_code=500, detail="Failed to delete the chat session.")

@@ -90,13 +90,14 @@
 
             <view class="input-area-minimalist">
                 <input 
-                    class="input-field" 
-                    type="text" 
-                    value="{{inputValue}}"
-                    bindinput="onInput"
-                    placeholder="" 
-                    confirm-type="send"
-                    bindconfirm="onSend"
+                class="input-field" 
+                type="text" 
+                value="{{inputValue}}"
+                bindinput="onInput"
+                placeholder="" 
+                confirm-type="send"
+                bindconfirm="onSend"
+
                 />
                 <image 
                     class="send-icon {{inputValue ? 'active' : ''}}" 

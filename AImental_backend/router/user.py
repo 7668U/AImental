@@ -192,3 +192,41 @@ def startup():
 def shutdown():
     if not user_db.is_closed():
         user_db.close()
+
+
+class TestUserLoginRequest(BaseModel):
+    """仅用于测试登录的请求体"""
+    user_id: str = Field(..., description="用于测试的任意用户ID")
+    
+@router.post("/login/test", response_model=TokenResponse, summary="【仅供测试】使用任意ID登录")
+def test_login(login_data: TestUserLoginRequest):
+    """
+    一个专为开发和测试设置的后门登录接口。
+    它会根据提供的 user_id 查找用户，如果用户不存在则自动创建，
+    然后直接签发一个有效的JWT Token。
+    【警告】这个接口绝对不能部署到生产环境！
+    """
+    user_id_for_test = login_data.user_id
+    
+    # 在 Peewee 中，我们通常用 get_or_none 来安全地获取对象
+    # 假设 user_table 中有 get_user_by_id 方法
+    # 注意：这里的 user_id 可能是你数据库中的自增主键或UUID，
+    # 我们这里简化为直接使用前端传来的字符串作为用户的唯一标识来查找或创建。
+    # 更好的做法是查找或创建一个user，然后用user的真实db_id来生成token。
+    
+    # 查找用户，如果不存在则创建一个新用户用于测试
+    user, created = User.get_or_create(
+        id=user_id_for_test, 
+        defaults={
+            'openid': f"test_openid_{user_id_for_test}",
+            'nickname': f"测试用户-{user_id_for_test[:6]}",
+            'avatar_url': ""
+        }
+    )
+    if created:
+        print(f"为测试创建了新用户: {user_id_for_test}")
+    
+    # 使用与微信登录相同的函数来创建Token，确保Token格式一致
+    # Token的'sub'字段（主体）应该是用户的唯一数据库ID
+    access_token = create_access_token(data={"sub": user.id})
+    return {"access_token": access_token}

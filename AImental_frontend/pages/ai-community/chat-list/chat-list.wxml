@@ -1,0 +1,56 @@
+<block wx:if="{{!isLoggedIn}}">
+  <login-prompt 
+    title="欢迎来到心灵社区"
+    subtitle="请先登录，发现AI伙伴"
+    bind:loginevent="handleLogin"
+  ></login-prompt>
+</block>
+
+<block wx:else>
+  <view class="page-container">
+    
+    <view class="top-bar" style="height: {{totalHeaderHeight}}px;">
+      <view class="nav-bar-content" style="margin-top: {{statusBarHeight}}px; height: {{navBarHeight}}px;">
+        <view class="top-bar-left"></view>
+        <view class="top-bar-center">
+          <view class="nav-title">心灵社区</view>
+        </view>
+        <view class="top-bar-right">
+          <image class="action-icon" src="/images/icons/new_item.png" bindtap="addMoreFriends"></image>
+        </view>
+      </view>
+    </view>
+
+    <scroll-view 
+      class="list-container" 
+      scroll-y="true"
+      style="padding-top: {{totalHeaderHeight}}px;"
+    >
+      <block wx:if="{{chatList.length > 0}}">
+        <view class="chat-item" wx:for="{{chatList}}" wx:key="id" bindtap="navigateToChat" data-ai="{{item}}">
+          <view class="avatar-container">
+            <image class="avatar" src="{{item.avatar}}"></image>
+            <view class="unread-dot" wx:if="{{item.unread}}"></view>
+          </view>
+          <view class="info-container">
+            <view class="info-header">
+              <text class="name">{{item.name}}</text>
+              <text class="time">{{item.time}}</text>
+            </view>
+            <view class="last-message">
+              <text>{{item.lastMessage}}</text>
+            </view>
+          </view>
+        </view>
+      </block>
+      
+      <block wx:else>
+        <view class="empty-state">
+          <image class="empty-icon" src="/images/icons/empty-chat.png"></image>
+          <text class="empty-text">还没有好友，快去发现新伙伴吧</text>
+        </view>
+      </block>
+    </scroll-view>
+
+  </view>
+</block>

@@ -349,3 +349,18 @@ page {
   font-size: 24rpx;
   color: var(--text-secondary);
 }
+
+.input-field::before {
+  display: none !important;
+  content: none !important;
+}
+
+.input-field::after {
+  /* 为保险起见，也禁用::after伪元素 */
+  display: none !important;
+  content: none !important;
+}
+
+.message-list .message-item:first-child {
+  margin-top: 100rpx; /* 您可以根据需要调整这个数值，比如 30rpx 或 50rpx */
+}

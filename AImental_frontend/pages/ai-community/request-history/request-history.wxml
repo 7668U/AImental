@@ -1,0 +1,29 @@
+<view class="history-page">
+  <view class="page-title">申请记录</view>
+  
+  <view class="request-list">
+    <block wx:if="{{!isLoading && requestList.length > 0}}">
+      <view class="request-item" wx:for="{{requestList}}" wx:key="character_id" bindtap="handleTap" data-item="{{item}}">
+        <image class="item-avatar" src="{{item.avatar}}" mode="aspectFill"></image>
+        <view class="item-info">
+          <view class="item-name">{{item.name}}</view>
+          <view class="item-description">你发送的验证消息: {{item.verification_message}}</view>
+          <view class="item-date">申请于 {{item.request_date}}</view>
+        </view>
+        <view class="item-status">
+          <text class="status-badge {{item.status_info.className}}">{{item.status_info.text}}</text>
+        </view>
+      </view>
+    </block>
+
+    <view class="empty-state" wx:if="{{!isLoading && isEmpty}}">
+      <image class="empty-icon" src="/images/empty-state-dark.png"></image>
+      <text class="empty-text">暂无申请记录</text>
+    </view>
+
+     <view class="loading-state" wx:if="{{isLoading}}">
+        <text class="loading-text">正在加载中...</text>
+     </view>
+
+  </view>
+</view>

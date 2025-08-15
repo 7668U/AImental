@@ -1,0 +1,182 @@
+/* pages/ai-community/chat-list/chat-list.wxss */
+
+page {
+  background-color: #F9F7F3;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+.page-container {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* =========================================== */
+/* 1. 动态自定义导航栏 */
+/* =========================================== */
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  background-color: rgba(249, 247, 243, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1rpx solid rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+}
+
+.nav-bar-content {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 30rpx;
+  padding-bottom: 16rpx; 
+  box-sizing: border-box;
+}
+
+.top-bar-left, .top-bar-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+.top-bar-center {
+  flex: 2;
+  text-align: center;
+}
+.top-bar-right {
+  justify-content: flex-end;
+}
+
+.nav-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #000;
+}
+
+.action-icon {
+  width: 44rpx;
+  height: 44rpx;
+}
+
+/* =========================================== */
+/* 2. 好友聊天列表 */
+/* =========================================== */
+.list-container {
+  height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #F9F7F3;
+}
+
+.chat-item {
+  display: flex;
+  padding: 25rpx 30rpx;
+  align-items: center;
+  transition: background-color 0.2s;
+  /* 【核心修改】在这里添加 border-bottom */
+  border-bottom: 1rpx solid #F1EEE9;
+  /* 【核心修改】为了让 border-bottom 左侧有留白，我们将 padding-left 移到这里 */
+  padding-left: 155rpx; /* (头像100rpx + 右边距25rpx + 留白30rpx) */
+  /* 【核心修改】同时取消原有的左右 padding */
+  padding-right: 30rpx;
+}
+
+.chat-item:active {
+  background-color: #F1EEE9;
+}
+
+/* 【核心修改】最后一个元素的 border 去掉 */
+.chat-item:last-child {
+  border-bottom: none;
+}
+
+.avatar-container {
+  position: relative;
+  /* 【核心修改】由于父级 padding 变化，这里用负 margin 拉回头像位置 */
+  margin-left: -125rpx; /* (头像100rpx + 右边距25rpx) */
+  margin-right: 25rpx;
+}
+
+.avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 12rpx;
+  background-color: #eee;
+}
+
+.unread-dot {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  width: 20rpx;
+  height: 20rpx;
+  background-color: #fa5151;
+  border-radius: 50%;
+  border: 4rpx solid #F9F7F3;
+}
+
+.info-container {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* 【核心修改】移除这里的 border-bottom 和 padding */
+  /* border-bottom: 1rpx solid #F1EEE9; */
+  /* padding: 10rpx 0; */
+  height: 120rpx;
+}
+
+/* 【核心修改】这个规则不再需要了 */
+/* .chat-item:last-child .info-container {
+  border-bottom: none;
+} */
+
+.info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.name {
+  font-size: 32rpx;
+  color: #333;
+}
+
+.time {
+  font-size: 24rpx;
+  color: #aaa;
+}
+
+.last-message {
+  font-size: 28rpx;
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 列表为空时的样式 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 250rpx;
+  opacity: 0.6;
+}
+
+.empty-icon {
+  width: 200rpx;
+  height: 200rpx;
+}
+
+.empty-text {
+  margin-top: 20rpx;
+  font-size: 28rpx;
+  color: #aaa;
+}
