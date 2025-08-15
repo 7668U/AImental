@@ -1,10 +1,10 @@
+<!-- pages/daily-checkin/paper-airplane/index.wxml -->
 <view class="page-container">
   <!-- 背景元素 -->
   <view class="sky-bg">
     <!-- 云朵 -->
     <image src="/images/cloud.png" class="cloud cloud-1"></image>
   </view>
-  <!-- 屋顶/阳台元素已移除 -->
 
   <!-- 纸飞机容器 -->
   <view class="airplane-container">
@@ -18,18 +18,20 @@
     </image>
   </view>
 
-  <!-- 底部操作区 -->
+  <!-- 底部操作区: 修改为 button 元素以确保点击事件的响应 -->
   <view class="actions-bar">
-    <view class="action-button throw" bindtap="onThrowClick">
-      <image src="/images/send_airplane.png" class="action-icon"></image>
-      <text>扔一个</text>
-    </view>
-    <!-- 捡一个按钮已移除 -->
+    <button class="throw-button-container" bindtap="onThrowClick">
+      <image src="/images/send_airplane.png" class="throw-button-img"></image>
+      <text class="throw-button-text">扔一个</text>
+    </button>
   </view>
 
   <!-- 写纸条的弹窗 -->
   <view class="modal-mask" wx:if="{{showWriteModal}}" bindtap="hideModals"></view>
   <view class="modal-content write-modal" wx:if="{{showWriteModal}}">
+    <!-- 弹窗右上角的取消按钮 -->
+    <image src="/images/cancle.png" class="modal-cancel-btn" bindtap="hideModals"></image>
+    
     <textarea class="message-input" placeholder="把你的心事写在纸上，然后让它飞远吧..." maxlength="500" value="{{newMessage}}" bindinput="onMessageInput"></textarea>
     <view class="modal-button" bindtap="sendAirplane">飞出去</view>
   </view>
@@ -37,6 +39,9 @@
   <!-- 查看纸条的弹窗 -->
   <view class="modal-mask" wx:if="{{showReadModal}}" bindtap="hideModals"></view>
   <view class="modal-content read-modal" wx:if="{{showReadModal}}">
+     <!-- 弹窗右上角的取消按钮 -->
+    <image src="/images/cancle.png" class="modal-cancel-btn" bindtap="hideModals"></image>
+    
     <scroll-view scroll-y="true" class="message-display">
       <text>{{openedMessage}}</text>
     </scroll-view>

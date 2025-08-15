@@ -2,26 +2,83 @@
 
 /* --- 全局与页面背景 --- */
 page {
-  background-color: #F9F7F3; /* 一个温暖、柔和的米色背景 */
+  background-color: #F9F7F3;
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
 }
 
-.container {
-  display: flex;
-  flex-direction: column;
-  padding: 30rpx;
-  box-sizing: border-box;
-}
-
-/* --- 1. 顶部控制区 --- */
-.controls-wrapper {
+/* --- 自定义导航栏样式 --- */
+.custom-nav-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
   background-color: #ffffff;
+  z-index: 1000;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.custom-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+.nav-left, .nav-right {
+  display: flex;
+  align-items: center;
+  width: 120rpx;
+}
+.nav-left {
+  justify-content: flex-start;
+  padding-left: 24rpx;
+}
+.nav-right {
+  justify-content: flex-end;
+}
+.nav-back-icon {
+  width: 36rpx;
+  height: 36rpx;
+}
+.nav-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+.nav-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #000000;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+/* --- 导航栏样式结束 --- */
+
+/* --- 主内容区域 --- */
+.main-content {
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 水平居中 */
+}
+
+/*
+ * 【已修改】
+ * 1. 移除了 box-shadow，去掉了阴影效果。
+ * 2. 将 margin-top 从一个较大的计算值减小为 20rpx，使整个区域上移。
+ * 3. 背景色 #F9F7F3 与 page 背景色相同，移除阴影后即可无缝融合。
+ */
+.controls-wrapper {
+  width: 90%; /* 限制宽度，实现整体居中 */
+  background-color: #F9F7F3;
   border-radius: 24rpx;
   padding: 40rpx;
   box-sizing: border-box;
+  margin-top: -200rpx; /* 向上移动，减少与导航栏的间距 */
   margin-bottom: 30rpx;
-  box-shadow: 0 8rpx 24rpx rgba(226, 172, 112, 0.1);
 }
 
 .page-title {
@@ -37,7 +94,7 @@ page {
   display: flex;
   justify-content: center;
   background-color: #F0F0F0;
-  border-radius: 35rpx; /* 圆润的胶囊形状 */
+  border-radius: 35rpx;
   padding: 8rpx;
   margin-bottom: 40rpx;
 }
@@ -47,13 +104,13 @@ page {
   text-align: center;
   padding: 12rpx 0;
   font-size: 28rpx;
-  color: #666;
+  color: rgb(73, 73, 73);
   border-radius: 30rpx;
   transition: all 0.2s ease-in-out;
 }
 
 .time-option.active {
-  background-color: #FFA726; /* 主题橙色 */
+  background-color: #FFA726;
   color: #ffffff;
   font-weight: bold;
   box-shadow: 0 4rpx 10rpx rgba(255, 167, 38, 0.3);
@@ -66,19 +123,25 @@ page {
   gap: 30rpx;
 }
 
+/*
+ * 【已修改】
+ * 1. 将 border 的颜色从 #EAEAEA (浅灰色) 修改为 #FFCC80 (一种较浅的橙色)。
+ * 这样既能与背景区分，又不会和 active 状态的 #FFA726 混淆。
+ */
 .analysis-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   background-color: #F9F9F9;
-  border: 2rpx solid #EAEAEA;
+  border: 2rpx solid #FFCC80; /* 添加橙色边框以区分背景 */
   border-radius: 20rpx;
   padding: 30rpx 0;
-  transition: all 0.2s ease-in-out; /* 【优化】增加平滑过渡效果 */
+  transition: all 0.2s ease-in-out;
+  width: 100%; /* 按钮撑满网格单元 */
+  box-sizing: border-box;
 }
 
-/* 【优化】增加按下的交互效果 */
 .analysis-btn:active {
   transform: scale(0.97);
   opacity: 0.8;
@@ -86,7 +149,7 @@ page {
 
 .analysis-btn.active {
   border-color: #FFA726;
-  background-color: #FFF7EE; /* 橙色的浅色背景，突出选中状态 */
+  background-color: #FFF7EE;
 }
 
 .btn-icon {
@@ -100,12 +163,12 @@ page {
   color: #333;
 }
 
-/* --- 2. 内容展示区 --- */
+/* 2. 内容展示区 */
 .content-wrapper {
-  width: 100%;
+  width: 90%; /* 限制宽度，实现整体居中 */
+  box-sizing: border-box;
 }
 
-/* 【优化】为结果展示区增加淡入动画 */
 .result-wrapper {
   animation: fade-in 0.5s ease-in-out;
 }
@@ -115,10 +178,9 @@ page {
   to { opacity: 1; transform: translateY(0); }
 }
 
-
 /* 加载状态 */
 .loading-wrapper {
-  padding: 150rpx 0;
+  padding: 100rpx 0; /* 减少一些垂直 padding */
   text-align: center;
   color: #999;
 }
@@ -130,12 +192,12 @@ page {
 /* 图表容器 */
 .chart-container {
   width: 100%;
-  height: 600rpx; /* 给予图表足够的展示高度 */
+  height: 500rpx; /* 稍微减少一些高度 */
   background-color: #fff;
   border-radius: 24rpx;
   padding: 20rpx;
   box-sizing: border-box;
-  margin-bottom: 30rpx;
+  margin-bottom: 20rpx; /* 稍微减少一些 margin-bottom */
   box-shadow: 0 8rpx 24rpx rgba(226, 172, 112, 0.1);
 }
 
@@ -146,7 +208,7 @@ page {
   border-radius: 24rpx;
   padding: 40rpx;
   box-sizing: border-box;
-  margin-bottom: 30rpx;
+  margin-bottom: 20rpx; /* 稍微减少一些 margin-bottom */
   box-shadow: 0 8rpx 24rpx rgba(226, 172, 112, 0.1);
 }
 
@@ -161,14 +223,14 @@ page {
 
 .card-content {
   font-size: 28rpx;
-  line-height: 1.7; /* 增加行高，提升长文本的阅读体验 */
+  line-height: 1.7;
   color: #555;
-  white-space: pre-wrap; /* 保证AI报告中的换行符(\n)能够生效 */
+  white-space: pre-wrap;
 }
 
 /* AI报告卡片的特殊样式 */
 .ai-card .card-title {
-  color: #FFA726; /* AI卡片的标题使用主题橙色 */
+  color: #FFA726;
 }
 
 .ai-icon {
@@ -179,9 +241,9 @@ page {
 
 /* 初始占位提示 */
 .initial-placeholder {
-  padding: 150rpx 0;
+  padding: 100rpx 0; /* 减少一些垂直 padding */
   text-align: center;
-  color: #aaa;
+  color: rgb(98, 98, 98);
   font-size: 28rpx;
 }
 
@@ -234,7 +296,7 @@ page {
 
 .accent-color-label {
   width: 140rpx;
-  color: #555;
+  color: rgb(68, 66, 66);
 }
 
 .accent-color-bar {
@@ -271,4 +333,38 @@ page {
   font-size: 30rpx;
   color: #333;
   font-weight: bold;
+}
+
+/* Period Picker 样式 - 保持不变 */
+.period-picker-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  z-index: 1001;
+  border-top: 1rpx solid #eee;
+}
+
+.picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 30rpx;
+  font-size: 32rpx;
+  color: #333;
+}
+
+.picker-cancel, .picker-confirm {
+  color: rgb(87, 85, 85);
+}
+
+.picker-confirm {
+  color: #FFA500;
+  font-weight: bold;
+}
+
+.picker-view {
+  width: 100%;
+  height: 300rpx;
 }

@@ -14,7 +14,7 @@
       
       <view class="welcome-wrapper">
         <view class="title">你好，</view>
-        <view class="subtitle">今天也请好好关照自己</view>
+        <view class="subtitle">今天也要好好关照自己</view>
       </view>
 
       <scroll-view class="card-scroll-area" scroll-y="true">

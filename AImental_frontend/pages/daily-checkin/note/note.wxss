@@ -6,7 +6,7 @@
   这能避免小程序报出样式选择器不规范的警告。
 */
 .note-container {
-  background-color: #f3ba50;
+  background-color: #F9F7F3;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   min-height: 100vh; /* 确保背景色铺满全屏 */
 }
@@ -58,7 +58,7 @@
 .card-counter {
   font-size: 24rpx;
   color: #fff;
-  background-color: #4A90E2;
+  background-color: #f3ba50;
   padding: 4rpx 12rpx;
   border-radius: 20rpx;
   margin-left: 8rpx;
@@ -192,7 +192,7 @@
   height: 88rpx;
   line-height: 88rpx;
   font-size: 30rpx;
-  background-color: #F7F8FA;
+  background-color: #F9F7F3;
   border-radius: 16rpx;
   padding: 0 24rpx;
   box-sizing: border-box;
@@ -223,8 +223,8 @@
 }
 
 .modal-btn.confirm {
-  color: #4A90E2;
-  font-weight: 500;
+  color: #666;
+  /* font-weight: 500; */
   border-bottom-right-radius: 24rpx;
 }
 
@@ -238,7 +238,7 @@
 .note-modal {
   width: 90%;
   max-height: 80vh;
-  background-color: #FDF6E3;
+  background-color: #f8f3e5;
 }
 
 /* 让头部、底部、按钮的背景透明，以继承米色 */

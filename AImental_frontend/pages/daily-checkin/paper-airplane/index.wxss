@@ -1,7 +1,5 @@
 /* pages/daily-checkin/paper-airplane/index.wxss */
 
-/* .background-image 已移除 */
-
 .page-container {
   position: relative;
   width: 100vw;
@@ -9,177 +7,27 @@
   overflow: hidden;
 }
 
-.sky-bg { /* 重新添加天空样式 */
+.sky-bg {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 70%; /* 天空占70% */
-  background: linear-gradient(to bottom, #87CEEB, #B0E0E6);
-}
-
-.rooftop-bg { /* 重新添加屋顶样式 */
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 30%; /* 屋顶占30% */
-  background-color: #A0522D; /* 棕色屋顶 */
-  border-top: 5px solid #8B4513; /* 屋顶边缘线 */
-  z-index: 0; /* 确保在背景图片之上，纸飞机之下 */
-}
-
-.airplane-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  z-index: 10;
-}
-
-.airplane {
-  position: absolute;
-  width: 120rpx;
-  height: 120rpx;
-  opacity: 0.9;
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0) rotate(-15deg);
-  }
-  50% {
-    transform: translateY(-20px) rotate(15deg);
-  }
-}
-
-/* 底部操作区 */
-.actions-bar {
-  position: absolute;
-  bottom: 40rpx;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 30rpx;
-  z-index: 20;
-}
-
-.action-button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 180rpx;
-  height: 180rpx;
-  border-radius: 50%;
-  color: white;
-  font-size: 28rpx;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-
-.action-button.throw {
-  background-color: #FF9800; /* 橙色 */
-}
-
-/* .action-button.pickup 已被移除 */
-
-.action-icon {
-  width: 60rpx;
-  height: 60rpx;
-  margin-bottom: 10rpx;
-}
-
-/* 弹窗样式 */
-.modal-mask {
-  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 998;
-}
-
-.modal-content {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 80vw;
-  max-width: 600rpx;
-  background-color: #fff;
-  border-radius: 20rpx;
-  padding: 40rpx;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  z-index: 999;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.write-modal {
-  height: 50vh;
-}
-
-.read-modal {
-  height: 60vh;
-}
-
-.message-input {
-  width: 100%;
-  height: calc(100% - 120rpx);
-  padding: 20rpx;
-  border: 1px solid #eee;
-  border-radius: 10rpx;
-  margin-bottom: 30rpx;
-  box-sizing: border-box;
-  font-size: 28rpx;
-}
-
-.message-display {
-  width: 100%;
-  height: calc(100% - 120rpx);
-  padding: 20rpx;
-  margin-bottom: 30rpx;
-  font-size: 30rpx;
-  line-height: 1.6;
-  white-space: pre-wrap; /* 保留换行 */
-}
-
-/* pages/daily-checkin/paper-airplane/index.wxss */
-
-/* .background-image 已移除 */
-
-.page-container {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-}
-
-.sky-bg { /* 重新添加天空样式 */
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%; /* 天空占满整个页面 */
   background: linear-gradient(to bottom, #87CEEB, #B0E0E6);
 }
-
-/* .rooftop-bg 已移除 */
 
 .cloud {
   position: absolute;
-  width: 300rpx; /* 放大一点 */
-  height: 300rpx; /* 明确设置高度 */
+  width: 300rpx;
+  height: 300rpx;
   opacity: 0.8;
   animation: floatCloud 30s linear infinite;
-  z-index: 5; /* 确保在背景之上，其他元素之下 */
+  z-index: 5;
 }
 
 .cloud-1 {
   top: 10%;
-  left: -20%; /* 从左边外侧开始 */
+  left: -20%;
   animation-delay: 0s;
 }
 
@@ -188,7 +36,7 @@
     transform: translateX(0);
   }
   100% {
-    transform: translateX(120vw); /* 飘出屏幕 */
+    transform: translateX(120vw);
   }
 }
 
@@ -216,43 +64,45 @@
   }
 }
 
-/* 底部操作区 */
+/* --- 底部操作区 --- */
 .actions-bar {
   position: absolute;
-  bottom: 40rpx;
+  bottom: 50rpx;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  gap: 30rpx;
   z-index: 20;
 }
 
-.action-button {
+.throw-button-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 180rpx;
-  height: 180rpx;
-  border-radius: 50%;
-  color: white;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.throw-button-container::after {
+  border: none;
+}
+
+.throw-button-img {
+  width: 160rpx;
+  height: 160rpx;
+}
+
+.throw-button-text {
   font-size: 28rpx;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  color: #fff;
+  font-weight: bold;
+  margin-top: 10rpx;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
-.action-button.throw {
-  background-color: #FF9800; /* 橙色 */
-}
 
-/* .action-button.pickup 已被移除 */
-
-.action-icon {
-  width: 60rpx;
-  height: 60rpx;
-  margin-bottom: 10rpx;
-}
-
-/* 弹窗样式 */
+/* --- 弹窗样式 --- */
 .modal-mask {
   position: fixed;
   top: 0;
@@ -264,7 +114,7 @@
 }
 
 .modal-content {
-  position: fixed;
+  position: fixed; /* <-- 这里是关键！确保弹窗相对于屏幕定位 */
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -278,6 +128,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  /* 之前这里有一行多余的 position: relative; 我已将其删除 */
+}
+
+.modal-cancel-btn {
+  position: absolute;
+  top: 20rpx;
+  right: 20rpx;
+  width: 40rpx;
+  height: 40rpx;
+  z-index: 1000;
 }
 
 .write-modal {
@@ -294,6 +154,7 @@
   padding: 20rpx;
   border: 1px solid #eee;
   border-radius: 10rpx;
+  margin-top: 30rpx;
   margin-bottom: 30rpx;
   box-sizing: border-box;
   font-size: 28rpx;
@@ -303,10 +164,11 @@
   width: 100%;
   height: calc(100% - 120rpx);
   padding: 20rpx;
+  margin-top: 30rpx;
   margin-bottom: 30rpx;
   font-size: 30rpx;
   line-height: 1.6;
-  white-space: pre-wrap; /* 保留换行 */
+  white-space: pre-wrap;
 }
 
 .modal-button {
@@ -314,14 +176,8 @@
   height: 80rpx;
   line-height: 80rpx;
   text-align: center;
-  background-color: #FF9800; /* 橙色 */
-  color: white;
+  background-color: #FF9800;
+  color: #fff; /* 将颜色改回白色，黑色在橙色背景上可能不好看 */
   border-radius: 10rpx;
   font-size: 32rpx;
 }
-
-.throw-button {
-  font-family: 'Pacifico', cursive;
-  font-weight: bold;
-}
-

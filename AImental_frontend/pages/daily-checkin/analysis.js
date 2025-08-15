@@ -13,6 +13,9 @@ const ANALYSIS_TYPE_MAP = {
 
 Page({
   data: {
+    // --- 新增：导航栏数据 ---
+    navTop: 0,
+    navHeight: 0,
     // --- 控制器状态 ---
     isReady: false,
     selectedTimeRange: 'monthly',
@@ -35,8 +38,24 @@ Page({
   },
 
   onLoad(options) {
+    this.setNavSize();
     this.initDefaultPeriod();
   },
+// --- 新增：为适配自定义导航栏新增的函数 ---
+setNavSize() {
+  const sysInfo = wx.getSystemInfoSync();
+  const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+  this.setData({
+    navTop: sysInfo.statusBarHeight,
+    navHeight: menuButtonInfo.height + (menuButtonInfo.top - sysInfo.statusBarHeight) * 2
+  });
+},
+
+navigateBack() {
+  wx.navigateBack({
+    delta: 1
+  });
+},
 
   initDefaultPeriod() {
     const now = new Date();

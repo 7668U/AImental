@@ -1,7 +1,8 @@
+
 {
   "usingComponents": {
     "ec-canvas": "./components/ec-canvas/ec-canvas",
     "period-picker": "./components/period-picker/period-picker"
   },
-  "navigationBarTitleText": "心情分析报告"
+  "navigationStyle": "custom"
 }
