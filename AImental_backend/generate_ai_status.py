@@ -1,4 +1,4 @@
-# services/generate_ai_status.py
+# generate_ai_status.py
 
 import os
 import json
@@ -16,48 +16,50 @@ from openai import OpenAI
 MOONSHOT_API_KEY = os.getenv("MOONSHOT_API_KEY", "sk-6gGW4lyWgHbvwFO8My2d1ivCkFY77iFBthp3J6TIolfAtJm3")
 MOONSHOT_BASE_URL = os.getenv("MOONSHOT_BASE_URL", "https://api.moonshot.cn/v1")
 
-# 注意：如果MOONSHOT_API_KEY是示例值，下面的API调用会失败。
-# 请替换为您自己的有效API Key来运行。
 try:
     client = OpenAI(api_key=MOONSHOT_API_KEY, base_url=MOONSHOT_BASE_URL)
 except Exception as e:
     print(f"无法初始化OpenAI客户端，请检查API Key和URL配置: {e}")
     client = None
 
-# --- 2. 定义期望的JSON输出结构 (与你的AiStatus模型对应) ---
+# --- 2. 定义期望的JSON输出结构 (已升级) ---
 
 class ScheduleItem(BaseModel):
     """
-    定义单条日程的数据结构。
+    【已升级】定义单条日程的数据结构。
     这个结构直接映射到你的 `AiStatus` 数据库表字段。
     """
     start_time: str = Field(..., description="事件开始时间，格式为 'HH:MM'")
     end_time: str = Field(..., description="事件结束时间，格式为 'HH:MM'")
     
-    # 对应 AiStatus.status_category
     status_category: str = Field(
         ..., 
         description="事件的内部逻辑分类。例如: 'work', 'hobby', 'social', 'chore', 'relax', 'meal', 'travel', 'exercise', 'sleep'"
     )
     
-    # 对应 AiStatus.status_description
     status_description: str = Field(
         ..., 
         description="符合角色人设的、详细的情景描述，用于AI生成回复时的核心上下文。"
     )
     
-    # 对应 AiStatus.reply_delay_minutes
     reply_delay_minutes: int = Field(
         ..., 
         description="建议的回复延迟分钟数。0代表可立即回复。根据事件的投入程度来决定。"
     )
+
+    # --- 【核心新增】 ---
+    focus_level: str = Field(
+        ...,
+        description="根据事件的重要性，从 'UNINTERRUPTIBLE', 'HIGH', 'LOW', 'AVAILABLE' 四个选项中选择一个。"
+    )
+    # --- ------------ ---
 
 class DailyScheduleResponse(BaseModel):
     """定义一整天日程表的完整数据结构"""
     schedule: List[ScheduleItem] = Field(..., description="包含当天所有日程项目的列表。")
 
 
-# --- 3. 构建核心Prompt (已修复三引号问题并更新指令) ---
+# --- 3. 构建核心Prompt (已升级) ---
 
 def build_schedule_generation_prompt(
     character_profile: Dict[str, Any], 
@@ -69,9 +71,9 @@ def build_schedule_generation_prompt(
     """
     profile_str = json.dumps(character_profile, indent=2, ensure_ascii=False)
     history_str = json.dumps(recent_history, indent=2, ensure_ascii=False)
+    # 【重要】使用更新后的模型来生成Schema
     json_schema = DailyScheduleResponse.model_json_schema()
 
-    # 这是整个魔法的核心：一个结构清晰、指令明确的Prompt模板
     prompt_template = f"""
 # 使命
 你是一个富有创造力和逻辑思维的虚拟角色日程规划师。你的任务是为一个名为“{character_profile.get('identity_core', {}).get('name', '角色')}”的虚拟角色，生成一整天（24小时）的、高度真实的、符合其人设的日程表。
@@ -86,13 +88,19 @@ def build_schedule_generation_prompt(
 
 # 任务指令
 1.  **生成目标日期**: 请为 **{target_date.strftime('%Y-%m-%d')}** 这一天生成日程。
-2.  **逻辑连贯性**: 日程必须逻辑连贯，时间线合理。例如，工作后会通勤，饭前会准备或外出，睡前会有放松活动。避免出现“上一秒在开会，下一秒在深海潜水”的突兀转变。
-3.  **人设一致性**: 所有活动都必须深度契合角色的职业、性格和兴趣爱好。例如，一个植物学家可能会“在实验室观察样本”，而不是“在金融市场操盘”。
+2.  **逻辑连贯性**: 日程必须逻辑连贯，时间线合理。
+3.  **人设一致性**: 所有活动都必须深度契合角色的职业、性格和兴趣爱好。
 4.  **时间覆盖**: 所有日程项目的时间应连续，并大致覆盖从 `00:00` 到 `23:59` 的24小时。
-5.  **字段生成规则**:
-    - `status_category`: 必须根据角色的个人特征以及前几天的活动轨迹来生成，可以是任意状态，但必须逻辑合理，不能出现上一秒还在吃火锅，下一秒在南极开会这样的离谱情况。这个字段是状态的一个简短描述，比如开会。
-    - `status_description`: 这个字段是一个对状态详细的描述，比如，由于研究所要求出差，在孟加拉开国际原子物理会议，描述可以尽可能详细！
-    - `reply_delay_minutes`: 必须根据事件的投入程度，估算一个合理的整数作为回复延迟分钟数。例如，“睡觉”或“重要会议”的延迟应该很长（如120分钟以上），而“喝咖啡”或“发呆”的延迟可以是0。
+5.  **【已升级】字段生成规则**:
+    - `status_category`: 必须根据角色的个人特征以及前几天的活动轨迹来生成，可以是任意状态，但必须逻辑合理,这个部分简短一点儿的中文就行，五个字以内，必须是中文哦。
+    - `status_description`: 对status_category字段状态的详细描述，越详细越好，可以描述很具体的事件，必须符合人设。
+    - `reply_delay_minutes`: 根据事件的投入程度，估算一个合理的整数作为回复延迟分钟数。
+    - **`focus_level`**: 你必须为每个事件评估一个专注等级。
+        - 如果是 **睡觉**，必须设为 **'UNINTERRUPTIBLE'**。
+        - 如果是 **重要工作、会议、开车、考试** 等，设为 **'HIGH'**。
+        - 如果是 **日常活动、学习、爱好** 等，设为 **'LOW'**。
+        - 如果是 **休息、喝茶、放空** 等，设为 **'AVAILABLE'**。
+
 6.  **输出格式**: 你的回答**必须且只能**是一个严格遵循以下JSON Schema的JSON对象。不要添加任何额外的解释、注释或Markdown标记。
 
 ```json
@@ -104,7 +112,7 @@ def build_schedule_generation_prompt(
     return prompt_template
 
 
-# --- 4. 核心生成与解析函数 (已更新) ---
+# --- 4. 核心生成与解析函数 (逻辑不变) ---
 
 def generate_daily_schedule(
     character_profile: Dict[str, Any], 
@@ -112,46 +120,35 @@ def generate_daily_schedule(
 ) -> List[Dict[str, Any]]:
     """
     调用LLM API为指定角色生成一天的日程表。
-
-    Args:
-        character_profile (Dict): 角色的完整设定。
-        recent_history (List[Dict]): 角色最近几天的日程历史。
-
-    Returns:
-        List[Dict[str, Any]]: 成功时返回日程列表，失败时返回空列表。
     """
     if not client:
         print("错误: LLM客户端未初始化。")
         return []
 
-    target_date = date.today() + timedelta(days=1) # 默认生成明天的日程
+    target_date = date.today() + timedelta(days=1)
     
-    # 1. 构建Prompt
     prompt = build_schedule_generation_prompt(character_profile, recent_history, target_date)
     
     print(f"--- 正在为角色 '{character_profile.get('identity_core', {}).get('name')}' 生成 {target_date} 的日程 ---")
 
     try:
-        # 2. 调用API
         response = client.chat.completions.create(
-            model="moonshot-v1-8k",  # 或者你选择的其他模型
+            model="moonshot-v1-8k",
             messages=[
                 {"role": "system", "content": "你是一个遵循指令的JSON生成助手。"},
                 {"role": "user", "content": prompt}
             ],
-            response_format={"type": "json_object"}, # 强制要求返回JSON对象
+            response_format={"type": "json_object"},
             temperature=0.7,
-            max_tokens=2048  # <-- 【核心修复】在这里增加 max_tokens 参数
+            max_tokens=2048
         )
         
         raw_response_content = response.choices[0].message.content
         
-        # 3. 解析和验证
         validated_data = DailyScheduleResponse.model_validate_json(raw_response_content)
         
         print(f"✅ 成功生成并验证了日程。")
         
-        # 将Pydantic模型转换为纯字典列表返回
         schedule_list = [item.model_dump() for item in validated_data.schedule]
         return schedule_list
 
@@ -164,34 +161,29 @@ def generate_daily_schedule(
         return []
 
 
-# --- 5. 示例：如何使用这个脚本 ---
+# --- 5. 示例 (逻辑不变) ---
 
 if __name__ == "__main__":
     print("🚀 开始执行AI日程生成脚本示例...")
 
-    # 准备一个角色的Profile
     lingjian_profile = {
         "identity_core": { "name": "林间", "age": 28, "gender": "女", "occupation": "植物学在读博士" },
         "personality_traits": { "mbti": "INFJ", "personality_tags": ["温柔", "理性", "有耐心", "轻微社恐"] },
         "lifestyle": { "hobbies": ["侍弄花草", "手冲咖啡", "阅读旧书"], "daily_routine": "早睡早起，上午效率最高。" }
     }
 
-    # 准备一份模拟的近期历史
     mock_recent_history = [
         { "date": (date.today() - timedelta(days=1)).strftime('%Y-%m-%d'), "summary": "全天在实验室整理数据，晚上阅读了关于苔藓植物的文献直到深夜。" }
     ]
 
-    # 调用核心函数
     generated_schedule = generate_daily_schedule(
         character_profile=lingjian_profile,
         recent_history=mock_recent_history
     )
 
-    # 打印结果
     if generated_schedule:
         print("\n--- 生成的日程表示例 ---")
         print(json.dumps(generated_schedule, indent=2, ensure_ascii=False))
         print("\n脚本执行完毕。")
     else:
         print("\n未能成功生成日程表。请检查API Key配置和错误信息。")
-

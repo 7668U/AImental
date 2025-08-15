@@ -1,5 +1,7 @@
 {
-  "usingComponents": {},
+  "usingComponents": {
+    "login-prompt": "/components/login-prompt/login-prompt"
+  },
   "navigationBarTitleText": "心灵社区",
   "enablePullDownRefresh": true,
   "navigationStyle": "custom"

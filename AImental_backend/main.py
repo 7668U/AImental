@@ -107,7 +107,7 @@ async def db_connection_middleware(request: Request, call_next):
 
 def check_and_generate_today_schedules():
     """
-    【时区修正版】
+    【已修正版】
     在系统启动时，检查所有AI角色是否已生成当天的日程。
     强制使用北京时间来定义“今天”。
     """
@@ -152,14 +152,18 @@ def check_and_generate_today_schedules():
                     start_dt = BEIJING_TZ.localize(datetime.strptime(f"{today_in_beijing} {activity['start_time']}", "%Y-%m-%d %H:%M"))
                     end_dt = BEIJING_TZ.localize(datetime.strptime(f"{today_in_beijing} {activity['end_time']}", "%Y-%m-%d %H:%M"))
                     
+                    # --- 【关键修复】在这里传入新的 focus_level 参数 ---
                     ai_status_table.create_status(
                         character_id=character.id,
                         category=activity['status_category'],
                         text=activity['status_description'],
                         start_time=start_dt,
                         end_time=end_dt,
-                        reply_delay_minutes=activity.get('reply_delay_minutes', 5)
+                        reply_delay_minutes=activity.get('reply_delay_minutes', 5),
+                        # 从AI生成的日程中获取 focus_level，如果不存在则默认为 'LOW'
+                        focus_level=activity.get('focus_level', 'LOW') 
                     )
+                    # --- ------------------------------------------ ---
                 print(f"✅ 成功为 '{character.name}' 补生成了 {len(daily_schedule)} 条今日日程。")
 
             else:

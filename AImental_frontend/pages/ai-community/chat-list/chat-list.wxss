@@ -1,19 +1,18 @@
-/* pages/ai-community/main/main.wxss */
+/* pages/ai-community/chat-list/chat-list.wxss */
 
 page {
-  /* 设置一个类似微信的灰色背景，让白色卡片区域更突出 */
-  background-color: #f7f7f7;
+  background-color: #F9F7F3;
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
 .page-container {
   height: 100vh;
   width: 100vw;
-  overflow: hidden; /* 防止子元素溢出 */
+  overflow: hidden;
 }
 
 /* =========================================== */
-/* 1. 动态自定义导航栏 (学习自您的范例) */
+/* 1. 动态自定义导航栏 */
 /* =========================================== */
 .top-bar {
   position: fixed;
@@ -21,39 +20,34 @@ page {
   left: 0;
   width: 100%;
   z-index: 100;
-  
-  /* 核心：半透明背景 + 背景模糊效果，非常有质感 */
-  background-color: rgba(247, 247, 247, 0.85);
+  background-color: rgba(249, 247, 243, 0.85);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px); /* 兼容旧版 Safari */
-  
-  border-bottom: 1rpx solid rgba(0, 0, 0, 0.05);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1rpx solid rgba(0, 0, 0, 0.04);
   box-sizing: border-box;
 }
 
 .nav-bar-content {
   width: 100%;
   display: flex;
-  align-items: flex-end; /* 【核心改动】从“居中”改为“底部对齐” */
+  align-items: flex-end;
   justify-content: space-between;
   padding: 0 30rpx;
-  /* 【新增】增加一个下内边距，避免文字和图标完全贴死在分割线上 */
   padding-bottom: 16rpx; 
   box-sizing: border-box;
 }
 
-/* 三段式布局，让标题居中，两侧按钮对齐 */
 .top-bar-left, .top-bar-right {
   flex: 1;
   display: flex;
   align-items: center;
 }
 .top-bar-center {
-  flex: 2; /* 中间区域更宽，避免标题过长被压缩 */
+  flex: 2;
   text-align: center;
 }
 .top-bar-right {
-  justify-content: flex-end; /* 右侧按钮靠右 */
+  justify-content: flex-end;
 }
 
 .nav-title {
@@ -74,7 +68,7 @@ page {
   height: 100vh;
   width: 100%;
   box-sizing: border-box;
-  background-color: #fff; /* 列表区域是白色背景 */
+  background-color: #F9F7F3;
 }
 
 .chat-item {
@@ -82,14 +76,27 @@ page {
   padding: 25rpx 30rpx;
   align-items: center;
   transition: background-color 0.2s;
+  /* 【核心修改】在这里添加 border-bottom */
+  border-bottom: 1rpx solid #F1EEE9;
+  /* 【核心修改】为了让 border-bottom 左侧有留白，我们将 padding-left 移到这里 */
+  padding-left: 155rpx; /* (头像100rpx + 右边距25rpx + 留白30rpx) */
+  /* 【核心修改】同时取消原有的左右 padding */
+  padding-right: 30rpx;
 }
 
 .chat-item:active {
-  background-color: #f0f0f0;
+  background-color: #F1EEE9;
+}
+
+/* 【核心修改】最后一个元素的 border 去掉 */
+.chat-item:last-child {
+  border-bottom: none;
 }
 
 .avatar-container {
   position: relative;
+  /* 【核心修改】由于父级 padding 变化，这里用负 margin 拉回头像位置 */
+  margin-left: -125rpx; /* (头像100rpx + 右边距25rpx) */
   margin-right: 25rpx;
 }
 
@@ -106,9 +113,9 @@ page {
   right: -8rpx;
   width: 20rpx;
   height: 20rpx;
-  background-color: #fa5151; /* 微信红点颜色 */
+  background-color: #fa5151;
   border-radius: 50%;
-  border: 4rpx solid #fff; /* 白色描边，让红点更突出 */
+  border: 4rpx solid #F9F7F3;
 }
 
 .info-container {
@@ -117,14 +124,16 @@ page {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  border-bottom: 1rpx solid #f0f0f0;
-  padding: 10rpx 0;
+  /* 【核心修改】移除这里的 border-bottom 和 padding */
+  /* border-bottom: 1rpx solid #F1EEE9; */
+  /* padding: 10rpx 0; */
   height: 120rpx;
 }
 
-.chat-item:last-child .info-container {
+/* 【核心修改】这个规则不再需要了 */
+/* .chat-item:last-child .info-container {
   border-bottom: none;
-}
+} */
 
 .info-header {
   display: flex;

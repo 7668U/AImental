@@ -1,4 +1,4 @@
-<view class="chat-page" style="padding-top: calc({{statusBarHeight}}px + 120rpx);">
+<view class="chat-page" style="padding-top: calc({{statusBarHeight}}px + 70rpx);">
 
 <view class="custom-nav-bar">
   <image class="back-icon" src="/images/left.png" bindtap="navigateBack"></image>
@@ -28,20 +28,17 @@
     
     <view class="message-row user" wx:if="{{item.role === 'user'}}">
       <view class="message-status">
-      <!-- 【核心修改】用一个 view 把图标和文字包起来 -->
-      <view class="status-unit" wx:if="{{item.status === 'sent'}}">
-        <image class="sent-icon" src="/images/send_successful.png"></image>
-        <text class="status-text">送达</text>
+        <view class="status-unit" wx:if="{{item.status === 'sent'}}">
+          <image class="sent-icon" src="/images/send_successful.png"></image>
+          <text class="status-text">送达</text>
+        </view>
+        <view class="status-unit" wx:if="{{item.status === 'read'}}">
+          <image class="read-icon" src="/images/read.png"></image>
+          <text class="status-text">已读</text>
+        </view>
+        <image wx:if="{{item.status === 'sending'}}" class="sending-icon" src="/images/loading.gif"></image>
+        <image wx:if="{{item.status === 'failed'}}" class="failed-icon" src="/images/failed.png"></image>
       </view>
-      <view class="status-unit" wx:if="{{item.status === 'read'}}">
-        <image class="read-icon" src="/images/read.png"></image>
-        <text class="status-text">已读</text>
-      </view>
-      
-      <!-- sending 和 failed 保持原样，因为它们不需要文字 -->
-      <image wx:if="{{item.status === 'sending'}}" class="sending-icon" src="/images/loading.gif"></image>
-      <image wx:if="{{item.status === 'failed'}}" class="failed-icon" src="/images/failed.png"></image>
-    </view>
       <view class="bubble-wrapper">
         <view class="bubble">{{item.content}}</view>
         <view class="message-time-user">{{item.time}}</view>
@@ -53,8 +50,11 @@
 
 <view class="input-bar-wrapper">
   <view class="input-bar">
-    <input class="input-field" value="{{inputValue}}" bindinput="onInput" placeholder="和Ta聊聊吧..."></input>
-    <button class="send-btn" bindtap="sendMessage" disabled="{{isSendDisabled}}">发送</button>
+    <input class="input-field" value="{{inputValue}}" bindinput="onInput" placeholder=""></input>
+    <view 
+      class="send-btn {{isSendDisabled ? 'disabled' : ''}}" 
+      bindtap="sendMessage"
+    >发送</view>
   </view>
 </view>
 </view>

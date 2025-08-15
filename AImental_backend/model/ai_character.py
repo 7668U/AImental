@@ -2,7 +2,8 @@
 
 import uuid
 from typing import Dict, Any, Optional, List
-
+import json  # <-- 添加此行
+import os    # <-- 添加此行
 # Peewee 是您项目中的核心ORM
 # playhouse.sqlite_ext 提供了对SQLite JSON字段的良好支持
 # 如果您未来使用PostgreSQL, 可以直接用 peewee.PostgresqlDatabase 并使用其内建的JSONField
@@ -113,6 +114,44 @@ class AICharacterTable:
             self.db.connect()
         self.db.create_tables([AICharacter])
         self.create_default_character_if_not_exists()
+        self._seed_from_json_file() # <-- 在这里调用新函数
+
+
+# 将这个新函数添加到您的 AICharacterTable 类中
+
+    def _seed_from_json_file(self, json_file_name: str = "ai_character.json"):
+        """
+        从指定的JSON文件中读取AI角色列表，并将其播种到数据库中。
+        这是一个内部辅助函数，主要用于应用初始化。
+        """
+        # 构建相对于当前脚本文件的绝对路径，这样无论从哪里运行脚本都能找到文件
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(script_dir, json_file_name)
+
+        # 检查JSON文件是否存在
+        if not os.path.exists(file_path):
+            print(f"ℹ️ 播种文件 '{json_file_name}' 未找到，跳过从JSON加载。")
+            return
+
+        print(f"ℹ️ 发现播种文件 '{json_file_name}'，正在尝试加载角色...")
+        
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                # 从文件中加载JSON数据
+                characters_data = json.load(f)
+            
+            # 确保JSON文件的内容是一个列表
+            if not isinstance(characters_data, list):
+                print(f"❌ 错误: JSON文件 '{json_file_name}' 的顶层结构必须是一个列表 (list)。")
+                return
+
+            # 复用已有的批量播种方法
+            self.seed_initial_characters(characters_data)
+
+        except json.JSONDecodeError:
+            print(f"❌ 错误: 解析JSON文件 '{json_file_name}' 失败，请检查文件格式是否有效。")
+        except Exception as e:
+            print(f"❌ 从JSON文件加载角色时发生未知错误: {e}")
 
     def create_default_character_if_not_exists(self):
             """

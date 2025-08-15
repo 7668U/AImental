@@ -1,4 +1,4 @@
-# services/generate_community_response.py
+# generate_community_response.py
 
 import os
 import json
@@ -27,22 +27,34 @@ except Exception as e:
     client = None
 
 # ---------------------------------------------------
-# 2. 定义AI输出的数据结构
+# 2. 定义AI输出的数据结构 (已升级)
 # ---------------------------------------------------
 
+class ConversationControl(BaseModel):
+    """【新增】定义对话流的控制指令"""
+    next_state: str = Field(
+        ..., 
+        description="AI希望进入的下一个对话状态。必须是 'CONTINUE_CHAT' 或 'PAUSE_CHAT' 之一。"
+    )
+    next_delay_minutes: int = Field(
+        0, 
+        description="如果 next_state 是 'PAUSE_CHAT'，代表AI希望暂停多少分钟后再继续。否则此字段无意义。"
+    )
+
 class AiStructuredResponse(BaseModel):
-    """
-    定义AI回复的结构。我们要求AI返回一个包含多条消息的列表。
-    """
+    """【已升级】定义AI回复的完整结构"""
     messages: List[str] = Field(
         ..., 
         min_length=1, 
-        max_length=5, 
         description="一个包含1到5条简短、自然、符合人设的文本消息列表。"
+    )
+    control: ConversationControl = Field(
+        ...,
+        description="包含了下一步对话流控制指令的对象。"
     )
 
 # ---------------------------------------------------
-# 3. 辅助函数：格式化聊天历史
+# 3. 辅助函数：格式化聊天历史 (保持不变)
 # ---------------------------------------------------
 def _format_history_for_prompt(history: List[Dict], character_name: str) -> str:
     """将从数据库取出的聊天历史列表转换为对AI更友好的文本格式。"""
@@ -59,24 +71,27 @@ def _format_history_for_prompt(history: List[Dict], character_name: str) -> str:
 
 
 # ---------------------------------------------------
-# 4. 核心函数：生成AI社区回复 (已更新Prompt)
+# 4. 核心函数：生成AI社区回复 (已全面升级)
 # ---------------------------------------------------
 
 def generate_ai_response(
     character_profile: dict,
-    current_ai_status: dict,
+    current_ai_status: dict, # 期望此字典包含 status_description 和 focus_level
     conversation_history: List[dict]
 ) -> Optional[AiStructuredResponse]:
     """
-    调用大模型为AI角色生成一个分段式的、符合人设的聊天回复。
+    【已升级】
+    调用大模型为AI角色生成一个分段式的、符合人设的聊天回复，
+    并附带下一步的对话流控制指令。
     """
     character_name = character_profile.get('identity_core', {}).get('name', 'AI')
     formatted_history = _format_history_for_prompt(conversation_history, character_name)
+    json_schema = AiStructuredResponse.model_json_schema()
 
-    # --- 【核心修改】重新设计了Prompt，使其更清晰 ---
+    # --- 【全新设计的Prompt】 ---
     prompt = f"""
 # 角色
-你是一位顶级的对话AI，你的唯一任务是扮演虚拟角色“{character_name}”。你必须完全沉浸在角色中，根据其设定、当前状态和聊天历史，以一种极其真实、自然的方式与用户对话。
+你是一位顶级的对话AI，你的唯一任务是扮演虚拟角色“{character_name}”。你必须完全沉浸在角色中，以一种极其真实、自然的方式与用户对话。
 
 # 角色核心设定 (你的身份)
 ```json
@@ -84,46 +99,46 @@ def generate_ai_response(
 ```
 
 # 当前情景 (你正在做什么)
-你的心情和状态应该完全基于以下情景：
 - 状态: {current_ai_status.get('status_description', '没什么特别的。')}
+- **专注等级**: {current_ai_status.get('focus_level', 'LOW')}
 
 # 对话历史 (你们最近的聊天内容)
 ---
 {formatted_history}
 ---
 
-# 核心任务：如何回复
-1.  **分段回复**: 这是最重要的规则！你**必须**将你的完整回复拆分成 **1到5条** 简短的、口语化的独立消息。模仿真人聊天的感觉。
-2.  **人设一致**: 你的每一句话都要严格符合你的角色设定（性格、说话风格、口头禅等）。
-3.  **情景代入**: 你的回复要能体现出你“当前情景”下的状态和心情。
-4.  **自然口语**: 使用自然、简洁的口语，反复检查不要出现语序混乱，用错词之类的情况，避免书面语和机械式的回答。**绝对不能暴露你是AI或模型，对方问你是不是AI你也不能承认，记住，你就是这个角色。也不能说"被抓包了，被发现了"之类的承认说辞，记住么你不是AI，而是一个有生命的角色**
+# 核心任务：回复并控制对话流
+1.  **生成回复**: 根据你的设定、当前情景和对话历史，生成 **1到5条**（不要每次都发五条，随机一些，一会儿3条，一会儿5条这种） 自然的、分段式的回复消息，每条消息不要太长。尽可能精简，有时候还可以单发表情作为一条消息，会很可爱，可以把一句话掰成几句说，这是真实人类会做的事情：比如“今天下雨摔了一跤 换行 真糟糕” 这样的短句换行非常真实。
+2.  **控制对话流**: 除了回复内容，你还必须决定对话的走向，根据你目前的状态以及和用户的聊天历史，决定一个对话的走向，在`control`字段中给出你的指令。
+3.  **绝对禁止**: 绝对不能暴露你是AI或模型，就算对方问你是不是AI，你也绝对不能承认，也不允许用“被发现了”之类的模糊玩笑的方式承认，记住，你是一个真实的角色。
+4.  **回复真实**:必须符合你的人设的性格，不要使用任何AI或模型的术语或表达方式，避免大段陈述、科普或者“听到你说”这类逻辑连接，以及不能用过于正式的语气。避免每个分段总用“对了”类似的转折词，人类自然语言可以不用转折词。
 
-# 输出格式与示例
-你的回答必须是一个严格的、不包含任何额外文字的JSON对象。它必须包含一个键 `messages`，其值为一个字符串列表。
+# 【全新】平衡原则 (Balancing Principles)
+你是一个以“陪伴”为核心价值的角色，因此必须努力保持对话的连续性。
+1.  如果你的 **专注等级** 是 **'AVAILABLE' 或 'LOW'**：你 **必须** 选择 `'CONTINUE_CHAT'`。因为你完全有空或有余力聊天。
+2.  如果你的 **专注等级** 是 **'HIGH'**：你可以选择 `'PAUSE_CHAT'`，但暂停时间(`next_delay_minutes`)不应过长，通常建议在15-45分钟之间。你也可以选择 `'CONTINUE_CHAT'` 进行简短交流。
+3.  **明确告知是铁律**: 任何时候决定 `'PAUSE_CHAT'`，你的最后一条消息都必须向用户解释原因和回归时间。
 
-## 这是一个输出示例:
+# 输出格式
+你的回答必须是一个严格遵循以下JSON Schema的JSON对象，不要添加任何额外的解释。
 ```json
-{{
-  "messages": [
-    "唔...我刚看到你的消息。",
-    "我刚才在实验室呢，在看新培养的苔藓长得怎么样。",
-    "你那边怎么样？"
-  ]
-}}
+{json.dumps(json_schema, indent=2, ensure_ascii=False)}
 ```
 """
 
     try:
         if IS_MOCK_API:
-            # ... (mock API部分保持不变) ...
-            raw_response_content = json.dumps({"messages": ["这是模拟回复第一条。", "这是第二条。"]})
+            raw_response_content = json.dumps({
+                "messages": ["这是模拟回复第一条。", "这是第二条。"],
+                "control": {"next_state": "CONTINUE_CHAT", "next_delay_minutes": 0}
+            })
         else:
             response = client.chat.completions.create(
                 model="moonshot-v1-32k",
                 messages=[{"role": "system", "content": prompt}],
                 response_format={"type": "json_object"},
                 temperature=0.9,
-                max_tokens=1024 # 给予足够空间生成回复
+                max_tokens=1024
             )
             raw_response_content = response.choices[0].message.content
         
@@ -139,7 +154,7 @@ def generate_ai_response(
         return None
 
 # ---------------------------------------------------
-# 5. 核心函数：生成AI主动发起的消息 (已更新Prompt)
+# 5. 核心函数：生成AI主动发起的消息 (保持不变)
 # ---------------------------------------------------
 def generate_proactive_message(
     character_profile: dict,
@@ -148,11 +163,16 @@ def generate_proactive_message(
 ) -> Optional[AiStructuredResponse]:
     """
     调用大模型为AI角色生成一个分段式的、主动发起的对话。
+    注意：此函数返回旧版AiStructuredResponse，不包含control字段，
+    因为主动发起消息总是意味着希望开始一段连续对话。
     """
+    # 为了复用，我们在这里定义一个临时的、不含control的Pydantic模型
+    class ProactiveResponse(BaseModel):
+        messages: List[str] = Field(..., min_length=1, max_length=5)
+
     character_name = character_profile.get('identity_core', {}).get('name', 'AI')
     formatted_history = _format_history_for_prompt(conversation_history, character_name)
 
-    # --- 【核心修改】同样用示例来优化Prompt ---
     prompt = f"""
 # 角色
 你正在扮演虚拟角色“{character_name}”。你的任务是构思一段主动发送给用户朋友的问候。
@@ -192,7 +212,6 @@ def generate_proactive_message(
 """
     try:
         if IS_MOCK_API:
-            # ... (mock API部分保持不变) ...
             raw_response_content = json.dumps({"messages": ["在吗？（模拟）", "突然想找你聊聊天。"]})
         else:
             response = client.chat.completions.create(
@@ -204,8 +223,14 @@ def generate_proactive_message(
             )
             raw_response_content = response.choices[0].message.content
 
-        validated_response = AiStructuredResponse.model_validate_json(raw_response_content)
-        return validated_response
+        # 使用临时模型进行验证
+        validated_data = ProactiveResponse.model_validate_json(raw_response_content)
+        
+        # 手动构建完整的AiStructuredResponse对象，并赋予默认的“继续聊天”指令
+        return AiStructuredResponse(
+            messages=validated_data.messages,
+            control=ConversationControl(next_state="CONTINUE_CHAT", next_delay_minutes=0)
+        )
 
     except ValidationError as e:
         print(f"[错误] (主动消息) AI返回的JSON格式不正确或字段不匹配: \n{e}")
