@@ -51,7 +51,7 @@
         "pagePath": "pages/ai-community/chat-list/chat-list",
         "text": "心灵社区",
         "iconPath": "/images/community.png",
-        "selectedIconPath": "/images/community.png"
+        "selectedIconPath": "/images/community_selected.png"
       },
       {
         "pagePath": "pages/daily-checkin/index",

@@ -12,57 +12,84 @@ page {
 }
 
 /* =========================================== */
-/* 1. 动态自定义导航栏 */
+/* pages/ai-community/chat-list/chat-list.wxss */
+
+page {
+  background-color: #F9F7F3;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+.page-container {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
 /* =========================================== */
-.top-bar {
+/* 1. 动态自定义导航栏 (采用新版样式) */
+/* =========================================== */
+
+/* 【移除】所有 .top-bar, .nav-bar-content, .top-bar-* 等旧样式 */
+
+/* 【新增】来自参考代码的导航栏样式结构 */
+.custom-nav-wrapper {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 100;
-  background-color: rgba(249, 247, 243, 0.85);
+  /* 保留你原有的背景模糊效果 */
+  background-color: #F9F7F3(240, 225, 195, 0.85);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1rpx solid rgba(0, 0, 0, 0.04);
-  box-sizing: border-box;
+  border-bottom: 5rpx solid rgba(0, 0, 0, 0.04);
 }
-
-.nav-bar-content {
-  width: 100%;
+.custom-nav {
   display: flex;
-  align-items: flex-end;
   justify-content: space-between;
-  padding: 0 30rpx;
-  padding-bottom: 16rpx; 
+  align-items: center;
+  width: 100%;
   box-sizing: border-box;
 }
-
-.top-bar-left, .top-bar-right {
-  flex: 1;
+.nav-left, .nav-right {
   display: flex;
   align-items: center;
+  /* 【核心】设置一个固定的、对称的宽度 */
+  width: 90rpx; 
 }
-.top-bar-center {
-  flex: 2;
-  text-align: center;
+.nav-left {
+  justify-content: flex-start;
+  /* 保留你原有的边距 */
+  padding-left: 30rpx;
+  box-sizing: border-box;
 }
-.top-bar-right {
+.nav-right {
+  /* 这个是空的，但必须存在且宽度与左边一致，以保证标题居中 */
   justify-content: flex-end;
 }
-
+.nav-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
 .nav-title {
+  /* 保留你原有的标题字体样式 */
   font-size: 34rpx;
   font-weight: 600;
   color: #000;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
-
 .action-icon {
   width: 44rpx;
   height: 44rpx;
 }
 
 /* =========================================== */
-/* 2. 好友聊天列表 */
+/* 2. 好友聊天列表 (这部分样式保持不变) */
 /* =========================================== */
 .list-container {
   height: 100vh;
@@ -76,27 +103,23 @@ page {
   padding: 25rpx 30rpx;
   align-items: center;
   transition: background-color 0.2s;
-  /* 【核心修改】在这里添加 border-bottom */
   border-bottom: 1rpx solid #F1EEE9;
-  /* 【核心修改】为了让 border-bottom 左侧有留白，我们将 padding-left 移到这里 */
-  padding-left: 155rpx; /* (头像100rpx + 右边距25rpx + 留白30rpx) */
-  /* 【核心修改】同时取消原有的左右 padding */
+  padding-left: 155rpx;
   padding-right: 30rpx;
+  background-color: #f5ecd7; 
 }
 
 .chat-item:active {
-  background-color: #F1EEE9;
+  background-color: #fad89f;
 }
 
-/* 【核心修改】最后一个元素的 border 去掉 */
 .chat-item:last-child {
   border-bottom: none;
 }
 
 .avatar-container {
   position: relative;
-  /* 【核心修改】由于父级 padding 变化，这里用负 margin 拉回头像位置 */
-  margin-left: -125rpx; /* (头像100rpx + 右边距25rpx) */
+  margin-left: -125rpx;
   margin-right: 25rpx;
 }
 
@@ -124,16 +147,8 @@ page {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  /* 【核心修改】移除这里的 border-bottom 和 padding */
-  /* border-bottom: 1rpx solid #F1EEE9; */
-  /* padding: 10rpx 0; */
   height: 120rpx;
 }
-
-/* 【核心修改】这个规则不再需要了 */
-/* .chat-item:last-child .info-container {
-  border-bottom: none;
-} */
 
 .info-header {
   display: flex;
@@ -160,7 +175,6 @@ page {
   text-overflow: ellipsis;
 }
 
-/* 列表为空时的样式 */
 .empty-state {
   display: flex;
   flex-direction: column;

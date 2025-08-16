@@ -1,19 +1,93 @@
-/* pages/ai-community/chat-interface/chat-interface.wxss (终极修复版) */
+/* pages/ai-community/chat-interface/chat-interface.wxss */
+
+/* 【核心修改】让顶层容器负责处理边距 */
+.container {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  box-sizing: border-box; /* 确保 padding-top 在 100vh 内部计算 */
+}
+
 .chat-page {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%; 
   background-color: #F9F7F3; 
-  box-sizing: border-box; 
+  /* 【核心修改】移除这里的 box-sizing，因为它不再需要处理 padding */
 }
 
-/* ... (前面从 .custom-nav-bar 到 .failed-icon 的所有样式保持不变，这里省略) ... */
-.custom-nav-bar { flex-shrink: 0; display: flex; align-items: center; padding: 10rpx 20rpx; background-color: #F9F7F3; border-bottom: 1rpx solid #e0e0e0; }
-.back-icon { width: 48rpx; height: 48rpx; padding: 10rpx; }
-.nav-title-container { flex: 1; display: flex; flex-direction: column; align-items: center; margin-right: 68rpx; }
-.nav-title { font-size: 34rpx; font-weight: 500; color: #000; }
-.nav-status { font-size: 24rpx; color: #888; }
-.message-list { flex: 1; overflow-y: auto; box-sizing: border-box; padding: 0 0 0 0; }
+/* =========================================== */
+/* 1. 动态自定义导航栏 (采用新版样式) */
+/* =========================================== */
+.custom-nav-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  background-color: #F9F7F3; /* 使用页面背景色 */
+  border-bottom: 1rpx solid #e0e0e0;
+}
+.custom-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+.nav-left, .nav-right {
+  display: flex;
+  align-items: center;
+  /* 【核心】设置一个固定的、对称的宽度 */
+  width: 90rpx;
+}
+.nav-left {
+  justify-content: center; /* 居中放置返回图标 */
+}
+.nav-right {
+  /* 空的占位符 */
+}
+.nav-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* 防止内容溢出 */
+}
+
+/* 【修改】移除旧的 .custom-nav-bar 样式 */
+
+/* 返回图标样式 */
+.back-icon { 
+  width: 48rpx; 
+  height: 48rpx;
+}
+
+/* 标题容器，移除用于手动居中的 margin */
+.nav-title-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 【移除】margin-right: 68rpx; */
+}
+.nav-title { 
+  font-size: 34rpx; 
+  font-weight: 500; 
+  color: #000; 
+}
+.nav-status { 
+  font-size: 24rpx; 
+  color: #888; 
+}
+
+/* =========================================== */
+/* 2. 页面主体内容 (样式基本保持不变) */
+/* =========================================== */
+.message-list {
+  flex: 1; /* 占据剩余所有空间 */
+  overflow-y: auto;
+  box-sizing: border-box;
+}
 .message-item { padding: 0 20rpx; margin-top: 30rpx; }
 .message-row { display: flex; width: 100%; align-items: flex-start; }
 .avatar { width: 80rpx; height: 80rpx; border-radius: 10rpx; flex-shrink: 0; }

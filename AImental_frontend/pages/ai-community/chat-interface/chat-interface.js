@@ -1,12 +1,16 @@
-// pages/ai-community/chat-interface/chat-interface.js (最终完整版)
+// pages/ai-community/chat-interface/chat-interface.js (已适配新导航栏结构)
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1/community';
 const WS_BASE_URL = 'ws://127.0.0.1:8000/api/v1/community';
-const app = getApp(); // 在文件顶部获取 App 实例，以便多处使用
+const app = getApp();
 
 Page({
   data: {
+    // --- 导航栏高度 ---
+    statusBarHeight: 0,
+    navBarHeight: 0,      // 【新增】导航栏自身高度
+    totalHeaderHeight: 0, // 【新增】导航栏总高度
+
     // --- 您的所有原有 data 字段，完全保留 ---
-    statusBarHeight: 0, 
     aiId: null,
     aiName: '',
     aiAvatar: '',
@@ -16,41 +20,30 @@ Page({
     scrollToView: '',
     inputValue: '',
     isSendDisabled: true,
-    socketTask: null, // (虽然未使用，但为您保留)
-    isSocketOpen: false, // (虽然未使用，但为您保留)
-    heartbeatTimer: null, // (虽然未使用，但为您保留)
-    reconnectTimer: null, // (虽然未使用，但为您保留)
-    isLeavingPage: false, // (虽然未使用，但为您保留)
     isAiTyping: false,
     typingTimer: null,
-
-    // --- 【新增】“用户窥视”心跳计时器 ---
     peekTimer: null,
+    // ... 其他旧的data字段 ...
   },
 
-  // --- 页面生命周期 ---
-
   onLoad: function (options) {
-    // 【保留】您的原有功能：获取页面参数和用户信息
     const { aiId, name, avatar } = options;
     const userInfo = wx.getStorageSync('userInfo');
+
+    // 【修改】从全局获取完整的导航栏高度信息
     this.setData({
+      statusBarHeight: app.globalData.statusBarHeight || 20,
+      navBarHeight: app.globalData.navBarHeight || 44,
+      totalHeaderHeight: app.globalData.totalNavBarHeight || 64,
       aiId,
       aiName: decodeURIComponent(name),
       aiAvatar: decodeURIComponent(avatar),
       userAvatar: userInfo ? userInfo.avatar_url : '/images/default-avatar.png',
-      // 从全局获取状态栏高度
-      statusBarHeight: app.globalData.statusBarHeight || 20
-
     });
   
-    // 【保留】您的原有功能：接入全局WebSocket管理器
+    // --- 后续所有原有功能逻辑保持不变 ---
     app.webSocketManager.registerListener(this);
-  
-    // 【保留】您的原有功能：加载初始聊天记录
     this.loadInitialDataWithFallback();
-
-    // 【新增】启动“用户窥视”逻辑
     this.notifyPeek();
     this.startPeeking();
   },
