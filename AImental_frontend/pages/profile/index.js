@@ -5,6 +5,7 @@ const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 const API_BASE_URL = `${SERVER_BASE_URL}/api/v1/users`; 
 const defaultAvatarUrl = '/images/default-avatar.png';
 
+const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 Page({
   data: {
     isLogin: false,
@@ -251,5 +252,13 @@ Page({
     wx.navigateTo({
       url: './about' // <-- 确保这个路径是正确的！
     });
+  },
+
+  onShareAppMessage: function () {
+    return getShareInfo();
+  },
+
+  onShareTimeline: function () {
+    return getTimelineInfo();
   }
 });

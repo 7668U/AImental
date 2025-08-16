@@ -32,6 +32,7 @@ function request(options) {
   });
 }
 
+const { getShareInfo, getTimelineInfo } = require('../../../utils/share.js');
 Page({
   data: {
     showWriteModal: false,
@@ -174,4 +175,12 @@ Page({
       console.error("发送失败", error);
     }
   },
+
+  onShareAppMessage: function () {
+    return getShareInfo();
+  },
+
+  onShareTimeline: function () {
+    return getTimelineInfo();
+  }
 });

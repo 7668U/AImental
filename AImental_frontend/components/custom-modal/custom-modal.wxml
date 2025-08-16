@@ -1,0 +1,9 @@
+<view class="modal-mask" wx:if="{{show}}">
+  <view class="modal-container">
+    <view class="modal-title">{{title}}</view>
+    <view class="modal-content">{{content}}</view>
+    <view class="modal-footer">
+      <view class="confirm-btn" bindtap="onConfirm">我知道了</view>
+    </view>
+  </view>
+</view>

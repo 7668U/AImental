@@ -55,7 +55,7 @@
       },
       {
         "pagePath": "pages/daily-checkin/index",
-        "text": "每日打卡",
+        "text": "心情日记",
         "iconPath": "/images/tabbar/checkin_default.png",
         "selectedIconPath": "/images/tabbar/checkin_selected.png"
       },

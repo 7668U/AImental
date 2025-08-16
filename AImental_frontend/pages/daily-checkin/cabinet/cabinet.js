@@ -41,6 +41,7 @@ function formatNameForCover(name) {
   return arr;
 }
 
+const { getShareInfo, getTimelineInfo } = require('../../../utils/share.js');
 Page({
   data: {
     // === 布局旋钮 ===
@@ -234,5 +235,13 @@ Page({
       wx.hideLoading();
       wx.showToast({ title: '操作失败', icon: 'none' });
     }
+  },
+
+  onShareAppMessage: function () {
+    return getShareInfo();
+  },
+
+  onShareTimeline: function () {
+    return getTimelineInfo();
   }
 });

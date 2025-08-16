@@ -1,71 +1,75 @@
-<view class="container" style="padding-top: {{totalHeaderHeight}}px;">
+<view class="chat-page" style="padding-top: calc({{statusBarHeight}}px + 70rpx);">
 
-<view class="custom-nav-wrapper" style="padding-top: {{statusBarHeight}}px;">
-  <view class="custom-nav" style="height: {{navBarHeight}}px;">
-    <view class="nav-left">
-      <image class="back-icon" src="/images/left.png" bindtap="navigateBack"></image>
-    </view>
-    <view class="nav-center">
-      <view class="nav-title-container">
-        <view class="nav-title">{{aiName}}</view>
-        <view class="nav-status" wx:if="{{isAiTyping}}">对方正在输入...</view>
-        <view class="nav-status" wx:elif="{{aiCurrentStatus}}">{{aiCurrentStatus}}</view>
-      </view>
-    </view>
-    <view class="nav-right"></view>
+<view class="custom-nav-bar">
+  <image class="back-icon" src="/images/left.png" bindtap="navigateBack"></image>
+  <view class="nav-title-container">
+    <view class="nav-title">{{aiName}}</view>
+    <view class="nav-status" wx:if="{{isAiTyping}}">对方正在输入...</view>
+    <view class="nav-status" wx:elif="{{aiCurrentStatus}}">{{aiCurrentStatus}}</view>
   </view>
 </view>
 
-<view class="chat-page">
-
-  <scroll-view 
-    class="message-list" 
-    scroll-y="true" 
-    scroll-into-view="{{scrollToView}}"
-    scroll-with-animation="true"
-    enhanced="true" 
-    show-scrollbar="false"
-  >
-    <view class="message-item" wx:for="{{messageList}}" wx:key="id" id="msg-{{item.id}}">
-      <view class="message-row ai" wx:if="{{item.role === 'ai'}}">
-        <image class="avatar" src="{{aiAvatar}}"></image>
-        <view class="bubble-wrapper">
-          <view class="bubble">{{item.content}}</view>
-          <view class="message-time-ai">{{item.time}}</view>
-        </view>
-      </view>
-      
-      <view class="message-row user" wx:if="{{item.role === 'user'}}">
-        <view class="message-status">
-          <view class="status-unit" wx:if="{{item.status === 'sent'}}">
-            <image class="sent-icon" src="/images/send_successful.png"></image>
-            <text class="status-text">送达</text>
-          </view>
-          <view class="status-unit" wx:if="{{item.status === 'read'}}">
-            <image class="read-icon" src="/images/read.png"></image>
-            <text class="status-text">已读</text>
-          </view>
-          <image wx:if="{{item.status === 'sending'}}" class="sending-icon" src="/images/loading.gif"></image>
-          <image wx:if="{{item.status === 'failed'}}" class="failed-icon" src="/images/failed.png"></image>
-        </view>
-        <view class="bubble-wrapper">
-          <view class="bubble">{{item.content}}</view>
-          <view class="message-time-user">{{item.time}}</view>
-        </view>
-        <image class="avatar" src="{{userAvatar}}"></image>
+<scroll-view 
+  class="message-list" 
+  scroll-y="true" 
+  scroll-into-view="{{scrollToView}}"
+  scroll-with-animation="true"
+  enhanced="true" 
+  show-scrollbar="false"
+>
+  <view class="message-item" wx:for="{{messageList}}" wx:key="id" id="msg-{{item.id}}">
+    <view class="message-row ai" wx:if="{{item.role === 'ai'}}">
+      <image class="avatar" src="{{aiAvatar}}"></image>
+      <view class="bubble-wrapper">
+        <view class="bubble">{{item.content}}</view>
+        <view class="message-time-ai">{{item.time}}</view>
       </view>
     </view>
-  </scroll-view>
-
-  <view class="input-bar-wrapper">
-    <view class="input-bar">
-      <input class="input-field" value="{{inputValue}}" bindinput="onInput" placeholder=""></input>
-      <view 
-        class="send-btn {{isSendDisabled ? 'disabled' : ''}}" 
-        bindtap="sendMessage"
-      >发送</view>
+    
+    <view class="message-row user" wx:if="{{item.role === 'user'}}">
+      <view class="message-status">
+        <view class="status-unit" wx:if="{{item.status === 'sent'}}">
+          <image class="sent-icon" src="/images/send_successful.png"></image>
+          <text class="status-text">送达</text>
+        </view>
+        <view class="status-unit" wx:if="{{item.status === 'read'}}">
+          <image class="read-icon" src="/images/read.png"></image>
+          <text class="status-text">已读</text>
+        </view>
+        <image wx:if="{{item.status === 'sending'}}" class="sending-icon" src="/images/loading.gif"></image>
+        <image wx:if="{{item.status === 'failed'}}" class="failed-icon" src="/images/failed.png"></image>
+      </view>
+      <view class="bubble-wrapper">
+        <view class="bubble">{{item.content}}</view>
+        <view class="message-time-user">{{item.time}}</view>
+      </view>
+      <image class="avatar" src="{{userAvatar}}"></image>
     </view>
   </view>
+</scroll-view>
 
+<view class="input-bar-wrapper">
+  <view class="input-bar">
+    <input 
+      class="input-field" 
+      value="{{inputValue}}" 
+      bindinput="onInput" 
+      placeholder="{{isMessageLimitReached ? '今天已经聊得够多啦~' : ''}}"
+      disabled="{{isMessageLimitReached}}"
+    ></input>
+    
+    <view 
+      class="send-btn {{isSendDisabled ? 'disabled' : ''}}" 
+      bindtap="sendMessage"
+    >发送</view>
+  </view>
 </view>
-</view>
+
+<custom-modal 
+  show="{{showCustomModal}}" 
+  title="{{modalTitle}}"
+  content="{{modalContent}}"
+  bind:confirm="onModalConfirm"
+></custom-modal>
+
+</view> 

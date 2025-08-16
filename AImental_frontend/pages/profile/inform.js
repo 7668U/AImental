@@ -1,4 +1,5 @@
 // pages/inform/inform.js (终极方案版)
+const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 
 const SERVER_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 const API_BASE_URL = `${SERVER_BASE_URL}/users`;
@@ -56,7 +57,6 @@ Page({
       success: (res) => {
         if (res.statusCode === 200) {
           const data = res.data;
-          // console.log('【侦探日志】从服务器收到的原始用户信息:', res.data);
           let genderIndex = 2;
           if (data.gender === 1) genderIndex = 0;
           if (data.gender === 2) genderIndex = 1;
@@ -150,7 +150,7 @@ Page({
           success: (uploadRes) => {
             if (uploadRes.statusCode === 200) {
               wx.showToast({ title: '头像更新成功!', icon: 'success' });
-              this.fetchUserInfo(); // 头像更新成功后，也调用 fetchUserInfo 刷新所有信息
+              this.fetchUserInfo();
             }
           },
           complete: () => wx.hideLoading()
@@ -158,4 +158,12 @@ Page({
       }
     });
   },
+
+  onShareAppMessage: function () {
+    return getShareInfo();
+  },
+
+  onShareTimeline: function () {
+    return getTimelineInfo();
+  }
 });

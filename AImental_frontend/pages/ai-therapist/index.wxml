@@ -1,5 +1,15 @@
 <view class="page-container">
-    <!-- 设置弹窗 -->
+    <view class="disclaimer-modal" wx:if="{{isDisclaimerVisible}}">
+        <view class="disclaimer-content">
+            <view class="disclaimer-title">温馨提示</view>
+            <view class="disclaimer-text">
+                AI心理伙伴旨在为您提供便捷的心理疏导与支持。但请注意，它的建议不能替代专业的心理医生、精神科医生或任何持牌医疗人员的诊断和治疗。
+                <view style="margin-top: 20rpx;">如果您正在经历严重的心理困扰，请务必寻求真人专业人士的帮助。</view>
+            </view>
+            <view class="disclaimer-button" bindtap="handleConfirmDisclaimer">我已知晓</view>
+        </view>
+    </view>
+
     <view class="settings-modal" wx:if="{{isSettingsVisible}}" catchtap="closeSettings">
         <view class="modal-content" catchtap="preventClose">
             <view class="modal-title">对话设置</view>
@@ -53,7 +63,6 @@
                 <view class="nav-bar-content" style="margin-top: {{statusBarHeight}}px; height: {{navBarHeight}}px;">
                     <view class="top-bar-left">
                         <image class="menu-icon" src="/images/icons/menu.png" catchtap="toggleSidebar"></image>
-                        <!-- 【新增】设置图标 -->
                         <image class="settings-icon" src="/images/icons/setting.png" catchtap="toggleSettings"></image>
                     </view>
 

@@ -34,6 +34,7 @@ function request(options) {
   });
 }
 
+const { getShareInfo, getTimelineInfo } = require('../../../utils/share.js');
 Page({
   data: {
     navBarHeight: getApp().globalData.navBarHeight,
@@ -249,5 +250,13 @@ Page({
   
   goBack() {
     wx.navigateBack();
+  },
+
+  onShareAppMessage: function () {
+    return getShareInfo();
+  },
+
+  onShareTimeline: function () {
+    return getTimelineInfo();
   }
 });

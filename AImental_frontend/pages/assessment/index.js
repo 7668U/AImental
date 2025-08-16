@@ -1,4 +1,5 @@
-// pages/assessment/index/index.js (最终重构版)
+const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
+// pages/assessment/index.js
 
 const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 const DEFAULT_ICON_PATH = '/images/assessment/default.png';
@@ -164,5 +165,13 @@ Page({
     const errorIndex = e.currentTarget.dataset.index;
     const updatedPath = `displayScaleList[${errorIndex}].iconPath`;
     this.setData({ [updatedPath]: DEFAULT_ICON_PATH });
+  },
+
+  onShareAppMessage: function () {
+    return getShareInfo();
+  },
+
+  onShareTimeline: function () {
+    return getTimelineInfo();
   }
 });

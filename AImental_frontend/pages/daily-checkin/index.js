@@ -1,4 +1,5 @@
 // pages/daily-checkin/index.js (修改后)
+const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 
 // 从 ai-therapist 页面“借鉴”过来的网络请求函数，你也可以把它封装成公共模块
 function request(options) {
@@ -195,4 +196,12 @@ Page({
       url: '/pages/daily-checkin/note/note'
     });
   },
-})
+
+    onShareAppMessage: function () {
+    return getShareInfo();
+  },
+
+  onShareTimeline: function () {
+    return getTimelineInfo();
+  }
+});

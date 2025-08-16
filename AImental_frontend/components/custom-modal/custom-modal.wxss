@@ -1,0 +1,61 @@
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-container {
+  background-color: #ffffff;
+  width: 80%;
+  border-radius: 20rpx;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 40rpx;
+}
+
+.modal-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.modal-content {
+  font-size: 30rpx;
+  color: #666;
+  padding: 30rpx 40rpx;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.modal-footer {
+  width: 100%;
+  border-top: 1rpx solid #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 【核心样式】使用您的小程序主色调 */
+.confirm-btn {
+  width: 100%;
+  height: 100rpx;
+  line-height: 100rpx;
+  text-align: center;
+  font-size: 32rpx;
+  color: white;
+  background-color: #FFB643; /* 您的淡橙色主色调 */
+}
+
+/* 按钮按下的效果 */
+.confirm-btn:active {
+  background-color: #e6a43c;
+}

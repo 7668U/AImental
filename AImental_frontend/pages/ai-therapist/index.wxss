@@ -364,3 +364,60 @@ page {
 .message-list .message-item:first-child {
   margin-top: 100rpx; /* 您可以根据需要调整这个数值，比如 30rpx 或 50rpx */
 }
+
+/* --- [新增] 温馨提示弹窗样式 --- */
+.disclaimer-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* 半透明遮罩 */
+  z-index: 999; /* 比其他元素层级更高 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.disclaimer-content {
+  width: 85vw;
+  max-width: 640rpx;
+  background-color: #fff;
+  border-radius: 24rpx;
+  padding: 50rpx 40rpx 40rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 内容居中 */
+}
+
+.disclaimer-title {
+  font-size: 38rpx;
+  font-weight: bold;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.disclaimer-text {
+  font-size: 28rpx;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  text-align: justify; /* 两端对齐，更美观 */
+  margin-bottom: 50rpx;
+}
+
+.disclaimer-button {
+  width: 100%;
+  padding: 22rpx 0;
+  background-color: var(--primary-orange);
+  color: #ffffff;
+  border-radius: 40rpx;
+  font-size: 32rpx;
+  text-align: center;
+  font-weight: bold;
+}
+
+.disclaimer-button:active {
+  background-color: #e08a40; /* 点击效果 */
+}
