@@ -59,7 +59,11 @@
   border-radius: 10rpx;
   font-size: 30rpx;
 }
-
+/* 【新增】输入框禁用时的样式 */
+.input-field[disabled] {
+  background-color: #f0f0f0; /* 变灰 */
+  color: #a0a0a0;
+}
 /* 【核心修改】针对 <view> 标签的按钮样式 */
 .send-btn {
   /* 在这里自由修改为您想要的宽度，现在它一定会生效 */

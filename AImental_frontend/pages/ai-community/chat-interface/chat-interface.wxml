@@ -50,11 +50,26 @@
 
 <view class="input-bar-wrapper">
   <view class="input-bar">
-    <input class="input-field" value="{{inputValue}}" bindinput="onInput" placeholder=""></input>
+    <input 
+      class="input-field" 
+      value="{{inputValue}}" 
+      bindinput="onInput" 
+      placeholder="{{isMessageLimitReached ? '今天已经聊得够多啦~' : ''}}"
+      disabled="{{isMessageLimitReached}}"
+    ></input>
+    
     <view 
       class="send-btn {{isSendDisabled ? 'disabled' : ''}}" 
       bindtap="sendMessage"
     >发送</view>
   </view>
 </view>
-</view>
+
+<custom-modal 
+  show="{{showCustomModal}}" 
+  title="{{modalTitle}}"
+  content="{{modalContent}}"
+  bind:confirm="onModalConfirm"
+></custom-modal>
+
+</view> 

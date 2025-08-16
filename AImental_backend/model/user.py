@@ -28,7 +28,10 @@ class User(Model):
     openid = CharField(max_length=128, unique=True, index=True)
     nickname = CharField(max_length=255, null=True)
     avatar_url = CharField(max_length=1024, null=True)
-    
+        # --- 【新增字段】 ---
+    # 这个标志位将用于永久记录用户是否已通过分享解锁了所有社区角色
+    has_unlocked_community = BooleanField(default=False, help_text="是否已分享解锁了社区")
+    # --- 【新增结束】 ---
     gender = IntegerField(default=0, null=True)  # 0: 未知, 1: 男, 2: 女
     birthday = DateField(null=True)
     

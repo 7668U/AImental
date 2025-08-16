@@ -1,6 +1,6 @@
 # routers/ai_community.py
 
-from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect,status
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 import asyncio
@@ -26,6 +26,7 @@ from .auth import get_current_user_id # 导入你实际的认证依赖项
 import traceback
 from logger_config import logger
 
+from datetime import datetime, date # 【修改】导入 date
 # ---------------------------------------------------
 # Router 设置
 # ---------------------------------------------------
@@ -214,7 +215,7 @@ def get_chat_list(current_user_id: str = Depends(get_current_user_id)):
 def get_chat_history(
     character_id: str,
     current_user_id: str = Depends(get_current_user_id),
-    limit: int = 50,
+    limit: int = 100,
 ):
     community_chat_table.mark_as_peeked(current_user_id, character_id)
     history = community_chat_table.get_conversation_history(current_user_id, character_id, limit=limit)
@@ -222,23 +223,35 @@ def get_chat_history(
 
 class MessageForm(BaseModel):
     content: str
-
-# --- 【核心升级点】 ---
 @router.post("/chats/{character_id}/messages", summary="用户向AI发送消息")
-def send_message(
+async def send_message(
     character_id: str,
     form: MessageForm,
     current_user_id: str = Depends(get_current_user_id)
 ):
     """
-    【已全面升级】
-    处理用户发送的消息，并根据AI的宏观/微观状态智能决定响应延迟。
+    【最终升级版】
+    处理用户发送的消息。
+    集成了每日消息数量限制、好友状态校验、AI睡眠状态拦截以及动态延迟响应。
     """
+    # --- 【新增校验 1：每日消息数量限制】 ---
+    if not redis_client:
+         # 如果Redis连接失败，记录错误但暂时允许通过，避免核心功能中断
+         logger.error("Redis client is not available. Skipping daily message limit check.")
+    else:
+        daily_count = await get_today_message_count(current_user_id)
+        if daily_count >= MESSAGE_LIMIT_PER_DAY:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"您今天发送的总消息条数已经达到{MESSAGE_LIMIT_PER_DAY}条限额啦~明天再来玩吧~"
+            )
+
+    # --- 【原始校验 2：好友关系检查】 ---
     friend_status = friendship_table.get_friendship_status(current_user_id, character_id)
     if friend_status != 'accepted':
-        raise HTTPException(status_code=403, detail="你们还不是好友")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="你们还不是好友")
 
-    # --- 【硬规则 1：睡眠拦截器】 ---
+    # --- 【原始校验 3：AI睡眠拦截器】 ---
     current_status = ai_status_table.get_current_status(character_id)
     if current_status and current_status.focus_level == 'UNINTERRUPTIBLE':
         community_chat_table.add_message(
@@ -246,16 +259,37 @@ def send_message(
             role='user', content=form.content
         )
         logger.info(f"AI({character_id}) 处于不可打扰状态，消息已存储，但不创建回复任务。")
+        # 注意：即使AI在睡眠，用户的消息也算在每日额度内
+        if redis_client:
+            today_str = date.today().isoformat()
+            redis_key = f"daily_message_count:{current_user_id}:{today_str}"
+            new_count = await redis_client.incr(redis_key)
+            if new_count == 1: # 如果是今天第一条，设置过期时间
+                await redis_client.expire(redis_key, timedelta(days=1))
         return {"message": "消息已发送"}
-    # --- ------------------------ ---
 
-    # 1. 正常保存用户的消息
+    # --- 所有校验通过后，执行核心逻辑 ---
+
+    # 1. 【新增】更新Redis中的消息计数
+    if redis_client:
+        today_str = date.today().isoformat()
+        redis_key = f"daily_message_count:{current_user_id}:{today_str}"
+        # 使用 INCR 原子地增加计数
+        new_count = await redis_client.incr(redis_key)
+        # 如果这是今天的第一条消息 (INCR后的值为1)，则设置24小时的过期时间
+        if new_count == 1:
+            await redis_client.expire(redis_key, timedelta(days=1))
+        
+        # 可选的日志记录
+        logger.info(f"User({current_user_id}) sent a message. Today's count is now: {new_count}/{MESSAGE_LIMIT_PER_DAY}")
+
+    # 2. 【原始逻辑】正常保存用户的消息
     community_chat_table.add_message(
         user_id=current_user_id, character_id=character_id,
         role='user', content=form.content
     )
     
-    # --- 【核心逻辑：动态延迟决策】 ---
+    # 3. 【原始逻辑】核心动态延迟决策
     conversation = community_chat_table.get_conversation(current_user_id, character_id)
     current_conv_state = conversation.conversation_state if conversation else 'CONTINUOUS'
 
@@ -268,11 +302,10 @@ def send_message(
         # 如果对话已暂停，参考AI的宏观状态（日程）
         base_delay_minutes = current_status.reply_delay_minutes if current_status else 2
         
-        # --- 【新增硬规则：非睡眠状态下，长延迟上限为10分钟】---
+        # 硬规则：非睡眠状态下，长延迟上限为10分钟
         capped_delay_minutes = min(base_delay_minutes, 10)
         if base_delay_minutes > 10:
             logger.info(f"AI({character_id})原计划延迟 {base_delay_minutes} 分钟，系统上限为10分钟，已修正为 {capped_delay_minutes} 分钟。")
-        # --- ---------------------------------------------------- ---
 
         delay = timedelta(minutes=capped_delay_minutes) + timedelta(seconds=random.randint(0, 59))
         logger.info(f"非连续对话模式，为AI({character_id})根据日程状态设置长延迟: {delay.total_seconds() / 60:.1f}分钟")
@@ -286,8 +319,10 @@ def send_message(
         execute_at=execute_at
     )
     
-    return {"message": "消息已发送"}
-
+    # 【可选优化】在返回中告知前端最新的计数值
+    final_count = await get_today_message_count(current_user_id) if redis_client else -1
+    return {"message": "消息已发送", "daily_count": final_count}
+# --- 【核心升级点】 ---
 class ChatDetailsResponse(BaseModel):
     history: List[Dict[str, Any]] = Field(..., description="聊天历史记录列表")
     character_status: str = Field(..., description="AI角色当前的实时状态文本")
@@ -371,32 +406,6 @@ def push_friend_request_result(user_id: str, character_id: str, status: str, ini
     print(f"Published friend request result to Redis channel '{channel}' for user {user_id}")
 
 
-@router.get("/discover/characters",
-            response_model=List[AICharacterModel],
-            summary="获取可发现的AI角色列表",
-            description="获取当前用户尚未成为好友或已发送请求的AI角色列表。")
-async def get_discoverable_characters(user_id: str = Depends(get_current_user_id)):
-    """
-    为用户提供一个用于“发现”或“添加好友”的AI角色列表。
-    """
-    try:
-        excluded_character_query = Friendship.select(Friendship.character).where(
-            (Friendship.user == user_id) &
-            ((Friendship.status == 'accepted') | (Friendship.status == 'pending'))
-        )
-        
-        excluded_character_ids = [friendship.character.id for friendship in excluded_character_query]
-
-        discoverable_characters = AICharacter.select().where(
-            AICharacter.id.not_in(excluded_character_ids)
-        )
-
-        return list(discoverable_characters)
-
-    except Exception as e:
-        print(f"Error fetching discoverable characters for user {user_id}: {e}")
-        raise HTTPException(status_code=500, detail="获取角色列表时发生服务器内部错误")
-    
     
     
 # --- Pydantic模型 (保持不变) ---
@@ -480,3 +489,109 @@ async def user_peek_at_chat(
     if not success:
         print(f"警告: 标记用户 {user_id} 窥视角色 {character_id} 的操作未找到记录或失败。")
     return {"message": "Peek status updated"}
+
+# ===================================================
+# --- 【核心新增】聊天状态查询接口 ---
+# ===================================================
+
+class ChatStatusResponse(BaseModel):
+    daily_count: int = Field(..., description="用户今日已发送消息数")
+    limit: int = Field(..., description="每日消息上限")
+
+MESSAGE_LIMIT_PER_DAY = 50
+
+async def get_today_message_count(user_id: str) -> int:
+    """【新增】从Redis获取用户今日发送的消息数"""
+    if not redis_client:
+        return 0
+    today_str = date.today().isoformat()
+    redis_key = f"daily_message_count:{user_id}:{today_str}"
+    count = await redis_client.get(redis_key)
+    return int(count) if count else 0
+
+@router.get(
+    "/chats/status",
+    response_model=ChatStatusResponse,
+    summary="获取用户的聊天状态（如每日消息数）"
+)
+async def get_user_chat_status(current_user_id: str = Depends(get_current_user_id)):
+    """
+    返回用户今天的消息发送计数和每日上限。
+    前端可以在进入聊天页时调用此接口来初始化UI状态。
+    """
+    daily_count = await get_today_message_count(current_user_id)
+    return ChatStatusResponse(daily_count=daily_count, limit=MESSAGE_LIMIT_PER_DAY)
+
+
+# 确保导入了你的 User 模型
+from model.user import User
+
+# (可选但推荐) 为了接口返回结构更清晰，定义一个新的 Pydantic 模型
+from pydantic import BaseModel
+class DiscoverResponse(BaseModel):
+    characters: List[AICharacterModel]
+    total_count: int
+    is_fully_unlocked: bool
+
+@router.get("/discover/characters",
+            response_model=DiscoverResponse,
+            summary="获取可发现的AI角色列表")
+async def get_discoverable_characters(user_id: str = Depends(get_current_user_id)):
+    # --- 日志 1: 记录函数入口和关键参数 ---
+    logger.info(f"开始为用户 {user_id} 获取可发现角色...")
+    
+    try:
+        # 1. 获取当前用户对象
+        user = User.get_or_none(User.id == user_id)
+        if not user:
+            logger.warning(f"用户ID: {user_id} 在数据库中未找到。")
+            raise HTTPException(status_code=404, detail="用户不存在")
+        
+        # --- 日志 2: 打印用户的解锁状态 ---
+        logger.debug(f"成功找到用户: {user.id}, 社区解锁状态: {user.has_unlocked_community}")
+
+        # 2. 获取所有可发现的角色完整列表
+        # 注意：这里的 .where(...) 我用一个有效的查询代替了，请确保你的代码是完整的
+        # 如果你的 Friendship 表还没有数据，这个查询会返回空，是正常的
+        try:
+            excluded_character_query = Friendship.select(Friendship.character).where(Friendship.user == user_id)
+            excluded_character_ids = [friendship.character.id for friendship in excluded_character_query]
+            # --- 日志 3: 打印排除了多少个角色 ---
+            logger.debug(f"需要排除的角色ID列表: {excluded_character_ids}")
+        except Exception as e:
+            logger.error(f"查询 Friendship 表时出错: {e}", exc_info=True)
+            excluded_character_ids = [] # 查询失败时，给一个空列表，避免整个接口崩溃
+
+        all_discoverable_query = AICharacter.select().where(AICharacter.id.not_in(excluded_character_ids))
+        all_discoverable_list = list(all_discoverable_query)
+        # --- 日志 4: 打印总共找到了多少个可发现角色 ---
+        logger.debug(f"数据库中总共找到 {len(all_discoverable_list)} 个可供发现的角色。")
+
+        # 3. 根据用户的解锁状态，决定返回哪些角色数据
+        characters_to_send = []
+        if user.has_unlocked_community:
+            characters_to_send = all_discoverable_list
+        elif all_discoverable_list:
+            characters_to_send = [all_discoverable_list[0]]
+        
+        # --- 日志 5: 打印最终决定要发送的角色数量 ---
+        logger.debug(f"根据解锁状态，本次准备发送 {len(characters_to_send)} 个角色给前端。")
+        
+        # 4. 按照新的响应模型格式返回数据
+        response_data = DiscoverResponse(
+            characters=characters_to_send,
+            total_count=len(all_discoverable_list),
+            is_fully_unlocked=user.has_unlocked_community
+        )
+        
+        # --- 日志 6: 打印最终要返回给前端的完整数据结构 (这是最重要的日志！) ---
+        # 使用 .model_dump_json() 可以得到一个格式化好的 JSON 字符串，非常适合调试
+        logger.info(f"最终返回给前端的数据结构:\n{response_data.model_dump_json(indent=2)}")
+        
+        return response_data
+
+    except Exception as e:
+        # --- 日志 7: 捕获所有未知异常 ---
+        # exc_info=True 会把详细的错误堆栈信息也记录下来，非常有用！
+        logger.error(f"为用户 {user_id} 获取角色时发生未知异常: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="获取角色列表时发生服务器内部错误")

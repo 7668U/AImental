@@ -230,3 +230,20 @@ def test_login(login_data: TestUserLoginRequest):
     # Token的'sub'字段（主体）应该是用户的唯一数据库ID
     access_token = create_access_token(data={"sub": user.id})
     return {"access_token": access_token}
+
+
+@router.put("/me/unlock-community", summary="【新】用户分享后，解锁社区全部角色")
+def unlock_community_for_user(current_user_id: str = Depends(get_current_user_id)):
+    """
+    这个接口在用户首次分享成功后被前端调用一次。
+    它的作用就是把用户的 'has_unlocked_community' 标志位永久设为 True。
+    """
+    rows_updated = (User
+                    .update({User.has_unlocked_community: True})
+                    .where(User.id == current_user_id)
+                    .execute())
+
+    if rows_updated == 0:
+        raise HTTPException(status_code=404, detail="用户不存在")
+
+    return {"message": "社区已成功解锁!"}

@@ -1,11 +1,11 @@
-// pages/ai-community/chat-interface/chat-interface.js (最终完整版)
+// pages/ai-community/chat-interface/chat-interface.js
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1/community';
 const WS_BASE_URL = 'ws://127.0.0.1:8000/api/v1/community';
-const app = getApp(); // 在文件顶部获取 App 实例，以便多处使用
+const app = getApp();
 
 Page({
   data: {
-    // --- 您的所有原有 data 字段，完全保留 ---
+    // --- 原有 data ---
     statusBarHeight: 0, 
     aiId: null,
     aiName: '',
@@ -16,22 +16,33 @@ Page({
     scrollToView: '',
     inputValue: '',
     isSendDisabled: true,
-    socketTask: null, // (虽然未使用，但为您保留)
-    isSocketOpen: false, // (虽然未使用，但为您保留)
-    heartbeatTimer: null, // (虽然未使用，但为您保留)
-    reconnectTimer: null, // (虽然未使用，但为您保留)
-    isLeavingPage: false, // (虽然未使用，但为您保留)
+    socketTask: null,
+    isSocketOpen: false,
+    heartbeatTimer: null,
+    reconnectTimer: null,
+    isLeavingPage: false,
     isAiTyping: false,
     typingTimer: null,
-
-    // --- 【新增】“用户窥视”心跳计时器 ---
     peekTimer: null,
+    
+    // --- 功能 data ---
+    dailyMessageCount: 0,
+    messageLimit: 50,
+    isMessageLimitReached: false,
+    showCustomModal: false,
+    modalTitle: '',
+    modalContent: '',
+
+    // --- BUG修复 data ---
+    isSending: false, 
   },
 
-  // --- 页面生命周期 ---
+  // ---------------------------------------------------
+  // 页面生命周期 (已修复)
+  // ---------------------------------------------------
 
   onLoad: function (options) {
-    // 【保留】您的原有功能：获取页面参数和用户信息
+    // 【最终修复 1】onLoad 只负责一次性的初始化工作
     const { aiId, name, avatar } = options;
     const userInfo = wx.getStorageSync('userInfo');
     this.setData({
@@ -39,44 +50,183 @@ Page({
       aiName: decodeURIComponent(name),
       aiAvatar: decodeURIComponent(avatar),
       userAvatar: userInfo ? userInfo.avatar_url : '/images/default-avatar.png',
-      // 从全局获取状态栏高度
       statusBarHeight: app.globalData.statusBarHeight || 20
-
     });
-  
-    // 【保留】您的原有功能：接入全局WebSocket管理器
+    
     app.webSocketManager.registerListener(this);
-  
-    // 【保留】您的原有功能：加载初始聊天记录
+    // 初始历史记录只加载一次
     this.loadInitialDataWithFallback();
+  },
 
-    // 【新增】启动“用户窥视”逻辑
+  // 【最终修复 1】新增 onShow 生命周期，处理每次页面显示时的逻辑
+  onShow: function() {
+    console.log("页面显示 (onShow)，开始刷新状态...");
+    // 每次进入页面，都重新检查消息限制，确保状态持久
+    this.checkMessageLimit();
+    // 每次进入页面，都启动“窥视”心跳
     this.notifyPeek();
     this.startPeeking();
   },
 
-  onUnload: function() {
-    // 【保留】您的原有功能：从全局管理器注销
-    app.webSocketManager.unregisterListener();
-
-    // 【新增】停止“用户窥视”心跳
+  // 【最终修复 1】新增 onHide 生命周期，处理页面隐藏
+  onHide: function() {
+    // 页面隐藏时，停止窥视心跳，节省资源
+    console.log("页面隐藏 (onHide)，停止窥视心跳。");
     this.stopPeeking();
   },
 
-  // --- WebSocket 消息处理 (您的原有设计，完全保留) ---
+  onUnload: function() {
+    // 页面被销毁时，注销监听器
+    app.webSocketManager.unregisterListener();
+    this.stopPeeking(); // 双重保险
+  },
+
+  // ---------------------------------------------------
+  // 核心功能函数 (已修复)
+  // ---------------------------------------------------
+  
+  checkMessageLimit: function() {
+    this._request({
+      url: `/chats/status`,
+      method: 'GET',
+    }).then(res => {
+      console.log("获取消息限制状态:", res);
+      const limitReached = res.daily_count >= res.limit;
+      this.setData({
+        dailyMessageCount: res.daily_count,
+        messageLimit: res.limit,
+        isMessageLimitReached: limitReached,
+        isSendDisabled: !this.data.inputValue.trim() || limitReached || this.data.isSending
+      });
+    }).catch(err => {
+      console.error("获取消息限制状态失败:", err);
+    });
+  },
+
+  showLimitModal: function(content) {
+    this.setData({
+      showCustomModal: true,
+      modalTitle: '提示',
+      modalContent: content
+    });
+  },
+  
+  onModalConfirm: function() {
+    this.setData({
+      showCustomModal: false
+    });
+  },
+
+  onInput: function(e) {
+    const value = e.detail.value;
+    this.setData({ 
+      inputValue: value,
+      isSendDisabled: !value.trim() || this.data.isMessageLimitReached || this.data.isSending
+    });
+  },
+
+  sendMessage: function() {
+    if (this.data.isSending) {
+      console.warn("正在发送中，请勿重复点击...");
+      return;
+    }
+
+    if (this.data.isMessageLimitReached) {
+      this.showLimitModal(`您今天发送的总消息条数已经达到${this.data.messageLimit}条限额啦~明天再来吧~`);
+      return;
+    }
+    
+    if (this.data.isSendDisabled) return;
+
+    const content = this.data.inputValue.trim();
+    if (!content) {
+        return;
+    }
+    
+    const tempId = Date.now() + '_user';
+    const userMessage = {
+      id: tempId,
+      role: 'user',
+      content: content,
+      time: this.formatTimestamp(Date.now() / 1000),
+      status: 'sending' 
+    };
+
+    this.setData({
+      messageList: [...this.data.messageList, userMessage],
+      inputValue: '',
+      isSendDisabled: true,
+      isSending: true,      
+    });
+
+    this.scrollToBottom();
+
+    this._request({
+      url: `/chats/${this.data.aiId}/messages`,
+      method: 'POST',
+      data: { content },
+      success: (data) => {
+        const newCount = this.data.dailyMessageCount + 1;
+        const limitReached = newCount >= this.data.messageLimit;
+        this.setData({
+            dailyMessageCount: newCount,
+            isMessageLimitReached: limitReached,
+            isSendDisabled: limitReached,
+        });
+        setTimeout(() => {
+          this.updateMessageStatus(tempId, 'sent');
+        }, 1000);
+      },
+      fail: (err) => {
+        console.error("发送失败:", err);
+
+        if (err && err.statusCode === 429) {
+          this.showLimitModal(err.data.detail || '今日消息已达上限');
+          this.setData({
+              isMessageLimitReached: true,
+              isSendDisabled: true
+          });
+          const currentMessageList = this.data.messageList;
+          const messageIndex = currentMessageList.findIndex(msg => msg.id === tempId);
+          if (messageIndex !== -1) {
+            currentMessageList.splice(messageIndex, 1);
+            this.setData({
+              messageList: currentMessageList,
+              // 【最终修复 2】不再把内容放回输入框，而是确保它被清空
+              inputValue: '' 
+            });
+          }
+        } else {
+          this.updateMessageStatus(tempId, 'failed');
+        }
+      }
+    })
+    .catch(err => {
+      console.log("Promise rejection has been handled gracefully.");
+    })
+    .finally(() => {
+      this.setData({ 
+        isSending: false,
+        isSendDisabled: !this.data.inputValue.trim() || this.data.isMessageLimitReached
+      });
+    });
+  },
+  
+  // ---------------------------------------------------
+  // 其他所有原有函数 (保持不变)
+  // ---------------------------------------------------
+
   onSocketMessage: function(data) {
-    console.log('聊天页面: 从全局管理器收到消息:', data);
     if (data.type === 'new_message' && data.from_character_id === this.data.aiId) {
       this.handleNewMessage(data.message);
     }
   },
 
-  // --- 【核心新增】“用户窥视”心跳逻辑 ---
   startPeeking: function() {
     this.stopPeeking(); 
     const timer = setInterval(() => {
         this.notifyPeek();
-    }, 15000); // 每15秒通知一次，确保“已窥视”状态持续有效
+    }, 15000);
     this.setData({ peekTimer: timer });
   },
 
@@ -89,28 +239,14 @@ Page({
 
   notifyPeek: function() {
     if (!this.data.aiId) return;
-    // 调用我们新增的 /peek 接口
     this._request({
         url: `/chats/${this.data.aiId}/peek`,
         method: 'POST',
-        // 【优化】这是一个即发即忘的请求，不需要 success 和 fail 回调
     }).catch(err => {
         console.warn("Notify peek failed:", err);
     });
   },
 
-  // --- 您的所有其他函数，全部原封不动地保留 ---
-
-  // --- 旧的WebSocket核心逻辑 (虽然不再被调用，但为您保留代码作为参考) ---
-  connectWebSocket: function() { /* 已被全局管理器替代 */ },
-  bindSocketEvents: function() { /* 已被全局管理器替代 */ },
-  closeWebSocket: function(isLeaving = false) { /* 已被全局管理器替代 */ },
-  reconnect: function() { /* 已被全局管理器替代 */ },
-  clearReconnectTimer: function() { /* 已被全局管理器替代 */ },
-  startHeartbeat: function() { /* 已被全局管理器替代 */ },
-  stopHeartbeat: function() { /* 已被全局管理器替代 */ },
-
-  // --- 消息处理 (完全保留) ---
   handleNewMessage: function(message) {
     const newMessage = {
       id: (message.timestamp || Date.now()) + '_' + Math.random().toString(36).substr(2, 9),
@@ -143,7 +279,6 @@ Page({
     this.setData({ typingTimer });
   },
 
-  // --- HTTP API 请求 (完全保留) ---
   loadInitialDataWithFallback: function() {
     this._request({
       url: `/chats/${this.data.aiId}/details`,
@@ -174,8 +309,6 @@ Page({
   },
   
   _request: function(options) {
-    // 【优化】为您原来的 _request 函数增加了 Promise 支持，使其更现代化
-    // 这样既兼容您原来的 success/fail 写法，也能支持 .catch()
     return new Promise((resolve, reject) => {
         const token = wx.getStorageSync('token');
         if (!token) { 
@@ -206,47 +339,6 @@ Page({
     });
   },
   
-  // --- 页面交互 (完全保留) ---
-  onInput: function(e) {
-    const value = e.detail.value;
-    this.setData({ 
-      inputValue: value,
-      isSendDisabled: !value.trim() 
-    });
-  },
-
-  sendMessage: function() {
-    if (this.data.isSendDisabled) return;
-    const content = this.data.inputValue.trim();
-    const tempId = Date.now() + '_user';
-    const userMessage = {
-      id: tempId,
-      role: 'user',
-      content: content,
-      time: this.formatTimestamp(Date.now() / 1000),
-      status: 'sending' 
-    };
-    this.setData({
-      messageList: [...this.data.messageList, userMessage],
-      inputValue: '',
-      isSendDisabled: true
-    });
-    this.scrollToBottom();
-    this._request({
-      url: `/chats/${this.data.aiId}/messages`,
-      method: 'POST',
-      data: { content },
-      success: (data) => {
-        setTimeout(() => {
-          this.updateMessageStatus(tempId, 'sent');
-        }, 2000); // 优化了延迟
-      },
-      fail: () => {
-        this.updateMessageStatus(tempId, 'failed');
-      }
-    });
-  },
-
   updateMessageStatus: function(id, status) {
     const index = this.data.messageList.findIndex(msg => msg.id === id);
     if (index !== -1) {
@@ -256,7 +348,6 @@ Page({
     }
   },
   
-  // --- 工具函数 (完全保留) ---
   scrollToBottom: function() {
     if (this.data.messageList.length > 0) {
       const lastMessage = this.data.messageList[this.data.messageList.length - 1];

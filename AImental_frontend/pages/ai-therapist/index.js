@@ -1,3 +1,5 @@
+// pages/ai-therapist/index.js
+
 // --- 全局配置与网络请求封装 ---
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 
@@ -48,6 +50,8 @@ Page({
     totalNavBarHeight: 0,
     isSettingsVisible: false,
     allowAiReadData: false,
+    // 【新增】控制温馨提示弹窗的显示/隐藏
+    isDisclaimerVisible: false,
   },
   
   // =================================================================
@@ -103,6 +107,10 @@ Page({
               wx.setStorageSync('token', tokenRes.access_token);
               this.checkLoginStatus(); 
               wx.showToast({ title: '登录成功', icon: 'success' });
+
+              // 【核心修改】登录成功后，检查是否需要显示温馨提示
+              this.checkDisclaimer();
+
             }).catch(err => {
               wx.hideLoading();
               console.error("后端登录接口失败", err);
@@ -430,5 +438,20 @@ Page({
       });
       this.setData({ allowAiReadData: oldStatus });
     });
+  },
+
+  // =================================================================
+  // 【新增】温馨提示弹窗相关方法
+  // =================================================================
+  checkDisclaimer() {
+    const hasShown = wx.getStorageSync('hasShownDisclaimer');
+    if (!hasShown) {
+      this.setData({ isDisclaimerVisible: true });
+    }
+  },
+
+  handleConfirmDisclaimer() {
+    this.setData({ isDisclaimerVisible: false });
+    wx.setStorageSync('hasShownDisclaimer', true);
   },
 });

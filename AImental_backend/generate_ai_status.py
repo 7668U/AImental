@@ -34,12 +34,12 @@ class ScheduleItem(BaseModel):
     
     status_category: str = Field(
         ..., 
-        description="事件的内部逻辑分类。例如: 'work', 'hobby', 'social', 'chore', 'relax', 'meal', 'travel', 'exercise', 'sleep'"
+        description="用简短但稍微具体的中文概括当前状态，八个字以内，比如在孟加拉出差、开会、刷手机准备睡觉等，但注意要是一个完整的状态，不能只是名词，比如不能说科幻电影，要说看科幻电影"
     )
     
     status_description: str = Field(
         ..., 
-        description="符合角色人设的、详细的情景描述，用于AI生成回复时的核心上下文。"
+        description="符合角色人设的、详细的情景描述，用于AI生成回复时的核心上下文。越详细越好，可以细化到很具体的小事。"
     )
     
     reply_delay_minutes: int = Field(
@@ -161,29 +161,3 @@ def generate_daily_schedule(
         return []
 
 
-# --- 5. 示例 (逻辑不变) ---
-
-if __name__ == "__main__":
-    print("🚀 开始执行AI日程生成脚本示例...")
-
-    lingjian_profile = {
-        "identity_core": { "name": "林间", "age": 28, "gender": "女", "occupation": "植物学在读博士" },
-        "personality_traits": { "mbti": "INFJ", "personality_tags": ["温柔", "理性", "有耐心", "轻微社恐"] },
-        "lifestyle": { "hobbies": ["侍弄花草", "手冲咖啡", "阅读旧书"], "daily_routine": "早睡早起，上午效率最高。" }
-    }
-
-    mock_recent_history = [
-        { "date": (date.today() - timedelta(days=1)).strftime('%Y-%m-%d'), "summary": "全天在实验室整理数据，晚上阅读了关于苔藓植物的文献直到深夜。" }
-    ]
-
-    generated_schedule = generate_daily_schedule(
-        character_profile=lingjian_profile,
-        recent_history=mock_recent_history
-    )
-
-    if generated_schedule:
-        print("\n--- 生成的日程表示例 ---")
-        print(json.dumps(generated_schedule, indent=2, ensure_ascii=False))
-        print("\n脚本执行完毕。")
-    else:
-        print("\n未能成功生成日程表。请检查API Key配置和错误信息。")

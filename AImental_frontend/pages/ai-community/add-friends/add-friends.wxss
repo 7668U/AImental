@@ -158,3 +158,72 @@
 .modal-button.cancel { background-color: transparent; color: #889; border: 1px solid #445; }
 .modal-button.confirm { background-image: linear-gradient(45deg, #f0f, #0ff); color: #fff; }
 .modal-button:active { transform: scale(0.95); }
+
+/* --- 【新增】上锁卡片的样式 --- */
+.locked-card {
+  width: 640rpx;
+  height: 980rpx;
+  background-color: #2a2a4e; /* 深色背景，与页面协调 */
+  border-radius: 40rpx;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 40rpx;
+  border: 2rpx dashed rgba(255, 255, 255, 0.3);
+  transition: transform 0.3s ease;
+}
+.locked-card:active {
+  transform: scale(0.98); /* 点击时有轻微缩小效果 */
+}
+
+.locked-card__icon {
+  width: 120rpx;
+  height: 120rpx;
+  margin-bottom: 40rpx;
+  opacity: 0.5;
+}
+
+.locked-card__title {
+  font-size: 50rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 60rpx;
+}
+
+.locked-card__text {
+  font-size: 32rpx;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+}
+
+.locked-card__btn {
+  margin-top: 80rpx;
+  padding: 25rpx 80rpx;
+  background-image: linear-gradient(45deg, #00ff7f, #00c9ff); /* 鲜艳的渐变色按钮 */
+  border-radius: 50rpx;
+  color: #1a1a2e; /* 按钮文字颜色用页面背景色，形成对比 */
+  font-size: 34rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10rpx 30rpx rgba(0, 255, 127, 0.3);
+}
+
+.locked-card__btn-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 20rpx;
+}
+
+/* ... 你原来的所有样式 ... */
+
+/* --- 【新增】针对 open-type="share" 按钮的样式重置 --- */
+.locked-card__btn::after {
+  /* 去除小程序按钮默认的边框 */
+  border: none;
+}
+
