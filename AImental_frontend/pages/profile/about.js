@@ -1,4 +1,6 @@
 // about.js
+const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
+
 Page({
   data: {
     statusBarHeight: 0, // 用于WXML设置导航栏样式的状态栏高度
@@ -42,5 +44,19 @@ Page({
         });
       }
     });
+  },
+
+  /**
+   * 用户点击右上角分享给好友
+   */
+  onShareAppMessage: function () {
+    return getShareInfo();
+  },
+
+  /**
+   * 用户点击右上角分享到朋友圈
+   */
+  onShareTimeline: function () {
+    return getTimelineInfo();
   }
 })

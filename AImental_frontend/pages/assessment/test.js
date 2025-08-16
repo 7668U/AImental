@@ -1,3 +1,4 @@
+const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 // pages/assessment/test.js (兼容版)
 
 const API_BASE_URL = 'http://127.0.0.1:8000';
@@ -207,5 +208,13 @@ Page({
         this.setData({ isSubmitting: false });
       }
     });
+  },
+
+  onShareAppMessage: function () {
+    return getShareInfo();
+  },
+
+  onShareTimeline: function () {
+    return getTimelineInfo();
   }
 });

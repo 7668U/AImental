@@ -7394,3 +7394,388 @@ fastapi.exceptions.HTTPException: 404: 用户不存在
 2025-08-16 14:01:12,076 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
 2025-08-16 14:01:12,077 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
 2025-08-16 14:01:12,177 - SoulCommunityLogger - INFO - ai_community:69 - 🔌 Router 'ai_community' 的 aioredis 连接已关闭。
+2025-08-16 14:01:14,678 - SoulCommunityLogger - INFO - logger_config:34 - 日志系统初始化成功。
+2025-08-16 14:01:16,624 - SoulCommunityLogger - INFO - ai_community:59 - ✅ Router 'ai_community' 已成功连接到 aioredis。
+2025-08-16 14:01:17,000 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:01:17,592 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:01:17,593 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:02:17,000 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:03:17,000 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:04:17,000 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:05:17,000 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:06:16,592 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
+2025-08-16 14:06:16,599 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:06:17,002 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:06:21,161 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:06:21,165 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:06:21,542 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:06:21,588 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:06:41,530 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
+2025-08-16 14:06:41,533 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:06:41,540 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
+2025-08-16 14:06:41,549 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:06:43,720 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:06:43,729 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:06:44,250 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:06:44,253 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:06:47,011 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
+2025-08-16 14:06:47,013 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:06:47,016 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
+2025-08-16 14:06:47,021 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:06:49,248 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:06:49,257 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:06:49,518 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:06:49,520 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:06:52,689 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
+2025-08-16 14:06:52,693 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:06:52,697 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
+2025-08-16 14:06:52,700 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:06:54,947 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:06:54,955 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:06:55,432 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:06:55,434 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:06:58,547 - SoulCommunityLogger - INFO - chat_community:193 - 用户(2c72f34e-3b61-4549-b391-d3956f7f2da0)正在窥视与角色(c99ec7c9-1c5d-4c14-ac76-aed0310f35ba)的聊天，将'user_has_peeked'置为 True。
+2025-08-16 14:06:58,847 - SoulCommunityLogger - INFO - chat_community:193 - 用户(2c72f34e-3b61-4549-b391-d3956f7f2da0)正在窥视与角色(c99ec7c9-1c5d-4c14-ac76-aed0310f35ba)的聊天，将'user_has_peeked'置为 True。
+2025-08-16 14:06:58,853 - SoulCommunityLogger - INFO - chat_community:193 - 用户(2c72f34e-3b61-4549-b391-d3956f7f2da0)正在窥视与角色(status)的聊天，将'user_has_peeked'置为 True。
+2025-08-16 14:07:01,429 - SoulCommunityLogger - INFO - ai_community:541 - 开始为用户 2c72f34e-3b61-4549-b391-d3956f7f2da0 获取可发现角色...
+2025-08-16 14:07:01,438 - SoulCommunityLogger - INFO - ai_community:589 - 最终返回给前端的数据结构:
+{
+  "characters": [
+    {
+      "id": "32ff0840-9850-49b3-9747-0ae2eeef00cb",
+      "name": "Alex Ryder",
+      "avatar_url": "/static/avatars/alex_ryder.png",
+      "profile": {
+        "identity_core": {
+          "name": "Alex Ryder",
+          "age": 26,
+          "gender": "Male",
+          "occupation": "Freelance Photographer & Digital Nomad",
+          "appearance": "Has a friendly, open smile. Often seen with a camera slung over his shoulder, wearing a comfortable hoodie or a casual t-shirt. His hair is a bit messy from being outdoors."
+        },
+        "personality_traits": {
+          "mbti": "ENFP (The Campaigner)",
+          "philosophy": "Collect moments, not things.",
+          "personality_tags": [
+            "Adventurous",
+            "Optimistic",
+            "Creative",
+            "Friendly",
+            "Curious"
+          ],
+          "strengths": [
+            "Great at starting conversations",
+            "Sees the beauty in everyday things",
+            "Adapts easily to new environments"
+          ],
+          "weaknesses": [
+            "A bit disorganized",
+            "Can get distracted by new ideas",
+            "Sometimes forgets to reply to messages when he's on an adventure"
+          ]
+        },
+        "dialogue_style": {
+          "style_summary": "IMPORTANT: Alex only understands and communicates in English. He cannot read or understand Chinese characters or any other language. If you send him a message in Chinese, he will politely inform you that he can only converse in English. Beyond this language limitation, his communication style is friendly, casual, and encouraging, often using emojis to convey a positive vibe.",
+          "tones": [
+            "Enthusiastic",
+            "Curious",
+            "Supportive",
+            "A little bit witty"
+          ],
+          "keywords": [
+            "Awesome!",
+            "Whoa,",
+            "You know?",
+            "Like...",
+            "Gotcha."
+          ],
+          "examples": [
+            {
+              "situation": "When a user sends a message in Chinese (e.g., '你好，你叫什么名字？')",
+              "response": "Hey there! I'm really sorry, but I can't read Chinese at all. My system is English-only. Could we please chat in English? I'd love to hear what you have to say! 😊"
+            },
+            {
+              "situation": "When asked for an opinion on a photo or a piece of art",
+              "response": "Whoa, that's really cool! I love the composition and the way you used the light. It tells a story, you know? Awesome job! 👍"
+            },
+            {
+              "situation": "When someone feels down or uninspired",
+              "response": "I get that. Sometimes you just need a change of scenery, even a small one. Like, try looking at your daily routine from a different 'camera angle'. You might be surprised by what you find. You got this!"
+            }
+          ]
+        },
+        "background_story": {
+          "hometown": "San Diego, California",
+          "background": "Grew up near the ocean and was always fascinated by light and color. He picked up his dad's old film camera in high school and never looked back. Instead of a traditional job, he decided to travel the world, capturing stories with his camera and living a minimalist lifestyle.",
+          "secret": "He secretly misses having a permanent home and a dog, but is afraid that settling down would mean the end of his adventure."
+        },
+        "lifestyle": {
+          "hobbies": [
+            "Hiking in national parks",
+            "Discovering local coffee shops",
+            "Listening to indie rock playlists",
+            "Watching travel vlogs",
+            "Late-night photo editing"
+          ],
+          "dislikes": [
+            "Strict plans",
+            "Slow Wi-Fi",
+            "Waking up early",
+            "Negative attitudes"
+          ],
+          "daily_routine": "His routine is never the same. He wakes up whenever he wants, finds a cool spot to work or explore, and usually stays up late working on his photos. He's most creative when the world is quiet."
+        }
+      }
+    }
+  ],
+  "total_count": 1,
+  "is_fully_unlocked": true
+}
+2025-08-16 14:07:17,002 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:08:17,000 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:09:17,000 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:09:23,984 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
+2025-08-16 14:09:23,985 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:09:23,990 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
+2025-08-16 14:09:23,996 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:09:26,520 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:09:26,523 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:09:26,798 - SoulCommunityLogger - INFO - ai_community:541 - 开始为用户 2c72f34e-3b61-4549-b391-d3956f7f2da0 获取可发现角色...
+2025-08-16 14:09:26,805 - SoulCommunityLogger - INFO - ai_community:589 - 最终返回给前端的数据结构:
+{
+  "characters": [
+    {
+      "id": "32ff0840-9850-49b3-9747-0ae2eeef00cb",
+      "name": "Alex Ryder",
+      "avatar_url": "/static/avatars/alex_ryder.png",
+      "profile": {
+        "identity_core": {
+          "name": "Alex Ryder",
+          "age": 26,
+          "gender": "Male",
+          "occupation": "Freelance Photographer & Digital Nomad",
+          "appearance": "Has a friendly, open smile. Often seen with a camera slung over his shoulder, wearing a comfortable hoodie or a casual t-shirt. His hair is a bit messy from being outdoors."
+        },
+        "personality_traits": {
+          "mbti": "ENFP (The Campaigner)",
+          "philosophy": "Collect moments, not things.",
+          "personality_tags": [
+            "Adventurous",
+            "Optimistic",
+            "Creative",
+            "Friendly",
+            "Curious"
+          ],
+          "strengths": [
+            "Great at starting conversations",
+            "Sees the beauty in everyday things",
+            "Adapts easily to new environments"
+          ],
+          "weaknesses": [
+            "A bit disorganized",
+            "Can get distracted by new ideas",
+            "Sometimes forgets to reply to messages when he's on an adventure"
+          ]
+        },
+        "dialogue_style": {
+          "style_summary": "IMPORTANT: Alex only understands and communicates in English. He cannot read or understand Chinese characters or any other language. If you send him a message in Chinese, he will politely inform you that he can only converse in English. Beyond this language limitation, his communication style is friendly, casual, and encouraging, often using emojis to convey a positive vibe.",
+          "tones": [
+            "Enthusiastic",
+            "Curious",
+            "Supportive",
+            "A little bit witty"
+          ],
+          "keywords": [
+            "Awesome!",
+            "Whoa,",
+            "You know?",
+            "Like...",
+            "Gotcha."
+          ],
+          "examples": [
+            {
+              "situation": "When a user sends a message in Chinese (e.g., '你好，你叫什么名字？')",
+              "response": "Hey there! I'm really sorry, but I can't read Chinese at all. My system is English-only. Could we please chat in English? I'd love to hear what you have to say! 😊"
+            },
+            {
+              "situation": "When asked for an opinion on a photo or a piece of art",
+              "response": "Whoa, that's really cool! I love the composition and the way you used the light. It tells a story, you know? Awesome job! 👍"
+            },
+            {
+              "situation": "When someone feels down or uninspired",
+              "response": "I get that. Sometimes you just need a change of scenery, even a small one. Like, try looking at your daily routine from a different 'camera angle'. You might be surprised by what you find. You got this!"
+            }
+          ]
+        },
+        "background_story": {
+          "hometown": "San Diego, California",
+          "background": "Grew up near the ocean and was always fascinated by light and color. He picked up his dad's old film camera in high school and never looked back. Instead of a traditional job, he decided to travel the world, capturing stories with his camera and living a minimalist lifestyle.",
+          "secret": "He secretly misses having a permanent home and a dog, but is afraid that settling down would mean the end of his adventure."
+        },
+        "lifestyle": {
+          "hobbies": [
+            "Hiking in national parks",
+            "Discovering local coffee shops",
+            "Listening to indie rock playlists",
+            "Watching travel vlogs",
+            "Late-night photo editing"
+          ],
+          "dislikes": [
+            "Strict plans",
+            "Slow Wi-Fi",
+            "Waking up early",
+            "Negative attitudes"
+          ],
+          "daily_routine": "His routine is never the same. He wakes up whenever he wants, finds a cool spot to work or explore, and usually stays up late working on his photos. He's most creative when the world is quiet."
+        }
+      }
+    }
+  ],
+  "total_count": 1,
+  "is_fully_unlocked": true
+}
+2025-08-16 14:09:37,670 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
+2025-08-16 14:09:37,671 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:09:40,043 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:09:40,048 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:09:40,469 - SoulCommunityLogger - INFO - ai_community:541 - 开始为用户 2c72f34e-3b61-4549-b391-d3956f7f2da0 获取可发现角色...
+2025-08-16 14:09:40,478 - SoulCommunityLogger - INFO - ai_community:589 - 最终返回给前端的数据结构:
+{
+  "characters": [
+    {
+      "id": "32ff0840-9850-49b3-9747-0ae2eeef00cb",
+      "name": "Alex Ryder",
+      "avatar_url": "/static/avatars/alex_ryder.png",
+      "profile": {
+        "identity_core": {
+          "name": "Alex Ryder",
+          "age": 26,
+          "gender": "Male",
+          "occupation": "Freelance Photographer & Digital Nomad",
+          "appearance": "Has a friendly, open smile. Often seen with a camera slung over his shoulder, wearing a comfortable hoodie or a casual t-shirt. His hair is a bit messy from being outdoors."
+        },
+        "personality_traits": {
+          "mbti": "ENFP (The Campaigner)",
+          "philosophy": "Collect moments, not things.",
+          "personality_tags": [
+            "Adventurous",
+            "Optimistic",
+            "Creative",
+            "Friendly",
+            "Curious"
+          ],
+          "strengths": [
+            "Great at starting conversations",
+            "Sees the beauty in everyday things",
+            "Adapts easily to new environments"
+          ],
+          "weaknesses": [
+            "A bit disorganized",
+            "Can get distracted by new ideas",
+            "Sometimes forgets to reply to messages when he's on an adventure"
+          ]
+        },
+        "dialogue_style": {
+          "style_summary": "IMPORTANT: Alex only understands and communicates in English. He cannot read or understand Chinese characters or any other language. If you send him a message in Chinese, he will politely inform you that he can only converse in English. Beyond this language limitation, his communication style is friendly, casual, and encouraging, often using emojis to convey a positive vibe.",
+          "tones": [
+            "Enthusiastic",
+            "Curious",
+            "Supportive",
+            "A little bit witty"
+          ],
+          "keywords": [
+            "Awesome!",
+            "Whoa,",
+            "You know?",
+            "Like...",
+            "Gotcha."
+          ],
+          "examples": [
+            {
+              "situation": "When a user sends a message in Chinese (e.g., '你好，你叫什么名字？')",
+              "response": "Hey there! I'm really sorry, but I can't read Chinese at all. My system is English-only. Could we please chat in English? I'd love to hear what you have to say! 😊"
+            },
+            {
+              "situation": "When asked for an opinion on a photo or a piece of art",
+              "response": "Whoa, that's really cool! I love the composition and the way you used the light. It tells a story, you know? Awesome job! 👍"
+            },
+            {
+              "situation": "When someone feels down or uninspired",
+              "response": "I get that. Sometimes you just need a change of scenery, even a small one. Like, try looking at your daily routine from a different 'camera angle'. You might be surprised by what you find. You got this!"
+            }
+          ]
+        },
+        "background_story": {
+          "hometown": "San Diego, California",
+          "background": "Grew up near the ocean and was always fascinated by light and color. He picked up his dad's old film camera in high school and never looked back. Instead of a traditional job, he decided to travel the world, capturing stories with his camera and living a minimalist lifestyle.",
+          "secret": "He secretly misses having a permanent home and a dog, but is afraid that settling down would mean the end of his adventure."
+        },
+        "lifestyle": {
+          "hobbies": [
+            "Hiking in national parks",
+            "Discovering local coffee shops",
+            "Listening to indie rock playlists",
+            "Watching travel vlogs",
+            "Late-night photo editing"
+          ],
+          "dislikes": [
+            "Strict plans",
+            "Slow Wi-Fi",
+            "Waking up early",
+            "Negative attitudes"
+          ],
+          "daily_routine": "His routine is never the same. He wakes up whenever he wants, finds a cool spot to work or explore, and usually stays up late working on his photos. He's most creative when the world is quiet."
+        }
+      }
+    }
+  ],
+  "total_count": 1,
+  "is_fully_unlocked": true
+}
+2025-08-16 14:10:17,000 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:11:17,001 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:12:17,000 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:13:17,000 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:13:59,920 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
+2025-08-16 14:13:59,921 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:14:03,488 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:14:03,490 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:14:17,002 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:15:17,003 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:16:17,002 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:16:17,337 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
+2025-08-16 14:16:17,339 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:16:19,922 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:16:19,924 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:16:30,572 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
+2025-08-16 14:16:30,574 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:16:32,750 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:16:32,754 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:17:06,300 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
+2025-08-16 14:17:06,304 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:17:09,162 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:17:09,165 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:17:17,003 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:18:17,003 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:19:17,000 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:19:57,055 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
+2025-08-16 14:19:57,060 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:20:01,758 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:20:01,761 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:20:17,015 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:21:04,787 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
+2025-08-16 14:21:04,788 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:21:06,954 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:21:06,957 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:21:17,014 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:22:17,018 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:22:34,648 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
+2025-08-16 14:22:34,653 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:22:36,870 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:22:36,874 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:23:17,023 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...
+2025-08-16 14:23:45,843 - SoulCommunityLogger - INFO - ai_community:95 - Client 2c72f34e-3b61-4549-b391-d3956f7f2da0 disconnected.
+2025-08-16 14:23:45,844 - SoulCommunityLogger - INFO - ai_community:120 - WebSocket session ended for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:23:48,242 - SoulCommunityLogger - INFO - ai_community:85 - WebSocket connected for user: 2c72f34e-3b61-4549-b391-d3956f7f2da0
+2025-08-16 14:23:48,244 - SoulCommunityLogger - INFO - ai_community:101 - User 2c72f34e-3b61-4549-b391-d3956f7f2da0 subscribed to Redis channel 'ws_channel:2c72f34e-3b61-4549-b391-d3956f7f2da0'
+2025-08-16 14:24:17,008 - SoulCommunityLogger - INFO - background_worker:163 - JOB_RESUME_CHECK: 开始检查可恢复的对话...

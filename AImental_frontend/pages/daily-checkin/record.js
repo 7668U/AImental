@@ -1,4 +1,5 @@
 // pages/daily-checkin/record.js
+const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 Page({
   /**
    * 页面的初始数据
@@ -361,5 +362,13 @@ Page({
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  },
+
+  onShareAppMessage: function () {
+    return getShareInfo();
+  },
+
+  onShareTimeline: function () {
+    return getTimelineInfo();
   }
 });

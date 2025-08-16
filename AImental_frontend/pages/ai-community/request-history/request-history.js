@@ -4,6 +4,7 @@
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1/community';
 const SERVER_URL = 'http://127.0.0.1:8000';
 
+const { getShareInfo, getTimelineInfo } = require('../../../utils/share.js');
 Page({
   data: {
     serverUrl: SERVER_URL,
@@ -88,5 +89,13 @@ Page({
     } else {
       wx.showToast({ title: '你的申请已被对方拒绝', icon: 'none' });
     }
+  },
+
+  onShareAppMessage: function () {
+    return getShareInfo();
+  },
+
+  onShareTimeline: function () {
+    return getTimelineInfo();
   }
 });

@@ -7,6 +7,7 @@ const ANALYSIS_API_URL = `${SERVER_BASE_URL}/api/v1/history-analysis`;
 const DEFAULT_ICON_PATH = '/images/assessment/default.png';
 const DELETE_BTN_WIDTH = 80;
 
+const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 Page({
   data: {
     isLoading: true,
@@ -271,5 +272,13 @@ Page({
     this.setData({
       groupedHistory: groupedHistory
     });
+  },
+
+  onShareAppMessage: function () {
+    return getShareInfo();
+  },
+
+  onShareTimeline: function () {
+    return getTimelineInfo();
   }
 });

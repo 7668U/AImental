@@ -43,6 +43,7 @@ function request(options) {
   });
 }
 
+const { getShareInfo, getTimelineInfo } = require('../../../utils/share.js');
 Page({
   data: {
     // 保留原有数据结构
@@ -214,6 +215,14 @@ Page({
     if (date >= today) return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
     if (date >= yesterday) return "昨天";
     return `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getDate().toString().padStart(2, "0")}`;
+  },
+
+  onShareAppMessage: function () {
+    return getShareInfo();
+  },
+
+  onShareTimeline: function () {
+    return getTimelineInfo();
   }
 });
 

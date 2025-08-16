@@ -1,4 +1,5 @@
-// pages/assessment/result/result.js (渐变条 + 文字标签最终版)
+const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
+// pages/assessment/result.js (渐变条 + 文字标签最终版)
 
 const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 const ASSESSMENTS_API_URL = `${SERVER_BASE_URL}/api/v1/assessments`;
@@ -154,5 +155,13 @@ Page({
         });
       }
     }, 2000);
+  },
+
+  onShareAppMessage: function () {
+    return getShareInfo();
+  },
+
+  onShareTimeline: function () {
+    return getTimelineInfo();
   }
 });

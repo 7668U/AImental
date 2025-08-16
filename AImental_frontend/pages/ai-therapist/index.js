@@ -1,4 +1,5 @@
 // pages/ai-therapist/index.js
+const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 
 // --- 全局配置与网络请求封装 ---
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
@@ -454,4 +455,12 @@ Page({
     this.setData({ isDisclaimerVisible: false });
     wx.setStorageSync('hasShownDisclaimer', true);
   },
+
+  onShareAppMessage: function () {
+    return getShareInfo();
+  },
+
+  onShareTimeline: function () {
+    return getTimelineInfo();
+  }
 });

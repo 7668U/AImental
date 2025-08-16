@@ -11,6 +11,7 @@ const ANALYSIS_TYPE_MAP = {
   color_palette: 'color'
 };
 
+const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 Page({
   data: {
     // --- 新增：导航栏数据 ---
@@ -292,4 +293,12 @@ navigateBack() {
       showPicker: false // 关闭选择器
     });
   },
+
+  onShareAppMessage: function () {
+    return getShareInfo();
+  },
+
+  onShareTimeline: function () {
+    return getTimelineInfo();
+  }
 });

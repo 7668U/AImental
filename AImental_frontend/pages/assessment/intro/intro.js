@@ -1,3 +1,4 @@
+const { getShareInfo, getTimelineInfo } = require('../../../utils/share.js');
 // pages/assessment/intro/intro.js
 
 // --- 抽离出可复用的网络请求函数 ---
@@ -93,5 +94,13 @@ Page({
     this.setData({
       'scale.iconPath': DEFAULT_ICON_PATH
     });
+  },
+
+  onShareAppMessage: function () {
+    return getShareInfo();
+  },
+
+  onShareTimeline: function () {
+    return getTimelineInfo();
   }
 });
