@@ -1,9 +1,9 @@
-// pages/ai-community/chat-list/chat-list.js (最终重构版)
+// pages/ai-community/chat-list/chat-list.js
 
 const SERVER_URL = 'http://127.0.0.1:8000';
 const app = getApp();
 
-// --- [新增] 借鉴自 assessment 页面的统一网络请求函数 ---
+// --- 统一网络请求函数 ---
 function request(options) {
   // 定义不同模块的基础URL
   const BASE_URLS = {
@@ -79,7 +79,7 @@ Page({
     app.webSocketManager.unregisterListener();
   },
 
-  // --- [重构] 核心登录检查逻辑 ---
+  // --- 核心登录检查逻辑 ---
   checkLoginStatus() {
     const token = wx.getStorageSync('token');
     if (token) {
@@ -98,7 +98,7 @@ Page({
     }
   },
 
-  // --- [新增] 清理登录状态的函数，用于被 request 或其他页面逻辑调用 ---
+  // --- 清理登录状态的函数，用于被 request 或其他页面逻辑调用 ---
   clearLoginState() {
     wx.removeStorageSync('token');
     wx.removeStorageSync('userInfo');
@@ -106,7 +106,7 @@ Page({
     wx.showToast({ title: '登录已失效', icon: 'none' });
   },
 
-  // --- [重构] 使用 async/await 和新的 request 函数重构登录逻辑 ---
+  // --- 使用 async/await 和新的 request 函数重构登录逻辑 ---
   async handleLogin() {
     wx.showLoading({ title: '正在登录...' });
     try {
@@ -136,7 +136,7 @@ Page({
     }
   },
 
-  // --- [重构] 使用新的 request 函数获取聊天列表 ---
+  // --- 使用新的 request 函数获取聊天列表 ---
   async getChatList() {
     if (this.data.isLoading) return;
     this.setData({ isLoading: true, isError: false });
@@ -182,8 +182,7 @@ Page({
       wx.stopPullDownRefresh();
     }
   },
-
-  // --- 以下函数保持不变 ---
+  
   onSocketMessage: function(data) {
     if (!this.data.isLoggedIn) return; // 未登录不处理
     if (data.type === 'new_message' && data.chat_summary) {
@@ -201,11 +200,16 @@ Page({
       this.setData({ chatList: list });
     }
   },
+
   navigateToChat: function(e) {
     const ai = e.currentTarget.dataset.ai;
     wx.navigateTo({ url: `/pages/ai-community/chat-interface/chat-interface?aiId=${ai.id}&name=${encodeURIComponent(ai.name)}&avatar=${encodeURIComponent(ai.avatar)}` });
   },
-  addMoreFriends: function() { wx.navigateTo({ url: '/pages/ai-community/add-friends/add-friends' }); },
+
+  addMoreFriends: function() { 
+    wx.navigateTo({ url: '/pages/ai-community/add-friends/add-friends' });
+  },
+
   formatTimestamp: function(timestamp) {
     if (!timestamp) return '';
     const date = new Date(timestamp * 1e3);
