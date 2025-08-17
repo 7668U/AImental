@@ -1,0 +1,147 @@
+/* --- 页面整体布局 --- */
+.page {
+  width: 100vw;
+  height: 100vh;
+  background-color: #F9F7F3; /* 米色背景 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* 保持页面居中，具体位置由 wrapper 的 transform 控制 */
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* --- 右上角历史按钮 --- */
+.history-btn {
+  position: absolute;
+  top: calc(var(--status-bar-height, 20px) + 20rpx);
+  right: 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+}
+.history-btn__icon { 
+  width: 44rpx; 
+  height: 44rpx; 
+  margin-bottom: 4rpx;
+}
+.history-btn__text {
+  font-size: 20rpx;
+  color: #888;
+}
+
+/* --- 【核心】内容包裹容器 --- */
+.main-content-wrapper {
+  transform: translateY(-30rpx); 
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* --- 卡片轮播 --- */
+.card-swiper {
+  width: 100%;
+  height: 1020rpx;
+  overflow: visible;
+}
+
+.card-swiper-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+/* --- AI卡片基础样式 --- */
+.ai-card {
+  width: 640rpx;
+  height: 980rpx;
+  background-color: #ffffff;
+  border-radius: 40rpx;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 40rpx;
+  transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.ai-card.active { opacity: 1; transform: scale(1); }
+.ai-card.inactive { opacity: 0; transform: scale(0.9); pointer-events: none; }
+.ai-card.disappearing { opacity: 0; transform: translateY(50%) scale(0.8); }
+
+.ai-card__header { display: flex; width: 100%; justify-content: space-between; align-items: center; flex-shrink: 0; }
+.ai-card__name { font-size: 60rpx; font-weight: bold; color: #1a1a1a; flex-shrink: 0; padding-right: 20rpx; white-space: nowrap; }
+.ai-card__info-block { text-align: left; }
+.info-item { display: flex; margin-bottom: 10rpx; font-size: 26rpx; }
+.info-item__label { color: #888; width: 90rpx; }
+.info-item__value { color: #333; font-weight: 500; }
+.ai-card__body { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; }
+.ai-card__avatar { width: 280rpx; height: 280rpx; border-radius: 50%; border: 10rpx solid white; box-shadow: 0 10rpx 30rpx rgba(0,0,0,0.1); margin-bottom: 30rpx; }
+.ai-card__motto { font-size: 28rpx; color: #777; font-style: italic; margin-bottom: 30rpx; text-align: center; }
+.ai-card__tags { display: flex; flex-wrap: wrap; justify-content: center; }
+.tag { background-color: #FFF2E6; color: #E89F67; font-size: 24rpx; padding: 10rpx 25rpx; border-radius: 30rpx; margin: 10rpx; }
+
+.ai-card__footer { width: 100%; display: flex; justify-content: center; flex-shrink: 0; }
+
+/* 温暖的橙色渐变按钮 */
+.add-btn-circular { width: 130rpx; height: 130rpx; border-radius: 50%; display: flex; justify-content: center; align-items: center; background-image: linear-gradient(45deg, #FFD1A4, #FF8C00); box-shadow: 0 10rpx 20rpx rgba(255, 140, 0, 0.3); transition: all 0.2s ease-in-out; }
+.add-btn-circular:active { transform: scale(0.9); box-shadow: 0 5rpx 10rpx rgba(255, 140, 0, 0.4); }
+.add-btn__plus { width: 60rpx; height: 60rpx; position: relative; }
+.add-btn__plus::before, .add-btn__plus::after { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background-color: #FFFFFF; border-radius: 4rpx; }
+.add-btn__plus::before { width: 8rpx; height: 100%; }
+.add-btn__plus::after { width: 100%; height: 8rpx; }
+
+/* --- 提示文字 --- */
+.bottom-hint-text { 
+  margin-top: 40rpx;
+  text-align: center; 
+  font-size: 32rpx; 
+  font-family: 'PingFang SC', 'Helvetica Neue', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; 
+  font-weight: bold; 
+  color: #AAAAAA; 
+  letter-spacing: 2rpx; 
+}
+
+/* --- 浅色主题弹窗 --- */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
+.modal-overlay.visible { opacity: 1; pointer-events: auto; }
+.modal-content { width: 80vw; background-color: #ffffff; border-radius: 30rpx; padding: 50rpx; box-sizing: border-box; box-shadow: 0 10rpx 40rpx rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; align-items: center; transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.modal-overlay.visible .modal-content { transform: scale(1); }
+.modal-title { font-size: 36rpx; font-weight: bold; color: #333; margin-bottom: 20rpx; }
+.modal-input { width: 100%; height: 80rpx; background-color: #F7F7F7; border-radius: 15rpx; margin-top: 20rpx; padding: 0 20rpx; box-sizing: border-box; color: #333; font-size: 28rpx; border: 1px solid #E0E0E0; text-align: center; }
+.modal-actions { display: flex; width: 100%; margin-top: 50rpx; justify-content: space-between; }
+.modal-button { width: 48%; height: 80rpx; border-radius: 15rpx; font-size: 30rpx; font-weight: bold; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; }
+.modal-button.cancel { background-color: #F0F0F0; color: #888; }
+.modal-button.confirm { background-image: linear-gradient(45deg, #FFD1A4, #FF8C00); color: #fff; }
+.modal-button:active { transform: scale(0.95); }
+.modal-button::after { border: none; }
+
+/* --- 上锁卡片（修改后的白底+黑色文字） --- */
+.locked-card { 
+  width: 640rpx; 
+  height: 980rpx; 
+  background-color: #ffffff; /* 改成白底 */
+  border-radius: 40rpx; 
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.1); 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: center; 
+  align-items: center; 
+  box-sizing: border-box; 
+  padding: 40rpx; 
+  border: 2rpx dashed rgba(0, 0, 0, 0.1); /* 调浅，配合白底 */
+  transition: transform 0.3s ease; 
+}
+.locked-card:active { transform: scale(0.98); }
+.locked-card__icon { width: 120rpx; height: 120rpx; margin-bottom: 40rpx; opacity: 0.8; }
+.locked-card__title { font-size: 50rpx; font-weight: bold; color: #333; margin-bottom: 60rpx; }
+.locked-card__text { font-size: 32rpx; color: #555; line-height: 1.6; }
+.locked-card__btn { margin-top: 80rpx; padding: 25rpx 80rpx; background-image: linear-gradient(45deg, #FFD1A4, #FF8C00); border-radius: 50rpx; color: #fff; font-size: 34rpx; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 10rpx 30rpx rgba(255, 140, 0, 0.3); }
+.locked-card__btn-icon { width: 40rpx; height: 40rpx; margin-right: 20rpx; }
+.locked-card__btn::after { border: none; }

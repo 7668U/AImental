@@ -177,7 +177,7 @@ Page({
         messages: [], messageCounter: 0, activeChatId: newChat.chat_id,
         isSidebarVisible: false, chatHistory: currentHistory
       });
-      this.addMessage('ai', '你好，我是你的AI心理伙伴，随时在这里倾听你的心声。');
+      this.addMessage('ai', '你好呀，和我分享一下今天的心情吧！');
     } catch (error) {
       console.error("创建新聊天失败", error);
       wx.showToast({ title: '创建失败', icon: 'none' });
@@ -226,7 +226,7 @@ Page({
         text: msg.content
       }));
       if (messages.length === 0) {
-          messages.push({ id: 1, sender: 'ai', text: '你好，我是你的AI心理伙伴，随时在这里倾听你的心声。' });
+          messages.push({ id: 1, sender: 'ai', text: '你好呀，和我分享一下今天的心情吧！' });
       }
       this.setData({
         messages, messageCounter: messages.length, activeChatId: chatId,

@@ -1,0 +1,108 @@
+{
+  "scale_info": {
+    "name": "年度好运测试",
+    "short_name": "AGLT",
+    "description": "本测试通过一系列有趣的生活情景选择，趣味性地预测您在今年可能会在哪个人生领域收获意想不到的好运气。",
+    "instructions": "请放松心情，阅读以下问题，并从选项中选择一个最符合你当下想法的答案。",
+    "category": "趣味测试",
+    "assessment_type": "categorical"
+  },
+  "questions": [
+    {
+      "order": 1,
+      "text": "如果让你选一种超能力，你会选择？",
+      "options": [
+        { "id": "A", "text": "隐身术", "target_personality_id": "p02" },
+        { "id": "B", "text": "瞬间移动", "target_personality_id": "p03" },
+        { "id": "C", "text": "与动物对话", "target_personality_id": "p01" },
+        { "id": "D", "text": "预知未来", "target_personality_id": "p04" }
+      ]
+    },
+    {
+      "order": 2,
+      "text": "你更喜欢哪种天气？",
+      "options": [
+        { "id": "A", "text": "阳光明媚的晴天", "target_personality_id": "p01" },
+        { "id": "B", "text": "细雨蒙蒙的雨天", "target_personality_id": "p03" },
+        { "id": "C", "text": "白雪皑皑的冬天", "target_personality_id": "p04" },
+        { "id": "D", "text": "凉风习习的秋天", "target_personality_id": "p02" }
+      ]
+    },
+    {
+      "order": 3,
+      "text": "如果必须参加一个比赛，你会选择？",
+      "options": [
+        { "id": "A", "text": "智力问答", "target_personality_id": "p04" },
+        { "id": "B", "text": "厨艺大赛", "target_personality_id": "p02" },
+        { "id": "C", "text": "演讲比赛", "target_personality_id": "p03" },
+        { "id": "D", "text": "马拉松", "target_personality_id": "p01" }
+      ]
+    },
+    {
+      "order": 4,
+      "text": "你捡到了一个神秘的漂流瓶，你希望里面装着？",
+      "options": [
+        { "id": "A", "text": "一张藏宝图", "target_personality_id": "p04" },
+        { "id": "B", "text": "一封感人的情书", "target_personality_id": "p01" },
+        { "id": "C", "text": "一个能实现愿望的精灵", "target_personality_id": "p02" },
+        { "id": "D", "text": "一段不为人知的历史秘密", "target_personality_id": "p03" }
+      ]
+    },
+    {
+      "order": 5,
+      "text": "你最想去哪里旅行？",
+      "options": [
+        { "id": "A", "text": "繁华的国际大都市", "target_personality_id": "p03" },
+        { "id": "B", "text": "宁静的海边小镇", "target_personality_id": "p01" },
+        { "id": "C", "text": "神秘的古老遗迹", "target_personality_id": "p04" },
+        { "id": "D", "text": "壮丽的自然风光区", "target_personality_id": "p02" }
+      ]
+    },
+    {
+      "order": 6,
+      "text": "如果用一种饮品来形容你自己，你会是？",
+      "options": [
+        { "id": "A", "text": "香醇的咖啡", "target_personality_id": "p03" },
+        { "id": "B", "text": "甜甜的奶茶", "target_personality_id": "p01" },
+        { "id": "C", "text": "清新的柠檬水", "target_personality_id": "p02" },
+        { "id": "D", "text": "浓郁的红酒", "target_personality_id": "p04" }
+      ]
+    },
+    {
+      "order": 7,
+      "text": "你房间里不可或缺的东西是？",
+      "options": [
+        { "id": "A", "text": "柔软舒适的床", "target_personality_id": "p01" },
+        { "id": "B", "text": "一整面墙的书柜", "target_personality_id": "p04" },
+        { "id": "C", "text": "高速的电脑和网络", "target_personality_id": "p03" },
+        { "id": "D", "text": "可爱的绿植或宠物", "target_personality_id": "p02" }
+      ]
+    }
+  ],
+  "interpretations": {
+    "p01": {
+      "title": "桃花运",
+      "description": "恭喜！今年你的丘比特已经悄悄上班啦，你将会在爱情方面收获满满的好运气。对于单身的你来说，今年会遇到许多优质的潜在对象，你的个人魅力会大大提升，很容易吸引到他人的目光，脱单几率极高！对于有伴侣的你来说，你们的感情会持续升温，关系更加稳固和甜蜜，可能会有订婚、结婚等好消息哦。总之，准备好迎接浪漫的一年吧！",
+      "recommendation": "大胆去爱，敞开心扉，你的正缘正在路上！",
+      "image_url": ""
+    },
+    "p02": {
+      "title": "健康运",
+      "description": "今年你的好运气主要体現在健康方面。你会感觉到自己精力充沛，活力满满，身体状态会调整到最佳。之前的一些小毛病或亚健康状态，今年都会得到很好的改善。你的心态也会变得更加积极乐观，强大的免疫力让你远离疾病的困扰。这是一个非常适合培养运动习惯、调整作息、关注身心平衡的好时机。健康的身体是革命的本钱，有了它，你才能更好地迎接其他挑战！",
+      "recommendation": "坚持良好的生活习惯，将好状态保持下去，活力每一天！",
+      "image_url": ""
+    },
+    "p03": {
+      "title": "事业运",
+      "description": "你的好运气将在事业或学业上大放异彩！今年你在工作和学习上会感到前所未有的顺遂，你的努力和才华将被上司、同事或老师看到并认可。可能会有升职加薪、项目成功、考试通过等好机会降临。你会变得更有创造力和执行力，能够轻松应对各种挑战，并在自己的专业领域取得突破。请抓住机会，勇敢地展示自己吧！",
+      "recommendation": "积极把握每一个机会，你的努力终将获得回报，前程似锦！",
+      "image_url": ""
+    },
+    "p04": {
+      "title": "财富运",
+      "description": "财神爷今年对你格外偏爱！你的财富运势非常旺盛。除了稳定的正财收入可能会有所增长外，你的偏财运也相当不错。可能会有意外的奖金、投资获利、中奖，甚至是收到意想不到的红包或礼物。你对金钱的嗅觉会变得更加敏锐，能够发现并抓住不错的赚钱机会。不过，在收获财富的同时，也要记得合理规划，让钱生钱哦！",
+      "recommendation": "眼光独到，果断出手，但也要记得稳健理财，让财富滚雪球！",
+      "image_url": ""
+    }
+  }
+}

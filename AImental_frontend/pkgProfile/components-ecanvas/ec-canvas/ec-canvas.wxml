@@ -1,0 +1,16 @@
+<!--
+  【修改说明】
+  为了确保图表能正常渲染，我们移除了原有的 wx:if/wx:else 判断逻辑，
+  并强制组件只使用新的 type="2d" canvas。
+  这可以保证组件的渲染引擎与我们的 JavaScript 初始化代码完全匹配，
+  从而解决图表无法显示的问题。
+-->
+<canvas
+  type="2d"
+  class="ec-canvas"
+  canvas-id="{{ canvasId }}"
+  bindinit="init"
+  bindtouchstart="{{ ec.disableTouch ? '' : 'touchStart' }}"
+  bindtouchmove="{{ ec.disableTouch ? '' : 'touchMove' }}"
+  bindtouchend="{{ ec.disableTouch ? '' : 'touchEnd' }}">
+</canvas>

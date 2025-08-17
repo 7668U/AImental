@@ -1,0 +1,132 @@
+{
+  "scale_info": {
+    "name": "性格最真实的一面",
+    "short_name": "TPS",
+    "description": "本测试通过一系列情景选择题，帮助您探索和了解自己性格中隐藏或最真实的一面，揭示您内在的渴望、动机和与人互动的模式。",
+    "instructions": "请阅读下面的每个情景，并从四个选项中选择一个最符合您第一反应或最倾向于去做的决定。请凭直觉快速作答。",
+    "category": "趣味测试",
+    "assessment_type": "categorical"
+  },
+  "questions": [
+    {
+      "order": 1,
+      "text": "假如你面前有一座山，你觉得山顶上会有什么？",
+      "options": [
+        { "id": "A", "text": "一座寺庙", "target_personality_id": "p01" },
+        { "id": "B", "text": "一片森林", "target_personality_id": "p02" },
+        { "id": "C", "text": "一片废墟", "target_personality_id": "p03" },
+        { "id": "D", "text": "一片云海", "target_personality_id": "p04" }
+      ]
+    },
+    {
+      "order": 2,
+      "text": "下山的时候，你刚好看见一道彩虹，你觉得它是什么颜色的？",
+      "options": [
+        { "id": "A", "text": "紫色", "target_personality_id": "p01" },
+        { "id": "B", "text": "蓝色", "target_personality_id": "p02" },
+        { "id": "C", "text": "黄色", "target_personality_id": "p03" },
+        { "id": "D", "text": "红色", "target_personality_id": "p04" }
+      ]
+    },
+    {
+      "order": 3,
+      "text": "这时候，你面前出现了一个人，你觉得这个人是谁？",
+      "options": [
+        { "id": "A", "text": "一个小孩", "target_personality_id": "p01" },
+        { "id": "B", "text": "一个老人", "target_personality_id": "p02" },
+        { "id": "C", "text": "你的爱人", "target_personality_id": "p03" },
+        { "id": "D", "text": "一个陌生人", "target_personality_id": "p04" }
+      ]
+    },
+    {
+      "order": 4,
+      "text": "你继续往前走，你看到了一幢房子，这幢房子是？",
+      "options": [
+        { "id": "A", "text": "茅草屋", "target_personality_id": "p01" },
+        { "id": "B", "text": "城堡", "target_personality_id": "p02" },
+        { "id": "C", "text": "普通民居", "target_personality_id": "p03" },
+        { "id": "D", "text": "别墅", "target_personality_id": "p04" }
+      ]
+    },
+    {
+      "order": 5,
+      "text": "房子里很黑，你推开门，你觉得会看到什么？",
+      "options": [
+        { "id": "A", "text": "一片漆黑", "target_personality_id": "p01" },
+        { "id": "B", "text": "一个怪物", "target_personality_id": "p02" },
+        { "id": "C", "text": "房子的主人", "target_personality_id": "p03" },
+        { "id": "D", "text": "一个金库", "target_personality_id": "p04" }
+      ]
+    },
+    {
+      "order": 6,
+      "text": "你没有进去，而是选择绕着房子走，你看到一个信箱，信箱是开着还是关着的？",
+      "options": [
+        { "id": "A", "text": "开着的", "target_personality_id": "p01" },
+        { "id": "B", "text": "关着的", "target_personality_id": "p02" }
+      ]
+    },
+    {
+      "order": 7,
+      "text": "你继续往前走，你看到一口井，井里有水吗？",
+      "options": [
+        { "id": "A", "text": "有水", "target_personality_id": "p01" },
+        { "id": "B", "text": "没水", "target_personality_id": "p02" }
+      ]
+    },
+    {
+      "order": 8,
+      "text": "在井的旁边，你看到一个箱子，这个箱子有多大？",
+      "options": [
+        { "id": "A", "text": "小箱子", "target_personality_id": "p01" },
+        { "id": "B", "text": "中箱子", "target_personality_id": "p02" },
+        { "id": "C", "text": "大箱子", "target_personality_id": "p03" }
+      ]
+    },
+    {
+      "order": 9,
+      "text": "这时候，你看到一匹马，你觉得这匹马是什么颜色的？",
+      "options": [
+        { "id": "A", "text": "白马", "target_personality_id": "p01" },
+        { "id": "B", "text": "黑马", "target_personality_id": "p02" },
+        { "id": "C", "text": "棕色的马", "target_personality_id": "p03" }
+      ]
+    },
+    {
+      "order": 10,
+      "text": "最后，你看到一条河，你用什么方法过河？",
+      "options": [
+        { "id": "A", "text": "游泳过河", "target_personality_id": "p01" },
+        { "id": "B", "text": "找一条船", "target_personality_id": "p02" },
+        { "id": "C", "text": "不管它，直接趟过去", "target_personality_id": "p03" },
+        { "id": "D", "text": "等河水退了再过去", "target_personality_id": "p04" }
+      ]
+    }
+  ],
+  "interpretations": {
+    "p01": {
+      "title": "红色性格",
+      "description": "你是一个充满激情和活力的人，热爱生活，乐于接受挑战。你天生就是一个领导者，有很强的决策能力和行动力。你对朋友非常讲义气，愿意为他们两肋插刀。然而，你的情绪波动较大，容易冲动行事，有时会显得比较固执。",
+      "recommendation": "你的热情很有感染力，但也要学会控制自己的脾气。在做决定前，多听取他人的意见，三思而后行，这样能帮助你更好地实现目标。",
+      "image_url": ""
+    },
+    "p02": {
+      "title": "蓝色性格",
+      "description": "你是一个性格沉稳、内敛且富有智慧的人。你心思缜密，考虑问题全面周到，是一个天生的思考者和规划者。你追求完美，对自己和他人都有较高的要求。你为人可靠，值得信赖，但有时会因为过于谨慎而显得犹豫不决。",
+      "recommendation": "你的细致和严谨是很大的优点，但也应适当放松对细节的掌控，学会更加包容和灵活。尝试多一些行动力，不要让过度的思考束缚了你的脚步。",
+      "image_url": ""
+    },
+    "p03": {
+      "title": "黄色性格",
+      "description": "你是一个积极乐观、善于交际的人。你性格开朗，充满正能量，是朋友中的开心果。你富有创造力，喜欢新鲜事物，对未来充满希望。你的人际关系很好，但有时可能会因为过于追求和谐而忽略自己的真实感受。",
+      "recommendation": "你的乐观能给周围的人带来阳光，这是非常宝贵的品质。在关心他人的同时，也别忘了关照自己的内心需求，勇敢地表达自己的想法。",
+      "image_url": ""
+    },
+    "p04": {
+      "title": "绿色性格",
+      "description": "你是一个性格温和、善良且有耐心的人。你追求和平与安宁，不喜欢与人发生冲突。你是一个很好的倾听者，有很强的同理心，总能给朋友带来安慰和支持。你随遇而安，但有时可能会缺乏主见和目标感。",
+      "recommendation": "你的温柔和耐心让你成为一个很好的伙伴。可以尝试为自己设定一些清晰的目标，并更主动地去追求自己想要的生活，你会发现自己内在的巨大潜力。",
+      "image_url": ""
+    }
+  }
+}

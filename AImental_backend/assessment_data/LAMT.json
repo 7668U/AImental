@@ -1,0 +1,118 @@
+{
+  "scale_info": {
+    "name": "恋爱态度与误区测试",
+    "short_name": "LAMT-V1",
+    "description": "本测试通过一系列关于爱情和关系的情景选择，帮助您识别自己内心深处的爱情态度，并点出在亲密关系中可能存在的思维误区。",
+    "instructions": "请放松心情，仔细阅读以下每个问题，并从四个选项中选择一个最符合您真实想法的答案。",
+    "category": "趣味测试",
+    "assessment_type": "categorical"
+  },
+  "questions": [
+    {
+      "order": 1,
+      "text": "你认为以下哪种情况最能代表“爱情”？",
+      "options": [
+        { "id": "A", "text": "激情与浪漫的火花", "target_personality_id": "p02" },
+        { "id": "B", "text": "细水长流的陪伴与默契", "target_personality_id": "p04" },
+        { "id": "C", "text": "双方共同成长，成为更好的自己", "target_personality_id": "p03" },
+        { "id": "D", "text": "一场有趣且充满未知的冒险", "target_personality_id": "p01" }
+      ]
+    },
+    {
+      "order": 2,
+      "text": "如果你的朋友失恋了，你会如何安慰他/她？",
+      "options": [
+        { "id": "A", "text": "“下一个会更好，旧的不去新的不来”", "target_personality_id": "p01" },
+        { "id": "B", "text": "“我懂你的感受，想哭就哭吧，我陪着你”", "target_personality_id": "p04" },
+        { "id": "C", "text": "“我们来分析一下，这段关系到底哪里出了问题”", "target_personality_id": "p03" },
+        { "id": "D", "text": "“走，带你出去玩，吃顿好的就忘了”", "target_personality_id": "p02" }
+      ]
+    },
+    {
+      "order": 3,
+      "text": "你对“一见钟情”的看法是？",
+      "options": [
+        { "id": "A", "text": "非常相信，这才是真爱该有的样子", "target_personality_id": "p02" },
+        { "id": "B", "text": "不切实际，不过是荷尔蒙的冲动", "target_personality_id": "p03" },
+        { "id": "C", "text": "有可能，但需要长时间的了解才能确定", "target_personality_id": "p04" },
+        { "id": "D", "text": "听起来很有趣，但可能很快就会厌倦", "target_personality_id": "p01" }
+      ]
+    },
+    {
+      "order": 4,
+      "text": "在选择伴侣时，你最看重的是？",
+      "options": [
+        { "id": "A", "text": "对方的经济条件和家庭背景", "target_personality_id": "p03" },
+        { "id": "B", "text": "对方的性格、人品和三观", "target_personality_id": "p04" },
+        { "id": "C", "text": "对方的外貌、身材和魅力", "target_personality_id": "p02" },
+        { "id": "D", "text": "和对方在一起是否开心、好玩", "target_personality_id": "p01" }
+      ]
+    },
+    {
+      "order": 5,
+      "text": "当爱情变得平淡时，你的第一反应是？",
+      "options": [
+        { "id": "A", "text": "寻找新的刺激，或者考虑分手", "target_personality_id": "p01" },
+        { "id": "B", "text": "这是正常现象，平平淡淡才是真", "target_personality_id": "p04" },
+        { "id": "C", "text": "努力制造浪漫，为关系注入新的活力", "target_personality_id": "p02" },
+        { "id": "D", "text": "开始思考这段关系是否还有未来", "target_personality_id": "p03" }
+      ]
+    },
+    {
+      "order": 6,
+      "text": "你是否同意“爱情需要经营”这个说法？",
+      "options": [
+        { "id": "A", "text": "不同意，真爱是自然而然的，不需要刻意", "target_personality_id": "p02" },
+        { "id": "B", "text": "非常同意，好的关系需要双方共同努力", "target_personality_id": "p04" },
+        { "id": "C", "text": "同意，但更看重实际的付出，如物质投入", "target_personality_id": "p03" },
+        { "id": "D", "text": "无所谓，开心就在一起，不开心就散", "target_personality_id": "p01" }
+      ]
+    },
+    {
+      "order": 7,
+      "text": "你更倾向于哪种恋爱模式？",
+      "options": [
+        { "id": "A", "text": "快速投入，享受当下的激情", "target_personality_id": "p01" },
+        { "id": "B", "text": "保持独立，有各自的空间和生活", "target_personality_id": "p03" },
+        { "id": "C", "text": "如胶似漆，24小时都想和对方在一起", "target_personality_id": "p02" },
+        { "id": "D", "text": "慢慢来，从朋友开始，逐步深入了解", "target_personality_id": "p04" }
+      ]
+    },
+    {
+      "order": 8,
+      "text": "如果伴侣的某个缺点你无法忍受，你会？",
+      "options": [
+        { "id": "A", "text": "直接提出，希望对方为你改变", "target_personality_id": "p02" },
+        { "id": "B", "text": "如果无法改变，可能会选择分手", "target_personality_id": "p01" },
+        { "id": "C", "text": "尝试接纳和包容，毕竟人无完人", "target_personality_id": "p04" },
+        { "id": "D", "text": "理性评估这个缺点对关系的影响再做决定", "target_personality_id": "p03" }
+      ]
+    }
+  ],
+  "interpretations": {
+    "p01": {
+      "title": "游戏型",
+      "description": "你的爱情态度偏向“游戏型”。你将爱情视为一场有趣的游戏，享受追逐和被追逐的快感。你富有魅力，喜欢新鲜感和刺激，很难长时间地专注于一段平淡的关系。对你而言，爱情最重要的就是当下的快乐和激情。",
+      "recommendation": "你的恋爱误区在于缺乏承诺和责任感。当激情退去，关系需要经营和维护时，你可能会感到厌倦并选择逃避。这种态度容易伤害到真心待你的人，也很难让你体验到深刻而持久的亲密关系。",
+      "image_url": ""
+    },
+    "p02": {
+      "title": "奉献型",
+      "description": "你的爱情态度偏向“奉献型”。你渴望浪漫和激情，一旦陷入爱情，便会全身心地投入，将对方视为全世界。你非常感性，容易被一时的感觉冲昏头脑，愿意为爱付出一切，甚至牺牲自我。",
+      "recommendation": "你的恋爱误区在于容易“恋爱脑”，在关系中失去自我。你可能会过度美化对方和爱情，而忽略了现实中的问题。当现实与想象不符时，你会受到巨大的伤害。学会更爱自己，保持理性和独立，是你的重要课题。",
+      "image_url": ""
+    },
+    "p03": {
+      "title": "现实型",
+      "description": "你的爱情态度偏向“现实型”。你非常理智和务实，在开始一段关系前，会仔细评估各方面的利弊，包括对方的性格、能力、家庭背景等。你认为爱情是建立在现实基础之上的，需要有共同的目标和规划。",
+      "recommendation": "你的恋爱误区在于可能过于理性，而忽略了情感的交流和表达。你像是在“完成任务”或“执行项目”一样对待感情，有时会让伴侣感觉不到爱意和温暖。爱情不仅需要面包，也需要玫瑰，学会在务实的同时增加一些浪漫和感性，会让你的关系更美好。",
+      "image_url": ""
+    },
+    "p04": {
+      "title": "伴侣型",
+      "description": "你的爱情态度偏向“伴侣型”。你追求的是一种成熟、稳定、相互扶持的亲密关系。你认为最好的爱情是细水长流的陪伴，是两个人像朋友、像亲人一样，能够分享生活的点滴，共同面对风雨。你懂得包容和经营，是理想的长期伴侣。",
+      "recommendation": "你的恋爱态度非常健康，几乎没有明显的误区。唯一需要提醒的是，在追求稳定和默契的同时，不要忘记为生活增添一些激情和仪式感。偶尔的惊喜和浪漫，是平淡生活里很好的调味剂，能让你们的爱历久弥新。",
+      "image_url": ""
+    }
+  }
+}

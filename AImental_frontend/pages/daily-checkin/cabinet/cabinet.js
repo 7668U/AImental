@@ -41,7 +41,7 @@ function formatNameForCover(name) {
   return arr;
 }
 
-const { getShareInfo, getTimelineInfo } = require('../../../utils/share.js');
+const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 Page({
   data: {
     // === 布局旋钮 ===
@@ -109,7 +109,7 @@ Page({
 
   navigateToNote(e) {
     const id = e.currentTarget.dataset.id;
-    wx.navigateTo({ url: `/pages/daily-checkin/note/note?id=${id}` });
+    wx.navigateTo({ url: `/pkgDailyCheckin/note/note?id=${id}` });
   },
 
   // ---- Action Sheet ----

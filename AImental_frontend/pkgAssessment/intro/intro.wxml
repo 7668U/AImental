@@ -1,0 +1,11 @@
+<view class="container">
+  <view class="intro-title">{{scale.name}}</view>
+
+  <view class="content-area">
+    <image class="intro-icon" src="{{scale.iconPath}}" mode="aspectFit"></image>
+    <view class="intro-description">{{scale.description}}</view>
+    <view class="intro-instructions" wx:if="{{scale.instructions}}">{{scale.instructions}}</view>
+  </view>
+
+  <button class="start-test-button" bindtap="startTest">开始测试</button>
+</view>

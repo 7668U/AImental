@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "分析报告",
+  "usingComponents": {
+    "ec-canvas": "./components-ecanvas/ec-canvas/ec-canvas"
+  }
+}

@@ -2,7 +2,7 @@
 
 import json
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List
+from typing import List, Dict, Any, Optional
 
 # 1. 导入项目模块
 try:
@@ -13,7 +13,7 @@ except (ImportError, ModuleNotFoundError):
 from model.assessment import (
     assessment_tables,
     ScaleInfoResponse,
-    ScaleDetailResponse,
+    # ScaleDetailResponse,
     SubmitAnswersRequest,
     UserAssessmentResponse
 )
@@ -34,7 +34,13 @@ router = APIRouter(
 # ---------------------------------------------------
 # API 端点
 # ---------------------------------------------------
-
+# --- 在这里添加新的 Pydantic 模型 ---
+class FormattedScaleResponse(ScaleInfoResponse):
+    """用于单个量表详情页的、格式化后的响应模型"""
+    questions: List[Dict[str, Any]]
+    choices: List[Dict[str, Any]]
+    
+    
 @router.get(
     "/", 
     response_model=List[ScaleInfoResponse], 
@@ -48,16 +54,18 @@ def get_all_available_scales(
 
 @router.get(
     "/{scale_id}", 
-    response_model=ScaleDetailResponse, 
-    summary="获取单个量表的完整详情"
+    response_model=FormattedScaleResponse, # <--- 1. 使用新的响应模型
+    summary="获取单个量表的完整详情（已为前端格式化）" # <--- 2. 更新接口摘要
 )
 def get_single_scale_details(scale_id: str):
-    scale = assessment_tables.get_scale_by_id(scale_id)
-    if not scale:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scale not found")
+    # --- 3. 调用我们之前在 model/assessment.py 中创建的新方法 ---
+    formatted_scale = assessment_tables.get_formatted_scale_details_by_id(scale_id)
     
-    scale.json_data = json.loads(scale.json_data)
-    return scale
+    if not formatted_scale:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scale not found")
+        
+    # --- 4. 直接返回格式化好的字典 ---
+    return formatted_scale
 
 @router.post(
     "/submit", 
@@ -200,7 +208,8 @@ def get_single_assessment_record(
             "category": scale_obj.category, "assessment_type": scale_obj.assessment_type,
             "json_data": json.loads(scale_obj.json_data)
         }
-    
+
+   
     # ✅ 【第 2 步】: 同样地，为这个接口也添加URL拼接逻辑
     if response_dict.get("result_details") and isinstance(response_dict["result_details"], dict):
         image_url = response_dict["result_details"].get("image_url")
@@ -208,3 +217,5 @@ def get_single_assessment_record(
             response_dict["result_details"]["image_url"] = f"{SERVER_BASE_URL}{image_url}"
 
     return response_dict
+
+

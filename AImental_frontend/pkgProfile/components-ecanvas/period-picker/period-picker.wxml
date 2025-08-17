@@ -1,0 +1,32 @@
+<!-- A custom component for selecting year, quarter, or month -->
+<view class="picker-popup" wx:if="{{show}}" catchtouchmove="preventScroll">
+  <!-- Overlay to close on tap -->
+  <view class="picker-overlay" bind:tap="hide"></view>
+  
+  <!-- Main content panel -->
+  <view class="picker-container">
+    <view class="picker-header">
+      <view class="picker-btn" bind:tap="hide">取消</view>
+      <view class="picker-title">{{title}}</view>
+      <view class="picker-btn confirm" bind:tap="handleConfirm">确定</view>
+    </view>
+    
+    <picker-view 
+      class="picker-view" 
+      indicator-style="height: 50px;" 
+      value="{{pickerValue}}" 
+      bindchange="bindChange"
+    >
+      <!-- Column 1: Year -->
+      <picker-view-column>
+        <view wx:for="{{columns.years}}" wx:key="*this" class="picker-item">{{item}}年</view>
+      </picker-view-column>
+      
+      <!-- Column 2: Quarter or Month (conditional) -->
+      <picker-view-column wx:if="{{mode !== 'yearly'}}">
+        <view wx:for="{{columns.periods}}" wx:key="*this" class="picker-item">{{item}}{{mode === 'monthly' ? '月' : ''}}</view>
+      </picker-view-column>
+      
+    </picker-view>
+  </view>
+</view>

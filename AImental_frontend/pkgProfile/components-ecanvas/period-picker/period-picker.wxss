@@ -1,0 +1,65 @@
+.picker-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+}
+
+.picker-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.picker-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #ffffff;
+  border-top-left-radius: 24rpx;
+  border-top-right-radius: 24rpx;
+  animation: slide-up 0.3s ease-out;
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.picker-title {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.picker-btn {
+  font-size: 30rpx;
+  color: #888;
+  padding: 10rpx;
+}
+
+.picker-btn.confirm {
+  color: #FFA726; /* 主题橙色 */
+}
+
+.picker-view {
+  width: 100%;
+  height: 220px;
+}
+
+.picker-item {
+  line-height: 50px;
+  text-align: center;
+  font-size: 32rpx;
+}

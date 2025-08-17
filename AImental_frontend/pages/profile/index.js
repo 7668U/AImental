@@ -212,7 +212,7 @@ Page({
     });
   },
   
-  goToUserInfo: function() { if (!this.data.isLogin) { wx.showToast({ title: '请先登录才能查看个人信息哦~', icon: 'none' }); return; } wx.navigateTo({ url: '/pages/profile/inform' }); },
+  goToUserInfo: function() { if (!this.data.isLogin) { wx.showToast({ title: '请先登录才能查看个人信息哦~', icon: 'none' }); return; } wx.navigateTo({ url: '/pkgProfile/inform' }); },
   goToFeedback: function() {
     // --- 核心改动：在这里添加登录判断 ---
     if (!this.data.isLogin) {
@@ -226,7 +226,7 @@ Page({
   
     // 如果代码能执行到这里，说明用户已登录
     wx.navigateTo({ 
-      url: '/pages/profile/feedback' 
+      url: '/pkgProfile/feedback' 
     });
   },
   goToReports: function() {
@@ -241,7 +241,7 @@ Page({
     
     // 只需修改这里的 url 指向我们新创建的 history 页面
     wx.navigateTo({
-      url: '/pages/profile/history' 
+      url: '/pkgProfile/history' 
     });
   },
 
@@ -250,7 +250,7 @@ Page({
    */
   goToAboutUs: function() {
     wx.navigateTo({
-      url: './about' // <-- 确保这个路径是正确的！
+      url: '/pkgProfile/about' // <-- 确保这个路径是正确的！
     });
   },
 

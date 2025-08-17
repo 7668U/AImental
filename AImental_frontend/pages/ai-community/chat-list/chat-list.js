@@ -61,9 +61,12 @@ Page({
 
   onLoad: function (options) {
     this.setData({
+      // statusBarHeight 不变
       statusBarHeight: app.globalData.statusBarHeight || 20,
-      navBarHeight: app.globalData.navBarHeight || 44,
-      totalHeaderHeight: app.globalData.totalNavBarHeight || 64
+      
+      // 【修改】让本页面使用“紧凑版”的高度
+      navBarHeight: app.globalData.compactNavBarHeight || 44, 
+      totalHeaderHeight: app.globalData.compactTotalNavBarHeight || 64
     });
     // onLoad 时只注册 WebSocket 监听器
     app.webSocketManager.registerListener(this);
@@ -203,11 +206,11 @@ Page({
 
   navigateToChat: function(e) {
     const ai = e.currentTarget.dataset.ai;
-    wx.navigateTo({ url: `/pages/ai-community/chat-interface/chat-interface?aiId=${ai.id}&name=${encodeURIComponent(ai.name)}&avatar=${encodeURIComponent(ai.avatar)}` });
+    wx.navigateTo({ url: `/pkgCommunity/chat-interface/chat-interface?aiId=${ai.id}&name=${encodeURIComponent(ai.name)}&avatar=${encodeURIComponent(ai.avatar)}` });
   },
 
   addMoreFriends: function() { 
-    wx.navigateTo({ url: '/pages/ai-community/add-friends/add-friends' });
+    wx.navigateTo({ url: '/pkgCommunity/add-friends/add-friends' });
   },
 
   formatTimestamp: function(timestamp) {

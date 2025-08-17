@@ -1,27 +1,52 @@
 {
   "pages": [
-    "pages/daily-checkin/index",
     "pages/ai-therapist/index",
     "pages/assessment/index",
-    "pages/assessment/intro/intro",
-    "pages/assessment/test",
-    "pages/assessment/result",
-    "pages/daily-checkin/record",
-    "pages/daily-checkin/paper-airplane/index",
-    "pages/profile/index",
-    "pages/profile/about",
-    "pages/daily-checkin/analysis",
-    "pages/profile/feedback",
-    "pages/profile/inform",
-    "pages/profile/history",
-    "pages/profile/history_analysis",
-    "components/login-prompt/login-prompt",
-    "pages/daily-checkin/cabinet/cabinet",
-    "pages/daily-checkin/note/note",
     "pages/ai-community/chat-list/chat-list",
-    "pages/ai-community/chat-interface/chat-interface",
-    "pages/ai-community/add-friends/add-friends",
-    "pages/ai-community/request-history/request-history"
+    "pages/daily-checkin/index",
+    "pages/profile/index",
+    "components/login-prompt/login-prompt"
+  ],
+  "subPackages": [
+    {
+      "root": "pkgDailyCheckin",
+      "name": "dailyCheckin",
+      "pages": [
+        "record",
+        "paper-airplane/index",
+        "analysis",
+        "note/note"
+      ]
+    },
+    {
+      "root": "pkgAssessment",
+      "name": "assessment",
+      "pages": [
+        "intro/intro",
+        "test",
+        "result"
+      ]
+    },
+    {
+      "root": "pkgCommunity",
+      "name": "community",
+      "pages": [
+        "chat-interface/chat-interface",
+        "add-friends/add-friends",
+        "request-history/request-history"
+      ]
+    },
+    {
+      "root": "pkgProfile",
+      "name": "profile",
+      "pages": [
+        "about",
+        "feedback",
+        "inform",
+        "history",
+        "history_analysis"
+      ]
+    }
   ],
   "window": {
     "backgroundTextStyle": "light",

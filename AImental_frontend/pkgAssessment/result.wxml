@@ -1,0 +1,81 @@
+<view class="container">
+  <view wx:if="{{isLoading}}" class="loading-container">
+    <text>正在生成您的专属报告...</text>
+  </view>
+
+  <block wx:else>
+
+    <block wx:if="{{result.scale_details.assessment_type === 'scoring'}}">
+      <view class="result-card summary-card">
+        <view class="score-display">
+          <text class="score-value">{{result.final_score}}</text>
+          <text class="score-total">/ {{totalScore}}</text>
+        </view>
+        <view class="result-level">{{result.result_level}}</view>
+      </view>
+
+      <view class="score-bar-wrapper">
+        <view class="score-bar-container">
+          <view class="score-bar-segments"></view>
+          
+          <view class="score-pointer" style="left: {{pointerPosition}}%;">
+            <view class="pointer-label align-{{pointerLabelAlign}}">您的位置</view>
+            <view class="pointer-dot"></view>
+          </view>
+          
+          <view class="score-markers-container">
+            <view wx:for="{{scoreMarkers}}" wx:key="score" class="score-marker-wrapper" style="left: {{item.position}}%;">
+              <view class="score-marker">
+                <view class="marker-line"></view>
+                <text class="marker-text">{{item.score}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        
+        <view class="segment-labels-container">
+  <view wx:for="{{scoreSegments}}" wx:key="level" class="label-wrapper" style="left: {{item.left}}%; width: {{item.width}}%;">
+    <text class="label-text">{{item.level}}</text>
+  </view>
+</view>
+      </view>
+    </block>
+
+    <block wx:elif="{{result.scale_details.assessment_type === 'categorical'}}">
+      <view class="result-card personality-card">
+        <view class="personality-image-container" wx:if="{{result.result_details.image_url}}">
+          <image class="personality-image" src="{{result.result_details.image_url}}" mode="aspectFit" />
+        </view>
+        <view class="personality-major">{{result.result_level}}</view>
+        
+        <view class="personality-college" wx:if="{{result.result_details.college}}">
+          {{result.result_details.college}}
+        </view>
+        
+        <view class="personality-motto" wx:if="{{result.result_details.college_motto}}">
+          “{{result.result_details.college_motto}}”
+        </view>
+        
+      </view>
+    </block>
+
+    <view class="result-card detail-card" wx:if="{{result.result_interpretation}}">
+      <view class="card-title">
+        <image class="card-icon" src="/images/icons/interpretation.png"></image>
+        <text>详细解读</text>
+      </view>
+      <view class="card-content">{{result.result_interpretation}}</view>
+    </view>
+
+    <view class="result-card detail-card" wx:if="{{result.result_recommendation}}">
+      <view class="card-title">
+        <image class="card-icon" src="/images/icons/recommendation.png"></image>
+        <text>给你的建议</text>
+      </view>
+      <view class="card-content">{{result.result_recommendation}}</view>
+    </view>
+
+    <button class="confirm-btn" bindtap="handleConfirm">我知道了</button>
+
+  </block>
+</view>

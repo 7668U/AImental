@@ -105,16 +105,17 @@ async def db_connection_middleware(request: Request, call_next):
 # 应用启动事件
 # ---------------------------------------------------
 
+
 def check_and_generate_today_schedules():
     """
-    【已修正版】
+    【已修正并增加重试机制版】
     在系统启动时，检查所有AI角色是否已生成当天的日程。
+    如果首次生成失败，会自动重试一次。
     强制使用北京时间来定义“今天”。
     """
     # --- 【核心修正】在这里统一定义“今天” ---
     BEIJING_TZ = pytz.timezone('Asia/Shanghai')
-    # 使用北京时间的当前日期作为“今天”的标准
-    today_in_beijing = datetime.now(BEIJING_TZ).date() 
+    today_in_beijing = datetime.now(BEIJING_TZ).date()
     # --- ------------------------------------ ---
 
     print(f"🤖 [Startup Check]: 正在检查AI角色在北京时间 {today_in_beijing} 的日程...")
@@ -126,7 +127,6 @@ def check_and_generate_today_schedules():
 
     for character in all_characters:
         try:
-            # 【核心修正】使用我们定义的北京时间日期进行查询
             has_today_schedule = ai_status_table.has_schedule_for_date(character.id, today_in_beijing)
             
             if has_today_schedule:
@@ -135,24 +135,37 @@ def check_and_generate_today_schedules():
 
             print(f"⚠️ 角色 '{character.name}' 缺少 {today_in_beijing} 的日程，现在开始生成...")
             
-            # 【核心修正】计算“昨天”也应该基于北京时间的“今天”
             yesterday_in_beijing = today_in_beijing - timedelta(days=1)
             recent_history = [
                 {"date": yesterday_in_beijing.strftime('%Y-%m-%d'), "summary": "昨天似乎是休息的一天。"}
             ]
             
-            daily_schedule = generate_daily_schedule(
-                character_profile=character.profile,
-                recent_history=recent_history
-            )
-            
+            # --- 【核心修改点：增加重试逻辑】 ---
+            daily_schedule = None
+            max_attempts = 2  # 设置最大尝试次数（首次 + 1次重试）
+            for attempt in range(max_attempts):
+                print(f"   [第 {attempt + 1}/{max_attempts} 次尝试] 正在为 '{character.name}' 生成日程...")
+                
+                # 调用生成函数
+                generated_data = generate_daily_schedule(
+                    character_profile=character.profile,
+                    recent_history=recent_history
+                )
+                
+                # 检查生成结果是否有效（不为None且不为空列表）
+                if generated_data:
+                    daily_schedule = generated_data
+                    print(f"   [第 {attempt + 1} 次尝试] 成功获取到日程。")
+                    break  # 成功，跳出重试循环
+                else:
+                    print(f"   [第 {attempt + 1} 次尝试] 生成失败。")
+            # --- 【重试逻辑结束】 ---
+
             if daily_schedule:
                 for activity in daily_schedule:
-                    # 【核心修正】拼接日期时，也使用北京时间的“今天”
                     start_dt = BEIJING_TZ.localize(datetime.strptime(f"{today_in_beijing} {activity['start_time']}", "%Y-%m-%d %H:%M"))
                     end_dt = BEIJING_TZ.localize(datetime.strptime(f"{today_in_beijing} {activity['end_time']}", "%Y-%m-%d %H:%M"))
                     
-                    # --- 【关键修复】在这里传入新的 focus_level 参数 ---
                     ai_status_table.create_status(
                         character_id=character.id,
                         category=activity['status_category'],
@@ -160,17 +173,16 @@ def check_and_generate_today_schedules():
                         start_time=start_dt,
                         end_time=end_dt,
                         reply_delay_minutes=activity.get('reply_delay_minutes', 5),
-                        # 从AI生成的日程中获取 focus_level，如果不存在则默认为 'LOW'
                         focus_level=activity.get('focus_level', 'LOW') 
                     )
-                    # --- ------------------------------------------ ---
                 print(f"✅ 成功为 '{character.name}' 补生成了 {len(daily_schedule)} 条今日日程。")
 
             else:
-                print(f"❌ 为 '{character.name}' 补生成今日日程失败。")
+                # 只有在所有尝试都失败后，才打印这条最终的失败信息
+                print(f"❌ 经过 {max_attempts} 次尝试后，为 '{character.name}' 补生成今日日程仍然失败。")
 
         except Exception as e:
-            print(f"🚨 在为角色 '{character.name}' 检查或生成日程时发生错误: {e}")
+            print(f"🚨 在为角色 '{character.name}' 检查或生成日程时发生严重错误: {e}")
 
 @app.on_event("startup")
 def on_startup():

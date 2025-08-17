@@ -1,0 +1,8 @@
+
+{
+  "usingComponents": {
+    "ec-canvas": "./components-ecanvas/ec-canvas/ec-canvas",
+    "period-picker": "./components-ecanvas/period-picker/period-picker"
+  },
+  "navigationStyle": "custom"
+}

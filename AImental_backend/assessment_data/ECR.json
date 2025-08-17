@@ -1,0 +1,110 @@
+{
+  "scale_info": {
+    "name": "亲密关系经历量表",
+    "short_name": "ECR",
+    "description": "亲密关系经历量表（Experiences in Close Relationships Scale, ECR）是成人依恋研究领域的黄金标准测量工具之一，由Brennan, Clark和Shaver于1998年编制。它通过评估'依恋焦虑'和'依恋回避'这两个核心维度，将依恋风格划分为四种类型，深刻地揭示了个体在亲密关系中的内在运作模式。",
+    "instructions": "以下是一些关于您在亲密关系中的感受的陈述。我们关心的是您在一般情况下的感受，而不是仅仅在某一特定关系中的感受。请根据您在多大程度上同意或不同意这些陈述，选择最能代表您真实感受的选项。",
+    "category": "专业测试",
+    "assessment_type": "categorical",
+    "scoring_rules": {
+      "type": "subscale_average_2d",
+      "dimensions": [
+        {
+          "name": "依恋焦虑",
+          "subscale": "焦虑"
+        },
+        {
+          "name": "依恋回避",
+          "subscale": "回避"
+        }
+      ],
+      "model": [
+        {
+          "level": "安全型",
+          "condition": "低焦虑 & 低回避"
+        },
+        {
+          "level": "痴迷型",
+          "condition": "高焦虑 & 低回避"
+        },
+        {
+          "level": "疏离型",
+          "condition": "低焦虑 & 高回避"
+        },
+        {
+          "level": "恐惧型",
+          "condition": "高焦虑 & 高回避"
+        }
+      ]
+    }
+  },
+  "questions": [
+    { "order": 1, "text": "我害怕一旦伴侣开始真正了解我，他/她就不会想和我在一起了。", "subscale": "焦虑", "reverse_scored": false },
+    { "order": 2, "text": "当伴侣不在我身边时，我很少担心他/她会对我三心二意。", "subscale": "焦虑", "reverse_scored": true },
+    { "order": 3, "text": "我很难向伴侣表达我的情感。", "subscale": "回避", "reverse_scored": false },
+    { "order": 4, "text": "我通常会和我的伴侣讨论我遇到的问题和担忧。", "subscale": "回避", "reverse_scored": true },
+    { "order": 5, "text": "我经常希望我的伴侣能把我们的关系看得和我一样重。", "subscale": "焦虑", "reverse_scored": false },
+    { "order": 6, "text": "我不担心被抛弃。", "subscale": "焦虑", "reverse_scored": true },
+    { "order": 7, "text": "我发现敞开心扉地依赖伴侣是比较容易的。", "subscale": "回避", "reverse_scored": true },
+    { "order": 8, "text": "我发现伴侣并不想向我期望的那样亲密。", "subscale": "焦虑", "reverse_scored": false },
+    { "order": 9, "text": "我很难完全信任我的伴侣。", "subscale": "回避", "reverse_scored": false },
+    { "order": 10, "text": "当伴侣不在身边时，我很少担心他/她会不会对别人更感兴趣。", "subscale": "焦虑", "reverse_scored": true },
+    { "order": 11, "text": "与伴侣亲近让我感到不舒服。", "subscale": "回避", "reverse_scored": false },
+    { "order": 12, "text": "我很容易与伴侣亲近。", "subscale": "回避", "reverse_scored": true },
+    { "order": 13, "text": "我常常担心我的伴侣并不真的爱我。", "subscale": "焦虑", "reverse_scored": false },
+    { "order": 14, "text": "我不常担心我的伴侣会离开我。", "subscale": "焦虑", "reverse_scored": true },
+    { "order": 15, "text": "我通常不会与伴侣分享我的想法与感受。", "subscale": "回避", "reverse_scored": false },
+    { "order": 16, "text": "我很容易接受伴侣对我的需要和依赖。", "subscale": "回避", "reverse_scored": true },
+    { "order": 17, "text": "我担心伴侣不像我关心他/她那样关心我。", "subscale": "焦虑", "reverse_scored": false },
+    { "order": 18, "text": "我的伴侣只有在我生气的时候才会注意到我。", "subscale": "焦虑", "reverse_scored": false },
+    { "order": 19, "text": "我告诉伴侣几乎所有的事情。", "subscale": "回避", "reverse_scored": true },
+    { "order": 20, "text": "我觉得向伴侣寻求安慰和支持是非常容易的。", "subscale": "回避", "reverse_scored": true },
+    { "order": 21, "text": "我感觉与伴侣的亲近让我有些不舒服。", "subscale": "回避", "reverse_scored": false },
+    { "order": 22, "text": "我很难让伴侣依赖我。", "subscale": "回避", "reverse_scored": false },
+    { "order": 23, "text": "我不担心一个人独处。", "subscale": "焦虑", "reverse_scored": true },
+    { "order": 24, "text": "我经常觉得我的伴侣不能在我需要的时候出现。", "subscale": "焦虑", "reverse_scored": false },
+    { "order": 25, "text": "当伴侣开始与我亲近时，我发现自己会拉开距离。", "subscale": "回避", "reverse_scored": false },
+    { "order": 26, "text": "我渴望在亲密关系中得到更多，但我又时常担心会因此吓跑我的伴侣。", "subscale": "焦虑", "reverse_scored": false },
+    { "order": 27, "text": "我与伴侣分享我的感受是比较自在的。", "subscale": "回避", "reverse_scored": true },
+    { "order": 28, "text": "我的伴侣似乎不愿意像我希望的那样亲近。", "subscale": "焦虑", "reverse_scored": false },
+    { "order": 29, "text": "对我来说，信赖并依赖他人是困难的。", "subscale": "回避", "reverse_scored": false },
+    { "order": 30, "text": "我发现我可以依赖别人。", "subscale": "回避", "reverse_scored": true },
+    { "order": 31, "text": "我很少担心伴侣会不再爱我。", "subscale": "焦虑", "reverse_scored": true },
+    { "order": 32, "text": "我希望与伴侣完完全全融为一体，而这有时会吓跑我的伴侣。", "subscale": "焦虑", "reverse_scored": false },
+    { "order": 33, "text": "我比较愿意维持自己和伴侣间的距离。", "subscale": "回避", "reverse_scored": false },
+    { "order": 34, "text": "有时我觉得自己对伴侣的过分要求会将他/她吓跑。", "subscale": "焦虑", "reverse_scored": false },
+    { "order": 35, "text": "在没有情感投入的情况下，与伴侣发生亲密行为，我也会心安理得。", "subscale": "回避", "reverse_scored": false },
+    { "order": 36, "text": "我对伴侣能在我需要时出现很有信心。", "subscale": "焦虑", "reverse_scored": true }
+  ],
+  "choices": [
+    { "id": "opt1", "text": "非常不同意", "score": 1 },
+    { "id": "opt2", "text": "很不同意", "score": 2 },
+    { "id": "opt3", "text": "比较不同意", "score": 3 },
+    { "id": "opt4", "text": "不确定", "score": 4 },
+    { "id": "opt5", "text": "比较同意", "score": 5 },
+    { "id": "opt6", "text": "很同意", "score": 6 },
+    { "id": "opt7", "text": "非常同意", "score": 7 }
+  ],
+  "interpretations": [
+    {
+      "level": "安全型",
+      "interpretation": "您的依恋类型是安全型（低焦虑、低回避）。您对自我和他人都有积极的看法。在亲密关系中，您既能享受亲密和依赖，也能保持独立和自主。您相信自己是值得被爱的，也信任伴侣的善意和承诺，能够坦然地处理关系中的起伏。",
+      "recommendation": "这是一种非常健康和有韧性的依恋模式，恭喜您！它为您拥有稳定、幸福的人际关系奠定了坚实的基础。请继续信任自己的感受，在关系中真诚地沟通和表达，享受这份美好的亲密。"
+    },
+    {
+      "level": "痴迷型",
+      "interpretation": "您的依恋类型是痴迷型（高焦虑、低回避）。您对自我看法消极，但对他人看法积极。您非常渴望亲密，甚至希望与伴侣“融为一体”，但内心深处又充满了对被抛弃的恐惧。您可能会过度依赖关系来证明自身价值，对伴侣的言行非常敏感。",
+      "recommendation": "请首先理解，您对亲密的深切渴望是非常自然的。请温柔地告诉自己，您的价值无需他人的时刻肯定来证明。可以尝试将一部分注意力用来滋养自己的内心世界，建立更稳固的自我价值感。当不安全感来临时，学习与它共处，并坦诚地与伴侣沟通您的感受，这会帮助您建立更平衡、更让您安心的关系。"
+    },
+    {
+      "level": "疏离型",
+      "interpretation": "您的依恋类型是疏离型回避（低焦虑、高回避）。您对自我看法积极，但对他人看法消极。您非常重视独立和自主，将亲密关系视为对自由的威胁。您倾向于压抑自己的情感，与伴侣保持距离，不习惯依赖他人，也不希望别人过度依赖您。",
+      "recommendation": "独立自主是一种非常重要的力量。在此基础上，如果也想体验更深的情感连接，可以尝试带着好奇心去探索那些让您对亲密感到不适的原因，无需强迫。逐步在您认为安全的关系中，练习分享一些微小的感受和需求，您会发现，适度的靠近和依赖，并不会吞噬您的独立，反而能让您的世界更丰富和温暖。"
+    },
+    {
+      "level": "恐惧型",
+      "interpretation": "您的依恋类型是恐惧型回避（高焦虑、高回避）。您对自我和他人都有消极的看法。您既渴望亲密，又害怕因依赖他人而受到伤害，因此陷入“想靠近又想逃开”的矛盾中。您可能会觉得亲密关系是危险的，难以信任他人，也怀疑自己是否值得被爱。",
+      "recommendation": "这是一个充满内心挣扎的模式，看到这个结果，您的内心一定非常辛苦。请理解，这种“既想要又害怕”的矛盾，往往源于过去的经历，是您保护自己的方式。您不必独自承受这一切。寻求专业的心理支持会对您非常有帮助，治疗师可以提供一个安全的空间，陪您一起疗愈旧的创伤，学习在关系中建立信任，并最终体验到您所渴望的安全与亲密。"
+    }
+  ]
+}

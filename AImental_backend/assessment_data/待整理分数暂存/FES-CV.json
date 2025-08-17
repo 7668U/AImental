@@ -1,0 +1,174 @@
+{
+  "scale_info": {
+    "name": "家庭环境量表中文版",
+    "short_name": "FES-CV",
+    "description": "家庭环境量表（Family Environment Scale, FES）由美国心理学家R.H.Moos编制，用于评估家庭的社会心理环境特征。它从关系、个人成长、系统维护这三个维度来测量家庭环境，共包含10个子量表，能全面地反映家庭成员对家庭氛围的感受。",
+    "instructions": "本问卷旨在了解您家庭中的一些情况。问卷共90个项目，每个项目都描述了一种家庭可能的情形。请您仔细阅读每一项，判断其描述是否符合您家庭的实际情况。如果符合，请选择“是”；如果不符合，请选择“否”。请务必回答所有问题。",
+    "category": "专业测试",
+    "assessment_type": "multi_subscale_scoring"
+  },
+  "scoring_rules": {
+    "dimensions": [
+      {
+        "name": "关系维度",
+        "subscales": ["亲密度", "情感表达", "矛盾性"]
+      },
+      {
+        "name": "个人成长维度",
+        "subscales": ["独立性", "成功性", "知识性", "娱乐性", "道德宗教观"]
+      },
+      {
+        "name": "系统维护维度",
+        "subscales": ["组织性", "控制性"]
+      }
+    ],
+    "subscale_definitions": {
+      "亲密度": {
+        "interpretation": "反映家庭成员之间相互关心、相互支持以及互相投入的程度。",
+        "high_score_meaning": "高分表示家庭成员关系紧密，愿意为彼此付出时间和精力，家庭有很强的凝聚力。",
+        "low_score_meaning": "低分表示家庭成员之间关系疏离，缺乏情感链接，倾向于各顾各的，凝聚力较差。"
+      },
+      "情感表达": {
+        "interpretation": "反映家庭成员之间在多大程度上可以自由地表达自己的情感。",
+        "high_score_meaning": "高分表示家庭氛围开放，鼓励成员直接地、坦率地表达各种情绪，无论是积极的还是消极的。",
+        "low_score_meaning": "低分表示家庭氛围比较压抑，不鼓励或习惯于隐藏个人情感，沟通较为含蓄或受限。"
+      },
+      "矛盾性": {
+        "interpretation": "反映家庭成员之间公开表达愤怒、攻击和冲突的程度。",
+        "high_score_meaning": "高分表示家庭中充满了公开的矛盾和冲突，成员之间常常相互指责、争吵，关系紧张。",
+        "low_score_meaning": "低分表示家庭倾向于回避冲突，很少有公开的争执，但需要注意这不代表没有矛盾，可能只是被压抑了。"
+      },
+      "独立性": {
+        "interpretation": "反映家庭成员在多大程度上被鼓励做到自信、自立和自己做决定。",
+        "high_score_meaning": "高分表示家庭鼓励成员独立思考和自主决策，家庭氛围民主，尊重个体。",
+        "low_score_meaning": "低分表示家庭成员依赖性强，不鼓励或害怕自己拿主意，可能存在过度保护或控制的情况。"
+      },
+      "成功性": {
+        "interpretation": "反映家庭对于成就和竞争的重视程度。",
+        "high_score_meaning": "高分表示家庭非常强调成功和成就，可能是一个以目标为导向、竞争氛围浓厚的环境。",
+        "low_score_meaning": "低分表示家庭对传统的“成功”标准不太看重，更注重过程而非结果，竞争性不强。"
+      },
+      "知识性": {
+        "interpretation": "反映家庭对政治、社会、文化等活动的兴趣和参与程度。",
+        "high_score_meaning": "高分表示家庭有浓厚的求知欲和学习氛围，鼓励成员探索新思想、参与文化活动。",
+        "low_score_meaning": "低分表示家庭对智力文化活动兴趣不大，讨论和关注点多集中于日常琐事。"
+      },
+      "娱乐性": {
+        "interpretation": "反映家庭对娱乐活动的重视和参与程度。",
+        "high_score_meaning": "高分表示家庭重视休闲娱乐，经常组织或参与社交和娱乐活动，家庭氛围轻松、有趣。",
+        "low_score_meaning": "低分表示家庭生活较为单调，缺少娱乐和社交活动，家庭氛围可能比较沉闷。"
+      },
+      "道德宗教观": {
+        "interpretation": "反映家庭在多大程度上强调伦理、道德和宗教的观念及价值观。",
+        "high_score_meaning": "高分表示家庭有明确且严格的道德或宗教准则，并以此作为家庭成员的行为规范。",
+        "low_score_meaning": "低分表示家庭对道德、伦理问题采取比较灵活或不明确的态度，很少强调这方面的价值观。"
+      },
+      "组织性": {
+        "interpretation": "反映家庭环境在多大程度上是有序的、有计划的。",
+        "high_score_meaning": "高分表示家庭生活非常有条理，重视计划和结构，职责分明，环境整洁。",
+        "low_score_meaning": "低分表示家庭生活比较随意、缺乏计划性，环境可能比较混乱无序。"
+      },
+      "控制性": {
+        "interpretation": "反映家庭在多大程度上是通过设立规则和程序来支配成员生活的。",
+        "high_score_meaning": "高分表示家庭有许多明确的规则和等级制度，对成员行为的控制比较严格。",
+        "low_score_meaning": "低分表示家庭规则很少，对成员行为的限制不多，家庭成员有较大的自由度。"
+      }
+    }
+  },
+  "questions": [
+    { "order": 1, "text": "家庭成员能相互得到真正的支持。", "subscale": "亲密度", "score_on": "是" },
+    { "order": 2, "text": "家庭成员经常把自己的感情藏在心里。", "subscale": "情感表达", "score_on": "否" },
+    { "order": 3, "text": "我们家经常吵架。", "subscale": "矛盾性", "score_on": "是" },
+    { "order": 4, "text": "我们家没人敢想敢说敢做。", "subscale": "独立性", "score_on": "否" },
+    { "order": 5, "text": "我们认为在任何事情上获得成功都是非常重要的。", "subscale": "成功性", "score_on": "是" },
+    { "order": 6, "text": "我们家很少去看戏、听音乐会或去娱乐场所。", "subscale": "知识性", "score_on": "否" },
+    { "order": 7, "text": "家庭成员常找时间一起出去玩。", "subscale": "娱乐性", "score_on": "是" },
+    { "order": 8, "text": "家庭成员都笃信什么是对、什么是错。", "subscale": "道德宗教观", "score_on": "是" },
+    { "order": 9, "text": "我们家做事是很有条理的。", "subscale": "组织性", "score_on": "是" },
+    { "order": 10, "text": "我们家有许多规定要遵守。", "subscale": "控制性", "score_on": "是" },
+    { "order": 11, "text": "我们家相互之间很亲密。", "subscale": "亲密度", "score_on": "是" },
+    { "order": 12, "text": "我们家可以公开地表达自己的感情。", "subscale": "情感表达", "score_on": "是" },
+    { "order": 13, "text": "家庭成员很少公开地互相批评或攻击。", "subscale": "矛盾性", "score_on": "否" },
+    { "order": 14, "text": "我们家的人办事能自己拿主意。", "subscale": "独立性", "score_on": "是" },
+    { "order": 15, "text": "我们总想把事情做得比别人好。", "subscale": "成功性", "score_on": "是" },
+    { "order": 16, "text": "我们家的人对文化活动很感兴趣。", "subscale": "知识性", "score_on": "是" },
+    { "order": 17, "text": "我们家经常参加各种娱乐活动。", "subscale": "娱乐性", "score_on": "是" },
+    { "order": 18, "text": "我们家的人对是非问题有自己严格的看法。", "subscale": "道德宗教观", "score_on": "是" },
+    { "order": 19, "text": "家里的东西常常乱放。", "subscale": "组织性", "score_on": "否" },
+    { "order": 20, "text": "我们家每个人在家里都有自己必须干的活。", "subscale": "控制性", "score_on": "是" },
+    { "order": 21, "text": "我们家的人都愿意把时间花在家里，而不愿到别处去。", "subscale": "亲密度", "score_on": "是" },
+    { "order": 22, "text": "我们家的人常常不露声色。", "subscale": "情感表达", "score_on": "否" },
+    { "order": 23, "text": "家庭成员有时会因一些小事就大发脾气。", "subscale": "矛盾性", "score_on": "是" },
+    { "order": 24, "text": "我们家的人能独立思考问题。", "subscale": "独立性", "score_on": "是" },
+    { "order": 25, "text": "我们家的人都很有上进心。", "subscale": "成功性", "score_on": "是" },
+    { "order": 26, "text": "我们家很少有人读书。", "subscale": "知识性", "score_on": "否" },
+    { "order": 27, "text": "我们家的人常想出一些好玩的事来做。", "subscale": "娱乐性", "score_on": "是" },
+    { "order": 28, "text": "我们家谈论宗教的时候不多。", "subscale": "道德宗教观", "score_on": "否" },
+    { "order": 29, "text": "我们家的人都注意保持自己房间的整洁。", "subscale": "组织性", "score_on": "是" },
+    { "order": 30, "text": "我们家的家规是很严格的。", "subscale": "控制性", "score_on": "是" },
+    { "order": 31, "text": "家庭成员之间似乎有意避开，不愿多接触。", "subscale": "亲密度", "score_on": "否" },
+    { "order": 32, "text": "我们家是个充满感情的家庭。", "subscale": "情感表达", "score_on": "是" },
+    { "order": 33, "text": "我们家的人常互相指责。", "subscale": "矛盾性", "score_on": "是" },
+    { "order": 34, "text": "我们家的人很能依靠自己。", "subscale": "独立性", "score_on": "是" },
+    { "order": 35, "text": "我们家的人不怎么关心升职、得高分等问题。", "subscale": "成功性", "score_on": "否" },
+    { "order": 36, "text": "我们家有人会演奏乐器。", "subscale": "知识性", "score_on": "是" },
+    { "order": 37, "text": "我们家的人不爱开玩笑。", "subscale": "娱乐性", "score_on": "否" },
+    { "order": 38, "text": "我们家的人认为钱财乃身外之物。", "subscale": "道德宗教观", "score_on": "否" },
+    { "order": 39, "text": "我们家的东西用完后总放回原处。", "subscale": "组织性", "score_on": "是" },
+    { "order": 40, "text": "我们家对发脾气有严格的规定。", "subscale": "控制性", "score_on": "是" },
+    { "order": 41, "text": "我们家的人互相帮助。", "subscale": "亲密度", "score_on": "是" },
+    { "order": 42, "text": "我们家的人很少公开表示自己的感情。", "subscale": "情感表达", "score_on": "否" },
+    { "order": 43, "text": "我们家的人经常设法“胜过”对方。", "subscale": "矛盾性", "score_on": "是" },
+    { "order": 44, "text": "我们家的人做什么事都喜欢别人给拿主意。", "subscale": "独立性", "score_on": "否" },
+    { "order": 45, "text": "我们家的人对“出人头地”抱无所谓的态度。", "subscale": "成功性", "score_on": "否" },
+    { "order": 46, "text": "我们家的人对政治、社会问题很感兴趣。", "subscale": "知识性", "score_on": "是" },
+    { "order": 47, "text": "我们家的人常一起看电视或听收音机。", "subscale": "娱乐性", "score_on": "是" },
+    { "order": 48, "text": "我们家认为“凡事应忍耐”。", "subscale": "道德宗教观", "score_on": "是" },
+    { "order": 49, "text": "我们家的事，谁想做谁就做，没有什么计划。", "subscale": "组织性", "score_on": "否" },
+    { "order": 50, "text": "我们家每个人的活动都有一定的规律。", "subscale": "控制性", "score_on": "是" },
+    { "order": 51, "text": "我们家很少有人单独行动。", "subscale": "亲密度", "score_on": "是" },
+    { "order": 52, "text": "如果有人不高兴，我们也能感觉出来。", "subscale": "情感表达", "score_on": "是" },
+    { "order": 53, "text": "我们家的人为一些小事就争吵不休。", "subscale": "矛盾性", "score_on": "是" },
+    { "order": 54, "text": "我们家的人可以独立地做决定。", "subscale": "独立性", "score_on": "是" },
+    { "order": 55, "text": "我们家的人都认为竞争是好事。", "subscale": "成功性", "score_on": "是" },
+    { "order": 56, "text": "我们家的人对新知识、新经验很感兴奋。", "subscale": "知识性", "score_on": "是" },
+    { "order": 57, "text": "我们家的人很少参加体育活动。", "subscale": "娱乐性", "score_on": "否" },
+    { "order": 58, "text": "我们家的人认为没有什么事情是绝对的“是”与“非”。", "subscale": "道德宗教观", "score_on": "否" },
+    { "order": 59, "text": "我们家的人都很注意准时。", "subscale": "组织性", "score_on": "是" },
+    { "order": 60, "text": "我们家没有什么规定，干什么都可以。", "subscale": "控制性", "score_on": "否" },
+    { "order": 61, "text": "我们家的人对别人的事不大关心。", "subscale": "亲密度", "score_on": "否" },
+    { "order": 62, "text": "我们家的人常常互相倾诉自己的苦恼。", "subscale": "情感表达", "score_on": "是" },
+    { "order": 63, "text": "我们家的人有时会打架。", "subscale": "矛盾性", "score_on": "是" },
+    { "order": 64, "text": "我们家的人都敢于发表自己的意见。", "subscale": "独立性", "score_on": "是" },
+    { "order": 65, "text": "我们家的人常谈论工作中的成就。", "subscale": "成功性", "score_on": "是" },
+    { "order": 66, "text": "我们家的人常谈论政治和社会问题。", "subscale": "知识性", "score_on": "是" },
+    { "order": 67, "text": "我们家常搞些文娱活动。", "subscale": "娱乐性", "score_on": "是" },
+    { "order": 68, "text": "我们家的人都认为遵守社会道德规范是重要的。", "subscale": "道德宗教观", "score_on": "是" },
+    { "order": 69, "text": "我们家吃饭的时间是不固定的。", "subscale": "组织性", "score_on": "否" },
+    { "order": 70, "text": "我们家的人做任何事情都没有固定的方式。", "subscale": "控制性", "score_on": "否" },
+    { "order": 71, "text": "我们家的人互相之间有很大的影响。", "subscale": "亲密度", "score_on": "是" },
+    { "order": 72, "text": "我们家的人都避免表示自己的感情。", "subscale": "情感表达", "score_on": "否" },
+    { "order": 73, "text": "我们家的人即使在生气的时候，也从不提高嗓门。", "subscale": "矛盾性", "score_on": "否" },
+    { "order": 74, "text": "我们家的人做什么事都爱随大流。", "subscale": "独立性", "score_on": "否" },
+    { "order": 75, "text": "我们家的人总在想方设法“往上爬”。", "subscale": "成功性", "score_on": "是" },
+    { "order": 76, "text": "我们家有人认为学习新东西是很重要的。", "subscale": "知识性", "score_on": "是" },
+    { "order": 77, "text": "我们家没有什么人对体育感兴趣。", "subscale": "娱乐性", "score_on": "否" },
+    { "order": 78, "text": "我们家的人认为向上帝祈祷是没有用的。", "subscale": "道德宗教观", "score_on": "否" },
+    { "order": 79, "text": "我们家的人不把家务事安排得井井有条。", "subscale": "组织性", "score_on": "否" },
+    { "order": 80, "text": "我们家的人常互相检查，看事情是否做得令人满意。", "subscale": "控制性", "score_on": "是" },
+    { "order": 81, "text": "我们家的人常在一起做事。", "subscale": "亲密度", "score_on": "是" },
+    { "order": 82, "text": "我们家的人常公开表示 affection (喜爱，钟爱)。", "subscale": "情感表达", "score_on": "是" },
+    { "order": 83, "text": "在我们家，如果你想得到什么，你就得大声嚷嚷。", "subscale": "矛盾性", "score_on": "是" },
+    { "order": 84, "text": "我们家的人要改变一下自己的习惯是很难的。", "subscale": "独立性", "score_on": "否" },
+    { "order": 85, "text": "我们家的人总觉得时间不够用。", "subscale": "成功性", "score_on": "是" },
+    { "order": 86, "text": "我们家的人认为，一个人应该不断学习新东西。", "subscale": "知识性", "score_on": "是" },
+    { "order": 87, "text": "我们家看电影或外出郊游的时候不多。", "subscale": "娱乐性", "score_on": "否" },
+    { "order": 88, "text": "我们家的人认为，生活中幸运比不幸多。", "subscale": "道德宗教观", "score_on": "是" },
+    { "order": 89, "text": "我们家的人事事都计划得很周到。", "subscale": "组织性", "score_on": "是" },
+    { "order": 90, "text": "我们家的人可以随心所欲，想做什么就做什么。", "subscale": "控制性", "score_on": "否" }
+  ],
+  "choices": [
+    { "text": "是" },
+    { "text": "否" }
+  ]
+}

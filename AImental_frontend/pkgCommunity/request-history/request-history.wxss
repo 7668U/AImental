@@ -1,0 +1,137 @@
+/* pages/request-history/request-history.wxss */
+/* 整体页面样式 */
+.history-page {
+  background-color: #F9F7F3; /* 主背景色 -> 温暖的米色 */
+  min-height: 100vh;
+  padding: 0 0 40rpx;
+  box-sizing: border-box;
+}
+
+/* 页面大标题 */
+.page-title {
+  font-size: 52rpx;
+  font-weight: bold;
+  color: #333333; /* 标题颜色 -> 深灰色（近黑色） */
+  padding: 80rpx 40rpx 40rpx;
+  /* text-shadow 已移除 */
+}
+
+.request-list {
+  margin: 0 30rpx;
+  border-radius: 20rpx;
+  /* 如果希望列表有独立的白色背景，可以取消下面的注释 */
+  /* background-color: #fff; */
+  /* box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05); */
+}
+
+/* 申请记录项目 */
+.request-item {
+  display: flex;
+  align-items: center;
+  padding: 30rpx;
+  /* border-bottom: 1px solid #EAEAEA; */ /* 1. 先将原有的分割线注释或删除 */
+  transition: background-color 0.2s;
+  
+  /* --- 以下是新增/修改的代码 --- */
+  background-color: #F2EFE8;  /* 2. 新增一个比页面底色稍深的米色 */
+  border-radius: 20rpx;       /* 3. 为每个项目添加圆角，使其成为卡片 */
+  margin-bottom: 20rpx;        /* 4. 添加下方间距来分隔项目 */
+}
+
+.request-item:last-child {
+  border-bottom: none;
+}
+
+/* 列表项点击效果 */
+.request-item:last-child {
+  /* border-bottom: none; */ /* 这行也不需要了，可以删除 */
+  margin-bottom: 0;       /* 将最后一个项目的下边距设为0 */
+}
+
+/* 头像 */
+.item-avatar {
+  width: 110rpx;
+  height: 110rpx;
+  border-radius: 50%;
+  margin-right: 30rpx;
+  border: 2px solid #EAEAEA; /* 头像边框 -> 浅灰色 */
+}
+
+.item-info {
+  flex: 1;
+}
+
+/* 申请对象名称 */
+.item-name {
+  font-size: 34rpx;
+  font-weight: 500;
+  color: #333; /* 主要文字颜色 -> 深灰色 */
+}
+
+/* 验证消息描述 */
+.item-description {
+  font-size: 26rpx;
+  color: #888888; /* 次要文字颜色 -> 中等灰色 */
+  margin-top: 8rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 申请日期 */
+.item-date {
+  font-size: 24rpx;
+  color: #AAAAAA; /* 辅助文字颜色 -> 浅灰色 */
+  margin-top: 8rpx;
+}
+
+.item-status {
+  margin-left: 30rpx;
+}
+
+/* 状态徽章通用样式 */
+.status-badge {
+  font-size: 26rpx;
+  padding: 10rpx 25rpx;
+  border-radius: 30rpx;
+  font-weight: bold;
+}
+
+/* 状态徽章的暖色风格 */
+.accepted {
+  color: #FFA726; /* 主题橙色 */
+  background-color: rgba(255, 167, 38, 0.15);
+  text-shadow: 0 0 8rpx rgba(255, 167, 38, 0.7); /* 柔和的橙色发光效果 */
+}
+
+.pending {
+  color: #FFC107; /* 温暖的黄色，用于区分 */
+  background-color: rgba(255, 193, 7, 0.15);
+  text-shadow: 0 0 8rpx rgba(255, 193, 7, 0.7); /* 柔和的黄色发光效果 */
+}
+
+.rejected {
+  color: #9E9E9E; /* 中性灰色 */
+  background-color: #F5F5F5; /* 浅灰色背景，使其更不显眼 */
+}
+
+/* 空状态和加载状态 */
+.empty-state, .loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 150rpx 0;
+}
+
+.empty-icon {
+  width: 180rpx;
+  height: 180rpx;
+  opacity: 0.5; /* 在浅色背景下，不透明度可以稍微调高一些 */
+}
+
+.empty-text, .loading-text {
+  margin-top: 20rpx;
+  font-size: 28rpx;
+  color: #AAAAAA; /* 文字颜色调整为与日期一致的浅灰色 */
+}

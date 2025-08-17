@@ -1,6 +1,0 @@
-{
-  "navigationBarTitleText": "分析报告",
-  "usingComponents": {
-    "ec-canvas": "../daily-checkin/components/ec-canvas/ec-canvas"
-  }
-}

@@ -1,0 +1,106 @@
+{
+  "scale_info": {
+    "name": "气质类型测评",
+    "short_name": "TTT-V1",
+    "description": "本测评基于心理学中经典的四种气质类型理论，通过一系列行为和情绪反应相关的问题，帮助您了解自己天生的、典型的心理活动动力特征，识别您主要的气质类型：多血质（活泼型）、胆汁质（兴奋型）、黏液质（安静型）或抑郁质（抑制型）。",
+    "instructions": "请仔细阅读下面的60个问题，如果描述的情况符合您的日常表现，请选择“是”；如果不符合，请选择“否”。请根据您的第一反应真实作答。",
+    "category": "专业测试",
+    "assessment_type": "multi_subscale_scoring"
+  },
+  "scoring_rules": {
+    "dimensions": [
+      "多血质",
+      "胆汁质",
+      "黏液质",
+      "抑郁质"
+    ],
+    "subscale_definitions": {
+      "多血质": {
+        "title": "多血质（活泼型）",
+        "interpretation": "你是一位典型的多血质者。你活泼开朗，善于交际，反应迅速，对新事物充满兴趣。你就像团队里的“开心果”，总能轻松地适应各种环境，为大家带来活力和欢笑。你的情感丰富且外露，喜怒哀乐都写在脸上。",
+        "recommendation": "你的优点在于灵活性和高适应性。但需要注意的是，你的兴趣可能变得太快，做事容易缺乏持久性。建议在确定重要目标后，有意识地培养自己的专注和毅力，将广泛的兴趣转化为深入的专长。"
+      },
+      "胆汁质": {
+        "title": "胆汁质（兴奋型）",
+        "interpretation": "你是一位典型的胆汁质者。你精力旺盛，坦率果断，充满热情，是天生的行动派和领导者。你意志坚强，敢于挑战困难，一旦设定目标就会勇往直前。你的情感体验非常强烈，但通常来得快去得也快。",
+        "recommendation": "你的优点在于强大的行动力和坚定的意志。但需要警惕的是，你的性情可能比较急躁，容易冲动和发脾气。学会控制自己的情绪，在做决定前多一些冷静的思考，能让你强大的能量发挥出更积极的作用。"
+      },
+      "黏液质": {
+        "title": "黏液质（安静型）",
+        "interpretation": "你是一位典型的黏液质者。你沉着冷静，情绪稳定，为人踏实稳重。你做事细心、有毅力，自制力强，是团队中最可靠和坚韧的成员。你不善言辞，情感内敛，但内心世界非常坚定。",
+        "recommendation": "你的优点在于稳定和坚韧，是值得信赖的伙伴。但需要注意的是，你的行为模式可能稍显迟缓，对新环境的适应较慢，有时会显得有些固执。建议有意识地提高自己的灵活性，尝试接受新事物，会让你的生活更加丰富多彩。"
+      },
+      "抑郁质": {
+        "title": "抑郁质（抑制型）",
+        "interpretation": "你是一位典型的抑郁质者。你情感体验深刻、细腻，观察力敏锐，是天生的思考者和艺术家。你为人沉静，不善交际，但内心世界极为丰富，富有同情心。你做事认真，但可能比较怯懦和敏感，容易多愁善感。",
+        "recommendation": "你的优点在于深刻的感受力和敏锐的洞察力。但你需要特别关注自己的情绪，因为你更容易受到负面情绪的困扰，且行为可能比较迟缓、缺乏果断。建议多参与一些轻松的社交活动，学习建立自信，勇敢地表达自己，不要让过度的敏感成为你的负担。"
+      }
+    }
+  },
+  "questions": [
+    { "order": 1, "text": "你活泼好动吗？", "subscale": "多血质", "score_on": "是" },
+    { "order": 2, "text": "你脾气急躁吗？", "subscale": "胆汁质", "score_on": "是" },
+    { "order": 3, "text": "你安静吗？", "subscale": "黏液质", "score_on": "是" },
+    { "order": 4, "text": "你孤僻吗？", "subscale": "抑郁质", "score_on": "是" },
+    { "order": 5, "text": "你善于交际吗？", "subscale": "多血质", "score_on": "是" },
+    { "order": 6, "text": "你做事爱冲动吗？", "subscale": "胆汁质", "score_on": "是" },
+    { "order": 7, "text": "你稳重吗？", "subscale": "黏液质", "score_on": "是" },
+    { "order": 8, "text": "你善于体贴人吗？", "subscale": "抑郁质", "score_on": "是" },
+    { "order": 9, "text": "你爽快吗？", "subscale": "多血质", "score_on": "是" },
+    { "order": 10, "text": "你精力旺盛吗？", "subscale": "胆汁质", "score_on": "是" },
+    { "order": 11, "text": "你办事细心吗？", "subscale": "黏液质", "score_on": "是" },
+    { "order": 12, "text": "你多愁善感吗？", "subscale": "抑郁质", "score_on": "是" },
+    { "order": 13, "text": "你反应迅速吗？", "subscale": "多血质", "score_on": "是" },
+    { "order": 14, "text": "你胆大吗？", "subscale": "胆汁质", "score_on": "是" },
+    { "order": 15, "text": "你善于忍耐吗？", "subscale": "黏液质", "score_on": "是" },
+    { "order": 16, "text": "你易于相处吗？", "subscale": "抑郁质", "score_on": "是" },
+    { "order": 17, "text": "你兴趣广泛吗？", "subscale": "多血质", "score_on": "是" },
+    { "order": 18, "text": "你思想敏锐吗？", "subscale": "胆汁质", "score_on": "是" },
+    { "order": 19, "text": "你墨守成规吗？", "subscale": "黏液质", "score_on": "是" },
+    { "order": 20, "text": "你沉静吗？", "subscale": "抑郁质", "score_on": "是" },
+    { "order": 21, "text": "你喜新厌旧吗？", "subscale": "多血质", "score_on": "是" },
+    { "order": 22, "text": "你富于挑战精神吗？", "subscale": "胆汁质", "score_on": "是" },
+    { "order": 23, "text": "你情绪稳定吗？", "subscale": "黏液质", "score_on": "是" },
+    { "order": 24, "text": "你易动感情吗？", "subscale": "抑郁质", "score_on": "是" },
+    { "order": 25, "text": "你机智吗？", "subscale": "多血质", "score_on": "是" },
+    { "order": 26, "text": "你果断吗？", "subscale": "胆汁质", "score_on": "是" },
+    { "order": 27, "text": "你迟缓吗？", "subscale": "黏液质", "score_on": "是" },
+    { "order": 28, "text": "你富有同情心吗？", "subscale": "抑郁质", "score_on": "是" },
+    { "order": 29, "text": "你热情吗？", "subscale": "多血质", "score_on": "是" },
+    { "order": 30, "text": "你坚持己见吗？", "subscale": "胆汁质", "score_on": "是" },
+    { "order": 31, "text": "你踏实吗？", "subscale": "黏液质", "score_on": "是" },
+    { "order": 32, "text": "你怯懦吗？", "subscale": "抑郁质", "score_on": "是" },
+    { "order": 33, "text": "你动作迅速吗？", "subscale": "多血质", "score_on": "是" },
+    { "order": 34, "text": "你常发脾气吗？", "subscale": "胆汁质", "score_on": "是" },
+    { "order": 35, "text": "你自制力强吗？", "subscale": "黏液质", "score_on": "是" },
+    { "order": 36, "text": "你腼腆吗？", "subscale": "抑郁质", "score_on": "是" },
+    { "order": 37, "text": "你轻率吗？", "subscale": "多血质", "score_on": "是" },
+    { "order": 38, "text": "你情感体验强烈吗？", "subscale": "胆汁质", "score_on": "是" },
+    { "order": 39, "text": "你认真吗？", "subscale": "黏液质", "score_on": "是" },
+    { "order": 40, "text": "你想像力丰富吗？", "subscale": "抑郁质", "score_on": "是" },
+    { "order": 41, "text": "你情感易于外露吗？", "subscale": "多血质", "score_on": "是" },
+    { "order": 42, "text": "你乐观吗？", "subscale": "胆汁质", "score_on": "是" },
+    { "order": 43, "text": "你镇静吗？", "subscale": "黏液质", "score_on": "是" },
+    { "order": 44, "text": "你柔弱吗？", "subscale": "抑郁质", "score_on": "是" },
+    { "order": 45, "text": "你思想不集中吗？", "subscale": "多血质", "score_on": "是" },
+    { "order": 46, "text": "你坦率吗？", "subscale": "胆汁质", "score_on": "是" },
+    { "order": 47, "text": "你忸怩吗？", "subscale": "黏液质", "score_on": "是" },
+    { "order": 48, "text": "你敏感吗？", "subscale": "抑郁质", "score_on": "是" },
+    { "order": 49, "text": "你做事有始有终吗？", "subscale": "多血质", "score_on": "是" },
+    { "order": 50, "text": "你语言、行为粗鲁吗？", "subscale": "胆汁质", "score_on": "是" },
+    { "order": 51, "text": "你有毅力吗？", "subscale": "黏液质", "score_on": "是" },
+    { "order": 52, "text": "你顺从吗？", "subscale": "抑郁质", "score_on": "是" },
+    { "order": 53, "text": "你情感稳定吗？", "subscale": "多血质", "score_on": "是" },
+    { "order": 54, "text": "你好争论吗？", "subscale": "胆汁质", "score_on": "是" },
+    { "order": 55, "text": "你有执拗的特点吗？", "subscale": "黏液质", "score_on": "是" },
+    { "order": 56, "text": "你易疲倦吗？", "subscale": "抑郁质", "score_on": "是" },
+    { "order": 57, "text": "你善于适应环境吗？", "subscale": "多血质", "score_on": "是" },
+    { "order": 58, "text": "你暴躁吗？", "subscale": "胆汁质", "score_on": "是" },
+    { "order": 59, "text": "你冷淡吗？", "subscale": "黏液质", "score_on": "是" },
+    { "order": 60, "text": "你严肃吗？", "subscale": "抑郁质", "score_on": "是" }
+  ],
+  "choices": [
+    { "text": "是" },
+    { "text": "否" }
+  ]
+}

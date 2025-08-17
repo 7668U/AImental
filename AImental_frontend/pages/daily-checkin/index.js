@@ -142,9 +142,9 @@ Page({
    * 以下是原有的页面业务逻辑函数，保持不变
    */
   goToRecord() {
-    let url = './record';
+    let url = '/pkgDailyCheckin/record';
     if (this.data.hasCheckedInToday) {
-      url = './record?mode=edit';
+      url = '/pkgDailyCheckin/record?mode=edit';
     }
     wx.navigateTo({ url: url });
   },
@@ -162,14 +162,14 @@ Page({
     
     if (hasCheckin) {
       wx.navigateTo({
-        url: `./record?mode=view&date=${date}`
+        url: `/pkgDailyCheckin/record?mode=view&date=${date}`
       });
     } else {
       const today = new Date();
       const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
       
       if (date === todayStr) {
-        wx.navigateTo({ url: './record' });
+        wx.navigateTo({ url: '/pkgDailyCheckin/record' });
       } else {
         wx.showToast({
           title: '那天没有记录哦~',
@@ -181,19 +181,19 @@ Page({
 
   goToStatistics() {
     wx.navigateTo({
-      url: './analysis'
+      url: '/pkgDailyCheckin/analysis'
     });
   },
 
   goToPaperAirplane() {
     wx.navigateTo({
-      url: '/pages/daily-checkin/paper-airplane/index'
+      url: '/pkgDailyCheckin/paper-airplane/index'
     });
   },
 
   goToCabinet() {
     wx.navigateTo({
-      url: '/pages/daily-checkin/note/note'
+      url: '/pkgDailyCheckin/note/note'
     });
   },
 

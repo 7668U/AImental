@@ -9,7 +9,7 @@ from .ai_character import AICharacter
 
 # 导入你在 db.py 中定义的状态数据库连接
 from db import status_db 
-
+from logger_config import logger # <--- 【新增】导入您的日志记录器
 # 定义北京时区，方便在本文件中统一使用
 BEIJING_TZ = pytz.timezone('Asia/Shanghai')
 
@@ -76,16 +76,38 @@ class AiStatusTable:
 
     def get_current_status(self, character_id: str) -> AiStatus | None:
         """
-        获取一个角色当前未结束的最新状态，使用正确的时区。
-        (此函数逻辑无需修改)
+        【已增加调试日志】
+        获取一个角色当前未结束的最新状态，并打印详细的查询过程。
         """
-        # 使用带时区的当前时间进行查询
+        # --- 【调试日志 1】: 打印收到的参数 ---
+        logger.info(f"--- [get_current_status DEBUG] 1. 函数开始执行，接收到的 character_id: '{character_id}'")
+
+        # --- 【调试日志 2】: 打印用于查询的时间 ---
         now = datetime.now(BEIJING_TZ)
-        status = AiStatus.select().where(
+        logger.info(f"--- [get_current_status DEBUG] 2. 用于查询的当前北京时间 (now): {now.isoformat()}")
+
+        # --- 【核心步骤】: 先构建查询对象，但不立即执行 ---
+        query = AiStatus.select().where(
             (AiStatus.character == character_id) &
             (AiStatus.start_time <= now) &
             (AiStatus.end_time > now)
-        ).order_by(AiStatus.start_time.desc()).first()
+        ).order_by(AiStatus.start_time.desc())
+
+        # --- 【调试日志 3 & 4】: 打印Peewee生成的真实SQL语句和参数 ---
+        # 这可以让我们看到ORM背后到底在做什么
+        try:
+            sql, params = query.sql()
+            logger.info(f"--- [get_current_status DEBUG] 3. 生成的SQL语句: {sql}")
+            logger.info(f"--- [get_current_status DEBUG] 4. SQL语句的参数: {params}")
+        except Exception as e:
+            logger.error(f"--- [get_current_status DEBUG] 获取SQL语句失败: {e}")
+
+        # --- 【核心步骤】: 现在执行查询 ---
+        status = query.first()
+
+        # --- 【调试日志 5】: 打印最终从数据库返回的结果 ---
+        logger.info(f"--- [get_current_status DEBUG] 5. 数据库查询执行完毕，返回的结果是: {status}")
+
         return status
 
     def has_schedule_for_date(self, character_id: str, target_date: date) -> bool:

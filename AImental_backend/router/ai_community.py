@@ -149,7 +149,6 @@ async def client_message_handler(websocket: WebSocket, user_id: str):
 # ===================================================
 # --- 1. 好友关系 (Friendship) 相关接口 ---
 # ===================================================
-
 class FriendRequestForm(BaseModel):
     verification_message: str
 
@@ -169,7 +168,10 @@ def send_friend_request(
         message=form.verification_message
     )
     
-    delay = timedelta(seconds=10)
+    random_delay_seconds = random.randint(0, 120) 
+    
+    # 使用这个随机秒数来创建延迟
+    delay = timedelta(seconds=random_delay_seconds)
     execute_at = datetime.now(BEIJING_TZ) + delay
     
     ai_task_table.create_task_if_needed(
@@ -337,14 +339,35 @@ def get_chat_details(
     current_user_id: str = Depends(get_current_user_id),
     limit: int = 50,
 ):
+    # --- 【调试日志 1】: 打印函数的入口和收到的参数 ---
+    logger.info(f"--- [GET /details DEBUG] 1. 函数开始执行，收到请求，角色ID: {character_id}")
+
     community_chat_table.mark_as_peeked(current_user_id, character_id)
     history = community_chat_table.get_conversation_history(
         user_id=current_user_id, 
         character_id=character_id, 
         limit=limit
     )
+
+    # --- 【调试日志 2】: 打印即将调用的关键函数 ---
+    logger.info(f"--- [GET /details DEBUG] 2. 准备调用 ai_status_table.get_current_status...")
+    
     current_status_obj = ai_status_table.get_current_status(character_id)
-    character_status_text = current_status_obj.status_category if current_status_obj else "在线"
+
+    # --- 【调试日志 3】: 打印关键函数的返回结果，这是最重要的一步！---
+    logger.info(f"--- [GET /details DEBUG] 3. get_current_status 调用完成，返回的对象是: {current_status_obj}")
+
+    # --- 【调试日志 4】: 根据返回结果，记录将要执行的逻辑分支 ---
+    if current_status_obj:
+        logger.info(f"--- [GET /details DEBUG] 4. 对象不为空，将使用 status_category: '{current_status_obj.status_category}'")
+        character_status_text = current_status_obj.status_category
+    else:
+        logger.warning(f"--- [GET /details DEBUG] 4. 对象为空 (None)，将使用默认状态 '在线'")
+        character_status_text = "在线"
+
+    # --- 【调试日志 5】: 打印最终要返回给前端的数据 ---
+    logger.info(f"--- [GET /details DEBUG] 5. 最终返回给前端的状态文本是: '{character_status_text}' ---")
+    
     return ChatDetailsResponse(
         history=history,
         character_status=character_status_text
@@ -595,3 +618,62 @@ async def get_discoverable_characters(user_id: str = Depends(get_current_user_id
         # exc_info=True 会把详细的错误堆栈信息也记录下来，非常有用！
         logger.error(f"为用户 {user_id} 获取角色时发生未知异常: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="获取角色列表时发生服务器内部错误")
+    
+# routers/ai_community.py
+
+# ... (您文件里所有已存在的代码) ...
+
+
+# --- 【请将以下代码完整粘贴到文件末尾】 ---
+
+from fastapi import Query
+
+@router.get(
+    "/debug/has_schedule/{character_id}", 
+    summary="【调试专用】检查角色在特定日期是否有日程"
+)
+def debug_check_schedule_exists(
+    character_id: str,
+    # 使用 Query 来让 FastAPI 生成更清晰的文档，并设置别名
+    target_date_str: str = Query(
+        ..., 
+        alias="date",
+        description="要查询的日期，格式必须为 YYYY-MM-DD",
+        example="2025-08-18"
+    ),
+    current_user_id: str = Depends(get_current_user_id)
+):
+    """
+    一个用于快速调试的接口，直接调用 ai_status_table.has_schedule_for_date
+    来验证指定角色在某一天是否存在任何日程记录。
+    """
+    logger.info(f"[DEBUG /has_schedule] 收到对角色 {character_id} 在日期 {target_date_str} 的检查请求。")
+    
+    try:
+        # 1. 将字符串格式的日期转换为 date 对象
+        target_date_obj = datetime.strptime(target_date_str, "%Y-%m-%d").date()
+    except ValueError:
+        logger.error(f"[DEBUG /has_schedule] 日期格式错误: '{target_date_str}'。必须是 YYYY-MM-DD。")
+        raise HTTPException(
+            status_code=400, 
+            detail=f"日期格式错误: '{target_date_str}'。请使用 YYYY-MM-DD 格式。"
+        )
+
+    # 2. 调用核心业务逻辑函数
+    try:
+        exists = ai_status_table.has_schedule_for_date(character_id, target_date_obj)
+        logger.info(f"[DEBUG /has_schedule] ai_status_table.has_schedule_for_date 返回: {exists}")
+        
+        # 3. 返回一个清晰的JSON结果
+        return {
+            "character_id": character_id,
+            "date_checked": target_date_str,
+            "schedule_exists": exists,
+            "message": "检查完成。"
+        }
+    except Exception as e:
+        logger.error(f"[DEBUG /has_schedule] 调用 has_schedule_for_date 时发生未知错误: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail="在检查日程是否存在时服务器发生内部错误。"
+        )

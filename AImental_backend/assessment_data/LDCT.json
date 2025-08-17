@@ -1,0 +1,104 @@
+{
+  "scale_info": {
+    "name": "恋爱属性测试",
+    "short_name": "LDCT-FUN",
+    "description": "想知道你在爱情里是摇着尾巴的忠犬系，还是傲娇独立的萌猫系？10道灵魂拷问，帮你精准定位自己的恋爱人格，快来看看你的隐藏属性吧！",
+    "instructions": "别想太多，请根据你的第一反应，选择最符合你的选项。",
+    "category": "趣味测试",
+    "assessment_type": "categorical"
+  },
+  "questions": [
+    {
+      "order": 1,
+      "text": "你更倾向于哪种方式表达爱意？",
+      "options": [
+        { "id": "a", "text": "行动派！照顾对方、送礼物才是王道。", "target_personality_id": "p_dog" },
+        { "id": "b", "text": "言语派！“我爱你”就要大声说出来。", "target_personality_id": "p_cat" }
+      ]
+    },
+    {
+      "order": 2,
+      "text": "当伴侣说“我想一个人待会儿”，你的反应是？",
+      "options": [
+        { "id": "a", "text": "“好的宝，那你好好休息”，然后自己找点乐子。", "target_personality_id": "p_cat" },
+        { "id": "b", "text": "内心OS：“他是不是不爱我了？”，感到有点不安。", "target_personality_id": "p_dog" }
+      ]
+    },
+    {
+      "order": 3,
+      "text": "在一段感情里，你觉得更重要的是？",
+      "options": [
+        { "id": "a", "text": "绝对的忠诚和承诺，我们是彼此的唯一！", "target_personality_id": "p_dog" },
+        { "id": "b", "text": "个人的独立和自由，相爱也要有自己的空间。", "target_personality_id": "p_cat" }
+      ]
+    },
+    {
+      "order": 4,
+      "text": "和伴侣吵架了，你会怎么办？",
+      "options": [
+        { "id": "a", "text": "速战速决！主动沟通，不能让矛盾过夜。", "target_personality_id": "p_dog" },
+        { "id": "b", "text": "战略性撤退，等双方都冷静下来再谈。", "target_personality_id": "p_cat" }
+      ]
+    },
+    {
+      "order": 5,
+      "text": "你更心水的约会方式是？",
+      "options": [
+        { "id": "a", "text": "宅家最舒服，一起做饭看电影，岁月静好。", "target_personality_id": "p_dog" },
+        { "id": "b", "text": "出门浪！去探索没吃过的餐厅和没玩过的地方。", "target_personality_id": "p_cat" }
+      ]
+    },
+    {
+      "order": 6,
+      "text": "对于伴侣的社交圈，你的态度是？",
+      "options": [
+        { "id": "a", "text": "爱屋及乌，想认识他所有的朋友，融入他的世界。", "target_personality_id": "p_dog" },
+        { "id": "b", "text": "君子之交，尊重他的圈子，但不必强融。", "target_personality_id": "p_cat" }
+      ]
+    },
+    {
+      "order": 7,
+      "text": "在关系中，你需要和对方时刻保持联系吗？",
+      "options": [
+        { "id": "a", "text": "是的！频繁互动能给我满满的安全感。", "target_personality_id": "p_dog" },
+        { "id": "b", "text": "不必，互相信任就好，各有各的生活。", "target_personality_id": "p_cat" }
+      ]
+    },
+    {
+      "order": 8,
+      "text": "当伴侣取得很棒的成就时，你的第一反应是？",
+      "options": [
+        { "id": "a", "text": "“我老公/老婆就是最棒的！”，骄傲得像自己得了奖。", "target_personality_id": "p_dog" },
+        { "id": "b", "text": "真诚地为他喝彩，并由衷地感到高兴。", "target_personality_id": "p_cat" }
+      ]
+    },
+    {
+      "order": 9,
+      "text": "你认为理想的爱情关系更像是？",
+      "options": [
+        { "id": "a", "text": "天生一对！我们是两个半圆，合起来才完整。", "target_personality_id": "p_dog" },
+        { "id": "b", "text": "灵魂伴侣！我们是两个独立的圆，相互吸引并肩前行。", "target_personality_id": "p_cat" }
+      ]
+    },
+    {
+      "order": 10,
+      "text": "如果用一种动物形容恋爱中的自己，你会选？",
+      "options": [
+        { "id": "a", "text": "忠诚热情的小狗。", "target_personality_id": "p_dog" },
+        { "id": "b", "text": "独立神秘的小猫。", "target_personality_id": "p_cat" }
+      ]
+    }
+  ],
+  "interpretations": {
+    "p_dog": {
+      "title": "忠犬系恋人",
+      "description": "你的出厂设置里，“忠诚”和“奉献”两个模块绝对是顶配！一旦陷入爱情，你的世界就自动开启“对方中心”模式。查岗？不存在的，因为你恨不得24小时挂在对方身上。安全感？对方就是你的安全感本身！你就像一只永远热情、永远等待主人回家的金毛，爱得坦荡又热烈。",
+      "recommendation": "喂！爱你的人也希望你爱自己呀！在摇尾巴的同时，也别忘了自己也是个闪闪发光的独立个体。偶尔“断开连接”，去发展自己的小爱好，你会发现，一个更完整的你，魅力值直接MAX！"
+    },
+    "p_cat": {
+      "title": "萌猫系恋人",
+      "description": "你就是爱情里的那只薛定谔的猫，时而黏人发出咕噜声，时而高冷地“独自美丽”。“独立”是你的关键词，“空间”是你的必需品。你享受被爱，但绝不为爱迷失自我。想完全掌控你？门儿都没有！你只会用你那神秘的魅力，让对方心甘情愿地为你“铲屎”，哦不，是付出。",
+      "recommendation": "你的独立人格超酷的！但有时候也要记得给你的“铲屎官”一些明确的信号嘛。在他快要觉得“主子不爱我了”的时候，主动蹭一蹭，或者送上一个“罐头”（爱的亲亲），让他知道，虽然你爱自由，但心里最重要的位置，早就留给他啦！"
+    }
+  }
+}

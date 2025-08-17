@@ -1,6 +1,0 @@
-<view class="container">
-  <view class="intro-title">{{scale.name}}</view>
-  <image class="intro-icon" src="{{scale.iconPath}}" mode="aspectFit"></image>
-  <view class="intro-description">{{scale.description}}</view>
-  <button class="start-test-button" bindtap="startTest">开始测试</button>
-</view>

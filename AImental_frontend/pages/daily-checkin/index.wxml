@@ -58,7 +58,7 @@
             <image class="card-icon" src="/images/airplane.png" mode="aspectFit"></image>
             <view class="card-content">
               <view class="card-title">纸飞机</view>
-              <view class="card-subtitle">和陌生人交换一个秘密</view>
+              <view class="card-subtitle">和陌生人分享自己的一天</view>
             </view>
           </view>
         </view>

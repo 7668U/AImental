@@ -63,6 +63,7 @@ class ScaleInfoResponse(BaseModel):
     short_name: str
     name: str
     description: str
+    instructions: Optional[str] = None  # <--- 在这里添加 instructions 字段
     category: str
     assessment_type: str
     class Config:
@@ -101,6 +102,7 @@ class AssessmentTables:
     """封装所有与测评相关的数据库操作"""
     def __init__(self, db_connection):
         self.db = db_connection
+        # self.db.drop_tables([Scale, UserAssessment], safe=True)
         self.db.create_tables([Scale, UserAssessment])
         self.initialize_scales_from_json()
 
@@ -150,6 +152,42 @@ class AssessmentTables:
                     print(f"❌ Error processing file {filename}: {e}")
 
         print("✨ Scale initialization complete.")
+
+    # --- ▼▼▼ 在这里添加下面的新方法 ▼▼▼ ---
+    def get_formatted_scale_details_by_id(self, scale_id: str) -> Optional[Dict[str, Any]]:
+        """
+        【新增】获取并格式化单个量表详情，专为API响应设计。
+        这个方法会解析 json_data，提取出 instructions 和题目等信息，
+        并整合成一个扁平的字典返回。
+        """
+        scale = self.get_scale_by_id(scale_id)
+        if not scale:
+            return None
+
+        # 解析存储在数据库中的JSON字符串
+        try:
+            full_data = json.loads(scale.json_data)
+        except json.JSONDecodeError:
+            # 如果JSON格式错误，返回基础信息并忽略附加数据
+            full_data = {}
+
+        scale_info = full_data.get('scale_info', {})
+
+        # 组装前端需要的最终数据结构
+        response_data = {
+            "id": scale.id,
+            "short_name": scale.short_name,
+            "name": scale.name,
+            "description": scale.description,
+            "category": scale.category,
+            "assessment_type": scale.assessment_type,
+            # 从解析后的JSON中提取 instructions
+            "instructions": scale_info.get('instructions'),
+            # 同时也可以把题目和选项带上，供测试页面使用
+            "questions": full_data.get('questions', []),
+            "choices": full_data.get('choices', [])
+        }
+        return response_data
     def get_all_scales(self) -> List[Scale]:
         return list(Scale.select(
             Scale.id, Scale.short_name, Scale.name, Scale.description, Scale.category, Scale.assessment_type
@@ -159,15 +197,46 @@ class AssessmentTables:
         return Scale.get_or_none(Scale.id == scale_id)
 
     def _calculate_scoring_result(self, request_answers: Dict[str, Any], scale_data: Dict) -> Dict:
-        """处理打分测试的计分逻辑"""
+        """【修改版】处理打分测试的计分逻辑，支持反向计分和谎言量表"""
         rules = scale_data.get('scale_info', {}).get('scoring_rules', {})
         interpretations = scale_data.get('interpretations', [])
-        raw_score = sum(float(v) for v in request_answers.values())
         
+        # 1. 获取计分规则
+        # 兼容 "reverse_scoring_items" 和 "reverse_scored_items" 两种可能的拼写
+        reverse_items = set(rules.get('reverse_scoring_items', []) + rules.get('reverse_scored_items', []))
+        
+        # 新增：获取谎言量表题目，如果JSON中定义了的话
+        lie_scale_items = set(rules.get('lie_scale_items', []))
+
+        raw_score = 0
+        # 2. 遍历用户答案进行计分
+        for q_order_str, score_str in request_answers.items():
+            try:
+                q_order = int(q_order_str)
+                score = float(score_str)
+            except (ValueError, TypeError):
+                continue # 如果题目序号或分数不是数字，则跳过
+
+            # 3. 如果是谎言量表题目，则不计入总分
+            if q_order in lie_scale_items:
+                continue
+
+            # 4. 应用反向计分逻辑
+            if q_order in reverse_items:
+                # 对于SEI的 "像我"(1分) / "不像我"(0分) 体系，反向计分就是用最高分1减去得分
+                # "像我"(得1分) -> 1 - 1 = 0分
+                # "不像我"(得0分) -> 1 - 0 = 1分
+                raw_score += (1 - score)
+            else:
+                # 正常计分
+                raw_score += score
+                
+        # 5. 最终分数计算 (例如乘以系数等，当前用不上但保留)
         final_score = raw_score * rules.get('multiplier', 1)
-        # ... 其他打分逻辑 ...
 
         result = {"raw_score": raw_score, "final_score": final_score, "result_details": None}
+        
+        # 6. 匹配分数解释
         for interp in interpretations:
             if interp.get('min_score', -1) <= final_score <= interp.get('max_score', float('inf')):
                 result.update({
@@ -176,50 +245,198 @@ class AssessmentTables:
                     "result_recommendation": interp.get('recommendation', ''),
                 })
                 break
+                
         return result
 
+
     def _calculate_categorical_result(self, request_answers: Dict[str, str], scale_data: Dict) -> Dict:
-        """处理分类测试的计分逻辑"""
-        questions = scale_data.get('questions', [])
-        interpretations = scale_data.get('interpretations', {})
-        questions_dict = {str(q['order']): q for q in questions}
+        """【最终完善版】处理分类测试的计分逻辑，支持多种计分模型"""
         
-        personality_counts = {}
+        rules = scale_data.get('scale_info', {}).get('scoring_rules', {})
+        scoring_type = rules.get('type')
+        interpretations = scale_data.get('interpretations', [])
+
+        # ==============================================================================
+        # 规则 1: 处理 ECR 问卷的 "subscale_average_2d" (二维度平均分)
+        # ==============================================================================
+        if scoring_type == 'subscale_average_2d':
+            # ... (这部分代码保持不变) ...
+            subscale_scores = {"焦虑": [], "回避": []}
+            questions_map = {str(q['order']): q for q in scale_data.get('questions', [])}
+            choices_map = {str(c.get('id')): c.get('score', 0) for c in scale_data.get('choices', [])}
+
+            for q_order_str, option_id in request_answers.items():
+                question = questions_map.get(q_order_str)
+                if not question: continue
+                
+                score = choices_map.get(option_id)
+                if score is None: continue
+
+                subscale = question.get('subscale')
+                if question.get('reverse_scored'):
+                    score = 8 - score
+                if subscale in subscale_scores:
+                    subscale_scores[subscale].append(score)
+
+            avg_anxiety = sum(subscale_scores["焦虑"]) / len(subscale_scores["焦虑"]) if subscale_scores["焦虑"] else 0
+            avg_avoidance = sum(subscale_scores["回避"]) / len(subscale_scores["回避"]) if subscale_scores["回避"] else 0
+            
+            anxiety_level = "高焦虑" if avg_anxiety > 4 else "低焦虑"
+            avoidance_level = "高回避" if avg_avoidance > 4 else "低回避"
+            condition_str = f"{anxiety_level} & {avoidance_level}"
+            
+            final_result_model = next((m for m in rules.get('model', []) if m['condition'] == condition_str), None)
+            
+            if final_result_model:
+                result_level = final_result_model.get('level')
+                interpretation_data = next((i for i in interpretations if i.get('level') == result_level), {})
+                return {
+                    "raw_score": None, "final_score": None, "result_level": result_level,
+                    "result_interpretation": interpretation_data.get('interpretation', ''),
+                    "result_recommendation": interpretation_data.get('recommendation', ''),
+                    "result_details": { "anxiety_score": round(avg_anxiety, 2), "avoidance_score": round(avg_avoidance, 2), "condition": condition_str }
+                }
+            return {"result_level": "无法确定类型", "result_interpretation": "计算结果无法匹配到任何预设类型。"}
+
+        # ==============================================================================
+        # 规则 2: 处理 AAS 问卷的 "dominant_subscale" (优势维度总分) - 【已修正】
+        # ==============================================================================
+        elif scoring_type == 'dominant_subscale':
+            # ✅ 关键修正：先创建一个从选项ID到分数的映射字典
+            choices_map = {str(c.get('id')): c.get('score', 0) for c in scale_data.get('choices', [])}
+            if not choices_map:
+                return {"result_level": "配置错误", "result_interpretation": "问卷选项(choices)未定义或缺少ID。"}
+
+            subscale_names = rules.get('subscales', [])
+            subscale_scores = {name: 0 for name in subscale_names}
+            questions_map = {str(q['order']): q for q in scale_data.get('questions', [])}
+            
+            # 这里的 `option_id` 现在被正确地理解为选项ID，而不是分数
+            for q_order_str, option_id in request_answers.items():
+                question = questions_map.get(q_order_str)
+                if not question: continue
+
+                # ✅ 关键修正：通过选项ID从映射中查找正确的分数
+                score = choices_map.get(option_id)
+                if score is None: 
+                    continue # 如果ID无效，则跳过
+
+                subscale = question.get('subscale')
+                if subscale in subscale_scores:
+                    subscale_scores[subscale] += score
+            
+            if not any(s > 0 for s in subscale_scores.values()):
+                return {"result_level": "无法计算", "result_interpretation": "所有维度得分均为0，请检查提交数据。"}
+            
+            result_level = max(subscale_scores, key=subscale_scores.get)
+            interpretation_data = next((i for i in interpretations if i.get('level') == result_level), {})
+            
+            return {
+                "raw_score": None, "final_score": None, "result_level": result_level,
+                "result_interpretation": interpretation_data.get('interpretation', ''),
+                "result_recommendation": interpretation_data.get('recommendation', ''),
+                "result_details": subscale_scores
+            }
+            
+        # ==============================================================================
+        # 规则 3 (默认): 处理 MBTI 和其他简单“投票计数”型问卷
+        # ==============================================================================
+        else:
+            # (这部分代码保持不变)
+            questions = scale_data.get('questions', [])
+            if questions:
+                first_question = questions[0]
+                first_option = first_question.get('options', [{}])[0]
+                first_target_id = first_option.get('target_personality_id', '')
+                if first_target_id.startswith('mbti:'):
+                    return self._calculate_mbti_dimensional_result(request_answers, scale_data)
+
+            questions_dict = {str(q['order']): q for q in questions}
+            interpretations_obj = scale_data.get('interpretations', {})
+            personality_counts = {}
+            
+            for q_order, option_id in request_answers.items():
+                question = questions_dict.get(q_order)
+                if not question or not question.get('options'): continue
+                
+                selected_option = next((opt for opt in question.get('options', []) if opt.get('id') == option_id), None)
+                
+                if selected_option:
+                    target_id = selected_option.get('target_personality_id')
+                    if target_id:
+                        personality_counts[target_id] = personality_counts.get(target_id, 0) + 1
+            
+            if not personality_counts:
+                return {"result_level": "无法确定", "result_interpretation": "您的答案无法匹配到任何结果，请重试。"}
+
+            final_personality_id = max(personality_counts, key=personality_counts.get)
+            final_result = interpretations_obj.get(final_personality_id, {})
+            
+            return {
+                "raw_score": None, "final_score": None,
+                "result_level": final_result.get('title'),
+                "result_interpretation": final_result.get('description'),
+                "result_recommendation": final_result.get('recommendation'),
+                "result_details": {
+                    "college": final_result.get('college'),
+                    "college_motto": final_result.get('college_motto'),
+                    "image_url": final_result.get('image_url') 
+                }
+            }
+                
+    def _calculate_mbti_dimensional_result(self, request_answers: Dict[str, str], scale_data: Dict) -> Dict:
+        """【新增】专门处理 MBTI 维度计分的私有方法"""
+        questions = {str(q['order']): q for q in scale_data.get('questions', [])}
+        interpretations = scale_data.get('interpretations', {})
+        print("使用专属函数了")
+        # 1. 初始化维度计分板
+        dim_counts = { 'I': 0, 'E': 0, 'S': 0, 'N': 0, 'T': 0, 'F': 0, 'J': 0, 'P': 0 }
+
+        # 2. 遍历答案，解析复合ID并计分
         for q_order, option_id in request_answers.items():
-            question = questions_dict.get(q_order)
+            question = questions.get(q_order)
             if not question: continue
             
-            selected_option = next((opt for opt in question.get('options', []) if opt['id'] == option_id), None)
-            
-            if selected_option:
-                target_id = selected_option.get('target_personality_id')
-                if target_id:
-                    personality_counts[target_id] = personality_counts.get(target_id, 0) + 1
-        
-        if not personality_counts:
-            return {
-                "result_level": "无法确定",
-                "result_interpretation": "您的答案无法匹配到任何结果，请重试。",
-                "result_recommendation": "", "result_details": None
-            }
+            option = next((opt for opt in question.get('options', []) if opt['id'] == option_id), None)
+            if not option: continue
+                
+            target_id = option.get('target_personality_id')
+            if target_id and target_id.startswith('mbti:'):
+                try:
+                    # 解析 "mbti:IE:I"
+                    _, dimension, value = target_id.split(':')
+                    if value in dim_counts:
+                        dim_counts[value] += 1
+                except ValueError:
+                    # 如果格式不正确，则跳过
+                    continue
 
-        final_personality_id = max(personality_counts, key=personality_counts.get)
-        final_result = interpretations.get(final_personality_id, {})
+        # 3. 计算最终人格类型
+        result_type = ""
+        result_type += 'I' if dim_counts['I'] >= dim_counts['E'] else 'E' # 等于时默认 I
+        result_type += 'S' if dim_counts['S'] >= dim_counts['N'] else 'N' # 等于时默认 S
+        result_type += 'T' if dim_counts['T'] >= dim_counts['F'] else 'F' # 等于时默认 T
+        result_type += 'J' if dim_counts['J'] >= dim_counts['P'] else 'P' # 等于时默认 J
         
-        # 【已补全】从这里开始是之前缺失的代码
+        # 4. 查找并返回结果
+        final_result = interpretations.get(result_type, {})
+        
         return {
             "raw_score": None,
             "final_score": None,
-            "result_level": final_result.get('major'),
+            "result_level": final_result.get('title'), # 复用 title 字段
             "result_interpretation": final_result.get('description'),
             "result_recommendation": final_result.get('recommendation'),
             "result_details": {
-                "college": final_result.get('college'),
-                "college_motto": final_result.get('college_motto'),
-                # 【已修正】从 final_result 中安全地获取 image_url
-                "image_url": final_result.get('image_url') 
+                "college": final_result.get('college'),                 # ✅ 添加 college
+                "college_motto": final_result.get('college_motto'),     # ✅ 添加 college_motto
+                "title": final_result.get('title'),
+                "type_code": result_type,
+                "dimension_scores": dim_counts,
+                "image_url": final_result.get('image_url')
             }
         }
+    
 
     def create_user_assessment(self, user_id: str, request_data: SubmitAnswersRequest) -> Optional[UserAssessment]:
         """核心方法：根据量表类型进行评分，并创建测评记录"""

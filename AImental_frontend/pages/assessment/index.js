@@ -159,7 +159,7 @@ Page({
   },
   goToTest(e) {
     const scaleId = e.currentTarget.dataset.id;
-    wx.navigateTo({ url: `./test?id=${scaleId}` });
+    wx.navigateTo({ url: `/pkgAssessment/intro/intro?id=${scaleId}` });
   },
   handleIconError(e) {
     const errorIndex = e.currentTarget.dataset.index;

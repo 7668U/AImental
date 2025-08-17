@@ -1,0 +1,871 @@
+{
+  "scale_info": {
+    "name": "MBTI",
+    "short_name": "mbti-93",
+    "description": "MBTI (Myers-Briggs Type Indicator) 是一份专业的性格自测问卷，基于荣格的心理类型理论发展而来。它通过四个维度（内外倾、感觉/直觉、思维/情感、判断/知觉）的组合，将人的性格分为16种类型，旨在帮助您更好地了解自我、规划职业发展、改善人际关系。",
+    "instructions": "请务必诚实、独立地回答问题。本测试展示的是您的性格倾向，没有好坏对错之分。请根据您一般的感受或行为，在每个题目中选择一个最贴切地描绘您的答案。",
+    "category": "专业测试",
+    "assessment_type": "categorical"
+  },
+  "questions": 
+  [
+    {
+      "order": 1,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？当你要外出一整天，你会",
+      "options": [
+        { "id": "a", "text": "计划你要做什么和在什么时候做", "target_personality_id": "mbti:JP:J" },
+        { "id": "b", "text": "说去就去", "target_personality_id": "mbti:JP:P" }
+      ]
+    },
+    {
+      "order": 2,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？你认为自己是一个",
+      "options": [
+        { "id": "a", "text": "较为随兴所至的人", "target_personality_id": "mbti:JP:P" },
+        { "id": "b", "text": "较为有条理的人", "target_personality_id": "mbti:JP:J" }
+      ]
+    },
+    {
+      "order": 3,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？假如你是一位老师，你会选教",
+      "options": [
+        { "id": "a", "text": "以事实为主的课程", "target_personality_id": "mbti:SN:S" },
+        { "id": "b", "text": "涉及理论的课程", "target_personality_id": "mbti:SN:N" }
+      ]
+    },
+    {
+      "order": 4,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？你通常",
+      "options": [
+        { "id": "a", "text": "与人容易混熟", "target_personality_id": "mbti:IE:E" },
+        { "id": "b", "text": "比较沉静或矜持", "target_personality_id": "mbti:IE:I" }
+      ]
+    },
+    {
+      "order": 5,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？一般来说，你和哪些人比较合得来？",
+      "options": [
+        { "id": "a", "text": "富于想象力的人", "target_personality_id": "mbti:SN:N" },
+        { "id": "b", "text": "现实的人", "target_personality_id": "mbti:SN:S" }
+      ]
+    },
+    {
+      "order": 6,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？你是否经常让",
+      "options": [
+        { "id": "a", "text": "你的情感支配你的理智", "target_personality_id": "mbti:TF:F" },
+        { "id": "b", "text": "你的理智主宰你的情感", "target_personality_id": "mbti:TF:T" }
+      ]
+    },
+    {
+      "order": 7,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？处理许多事情上，你会喜欢",
+      "options": [
+        { "id": "a", "text": "凭兴所至行事", "target_personality_id": "mbti:JP:P" },
+        { "id": "b", "text": "按照计划行事", "target_personality_id": "mbti:JP:J" }
+      ]
+    },
+    {
+      "order": 8,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？你是否",
+      "options": [
+        { "id": "a", "text": "容易让人了解", "target_personality_id": "mbti:IE:E" },
+        { "id": "b", "text": "难于让人了解", "target_personality_id": "mbti:IE:I" }
+      ]
+    },
+    {
+      "order": 9,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？按照程序表做事",
+      "options": [
+        { "id": "a", "text": "合你心意", "target_personality_id": "mbti:JP:J" },
+        { "id": "b", "text": "令你感到束缚", "target_personality_id": "mbti:JP:P" }
+      ]
+    },
+    {
+      "order": 10,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？当你有一份特别的任务，你会喜欢",
+      "options": [
+        { "id": "a", "text": "开始前小心组织计划", "target_personality_id": "mbti:JP:J" },
+        { "id": "b", "text": "边做边找须做什么", "target_personality_id": "mbti:JP:P" }
+      ]
+    },
+    {
+      "order": 11,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？在大多数情况下，你会选择",
+      "options": [
+        { "id": "a", "text": "顺其自然", "target_personality_id": "mbti:JP:P" },
+        { "id": "b", "text": "按程序表做事", "target_personality_id": "mbti:JP:J" }
+      ]
+    },
+    {
+      "order": 12,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？大多数人会说你是一个",
+      "options": [
+        { "id": "a", "text": "重视自我隐私的人", "target_personality_id": "mbti:IE:I" },
+        { "id": "b", "text": "非常坦率开放的人", "target_personality_id": "mbti:IE:E" }
+      ]
+    },
+    {
+      "order": 13,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？你宁愿被人认为是一个",
+      "options": [
+        { "id": "a", "text": "实事求是的人", "target_personality_id": "mbti:SN:S" },
+        { "id": "b", "text": "机灵的人", "target_personality_id": "mbti:SN:N" }
+      ]
+    },
+    {
+      "order": 14,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？在一大群人当中，通常是",
+      "options": [
+        { "id": "a", "text": "你介绍大家认识", "target_personality_id": "mbti:IE:E" },
+        { "id": "b", "text": "别人介绍你", "target_personality_id": "mbti:IE:I" }
+      ]
+    },
+    {
+      "order": 15,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？你会跟哪些人做朋友？",
+      "options": [
+        { "id": "a", "text": "常提出新注意的", "target_personality_id": "mbti:SN:N" },
+        { "id": "b", "text": "脚踏实地的", "target_personality_id": "mbti:SN:S" }
+      ]
+    },
+    {
+      "order": 16,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？你倾向",
+      "options": [
+        { "id": "a", "text": "重视感情多于逻辑", "target_personality_id": "mbti:TF:F" },
+        { "id": "b", "text": "重视逻辑多于感情", "target_personality_id": "mbti:TF:T" }
+      ]
+    },
+    {
+      "order": 17,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？你比较喜欢",
+      "options": [
+        { "id": "a", "text": "坐观事情发展才作计划", "target_personality_id": "mbti:JP:P" },
+        { "id": "b", "text": "很早就作计划", "target_personality_id": "mbti:JP:J" }
+      ]
+    },
+    {
+      "order": 18,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？你喜欢花很多的时间",
+      "options": [
+        { "id": "a", "text": "一个人独处", "target_personality_id": "mbti:IE:I" },
+        { "id": "b", "text": "合别人在一起", "target_personality_id": "mbti:IE:E" }
+      ]
+    },
+    {
+      "order": 19,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？与很多人一起会",
+      "options": [
+        { "id": "a", "text": "令你活力培增", "target_personality_id": "mbti:IE:E" },
+        { "id": "b", "text": "常常令你心力憔悴", "target_personality_id": "mbti:IE:I" }
+      ]
+    },
+    {
+      "order": 20,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？你比较喜欢",
+      "options": [
+        { "id": "a", "text": "很早便把约会、社交聚集等事情安排妥当", "target_personality_id": "mbti:JP:J" },
+        { "id": "b", "text": "无拘无束，看当时有什么好玩就做什么", "target_personality_id": "mbti:JP:P" }
+      ]
+    },
+    {
+      "order": 21,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？计划一个旅程时，你较喜欢",
+      "options": [
+        { "id": "a", "text": "大部分的时间都是跟当天的感觉行事", "target_personality_id": "mbti:JP:P" },
+        { "id": "b", "text": "事先知道大部分的日子会做什么", "target_personality_id": "mbti:JP:J" }
+      ]
+    },
+    {
+      "order": 22,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？在社交聚会中，你",
+      "options": [
+        { "id": "a", "text": "有时感到郁闷", "target_personality_id": "mbti:IE:I" },
+        { "id": "b", "text": "常常乐在其中", "target_personality_id": "mbti:IE:E" }
+      ]
+    },
+    {
+      "order": 23,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？你通常",
+      "options": [
+        { "id": "a", "text": "和别人容易混熟", "target_personality_id": "mbti:IE:E" },
+        { "id": "b", "text": "趋向自处一隅", "target_personality_id": "mbti:IE:I" }
+      ]
+    },
+    {
+      "order": 24,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？哪些人会更吸引你？",
+      "options": [
+        { "id": "a", "text": "一个思想敏捷及非常聪颖的人", "target_personality_id": "mbti:SN:N" },
+        { "id": "b", "text": "实事求是，具丰富常识的人", "target_personality_id": "mbti:SN:S" }
+      ]
+    },
+    {
+      "order": 25,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？在日常工作中，你会",
+      "options": [
+        { "id": "a", "text": "颇为喜欢处理迫使你分秒必争的突发", "target_personality_id": "mbti:JP:P" },
+        { "id": "b", "text": "通常预先计划，以免要在压力下工作", "target_personality_id": "mbti:JP:J" }
+      ]
+    },
+    {
+      "order": 26,
+      "text": "哪一个答案最能贴切的描绘你一般的感受或行为？你认为别人一般",
+      "options": [
+        { "id": "a", "text": "要花很长时间才认识你", "target_personality_id": "mbti:IE:I" },
+        { "id": "b", "text": "用很短的时间便认识你", "target_personality_id": "mbti:IE:E" }
+      ]
+    },
+    {
+      "order": 27,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "注重隐私", "target_personality_id": "mbti:IE:I" },
+        { "id": "b", "text": "坦率开放", "target_personality_id": "mbti:IE:E" }
+      ]
+    },
+    {
+      "order": 28,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "预先安排的", "target_personality_id": "mbti:JP:J" },
+        { "id": "b", "text": "无计划的", "target_personality_id": "mbti:JP:P" }
+      ]
+    },
+    {
+      "order": 29,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "抽象", "target_personality_id": "mbti:SN:N" },
+        { "id": "b", "text": "具体", "target_personality_id": "mbti:SN:S" }
+      ]
+    },
+    {
+      "order": 30,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "温柔", "target_personality_id": "mbti:TF:F" },
+        { "id": "b", "text": "坚定", "target_personality_id": "mbti:TF:T" }
+      ]
+    },
+    {
+      "order": 31,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "思考", "target_personality_id": "mbti:TF:T" },
+        { "id": "b", "text": "感受", "target_personality_id": "mbti:TF:F" }
+      ]
+    },
+    {
+      "order": 32,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "事实", "target_personality_id": "mbti:SN:S" },
+        { "id": "b", "text": "意念", "target_personality_id": "mbti:SN:N" }
+      ]
+    },
+    {
+      "order": 33,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "冲动", "target_personality_id": "mbti:JP:P" },
+        { "id": "b", "text": "决定", "target_personality_id": "mbti:JP:J" }
+      ]
+    },
+    {
+      "order": 34,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "热衷", "target_personality_id": "mbti:IE:E" },
+        { "id": "b", "text": "文静", "target_personality_id": "mbti:IE:I" }
+      ]
+    },
+    {
+      "order": 35,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "文静", "target_personality_id": "mbti:IE:I" },
+        { "id": "b", "text": "外向", "target_personality_id": "mbti:IE:E" }
+      ]
+    },
+    {
+      "order": 36,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "有系统", "target_personality_id": "mbti:JP:J" },
+        { "id": "b", "text": "随意", "target_personality_id": "mbti:JP:P" }
+      ]
+    },
+    {
+      "order": 37,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "理论", "target_personality_id": "mbti:SN:N" },
+        { "id": "b", "text": "肯定", "target_personality_id": "mbti:SN:S" }
+      ]
+    },
+    {
+      "order": 38,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "敏感", "target_personality_id": "mbti:TF:F" },
+        { "id": "b", "text": "公正", "target_personality_id": "mbti:TF:T" }
+      ]
+    },
+    {
+      "order": 39,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "令人信服", "target_personality_id": "mbti:TF:T" },
+        { "id": "b", "text": "感人的", "target_personality_id": "mbti:TF:F" }
+      ]
+    },
+    {
+      "order": 40,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "声明", "target_personality_id": "mbti:SN:S" },
+        { "id": "b", "text": "概念", "target_personality_id": "mbti:SN:N" }
+      ]
+    },
+    {
+      "order": 41,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "不受约束", "target_personality_id": "mbti:JP:P" },
+        { "id": "b", "text": "预先安排", "target_personality_id": "mbti:JP:J" }
+      ]
+    },
+    {
+      "order": 42,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "矜持", "target_personality_id": "mbti:IE:I" },
+        { "id": "b", "text": "健谈", "target_personality_id": "mbti:IE:E" }
+      ]
+    },
+    {
+      "order": 43,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "有条不紊", "target_personality_id": "mbti:JP:J" },
+        { "id": "b", "text": "不拘小节", "target_personality_id": "mbti:JP:P" }
+      ]
+    },
+    {
+      "order": 44,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "意念", "target_personality_id": "mbti:SN:N" },
+        { "id": "b", "text": "实况", "target_personality_id": "mbti:SN:S" }
+      ]
+    },
+    {
+      "order": 45,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "同情怜悯", "target_personality_id": "mbti:TF:F" },
+        { "id": "b", "text": "远见", "target_personality_id": "mbti:TF:T" }
+      ]
+    },
+    {
+      "order": 46,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "利益", "target_personality_id": "mbti:TF:T" },
+        { "id": "b", "text": "祝福", "target_personality_id": "mbti:TF:F" }
+      ]
+    },
+    {
+      "order": 47,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "务实的", "target_personality_id": "mbti:SN:S" },
+        { "id": "b", "text": "理论的", "target_personality_id": "mbti:SN:N" }
+      ]
+    },
+    {
+      "order": 48,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "朋友不多", "target_personality_id": "mbti:IE:I" },
+        { "id": "b", "text": "朋友众多", "target_personality_id": "mbti:IE:E" }
+      ]
+    },
+    {
+      "order": 49,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "有系统", "target_personality_id": "mbti:JP:J" },
+        { "id": "b", "text": "即兴", "target_personality_id": "mbti:JP:P" }
+      ]
+    },
+    {
+      "order": 50,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "富想象的", "target_personality_id": "mbti:SN:N" },
+        { "id": "b", "text": "以事论事", "target_personality_id": "mbti:SN:S" }
+      ]
+    },
+    {
+      "order": 51,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "亲切的", "target_personality_id": "mbti:TF:F" },
+        { "id": "b", "text": "客观的", "target_personality_id": "mbti:TF:T" }
+      ]
+    },
+    {
+      "order": 52,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "客观的", "target_personality_id": "mbti:TF:T" },
+        { "id": "b", "text": "热情的", "target_personality_id": "mbti:TF:F" }
+      ]
+    },
+    {
+      "order": 53,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "建造", "target_personality_id": "mbti:SN:S" },
+        { "id": "b", "text": "发明", "target_personality_id": "mbti:SN:N" }
+      ]
+    },
+    {
+      "order": 54,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "文静", "target_personality_id": "mbti:IE:I" },
+        { "id": "b", "text": "爱合群", "target_personality_id": "mbti:IE:E" }
+      ]
+    },
+    {
+      "order": 55,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "理论", "target_personality_id": "mbti:SN:N" },
+        { "id": "b", "text": "事实", "target_personality_id": "mbti:SN:S" }
+      ]
+    },
+    {
+      "order": 56,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "富同情", "target_personality_id": "mbti:TF:F" },
+        { "id": "b", "text": "合逻辑", "target_personality_id": "mbti:TF:T" }
+      ]
+    },
+    {
+      "order": 57,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "具分析力", "target_personality_id": "mbti:TF:T" },
+        { "id": "b", "text": "多愁善感", "target_personality_id": "mbti:TF:F" }
+      ]
+    },
+    {
+      "order": 58,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？请仔细想想这些词语的意义，而不要理会他们的字形或读音。",
+      "options": [
+        { "id": "a", "text": "合情合理", "target_personality_id": "mbti:SN:S" },
+        { "id": "b", "text": "令人着迷", "target_personality_id": "mbti:SN:N" }
+      ]
+    },
+    {
+      "order": 59,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？当你要在一个星期内完成一个大项目，你在开始的时候会",
+      "options": [
+        { "id": "a", "text": "把要做的不同工作依次列出", "target_personality_id": "mbti:JP:J" },
+        { "id": "b", "text": "马上动工", "target_personality_id": "mbti:JP:P" }
+      ]
+    },
+    {
+      "order": 60,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？在社交场合中，你经常会感到",
+      "options": [
+        { "id": "a", "text": "与某些人很难打开话匣儿和保持对话", "target_personality_id": "mbti:IE:I" },
+        { "id": "b", "text": "与多数人都能从容地长谈", "target_personality_id": "mbti:IE:E" }
+      ]
+    },
+    {
+      "order": 61,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？要做许多人也做的事，你比较喜欢",
+      "options": [
+        { "id": "a", "text": "按照一般认可的方法去做", "target_personality_id": "mbti:SN:S" },
+        { "id": "b", "text": "构想一个自己的想法", "target_personality_id": "mbti:SN:N" }
+      ]
+    },
+    {
+      "order": 62,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？你刚认识的朋友能否说出你的兴趣？",
+      "options": [
+        { "id": "a", "text": "马上可以", "target_personality_id": "mbti:IE:E" },
+        { "id": "b", "text": "要待他们真正了解你之后才可以", "target_personality_id": "mbti:IE:I" }
+      ]
+    },
+    {
+      "order": 63,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？你通常较喜欢的科目是",
+      "options": [
+        { "id": "a", "text": "讲授概念和原则的", "target_personality_id": "mbti:SN:N" },
+        { "id": "b", "text": "讲授事实和数据的", "target_personality_id": "mbti:SN:S" }
+      ]
+    },
+    {
+      "order": 64,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？哪个是较高的赞誉，或称许为？",
+      "options": [
+        { "id": "a", "text": "一贯感性的人", "target_personality_id": "mbti:TF:F" },
+        { "id": "b", "text": "一贯理性的人", "target_personality_id": "mbti:TF:T" }
+      ]
+    },
+    {
+      "order": 65,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？你认为按照程序表做事",
+      "options": [
+        { "id": "a", "text": "有时是需要的，但一般来说你不大喜欢这样做", "target_personality_id": "mbti:JP:P" },
+        { "id": "b", "text": "大多数情况下是有帮助而且是你喜欢做的", "target_personality_id": "mbti:JP:J" }
+      ]
+    },
+    {
+      "order": 66,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？和一群人在一起，你通常会选",
+      "options": [
+        { "id": "a", "text": "跟你很熟悉的个别人谈话", "target_personality_id": "mbti:IE:I" },
+        { "id": "b", "text": "参与大伙的谈话", "target_personality_id": "mbti:IE:E" }
+      ]
+    },
+    {
+      "order": 67,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？在社交聚会上，你会",
+      "options": [
+        { "id": "a", "text": "是说话很多的一个", "target_personality_id": "mbti:IE:E" },
+        { "id": "b", "text": "让别人多说话", "target_personality_id": "mbti:IE:I" }
+      ]
+    },
+    {
+      "order": 68,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？把周末期间要完成的事列成清单，这个主意会",
+      "options": [
+        { "id": "a", "text": "合你意", "target_personality_id": "mbti:JP:J" },
+        { "id": "b", "text": "使你提不起劲", "target_personality_id": "mbti:JP:P" }
+      ]
+    },
+    {
+      "order": 69,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？哪个是较高的赞誉，或称许为",
+      "options": [
+        { "id": "a", "text": "能干的", "target_personality_id": "mbti:TF:T" },
+        { "id": "b", "text": "富有同情心", "target_personality_id": "mbti:TF:F" }
+      ]
+    },
+    {
+      "order": 70,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？你通常喜欢",
+      "options": [
+        { "id": "a", "text": "事先安排你的社交约会", "target_personality_id": "mbti:JP:J" },
+        { "id": "b", "text": "随兴之所至做事", "target_personality_id": "mbti:JP:P" }
+      ]
+    },
+    {
+      "order": 71,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？总的说来，要做一个大型作业时，你会选",
+      "options": [
+        { "id": "a", "text": "边做边想该做什么", "target_personality_id": "mbti:JP:P" },
+        { "id": "b", "text": "首先把工作按步细分", "target_personality_id": "mbti:JP:J" }
+      ]
+    },
+    {
+      "order": 72,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？你能否滔滔不绝地与人聊天",
+      "options": [
+        { "id": "a", "text": "只限于跟你有共同兴趣的人", "target_personality_id": "mbti:IE:I" },
+        { "id": "b", "text": "几乎跟任何人都可以", "target_personality_id": "mbti:IE:E" }
+      ]
+    },
+    {
+      "order": 73,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？你会",
+      "options": [
+        { "id": "a", "text": "跟随一些证明有效的方法", "target_personality_id": "mbti:SN:S" },
+        { "id": "b", "text": "分析还有什么毛病，及针对尚未解决的难题", "target_personality_id": "mbti:SN:N" }
+      ]
+    },
+    {
+      "order": 74,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？为乐趣而阅读时，你会",
+      "options": [
+        { "id": "a", "text": "喜欢奇特或创新的表达方式", "target_personality_id": "mbti:SN:N" },
+        { "id": "b", "text": "喜欢作者直话直说", "target_personality_id": "mbti:SN:S" }
+      ]
+    },
+    {
+      "order": 75,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？你宁愿替哪一类上司（或者老师）工作？",
+      "options": [
+        { "id": "a", "text": "天性淳良，但常常前后不一的", "target_personality_id": "mbti:TF:F" },
+        { "id": "b", "text": "言词尖锐但永远合乎逻辑的", "target_personality_id": "mbti:TF:T" }
+      ]
+    },
+    {
+      "order": 76,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？你做事多数是",
+      "options": [
+        { "id": "a", "text": "按当天心情去做", "target_personality_id": "mbti:JP:P" },
+        { "id": "b", "text": "照拟好的程序表去做", "target_personality_id": "mbti:JP:J" }
+      ]
+    },
+    {
+      "order": 77,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？你是否",
+      "options": [
+        { "id": "a", "text": "可以和任何人按需求从容地交谈", "target_personality_id": "mbti:IE:E" },
+        { "id": "b", "text": "只是对某些人或在某种情况下才可以畅所欲言", "target_personality_id": "mbti:IE:I" }
+      ]
+    },
+    {
+      "order": 78,
+      "text": "哪一个答案最能贴切地描绘你一般的感受或行为？要作决定时，你认为比较重要的是",
+      "options": [
+        { "id": "a", "text": "据事实衡量", "target_personality_id": "mbti:TF:T" },
+        { "id": "b", "text": "考虑他人的感受和意见", "target_personality_id": "mbti:TF:F" }
+      ]
+    },
+    {
+      "order": 79,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？",
+      "options": [
+        { "id": "a", "text": "想象的", "target_personality_id": "mbti:SN:N" },
+        { "id": "b", "text": "真实的", "target_personality_id": "mbti:SN:S" }
+      ]
+    },
+    {
+      "order": 80,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？",
+      "options": [
+        { "id": "a", "text": "仁慈慷慨的", "target_personality_id": "mbti:TF:F" },
+        { "id": "b", "text": "意志坚定的", "target_personality_id": "mbti:TF:T" }
+      ]
+    },
+    {
+      "order": 81,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？",
+      "options": [
+        { "id": "a", "text": "公正的", "target_personality_id": "mbti:TF:T" },
+        { "id": "b", "text": "有关怀心", "target_personality_id": "mbti:TF:F" }
+      ]
+    },
+    {
+      "order": 82,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？",
+      "options": [
+        { "id": "a", "text": "制作", "target_personality_id": "mbti:SN:S" },
+        { "id": "b", "text": "设计", "target_personality_id": "mbti:SN:N" }
+      ]
+    },
+    {
+      "order": 83,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？",
+      "options": [
+        { "id": "a", "text": "可能性", "target_personality_id": "mbti:SN:N" },
+        { "id": "b", "text": "必然性", "target_personality_id": "mbti:SN:S" }
+      ]
+    },
+    {
+      "order": 84,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？",
+      "options": [
+        { "id": "a", "text": "温柔", "target_personality_id": "mbti:TF:F" },
+        { "id": "b", "text": "力量", "target_personality_id": "mbti:TF:T" }
+      ]
+    },
+    {
+      "order": 85,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？",
+      "options": [
+        { "id": "a", "text": "实际", "target_personality_id": "mbti:TF:T" },
+        { "id": "b", "text": "多愁善感", "target_personality_id": "mbti:TF:F" }
+      ]
+    },
+    {
+      "order": 86,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？",
+      "options": [
+        { "id": "a", "text": "制造", "target_personality_id": "mbti:SN:S" },
+        { "id": "b", "text": "创造", "target_personality_id": "mbti:SN:N" }
+      ]
+    },
+    {
+      "order": 87,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？",
+      "options": [
+        { "id": "a", "text": "新颖的", "target_personality_id": "mbti:SN:N" },
+        { "id": "b", "text": "已知的", "target_personality_id": "mbti:SN:S" }
+      ]
+    },
+    {
+      "order": 88,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？",
+      "options": [
+        { "id": "a", "text": "同情", "target_personality_id": "mbti:TF:F" },
+        { "id": "b", "text": "分析", "target_personality_id": "mbti:TF:T" }
+      ]
+    },
+    {
+      "order": 89,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？",
+      "options": [
+        { "id": "a", "text": "坚持己见", "target_personality_id": "mbti:TF:T" },
+        { "id": "b", "text": "温柔有爱心", "target_personality_id": "mbti:TF:F" }
+      ]
+    },
+    {
+      "order": 90,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？",
+      "options": [
+        { "id": "a", "text": "具体的", "target_personality_id": "mbti:SN:S" },
+        { "id": "b", "text": "抽象的", "target_personality_id": "mbti:SN:N" }
+      ]
+    },
+    {
+      "order": 91,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？",
+      "options": [
+        { "id": "a", "text": "全心投入", "target_personality_id": "mbti:TF:F" },
+        { "id": "b", "text": "有决心的", "target_personality_id": "mbti:TF:T" }
+      ]
+    },
+    {
+      "order": 92,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？",
+      "options": [
+        { "id": "a", "text": "能干", "target_personality_id": "mbti:TF:T" },
+        { "id": "b", "text": "仁慈", "target_personality_id": "mbti:TF:F" }
+      ]
+    },
+    {
+      "order": 93,
+      "text": "在下列每一对词语中，哪一个词语更合你心意？",
+      "options": [
+        { "id": "a", "text": "实际", "target_personality_id": "mbti:SN:S" },
+        { "id": "b", "text": "创新", "target_personality_id": "mbti:SN:N" }
+      ]
+    }
+],
+  "interpretations": {
+    "ISTJ": {
+      "title": "物流师 (ISTJ)",
+      "college_motto": "别慌，这事儿我早就做成PPT了。",
+      "description": "作为一个ISTJ，您是严肃、有责任心和通情达理的社会坚定分子。您非常值得信赖，极其重视承诺，对您来说，言语就是庄严的宣誓。您工作缜密，讲求实际，很有头脑也很现实。无论做什么，您都表现出很强的集中力、条理性和准确性。您总是显得责无旁贷、坚定不变，即使在危机之时，也显得很平静。在冷静的外表之下，您也许有强烈却很少表露的反应。",
+      "recommendation": "基于您的特质，您在以下领域可能会有出色的表现：工商业、政府机构、金融银行业、技术领域和医务领域。\n具体来说，这些职业很适合您：审计师、会计、财务经理、办公室行政管理、后勤和供应管理、中层经理、公务（法律、税务）执行人员、银行信贷员、成本估价师、保险精算师、税务经纪人、税务检查员、机械/电气工程师、计算机程序员、数据库管理员、地质/气象学家、法律研究者、律师、外科医生、药剂师、实验室技术人员、牙科医生、医学研究员等。",
+      "image_url": "/images/mbti/istj.png"
+    },
+    "ISFJ": {
+      "title": "守卫者 (ISFJ)",
+      "college_motto": "我可能忘了自己要干嘛，但绝对记得你的生日和忌口。",
+      "description": "作为一个ISFJ，您是忠诚、有奉献精神和同情心的人，很能理解别人的感受。您意志清醒而有责任心，乐于为人所需。您喜欢平和谦逊的人，做事非常务实，能利用大量事实情况，并对细节有很强的记忆力。您具有强烈的职业道德，会准确系统地完成任务，并通过出色的注重实际的态度为周围带来稳定性。您温和、圆通，乐于为他人服务，并愿意为朋友和同伴献身。",
+      "recommendation": "基于您的特质，您在以下领域可能会有出色的表现：医护领域、消费类商业、服务业领域。\n具体来说，这些职业很适合您：行政管理人员、总经理助理、秘书、人事管理者、项目经理、物流经理、律师助手、外科医生及其它各类医生、家庭医生、牙科医生、护士、药剂师、医学专家、营养学专家、顾问、零售店/精品店业主、大型商场/酒店管理人员、室内设计师等。",
+      "image_url": "/images/mbti/isfj.png"
+    },
+    "INFJ": {
+      "title": "提倡者 (INFJ)",
+      "college_motto": "别问我怎么知道的，我就是知道。（并且已经在心里给你写好了八百字的人物分析）",
+      "description": "作为一个INFJ，您生活在思想的世界里，是独立的、有独创性的思想家。您具有强烈的感情、坚定的原则和正直的人性。您对他人的情感和利益非常关注，能很好地处理复杂的人际关系。您具有本能的洞察力，能看到事物更深层的含义，并对什么能激励他人有清晰的看法。因为您的说服能力和理想主义，您会成为伟大的领导者，常常受到他人的尊重或敬佩。您珍视友谊与和睦，更喜欢说服而不是争吵。",
+      "recommendation": "基于您的特质，您在以下领域可能会有出色的表现：咨询、教育、科研、文化、艺术、设计等领域。\n具体来说，这些职业很适合您：心理咨询工作者、心理诊疗师、职业指导顾问、大学教师（人文学科、艺术类）、心理学/教育学/社会学/哲学研究人员、作家、诗人、剧作家、电影编剧、电影导演、画家、雕塑家、音乐家、艺术顾问、建筑师、设计师等。",
+      "image_url": "/images/mbti/infj.png"
+    },
+    "INTJ": {
+      "title": "建筑师 (INTJ)",
+      "college_motto": "我的计划里唯一的变量，就是你们这群愚蠢的人类。",
+      "description": "作为一个INTJ，您是天生的完美主义者和谋略家。您强烈地要求个人自由和能力，并有不可动摇的信仰促使您达到目标。您的思维严谨、有逻辑性、足智谋，能够清楚地看到新计划实行后的结果。作为所有性格类型中最独立的一种，您更喜欢以自己的方式行事，面对相反意见时通常持怀疑态度，十分坚定和坚决。您天生精于理论，对于复杂而综合的概念运转灵活，是优秀的战略思想家。",
+      "recommendation": "基于您的特质，您在以下领域可能会有出色的表现：科研、科技应用、技术咨询、管理咨询、金融、投资领域、创造性行业。\n具体来说，这些职业很适合您：各类科学家、研究所研究人员、设计工程师、系统分析员、计算机程序师、各类技术顾问、企业管理顾问、投资专家、法律顾问、医学专家、经济学家、投资银行研究员、证券分析员、财务计划人、企业并购专家、各类发明家、建筑师、社论作家、设计师等。",
+      "image_url": "/images/mbti/intj.png"
+    },
+    "ISTP": {
+      "title": "鉴赏家 (ISTP)",
+      "college_motto": "先别扔，我感觉还能再抢救一下。",
+      "description": "作为一个ISTP，您坦率、诚实、讲求实效，喜欢行动而非漫谈。您擅长分析，对客观原则很感兴趣，对技巧性的事物有天生的理解力，通常精于使用工具和进行手工劳动。您是现实主义者，善于观察，只有理性、可靠的事实才能使您信服。您平和而寡言，有时显得冷酷而清高，但与好朋友在一起时则不同。您喜欢行动和兴奋的事情，受冲动的驱使，对于即刻的挑战和问题具有相当的适应性和反应能力。",
+      "recommendation": "基于您的特质，您在以下领域可能会有出色的表现：技术领域、证券、金融业、贸易、商业领域、户外、运动、艺术等领域。\n具体来说，这些职业很适合您：机械/电气/电子工程师、各类技术专家和技师、计算机硬件/系统集成专业人员、证券分析师、金融/财务顾问、经济学研究者、贸易商、商品经销商、产品代理商、警察、侦探、体育工作者、赛车手、飞行员、雕塑家、手工制作者、画家等。",
+      "image_url": "/images/mbti/istp.png"
+    },
+    "ISFP": {
+      "title": "探险家 (ISFP)",
+      "college_motto": "计划是什么？我的计划就是没有计划，主打一个随心所欲。",
+      "description": "作为一个ISFP，您平和、敏感，保持着许多强烈的个人理想和价值观念。您更多地是通过行为而不是言辞来表达自己深沉的情感。虽然您可能谦虚而缄默，但实际上内心充满巨大的友善和热情，只是不经常对不熟悉的人表现出来。您耐心、灵活，很容易与他人相处，很少支配或控制别人。您完全生活在当下，喜欢享受目前的经历，常常富有艺术天赋和审美感，力求为自己创造一个美丽而隐蔽的环境。",
+      "recommendation": "基于您的特质，您在以下领域可能会有出色的表现：手工艺、艺术领域、医护领域、商业、服务业领域。\n具体来说，这些职业很适合您：时装/首饰设计师、装潢/园艺设计师、陶器/乐器/卡通制作者、素描画家、舞蹈演员、画家、出诊医生/护士、理疗师、牙科医生、个人健康和运动教练、餐饮业/娱乐业业主、旅行社销售人员、体育用品销售员等。",
+      "image_url": "/images/mbti/isfp.png"
+    },
+    "INFP": {
+      "title": "调停者 (INFP)",
+      "college_motto": "别理我，我正在脑内小剧场和我的精神挚友开茶话会。",
+      "description": "作为一个INFP，您将内在的和谐视为高于一切。您敏感、理想化、忠诚，对于个人价值具有一种强烈的荣誉感，有为自认为有价值的事业献身的精神。您对已知事物之外的可能性很感兴趣，精力集中于梦想和想象，常常具有出色的长远眼光。您富有同情心、理解力，对别人的情感很敏感，总是避免冲突。您常常喜欢通过书写而不是口头来表达自己的感情，在劝说别人相信您的想法时，会变得极有说服力。",
+      "recommendation": "基于您的特质，您在以下领域可能会有出色的表现：创作性、艺术类、教育、研究、咨询类。\n具体来说，这些职业很适合您：各类艺术家、插图画家、诗人、小说家、建筑师、设计师、文学编辑、艺术指导、记者、大学老师（人文类）、心理学工作者、心理辅导和咨询人员、社科类研究人员、社会工作者、教育顾问、图书管理者、翻译家等。",
+      "image_url": "/images/mbti/infp.png"
+    },
+    "INTP": {
+      "title": "逻辑学家 (INTP)",
+      "college_motto": "不是我杠，是你说的确实不符合逻辑。",
+      "description": "作为一个INTP，您是天生的理性问题解决者。您很有才智和条理性，并有创造才华的突出表现。您的外表可能平静、缄默、超然，内心却专心致志于分析问题。您苛求精细、惯于怀疑，努力寻找和利用原则以理解许多想法。您重视才智，有能力也很感兴趣向他人挑战。您的主要兴趣在于理解事物之外的可能性，思考方式极端复杂，十分独立，喜欢冒险和富有想象力的活动。",
+      "recommendation": "基于您的特质，您在以下领域可能会有出色的表现：计算机技术、理论研究、学术领域、专业领域、创造性领域。\n具体来说，这些职业很适合您：软件设计员、系统分析师、计算机程序员、数据库管理、故障排除专家、大学教授、科研机构研究人员、数学家、物理学家、经济学家、考古学家、历史学家、证券分析师、金融投资顾问、律师、法律顾问、财务专家、侦探、各类发明家、作家、设计师、音乐家、艺术家、艺术鉴赏家等。",
+      "image_url": "/images/mbti/intp.png"
+    },
+    "ESTP": {
+      "title": "企业家 (ESTP)",
+      "college_motto": "人生是场大胆的冒险，怂了你就输了。",
+      "description": "作为一个ESTP，您活跃、随遇而安、天真率直，乐于享受现在的一切而不是为将来计划什么。您很现实，信任和依赖于自己对这个世界的感受，是好奇而热心的观察者。您喜欢行动而不是漫谈，是优秀的解决问题的人，因为您能掌握必要的事实情况，然后找到符合逻辑的明智解决途径。在大多数社交场合中，您很友善，富有魅力、轻松自如而受人欢迎，总有没完没了的笑话和故事。",
+      "recommendation": "基于您的特质，您在以下领域可能会有出色的表现：贸易、商业、服务业、金融证券业、娱乐、体育、艺术领域。\n具体来说，这些职业很适合您：各类贸易商、批发商、零售商、房地产/保险经纪人、汽车销售、私家侦探、警察、餐饮/娱乐业主管、自由职业者、股票经纪人、理财顾问、个人投资者、娱乐节目主持人、体育评论、脱口秀、表演者、健身教练等。",
+      "image_url": "/images/mbti/estp.png"
+    },
+    "ESFP": {
+      "title": "表演家 (ESFP)",
+      "college_motto": "让聚光灯亮起，把每个瞬间都变成一场精彩的派对！",
+      "description": "作为一个ESFP，您乐意与人相处，有一种真正的生活热情。您顽皮活泼，脾气随和、适应性强，热情友好和慷慨大方。您擅长交际，常常是别人的“注意中心”，能热情而乐于合作地参加各种活动。您是现实的观察者，按照事物的本身去对待并接受它们，能从亲身的经历中学到最好的东西。您通融和有同情心，擅长帮助冲突的各方重归于好。您天真率直，很有魅力和说服力，喜欢寻找给他人带来愉快和意外惊喜的方法。",
+      "recommendation": "基于您的特质，您在以下领域可能会有出色的表现：消费类商业、服务业、广告业、娱乐业、旅游业、社区服务等领域。\n具体来说，这些职业很适合您：精品店/商场销售、娱乐/餐饮业客户经理、房地产/汽车销售、市场营销（消费类）、广告设计师/创意人员、时装设计/表演、摄影师、节目主持人、脱口秀演员、导游、社区工作者、公共关系专家、健身和运动教练、医护人员等。",
+      "image_url": "/images/mbti/esfp.png"
+    },
+    "ENFP": {
+      "title": "竞选者 (ENFP)",
+      "college_motto": "冲啊！……哎我刚刚说到哪了？哦对，这个新想法超赞的！",
+      "description": "作为一个ENFP，您充满热情和新思想。您乐观、自然、富有创造性和自信，具有独创性的思想和对可能性的强烈感受。对您来说，生活是激动人生的戏剧。您具有洞察力，是热情的观察者，注意常规以外的任何事物。您具有想象力、适应性和可变性，视灵感高于一切。您具有魅力、充满生机，待人热情、彬彬有礼、富有同情心，常常关心他人的发展。",
+      "recommendation": "基于您的特质，您在以下领域可能会有出色的表现：广告、市场营销、教育、人力资源、媒体、艺术等领域。\n具体来说，这些职业很适合您：广告创意/撰稿人、市场营销和宣传策划、市场调研人员、艺术指导、公关专家、公司对外发言人、儿童教育老师、大学老师（人文类）、心理辅导和咨询人员、职业规划顾问、社会工作者、人力资源专家、培训师、演讲家、记者（访谈类）、节目策划和主持人、专栏作家、剧作家、设计师、卡通制作者、电影/电视制片人等。",
+      "image_url": "/images/mbti/enfp.png"
+    },
+    "ENTP": {
+      "title": "辩论家 (ENTP)",
+      "college_motto": "我不是来解决问题的，我是来告诉你们问题不止一种解法的。",
+      "description": "作为一个ENTP，您喜欢兴奋与挑战。您热情开放、足智谋、健谈而聪明，擅长于许多事情。您天生富有想象力，深深地喜欢新思想，留心一切可能性。您有很强的首创精神，视灵感高于其他的一切，力求使新颖想法转变为现实。您灵活而率直，能够轻易地看出任何情况中的缺点，并乐于争论。您有极好的分析能力，是出色的策略谋划者。",
+      "recommendation": "基于您的特质，您在以下领域可能会有出色的表现：投资顾问、项目策划、自我创业、市场营销、创造性领域、公共关系、政治。\n具体来说，这些职业很适合您：投资顾问（房地产、金融、贸易等）、各类项目的策划人和发起者、投资银行家、风险投资人、企业业主（新兴产业）、市场营销人员、各类产品销售经理、广告创意、艺术总监、访谈类节目主持人、制片人、公共关系专家、公司对外发言人、社团负责人、政治家等。",
+      "image_url": "/images/mbti/entp.png"
+    },
+    "ESTJ": {
+      "title": "总经理 (ESTJ)",
+      "college_motto": "别整那些虚的，听我指挥，保证给你办得明明白白。",
+      "description": "作为一个ESTJ，您能高效率地工作，自我负责，并善于监督他人。您很善于完成任务，喜欢操纵局势和促使事情发生。您具有责任感，信守承诺，喜欢条理性并且能记住和组织安排许多细节。您很客观，有条理性和分析能力，以及很强的推理能力，除了符合逻辑外，其他没有什么可以使您信服。您很现实、有头脑、讲求实际，更感兴趣的是“真实的事物”，而不是抽象的想法和理论。",
+      "recommendation": "您的特质让您在制度健全、等级分明、比较稳定的企业中表现出色。\n具体来说，这些职业很适合您：大、中型外资企业员工、业务经理、中层经理（多分布在财务、营运、物流采购、销售管理、项目管理、工厂管理、人事行政部门）、职业经理人、各类中小型企业主管和业主等。",
+      "image_url": "/images/mbti/estj.png"
+    },
+    "ESFJ": {
+      "title": "执政官 (ESFJ)",
+      "college_motto": "大家开心就好！来来来都别客气，就跟到自个儿家一样！",
+      "description": "作为一个ESFJ，您通过直接的行动和合作，积极地以真实、实际的方法帮助别人。您友好、富有同情心和责任感。您把同别人的关系放在十分重要的位置，并为维持和睦的人际关系付出巨大努力。您很现实，讲求实际、实事求是和安排有序，能记住重要的事情和细节。您非常传统化，能恪守自己的责任与承诺，是组织机构中积极主动和乐于合作的成员。",
+      "recommendation": "您的特质让您在与人打交道的服务和管理岗位上如鱼得水。\n具体来说，这些职业很适合您：办公室行政或管理人员、秘书、总经理助理、项目经理、客户服务部人员、采购和物流管理人员、内科医生及其它各类医生、牙科医生、护士、健康护理指导师、饮食学/营养学专家、小学教师（班主任）、学校管理者、银行/酒店/大型企业客户服务代表、客户经理、公共关系部主任、商场经理、餐饮业业主和管理人员等。",
+      "image_url": "/images/mbti/esfj.png"
+    },
+    "ENFJ": {
+      "title": "主人公 (ENFJ)",
+      "college_motto": "你绝对可以的！相信我，也相信你自己！（已经帮你规划好成功路线了）",
+      "description": "作为一个ENFJ，您热爱人类，认为人的感情是最重要的。您很自然地关心别人，以热情的态度对待生命。您精力充沛、满腔热情、富有责任感、锲而不舍。您敏锐地意识到什么是合适的行为，彬彬有礼、富有魅力、深谙社会。您是天然的领导者，受人欢迎而有魅力，并且长于外交，是出色的传播者。您富有同情心和理解力，愿意培养和支持他人，总能看到别人身上的优点。",
+      "recommendation": "基于您的特质，您在以下领域可能会有出色的表现：培训、咨询、教育、新闻传播、公共关系、文化艺术。\n具体来说，这些职业很适合您：人力资源培训主任、销售/沟通/团队培训员、职业指导顾问、心理咨询工作者、大学教师（人文学科类）、教育学/心理学研究人员、记者、撰稿人、节目主持人（新闻、采访类）、公共关系专家、社会活动家、文艺工作者、平面设计师、画家、音乐家等。",
+      "image_url": "/images/mbti/enfj.png"
+    },
+    "ENTJ": {
+      "title": "指挥官 (ENTJ)",
+      "college_motto": "时间宝贵，不要浪费在无意义的会议上。按我说的做，我们都能早点下班。",
+      "description": "作为一个ENTJ，您是伟大的领导者和决策人。您能轻易地看出事物具有的可能性，并很高兴指导别人，使想象成为现实。您是头脑灵活的思想家和伟大的长远规划者，对要求推理和才智的任何事情都很擅长。您乐于完成需要解决的复杂问题，并大胆地力求掌握使您感兴趣的任何事情。您热心而真诚，往往能够控制所处的任何环境，是出色的群众组织者。",
+      "recommendation": "基于您的特质，您在以下领域可能会有出色的表现：工商业、政界、金融和投资领域、管理咨询、培训、专业性领域。\n具体来说，这些职业很适合您：各类企业的高级主管、总经理、企业主、社会团体负责人、政治家、投资银行家、风险投资家、股票经纪人、公司财务经理、财务顾问、经济学家、企业管理/战略顾问、项目顾问、专项培训师、律师、法官、知识产权专家、大学教师、科技专家等。",
+      "image_url": "/images/mbti/entj.png"
+    }
+  }
+}

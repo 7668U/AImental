@@ -24,7 +24,7 @@
     <scroll-view 
       class="list-container" 
       scroll-y="true"
-      style="padding-top: {{totalHeaderHeight}}px;"
+      style="padding-top: {{totalHeaderHeight }}px;"
     >
       <block wx:if="{{chatList.length > 0}}">
         <view class="chat-item" wx:for="{{chatList}}" wx:key="id" bindtap="navigateToChat" data-ai="{{item}}">
