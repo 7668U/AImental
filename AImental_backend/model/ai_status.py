@@ -128,7 +128,8 @@ class AiStatusTable:
         """
         start_of_day = datetime.combine(target_date, datetime.min.time()).replace(tzinfo=BEIJING_TZ)
         end_of_day = datetime.combine(target_date, datetime.max.time()).replace(tzinfo=BEIJING_TZ)
-
+        print(f"获取 {character_id} 在 {target_date} 的日程安排...")
+        print(f"开始时间: {start_of_day}, 结束时间: {end_of_day}")
         query = (AiStatus
                 .select()
                 .where(
@@ -137,13 +138,35 @@ class AiStatusTable:
                     (AiStatus.end_time <= end_of_day)
                 )
                 .order_by(AiStatus.start_time))
-
+        print(f"查询结果: {query.count()} 条记录")
+        print("查询结果:", query)  
         # 将查询结果转换为字典列表，方便后续处理
         schedule_list = []
         for status in query:
+            # --- 【核心修复】 ---
+            start_time_str = ''
+            if status.start_time:  # 首先确保不是None
+                try:
+                    # 检查类型，如果是字符串则解析，如果是datetime则直接使用
+                    dt_obj = status.start_time if isinstance(status.start_time, datetime) else datetime.fromisoformat(str(status.start_time))
+                    start_time_str = dt_obj.strftime('%H:%M')
+                except (ValueError, TypeError):
+                    # 如果解析失败，记录一个警告，但程序不崩溃
+                    logger.warning(f"无法解析的日期时间格式: {status.start_time}")
+
+            end_time_str = ''
+            if status.end_time:  # 同样处理 end_time
+                try:
+                    # 检查类型，如果是字符串则解析，如果是datetime则直接使用
+                    dt_obj = status.end_time if isinstance(status.end_time, datetime) else datetime.fromisoformat(str(status.end_time))
+                    end_time_str = dt_obj.strftime('%H:%M')
+                except (ValueError, TypeError):
+                    logger.warning(f"无法解析的日期时间格式: {status.end_time}")
+            # --- ---------------- ---
+            print(f"状态记录: {status.id}, 开始时间: {status.start_time}, 结束时间: {status.end_time}, 分类: {status.status_category}, 描述: {status.status_text}, 专注等级: {status.focus_level}")
             schedule_list.append({
-                "start_time": status.start_time.strftime('%H:%M'),
-                "end_time": status.end_time.strftime('%H:%M'),
+                "start_time": start_time_str,
+                "end_time": end_time_str,
                 "status_category": status.status_category,
                 "status_description": status.status_text,
                 "focus_level": status.focus_level

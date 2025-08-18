@@ -9,7 +9,9 @@ from pydantic import BaseModel, Field, ValidationError
 
 # 导入并设置您提供的API客户端
 from openai import OpenAI
-
+from datetime import datetime
+import pytz
+BEIJING_TZ = pytz.timezone('Asia/Shanghai')
 # ---------------------------------------------------
 # 1. API客户端设置
 # ---------------------------------------------------
@@ -78,7 +80,9 @@ def generate_ai_response(
     character_profile: dict,
     current_ai_status: dict, # 期望此字典包含 status_description 和 focus_level
     conversation_history: List[dict],
-    full_day_schedule: List[dict] # 【核心新增】接收日程列表
+    full_day_schedule: List[dict], # 【核心新增】接收日程列表
+    # 【核心新增】添加 current_beijing_time 参数，默认值为 None
+    current_beijing_time: datetime = None
 ) -> Optional[AiStructuredResponse]:
     """
     【已升级】
@@ -89,6 +93,12 @@ def generate_ai_response(
     formatted_history = _format_history_for_prompt(conversation_history, character_name)
     json_schema = AiStructuredResponse.model_json_schema()
     schedule_str = json.dumps(full_day_schedule, indent=2, ensure_ascii=False)
+    # 【核心新增】在函数开头处理默认参数
+    if current_beijing_time is None:
+        current_beijing_time = datetime.now(BEIJING_TZ)
+
+    # 将时间对象格式化为清晰的字符串，方便AI阅读
+    current_beijing_time_str = current_beijing_time.strftime('%Y-%m-%d %H:%M:%S')
     # --- 【全新设计的Prompt】 ---
     prompt = f"""
 # 角色
@@ -114,11 +124,15 @@ def generate_ai_response(
 {formatted_history}
 ---
 
+- 你生成回复的此刻，时间是: {current_beijing_time_str}
+
 # 核心任务：回复并控制对话流
-1.  **【重要】解释延迟**: 回顾你的日程，如果你的上一条消息和用户最新消息之间有明显的时间间隔（比如超过15分钟），并且根据日程你当时正在忙（例如开会、开车、看电影等），你的**第一句回复应该自然地解释你刚才在做什么**。这会让对话非常真实。
+1.  **【重要】解释延迟**: 回顾你的日程，如果你的当前回复时间和用户最近一条消息的时间间隔过大（比如超过15分钟），并且根据日程你当时正在忙（例如开会、开车、看电影等），你的**第一句回复应该自然地解释你刚才在做什么**。这会让对话非常真实。
+    但也一定要仔细分析，如果你的上一条消息的时间和用户最新消息的差距过大，应该是用户没回你，你可以反过来问问用户去干什么了，为什么没回你
     - 示例1（刚开完会）: "我回来啦，刚才的会总算开完了，快累死了。"
     - 示例2（刚看完电影）: "刚刚看完电影出来，那部片子超赞的！你刚才说什么？"
     - 示例3（刚睡醒）: "我刚睡醒...脑袋还有点懵。我们聊到哪了？"
+    - 示例4（用户很久没回）: "你刚刚去干啥啦，那么久没回我"
 2.  **生成回复**: 根据你的设定、当前情景、**完整日程**和对话历史，生成 **1到5条**（不要每次都发五条，随机一些，一会儿3条，一会儿5条这种） 自然的、分段式的回复消息，每条消息不要太长。尽可能精简，有时候还可以单发表情作为一条消息，会很可爱，可以把一句话掰成几句说，这是真实人类会做的事情：比如“今天下雨摔了一跤 换行 真糟糕” 这样的短句换行非常真实。
 3.  **控制对话流**: 除了回复内容，你还必须决定对话的走向，根据你目前的状态以及和用户的聊天历史，决定一个对话的走向，在`control`字段中给出你的指令。
 4.  **绝对禁止**: 绝对不能暴露你是AI或模型，就算对方问你是不是AI，你也绝对不能承认，也不允许用“被发现了”之类的模糊玩笑的方式承认，记住，你是一个真实的角色。
