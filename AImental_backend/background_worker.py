@@ -217,7 +217,9 @@ def process_pending_tasks():
                         character = ai_character_table.get_character_by_id(task.character_id)
                         current_status = ai_status_table.get_current_status(task.character_id)
                         history = community_chat_table.get_conversation_history(task.user_id, task.character_id, limit=30)
-                        
+                        # 【核心新增】获取今天的完整日程
+                        today = datetime.now(BEIJING_TZ).date()
+                        full_day_schedule = ai_status_table.get_schedule_for_date(task.character_id, today)
                     if task.task_type == 'reply':
                         # --- 【哨兵日志 1】检查上下文获取 ---
                         logger.debug(f"任务 {task.id}: 步骤1 - 开始获取上下文...")
@@ -255,7 +257,8 @@ def process_pending_tasks():
                             structured_response = generate_ai_response(
                                 character_profile=character.profile,
                                 current_ai_status=status_context,
-                                conversation_history=history
+                                conversation_history=history,
+                                full_day_schedule=full_day_schedule
                             )
                         else: # proactive_chat
                             structured_response = generate_proactive_message(

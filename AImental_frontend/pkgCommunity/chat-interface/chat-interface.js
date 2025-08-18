@@ -373,14 +373,35 @@ Page({
   },
 
   formatMessages: function(messages) {
-    if (!messages || !Array.isArray(messages)) return [];
-    return messages.map(msg => ({
-      ...msg,
-      id: (msg.timestamp || Date.now()) + '_' + Math.random().toString(36).substr(2, 9),
-      time: this.formatTimestamp(msg.timestamp),
-      status: msg.role === 'user' ? 'read' : 'received'
-    }));
-  },
+      if (!messages || !Array.isArray(messages)) return [];
+    
+      const lastMessage = messages[messages.length - 1];
+    
+      return messages.map((msg, index) => {
+        let status = 'received'; // AI消息的默认状态
+    
+        if (msg.role === 'user') {
+          // 【核心逻辑】判断用户消息的状态
+          // 默认是 'sent' (送达)
+          status = 'sent'; 
+    
+          // 如果这不是最后一条消息，并且下一条消息是AI发的，
+          // 那么这条用户消息就可以被认为是 'read' (已读)
+          const nextMessage = messages[index + 1];
+          if (nextMessage && nextMessage.role === 'ai') {
+            status = 'read';
+          }
+        }
+    
+        return {
+          ...msg,
+          id: (msg.timestamp || Date.now()) + '_' + Math.random().toString(36).substr(2, 9),
+          time: this.formatTimestamp(msg.timestamp),
+          // 使用我们刚刚计算出的智能状态
+          status: status 
+        }
+      });
+    },
 
   navigateBack: function() {
     wx.navigateBack();
