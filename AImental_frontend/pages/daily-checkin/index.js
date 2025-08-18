@@ -7,7 +7,7 @@ function request(options) {
     const token = wx.getStorageSync('token');
     wx.request({
       ...options,
-      url: `http://127.0.0.1:8000/api/v1${options.url}`,
+      url: `https://api.feelyourself.cn/api/v1${options.url}`,
       header: {
         ...options.header,
         'Authorization': `Bearer ${token}`
@@ -87,7 +87,7 @@ Page({
         if (loginRes.code) {
           // 调用你原来的后端登录接口
           wx.request({
-            url: 'http://127.0.0.1:8000/api/v1/users/login',
+            url: 'https://api.feelyourself.cn/api/v1/users/login',
             method: 'POST',
             data: { code: loginRes.code },
             success: (tokenRes) => {

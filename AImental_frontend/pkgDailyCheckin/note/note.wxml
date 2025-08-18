@@ -104,7 +104,7 @@
                 value="{{currentNote.content}}" 
                 placeholder="在此记录..."
                 bindinput="onModalInput"
-                data-field="noteContent" />
+                data-field="content" />
     </view>
     <view class="modal-footer">
       <button class="modal-btn cancel" bindtap="hideModals">取消</button>

@@ -279,9 +279,9 @@ def process_pending_tasks():
                         delay_minutes = control.next_delay_minutes
                         
                         # 【硬规则】延迟上限器
-                        if current_status.focus_level == 'HIGH' and delay_minutes > 60:
-                            logger.warning(f"AI为HIGH专注状态请求了过长延迟({delay_minutes}分钟)，系统强制修正为60分钟。")
-                            delay_minutes = 60
+                        if current_status.focus_level == 'HIGH' and delay_minutes > 20:
+                            logger.warning(f"AI为HIGH专注状态请求了过长延迟({delay_minutes}分钟)，系统强制修正为10分钟。")
+                            delay_minutes = 10
                         
                         if control.next_state == 'PAUSE_CHAT':
                             resume_time = datetime.now(BEIJING_TZ) + timedelta(minutes=delay_minutes)

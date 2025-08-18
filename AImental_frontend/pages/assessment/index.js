@@ -1,7 +1,7 @@
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 // pages/assessment/index.js
 
-const SERVER_BASE_URL = 'http://127.0.0.1:8000';
+const SERVER_BASE_URL = 'https://api.feelyourself.cn';
 const DEFAULT_ICON_PATH = '/images/assessment/default.png';
 const DEFAULT_CATEGORY = '专业测试';
 

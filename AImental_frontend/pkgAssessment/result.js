@@ -1,7 +1,7 @@
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 // pages/assessment/result.js (渐变条 + 文字标签最终版)
 
-const SERVER_BASE_URL = 'http://127.0.0.1:8000';
+const SERVER_BASE_URL = 'https://api.feelyourself.cn';
 const ASSESSMENTS_API_URL = `${SERVER_BASE_URL}/api/v1/assessments`;
 
 Page({

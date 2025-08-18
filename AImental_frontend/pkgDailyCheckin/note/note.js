@@ -2,7 +2,7 @@
 
 
 
-const BASE_URL = getApp().globalData?.apiBase || 'http://127.0.0.1:8000/api/v1';
+const BASE_URL = getApp().globalData?.apiBase || 'https://api.feelyourself.cn/api/v1';
 
 
 

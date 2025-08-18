@@ -1,6 +1,6 @@
 // pages/ai-community/chat-list/chat-list.js
 
-const SERVER_URL = 'http://127.0.0.1:8000';
+const SERVER_URL = 'https://api.feelyourself.cn';
 const app = getApp();
 
 // --- 统一网络请求函数 ---

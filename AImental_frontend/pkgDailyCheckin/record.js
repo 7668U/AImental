@@ -101,7 +101,7 @@ Page({
 
     wx.showLoading({ title: '加载中...' });
     wx.request({
-      url: `http://127.0.0.1:8000/api/v1/checkin/date/${dateToFetch}`,
+      url: `https://api.feelyourself.cn/api/v1/checkin/date/${dateToFetch}`,
       method: 'GET',
       header: { 'Authorization': `Bearer ${token}` },
       success: (res) => {
@@ -151,7 +151,7 @@ Page({
       statuses: newStatuses,
       colors: newColors,
       textContent: data.text_content || '',
-      imageUrl: data.image_url ? `http://127.0.0.1:8000${data.image_url}` : '',
+      imageUrl: data.image_url ? `https://api.feelyourself.cn${data.image_url}` : '',
     });
   },
   
@@ -252,7 +252,7 @@ Page({
    */
   createCheckinRecord(data) {
     this.sendRequest({
-      url: 'http://127.0.0.1:8000/api/v1/checkin/',
+      url: 'https://api.feelyourself.cn/api/v1/checkin/',
       method: 'POST',
       data: data,
       successCallback: (res) => {
@@ -272,7 +272,7 @@ Page({
    */
   updateCheckinRecord(data) {
     this.sendRequest({
-      url: `http://127.0.0.1:8000/api/v1/checkin/${this.data.checkinId}`,
+      url: `https://api.feelyourself.cn/api/v1/checkin/${this.data.checkinId}`,
       method: 'PUT',
       data: data,
       successCallback: (res) => {
@@ -292,7 +292,7 @@ Page({
   uploadImageForCheckin(checkinId, filePath, successTitle) {
     const token = wx.getStorageSync('token');
     wx.uploadFile({
-      url: `http://127.0.0.1:8000/api/v1/checkin/${checkinId}/image`,
+      url: `https://api.feelyourself.cn/api/v1/checkin/${checkinId}/image`,
       filePath: filePath, name: 'image', header: { 'Authorization': `Bearer ${token}` },
       success: (res) => {
         if (res.statusCode === 200) {

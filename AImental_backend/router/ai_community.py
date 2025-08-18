@@ -302,15 +302,18 @@ async def send_message(
         logger.info(f"连续对话模式，为AI({character_id})设置短延迟: {delay.seconds}秒")
     else: # PAUSED
         # 如果对话已暂停，参考AI的宏观状态（日程）
-        base_delay_minutes = current_status.reply_delay_minutes if current_status else 2
+        # base_delay_minutes = current_status.reply_delay_minutes if current_status else 2
         
-        # 硬规则：非睡眠状态下，长延迟上限为10分钟
-        capped_delay_minutes = min(base_delay_minutes, 10)
-        if base_delay_minutes > 10:
-            logger.info(f"AI({character_id})原计划延迟 {base_delay_minutes} 分钟，系统上限为10分钟，已修正为 {capped_delay_minutes} 分钟。")
+        # # 硬规则：非睡眠状态下，长延迟上限为10分钟
+        # capped_delay_minutes = min(base_delay_minutes, 10)
+        # if base_delay_minutes > 10:
+        #     logger.info(f"AI({character_id})原计划延迟 {base_delay_minutes} 分钟，系统上限为10分钟，已修正为 {capped_delay_minutes} 分钟。")
 
-        delay = timedelta(minutes=capped_delay_minutes) + timedelta(seconds=random.randint(0, 59))
-        logger.info(f"非连续对话模式，为AI({character_id})根据日程状态设置长延迟: {delay.total_seconds() / 60:.1f}分钟")
+        # delay = timedelta(minutes=capped_delay_minutes) + timedelta(seconds=random.randint(0, 59))
+        
+        delay = timedelta(seconds=3)
+        logger.info(f"对话已暂停，但用户再次发言，触发快速响应机制，强制延迟为 {delay.seconds} 秒。")
+        # logger.info(f"非连续对话模式，为AI({character_id})根据日程状态设置长延迟: {delay.total_seconds() / 60:.1f}分钟")
     
     execute_at = datetime.now(BEIJING_TZ) + delay
     
@@ -577,7 +580,10 @@ async def get_discoverable_characters(user_id: str = Depends(get_current_user_id
         # 注意：这里的 .where(...) 我用一个有效的查询代替了，请确保你的代码是完整的
         # 如果你的 Friendship 表还没有数据，这个查询会返回空，是正常的
         try:
-            excluded_character_query = Friendship.select(Friendship.character).where(Friendship.user == user_id)
+            excluded_character_query = Friendship.select(Friendship.character).where(
+                (Friendship.user == user_id) & 
+                (Friendship.status.in_(['pending', 'accepted']))
+            )
             excluded_character_ids = [friendship.character.id for friendship in excluded_character_query]
             # --- 日志 3: 打印排除了多少个角色 ---
             logger.debug(f"需要排除的角色ID列表: {excluded_character_ids}")
