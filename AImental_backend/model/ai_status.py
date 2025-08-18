@@ -121,6 +121,34 @@ class AiStatusTable:
         ).exists()
         
         return query
+    def get_schedule_for_date(self, character_id: str, target_date: date) -> list:
+        """
+        【新增】获取指定角色在特定一整天的所有日程安排。
+        返回一个按开始时间排序的 AiStatus 对象列表。
+        """
+        start_of_day = datetime.combine(target_date, datetime.min.time()).replace(tzinfo=BEIJING_TZ)
+        end_of_day = datetime.combine(target_date, datetime.max.time()).replace(tzinfo=BEIJING_TZ)
 
+        query = (AiStatus
+                .select()
+                .where(
+                    (AiStatus.character == character_id) &
+                    (AiStatus.start_time >= start_of_day) &
+                    (AiStatus.end_time <= end_of_day)
+                )
+                .order_by(AiStatus.start_time))
+
+        # 将查询结果转换为字典列表，方便后续处理
+        schedule_list = []
+        for status in query:
+            schedule_list.append({
+                "start_time": status.start_time.strftime('%H:%M'),
+                "end_time": status.end_time.strftime('%H:%M'),
+                "status_category": status.status_category,
+                "status_description": status.status_text,
+                "focus_level": status.focus_level
+            })
+
+        return schedule_list
 # --- 实例化 Table Access 对象 ---
 ai_status_table = AiStatusTable(status_db)
