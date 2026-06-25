@@ -28,7 +28,7 @@
             <image 
               wx:if="{{item.checkin}}" 
               class="mood-icon" 
-              src="/images/daily-checkin/emotion/{{item.checkin.mood}}.png"
+              src="/images/daily-checkin/record/mood24/{{item.checkin.mood_icon || item.checkin.mood_id || item.checkin.mood}}.png"
             ></image>
             <text class="day-number">{{item.day > 0 ? item.day : ''}}</text>
           </view>

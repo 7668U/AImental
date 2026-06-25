@@ -1,7 +1,8 @@
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
+const { loginWithBackend } = require('../../utils/auth.js');
 // pages/assessment/index.js
 
-const SERVER_BASE_URL = 'https://api.feelyourself.cn';
+const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 const DEFAULT_ICON_PATH = '/images/assessment/default.png';
 const DEFAULT_CATEGORY = '专业测试';
 
@@ -66,35 +67,21 @@ Page({
 
   // --- [修改] 采用 async/await 重构登录函数，逻辑更清晰 ---
   async handleLogin() {
-    wx.showLoading({ title: '正在登录...' });
+    wx.showLoading({ title: '???...' });
     try {
-      // 1. 调用微信登录获取 code
-      const loginRes = await wx.login();
-
-      // 2. 将 code 发送到后端换取 token
-      //    注意这里的 request 是我们上面封装的 Promise 版本
-      const tokenRes = await request({
-        url: '/users/login', // request函数会自动拼接前缀
-        method: 'POST',
-        data: { code: loginRes.code }
-      });
-      
-      // 3. 登录成功，存储 token
+      const tokenRes = await loginWithBackend(SERVER_BASE_URL + '/api/v1');
       if (tokenRes.access_token) {
         wx.setStorageSync('token', tokenRes.access_token);
         wx.hideLoading();
-        wx.showToast({ title: '登录成功', icon: 'success' });
-        
-        // 4. 刷新页面为已登录状态
+        wx.showToast({ title: '????', icon: 'success' });
         this.checkLoginStatus();
       } else {
-        throw new Error('后端未返回有效token');
+        throw new Error('???????token');
       }
-
     } catch (error) {
       wx.hideLoading();
-      wx.showToast({ title: '登录失败，请稍后重试', icon: 'none' });
-      console.error("登录流程失败: ", error);
+      wx.showToast({ title: '??????????', icon: 'none' });
+      console.error('??????: ' , error);
     }
   },
 

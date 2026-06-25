@@ -4,6 +4,7 @@
     "pages/assessment/index",
     "pages/ai-community/chat-list/chat-list",
     "pages/daily-checkin/index",
+    "pages/paper-airplane/index",
     "pages/profile/index",
     "components/login-prompt/login-prompt"
   ],
@@ -73,16 +74,16 @@
         "selectedIconPath": "/images/tabbar/assessment_selected.png"
       },
       {
-        "pagePath": "pages/ai-community/chat-list/chat-list",
-        "text": "心灵社区",
-        "iconPath": "/images/community.png",
-        "selectedIconPath": "/images/community_selected.png"
-      },
-      {
         "pagePath": "pages/daily-checkin/index",
         "text": "心情日记",
         "iconPath": "/images/tabbar/checkin_default.png",
         "selectedIconPath": "/images/tabbar/checkin_selected.png"
+      },
+      {
+        "pagePath": "pages/paper-airplane/index",
+        "text": "纸飞机",
+        "iconPath": "/images/tabbar/paper_airplane_default.png",
+        "selectedIconPath": "/images/tabbar/paper_airplane_selected.png"
       },
       {
         "pagePath": "pages/profile/index",
@@ -93,5 +94,13 @@
     ]
   },
   "style": "v2",
-  "sitemapLocation": "sitemap.json"
+  "sitemapLocation": "sitemap.json",
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于在地图中选择打卡位置"
+    }
+  },
+  "requiredPrivateInfos": [
+    "chooseLocation"
+  ]
 }

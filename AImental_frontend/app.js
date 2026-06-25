@@ -156,7 +156,7 @@ App({
   
         this.socketTask = wx.connectSocket({
   
-          url: 'wss://api.feelyourself.cn/api/v1/community/ws?token=' + token,
+          url: 'ws://127.0.0.1:8000/api/v1/community/ws?token=' + token,
   
         });
   

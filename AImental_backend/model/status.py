@@ -4,15 +4,68 @@ import uuid
 import time
 import datetime 
 import calendar
+import json
 import os
 import shutil
 from typing import Optional, List, Dict, Any
 
 # Import necessary types from peewee and pydantic
-from peewee import Model, CharField, IntegerField, TextField, IntegrityError, fn
+from peewee import Model, CharField, IntegerField, TextField, FloatField, IntegrityError, fn
 from pydantic import BaseModel, Field
 from fastapi import UploadFile
 import random
+from .checkin_dimensions import (
+    MOOD_OPTIONS,
+    STATUS_OPTIONS,
+    COLOR_OPTIONS,
+    enrich_checkin_payload,
+    get_mood_meta,
+    get_color_meta,
+    build_status_meta_from_tags,
+    load_list,
+)
+
+MAX_CHECKIN_IMAGES = 3
+
+
+def normalize_image_urls(value: Any, fallback_url: Optional[str] = None) -> List[str]:
+    """Returns a deduplicated, capped list of check-in image URLs."""
+    raw_items = []
+    if isinstance(value, list):
+        raw_items.extend(value)
+    elif isinstance(value, str):
+        stripped = value.strip()
+        if stripped:
+            try:
+                parsed = json.loads(stripped)
+                if isinstance(parsed, list):
+                    raw_items.extend(parsed)
+                else:
+                    raw_items.append(stripped)
+            except json.JSONDecodeError:
+                raw_items.append(stripped)
+
+    if fallback_url:
+        raw_items.append(fallback_url)
+
+    urls = []
+    seen = set()
+    for item in raw_items:
+        url = str(item).strip() if item is not None else ""
+        if url and url not in seen:
+            seen.add(url)
+            urls.append(url)
+        if len(urls) >= MAX_CHECKIN_IMAGES:
+            break
+    return urls
+
+
+def dump_image_urls(value: Any, fallback_url: Optional[str] = None) -> str:
+    return json.dumps(
+        normalize_image_urls(value, fallback_url),
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
 
 # Import the database connection as requested
 try:
@@ -31,10 +84,26 @@ class Checkin(Model):
     id = CharField(primary_key=True, max_length=36, default=lambda: str(uuid.uuid4()))
     user_id = CharField(max_length=36, index=True)
     mood = CharField(max_length=50)
+    mood_id = CharField(max_length=50, null=True)
+    mood_family = CharField(max_length=50, null=True)
+    mood_valence = CharField(max_length=20, null=True)
+    mood_energy = CharField(max_length=20, null=True)
     color = CharField(max_length=20) # e.g., "#RRGGBB"
+    color_id = CharField(max_length=50, null=True)
+    color_label = CharField(max_length=50, null=True)
+    color_group = CharField(max_length=50, null=True)
+    color_tone = CharField(max_length=20, null=True)
+    color_description = CharField(max_length=255, null=True)
     tags = CharField(max_length=255, null=True) # Comma-separated tags
+    status_ids = TextField(null=True) # JSON list
+    status_families = TextField(null=True) # JSON list
     text_content = TextField(null=True)
     image_url = CharField(max_length=1024, null=True)
+    image_urls = TextField(null=True) # JSON list
+    location_name = CharField(max_length=255, null=True)
+    location_address = CharField(max_length=1024, null=True)
+    location_latitude = FloatField(null=True)
+    location_longitude = FloatField(null=True)
     timestamp = IntegerField(default=lambda: int(time.time()))
     updated_at = IntegerField(default=lambda: int(time.time()))
 
@@ -53,6 +122,22 @@ class CheckinBaseModel(BaseModel):
     tags: Optional[str] = None
     text_content: Optional[str] = None
     image_url: Optional[str] = None
+    image_urls: Optional[List[str]] = None
+    mood_id: Optional[str] = None
+    mood_family: Optional[str] = None
+    mood_valence: Optional[str] = None
+    mood_energy: Optional[str] = None
+    status_ids: Optional[List[str]] = None
+    status_families: Optional[List[str]] = None
+    color_id: Optional[str] = None
+    color_label: Optional[str] = None
+    color_group: Optional[str] = None
+    color_tone: Optional[str] = None
+    color_description: Optional[str] = None
+    location_name: Optional[str] = None
+    location_address: Optional[str] = None
+    location_latitude: Optional[float] = None
+    location_longitude: Optional[float] = None
 
 class CheckinModel(CheckinBaseModel):
     """The full Pydantic Model for a Checkin response."""
@@ -60,6 +145,9 @@ class CheckinModel(CheckinBaseModel):
     user_id: str
     timestamp: int
     updated_at: int
+    mood_icon: Optional[str] = None
+    status_items: List[Dict[str, Any]] = Field(default_factory=list)
+    image_urls: List[str] = Field(default_factory=list)
     
     class Config:
         from_attributes = True
@@ -74,15 +162,45 @@ class CheckinTable:
         self.db = db_connection
         # This safely creates the table if it doesn't exist.
         self.db.create_tables([Checkin], safe=True)
+        self._ensure_schema()
         # self.create_dummy_data_for_month()
+
+    def _ensure_schema(self):
+        """Adds V2 dimension columns to existing SQLite tables without data loss."""
+        existing_columns = {
+            row[1] for row in self.db.execute_sql("PRAGMA table_info(checkins)").fetchall()
+        }
+        migrations = {
+            "mood_id": "VARCHAR(50)",
+            "mood_family": "VARCHAR(50)",
+            "mood_valence": "VARCHAR(20)",
+            "mood_energy": "VARCHAR(20)",
+            "color_id": "VARCHAR(50)",
+            "color_label": "VARCHAR(50)",
+            "color_group": "VARCHAR(50)",
+            "color_tone": "VARCHAR(20)",
+            "color_description": "VARCHAR(255)",
+            "status_ids": "TEXT",
+            "status_families": "TEXT",
+            "image_urls": "TEXT",
+            "location_name": "VARCHAR(255)",
+            "location_address": "VARCHAR(1024)",
+            "location_latitude": "REAL",
+            "location_longitude": "REAL",
+        }
+        for column_name, column_type in migrations.items():
+            if column_name not in existing_columns:
+                self.db.execute_sql(
+                    f"ALTER TABLE checkins ADD COLUMN {column_name} {column_type}"
+                )
         
     def create_dummy_data_for_month(self, user_id: str = "c959d470-64e7-45fe-8942-45ee05d0f153"):
         """
         Generates a full month of random check-in data for a user.
         """
-        mood_choices = ['开心', '平静', '难过', '生气', '放松', '迷茫', '尴尬', '疲惫', '兴奋']
-        tag_choices = ['工作', '学习', '美食', '生病', '远足', '娱乐', '躺平', '运动']
-        color_choices = ['#FFC107', '#81D4FA', '#A5D6A7', '#B0BEC5', '#F48FB1', '#C5CAE9', '#FF8A80', '#FFF59D', '#80CBC4', '#7986CB', '#BCAAA4', '#F5F5F5']
+        mood_choices = [item["label"] for item in MOOD_OPTIONS]
+        tag_choices = [item["label"] for item in STATUS_OPTIONS]
+        color_choices = [item["hex"] for item in COLOR_OPTIONS]
 
         today = datetime.datetime.now()
         year, month = today.year, today.month
@@ -103,7 +221,7 @@ class CheckinTable:
             
             checkin_timestamp = int(checkin_dt_obj.timestamp())
 
-            dummy_record = {
+            dummy_record = enrich_checkin_payload({
                 "user_id": user_id,
                 "mood": random.choice(mood_choices),
                 "tags": random.choice(tag_choices),
@@ -111,7 +229,7 @@ class CheckinTable:
                 "text_content": f"这是{month}月{day}日的自动生成记录。",
                 "timestamp": checkin_timestamp,
                 "updated_at": checkin_timestamp
-            }
+            })
             
             Checkin.create(**dummy_record)
             created_count += 1
@@ -119,12 +237,21 @@ class CheckinTable:
         print(f"Dummy data generation complete. Created {created_count} new records.")
         return {"message": f"Process complete. Created {created_count} new records."}
 
+    def _prepare_checkin_payload(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        data = enrich_checkin_payload(payload)
+        if "image_urls" in data or "image_url" in data:
+            image_urls = normalize_image_urls(data.get("image_urls"), data.get("image_url"))
+            data["image_urls"] = dump_image_urls(image_urls)
+            data["image_url"] = image_urls[0] if image_urls else None
+        return data
+
     def create_checkin(self, user_id: str, data: CheckinBaseModel) -> Optional[Checkin]:
         """Creates a new checkin record."""
         try:
+            payload = self._prepare_checkin_payload(data.model_dump(exclude_unset=True))
             checkin = Checkin.create(
                 user_id=user_id,
-                **data.model_dump(exclude_unset=True)
+                **payload
             )
             return checkin
         except IntegrityError:
@@ -191,7 +318,7 @@ class CheckinTable:
 
     def update_checkin(self, checkin_id: str, data: CheckinBaseModel) -> Optional[Checkin]:
         """Updates an existing checkin record."""
-        update_data = data.model_dump(exclude_unset=True)
+        update_data = self._prepare_checkin_payload(data.model_dump(exclude_unset=True))
         update_data['updated_at'] = int(time.time())
 
         query = Checkin.update(update_data).where(Checkin.id == checkin_id)
@@ -217,7 +344,7 @@ class CheckinTable:
             user_specific_dir = os.path.join(base_upload_dir, user_id, today_str)
             os.makedirs(user_specific_dir, exist_ok=True)
             file_extension = os.path.splitext(image_file.filename)[1]
-            new_filename = f"{int(time.time())}{file_extension}"
+            new_filename = f"{int(time.time())}-{uuid.uuid4().hex[:8]}{file_extension}"
             save_path = os.path.join(user_specific_dir, new_filename)
             
             # --- FIX: Perform the string replacement outside of the f-string ---
@@ -235,9 +362,66 @@ class CheckinTable:
             
     def update_image_url(self, checkin_id: str, image_url: str) -> bool:
         """Updates only the image_url for a given check-in."""
-        query = Checkin.update(image_url=image_url).where(Checkin.id == checkin_id)
+        image_urls = normalize_image_urls([image_url])
+        query = Checkin.update(
+            image_url=image_urls[0] if image_urls else None,
+            image_urls=dump_image_urls(image_urls),
+            updated_at=int(time.time()),
+        ).where(Checkin.id == checkin_id)
         rows_affected = query.execute()
         return rows_affected > 0
+
+    def get_image_urls(self, checkin: Checkin) -> List[str]:
+        return normalize_image_urls(
+            getattr(checkin, "image_urls", None),
+            getattr(checkin, "image_url", None),
+        )
+
+    def set_image_urls(self, checkin_id: str, image_urls: List[str]) -> Optional[Checkin]:
+        urls = normalize_image_urls(image_urls)
+        if len(image_urls) > MAX_CHECKIN_IMAGES or len(urls) > MAX_CHECKIN_IMAGES:
+            return None
+        query = Checkin.update(
+            image_url=urls[0] if urls else None,
+            image_urls=dump_image_urls(urls),
+            updated_at=int(time.time()),
+        ).where(Checkin.id == checkin_id)
+        rows_affected = query.execute()
+        if rows_affected > 0:
+            return self.get_checkin_by_id(checkin_id)
+        return None
+
+    def append_image_urls(self, checkin_id: str, image_urls: List[str]) -> Optional[Checkin]:
+        checkin = self.get_checkin_by_id(checkin_id)
+        if not checkin:
+            return None
+        next_urls = self.get_image_urls(checkin) + normalize_image_urls(image_urls)
+        if len(next_urls) > MAX_CHECKIN_IMAGES:
+            return None
+        return self.set_image_urls(checkin_id, next_urls)
+
+    def replace_image_url(self, checkin_id: str, image_index: int, image_url: str) -> Optional[Checkin]:
+        checkin = self.get_checkin_by_id(checkin_id)
+        if not checkin:
+            return None
+        urls = self.get_image_urls(checkin)
+        if image_index < 0 or image_index > len(urls) or image_index >= MAX_CHECKIN_IMAGES:
+            return None
+        if image_index == len(urls):
+            urls.append(image_url)
+        else:
+            urls[image_index] = image_url
+        return self.set_image_urls(checkin_id, urls)
+
+    def delete_image_url(self, checkin_id: str, image_index: int) -> Optional[Checkin]:
+        checkin = self.get_checkin_by_id(checkin_id)
+        if not checkin:
+            return None
+        urls = self.get_image_urls(checkin)
+        if image_index < 0 or image_index >= len(urls):
+            return None
+        urls.pop(image_index)
+        return self.set_image_urls(checkin_id, urls)
 
 # ---------------------------------------------------
 # 4. Helper Function & Instantiation
@@ -245,14 +429,49 @@ class CheckinTable:
 
 def model_to_dict(model_instance: Model) -> Dict:
     """A helper function to convert a Peewee model instance to a dictionary."""
+    mood_meta = get_mood_meta(getattr(model_instance, "mood_id", None) or model_instance.mood)
+    color_meta = get_color_meta(getattr(model_instance, "color_id", None) or model_instance.color)
+    status_items = build_status_meta_from_tags(
+        model_instance.tags,
+        getattr(model_instance, "status_ids", None),
+    )
+    status_ids = load_list(getattr(model_instance, "status_ids", None))
+    if not status_ids and status_items:
+        status_ids = [item["id"] for item in status_items]
+    status_families = load_list(getattr(model_instance, "status_families", None))
+    if not status_families and status_items:
+        status_families = list(dict.fromkeys(item["family"] for item in status_items))
+    image_urls = normalize_image_urls(
+        getattr(model_instance, "image_urls", None),
+        getattr(model_instance, "image_url", None),
+    )
+
     return {
         "id": model_instance.id,
         "user_id": model_instance.user_id,
         "mood": model_instance.mood,
+        "mood_id": getattr(model_instance, "mood_id", None) or mood_meta.get("id"),
+        "mood_icon": mood_meta.get("icon"),
+        "mood_family": getattr(model_instance, "mood_family", None) or mood_meta.get("family"),
+        "mood_valence": getattr(model_instance, "mood_valence", None) or mood_meta.get("valence"),
+        "mood_energy": getattr(model_instance, "mood_energy", None) or mood_meta.get("energy"),
         "color": model_instance.color,
+        "color_id": getattr(model_instance, "color_id", None) or color_meta.get("id"),
+        "color_label": getattr(model_instance, "color_label", None) or color_meta.get("label"),
+        "color_group": getattr(model_instance, "color_group", None) or color_meta.get("group"),
+        "color_tone": getattr(model_instance, "color_tone", None) or color_meta.get("tone"),
+        "color_description": getattr(model_instance, "color_description", None) or color_meta.get("description"),
         "tags": model_instance.tags,
+        "status_ids": status_ids,
+        "status_families": status_families,
+        "status_items": status_items,
         "text_content": model_instance.text_content,
-        "image_url": model_instance.image_url,
+        "image_url": image_urls[0] if image_urls else None,
+        "image_urls": image_urls,
+        "location_name": getattr(model_instance, "location_name", None),
+        "location_address": getattr(model_instance, "location_address", None),
+        "location_latitude": getattr(model_instance, "location_latitude", None),
+        "location_longitude": getattr(model_instance, "location_longitude", None),
         "timestamp": model_instance.timestamp,
         "updated_at": model_instance.updated_at
     }

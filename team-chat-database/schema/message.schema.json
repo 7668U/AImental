@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Team Chat Message",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "room_id",
+    "created_at",
+    "author_role",
+    "author_name",
+    "reply_to_id",
+    "topic",
+    "message_type",
+    "status",
+    "tags",
+    "mentions",
+    "body",
+    "links",
+    "attachments",
+    "related_files",
+    "decisions",
+    "tasks"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^msg-[0-9]{8}-[0-9]{4}$"
+    },
+    "room_id": {
+      "type": "string",
+      "default": "core-team"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "author_role": {
+      "type": "string",
+      "enum": ["system", "product_manager", "frontend_designer", "backend_engineer"]
+    },
+    "author_name": {
+      "type": "string"
+    },
+    "reply_to_id": {
+      "type": ["string", "null"],
+      "pattern": "^msg-[0-9]{8}-[0-9]{4}$"
+    },
+    "topic": {
+      "type": "string"
+    },
+    "message_type": {
+      "type": "string",
+      "enum": ["system", "message", "question", "answer", "decision", "task", "note", "handoff", "review"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["open", "in_progress", "blocked", "resolved", "archived"]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "mentions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["product_manager", "frontend_designer", "backend_engineer"]
+      }
+    },
+    "body": {
+      "type": "string",
+      "minLength": 1
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "path"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "related_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["summary", "status"],
+        "properties": {
+          "summary": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["proposed", "accepted", "rejected", "superseded"]
+          }
+        }
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "owner_role", "status", "due_at"],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "owner_role": {
+            "type": "string",
+            "enum": ["product_manager", "frontend_designer", "backend_engineer"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["open", "in_progress", "blocked", "done", "dropped"]
+          },
+          "due_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}
+

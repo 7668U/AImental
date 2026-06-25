@@ -12,12 +12,12 @@ from pydantic import BaseModel, Field, ValidationError
 from openai import OpenAI
 
 # --- 1. 配置LLM客户端 ---
-# 在实际项目中，建议使用环境变量管理API Key
-MOONSHOT_API_KEY = os.getenv("MOONSHOT_API_KEY", "sk-6gGW4lyWgHbvwFO8My2d1ivCkFY77iFBthp3J6TIolfAtJm3")
+# 使用环境变量管理API Key，不要在代码中硬编码真实密钥。
+MOONSHOT_API_KEY = os.getenv("MOONSHOT_API_KEY")
 MOONSHOT_BASE_URL = os.getenv("MOONSHOT_BASE_URL", "https://api.moonshot.cn/v1")
 
 try:
-    client = OpenAI(api_key=MOONSHOT_API_KEY, base_url=MOONSHOT_BASE_URL)
+    client = OpenAI(api_key=MOONSHOT_API_KEY, base_url=MOONSHOT_BASE_URL) if MOONSHOT_API_KEY else None
 except Exception as e:
     print(f"无法初始化OpenAI客户端，请检查API Key和URL配置: {e}")
     client = None

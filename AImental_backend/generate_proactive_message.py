@@ -13,10 +13,10 @@ from openai import OpenAI
 # ---------------------------------------------------
 # 1. API客户端设置 (假设已在文件顶部定义)
 # ---------------------------------------------------
-MOONSHOT_API_KEY = os.getenv("MOONSHOT_API_KEY", "sk-6gGW4lyWgHbvwFO8My2d1ivCkFY77iFBthp3J6TIolfAtJm3")
-MOONSHOT_BASE_URL = "https://api.moonshot.cn/v1"
-IS_MOCK_API = "xxxx" in MOONSHOT_API_KEY
-client = OpenAI(api_key=MOONSHOT_API_KEY, base_url=MOONSHOT_BASE_URL)
+MOONSHOT_API_KEY = os.getenv("MOONSHOT_API_KEY")
+MOONSHOT_BASE_URL = os.getenv("MOONSHOT_BASE_URL", "https://api.moonshot.cn/v1")
+IS_MOCK_API = not MOONSHOT_API_KEY
+client = OpenAI(api_key=MOONSHOT_API_KEY, base_url=MOONSHOT_BASE_URL) if MOONSHOT_API_KEY else None
 
 
 # ---------------------------------------------------

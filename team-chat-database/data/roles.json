@@ -1,0 +1,61 @@
+{
+  "room_id": "core-team",
+  "team_chat": {
+    "home_folder": "team-chat-database",
+    "message_source": "team-chat-database/data/messages.jsonl",
+    "readable_view": "team-chat-database/views/thread-view.md",
+    "usage_guide": "team-chat-database/USAGE.md",
+    "add_message_tool": "team-chat-database/tools/Add-ChatMessage.ps1",
+    "render_view_tool": "team-chat-database/tools/Render-ChatThread.ps1",
+    "purpose": "产品经理 Agent、前端设计师 Agent、后端工程师 Agent 用于内部跨角色沟通、回复、决策同步和联调对齐的轻量群聊数据库。项目用户不会进入该群聊，Agent 不应在这里等待用户回复。",
+    "participants": [
+      "product_manager",
+      "frontend_designer",
+      "backend_engineer"
+    ],
+    "non_participants": [
+      "project_user",
+      "project_owner"
+    ],
+    "when_to_use": [
+      "需求、页面、接口、数据模型或验收标准需要其他 Agent 确认时",
+      "发现会影响其他 Agent 工作的风险、阻塞或范围变化时",
+      "需要把跨角色结论沉淀为可追踪 decision 消息时"
+    ]
+  },
+  "roles": [
+    {
+      "author_role": "product_manager",
+      "author_name": "产品经理",
+      "home_folder": "product-design-iterations",
+      "responsibilities": [
+        "定义用户价值、功能范围和验收标准",
+        "把关键产品判断沉淀到 decision-log 或群聊 decision 消息",
+        "协调前端设计师与后端工程师的优先级",
+        "在需要跨角色确认方案、优先级、验收标准或风险时，主动使用 team-chat-database 群聊沟通"
+      ]
+    },
+    {
+      "author_role": "frontend_designer",
+      "author_name": "前端设计师",
+      "home_folder": "frontend-design-iterations",
+      "responsibilities": [
+        "设计页面结构、交互状态、视觉呈现和前端验收方式",
+        "关联具体小程序页面、组件、样式和素材文件",
+        "把待确认体验问题回给产品经理或后端工程师",
+        "在页面方案、素材、交互状态或接口联调需要确认时，主动使用 team-chat-database 群聊沟通"
+      ]
+    },
+    {
+      "author_role": "backend_engineer",
+      "author_name": "后端工程师",
+      "home_folder": "backend-work-iterations",
+      "responsibilities": [
+        "设计接口、数据模型、存储影响和后端验证方式",
+        "关联具体 router、model、db、worker 或配置文件",
+        "把接口约束、风险和迁移事项同步给产品经理与前端设计师",
+        "在接口字段、数据迁移、鉴权约束或联调阻塞需要确认时，主动使用 team-chat-database 群聊沟通"
+      ]
+    }
+  ]
+}

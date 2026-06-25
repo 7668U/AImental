@@ -1,107 +1,346 @@
 // pages/daily-checkin/record.js
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
+
+const API_BASE_URL = 'http://127.0.0.1:8000';
+const MAX_PHOTOS = 3;
+
+const MOOD_OPTIONS = [
+  { id: 'happy', name: '开心', icon: 'happy', family: '明亮愉悦', valence: 'positive', energy: 'high' },
+  { id: 'satisfied', name: '满足', icon: 'satisfied', family: '明亮愉悦', valence: 'positive', energy: 'medium' },
+  { id: 'expectant', name: '期待', icon: 'expectant', family: '明亮愉悦', valence: 'positive', energy: 'high' },
+  { id: 'grateful', name: '感激', icon: 'grateful', family: '明亮愉悦', valence: 'positive', energy: 'medium' },
+  { id: 'calm', name: '平静', icon: 'calm', family: '安稳平静', valence: 'neutral', energy: 'low' },
+  { id: 'relaxed', name: '放松', icon: 'relaxed', family: '安稳平静', valence: 'positive', energy: 'low' },
+  { id: 'secure', name: '安心', icon: 'secure', family: '安稳平静', valence: 'positive', energy: 'low' },
+  { id: 'focused', name: '专注', icon: 'focused', family: '安稳平静', valence: 'neutral', energy: 'medium' },
+  { id: 'sad', name: '难过', icon: 'sad', family: '低落难过', valence: 'negative', energy: 'low' },
+  { id: 'lost', name: '失落', icon: 'lost', family: '低落难过', valence: 'negative', energy: 'low' },
+  { id: 'wronged', name: '委屈', icon: 'wronged', family: '低落难过', valence: 'negative', energy: 'low' },
+  { id: 'lonely', name: '孤独', icon: 'lonely', family: '低落难过', valence: 'negative', energy: 'low' },
+  { id: 'anxious', name: '焦虑', icon: 'anxious', family: '焦虑紧绷', valence: 'negative', energy: 'high' },
+  { id: 'worried', name: '担心', icon: 'worried', family: '焦虑紧绷', valence: 'negative', energy: 'medium' },
+  { id: 'irritable', name: '烦躁', icon: 'irritable', family: '焦虑紧绷', valence: 'negative', energy: 'high' },
+  { id: 'panicked', name: '慌乱', icon: 'panicked', family: '焦虑紧绷', valence: 'negative', energy: 'high' },
+  { id: 'angry', name: '生气', icon: 'angry', family: '生气受伤', valence: 'negative', energy: 'high' },
+  { id: 'annoyed', name: '厌烦', icon: 'annoyed', family: '生气受伤', valence: 'negative', energy: 'medium' },
+  { id: 'unwilling', name: '不甘', icon: 'unwilling', family: '生气受伤', valence: 'negative', energy: 'high' },
+  { id: 'hurt', name: '受伤', icon: 'hurt', family: '生气受伤', valence: 'negative', energy: 'low' },
+  { id: 'tired', name: '疲惫', icon: 'tired', family: '疲惫麻木', valence: 'negative', energy: 'low' },
+  { id: 'sleepy', name: '困倦', icon: 'sleepy', family: '疲惫麻木', valence: 'neutral', energy: 'low' },
+  { id: 'numb', name: '麻木', icon: 'numb', family: '疲惫麻木', valence: 'neutral', energy: 'low' },
+  { id: 'confused', name: '迷茫', icon: 'confused', family: '疲惫麻木', valence: 'negative', energy: 'low' },
+];
+
+function buildMoodList(selectedName = '平静') {
+  return MOOD_OPTIONS.map(item => ({
+    ...item,
+    selected: item.name === selectedName,
+  }));
+}
+
+const STATUS_OPTIONS = [
+  { id: 'sunny', name: '元气满满', icon: 'sunny', family: '能量气场', selected: false },
+  { id: 'charge', name: '充电', icon: 'charge', family: '能量气场', selected: false },
+  { id: 'low_battery', name: '低电量', icon: 'low_battery', family: '能量气场', selected: false },
+  { id: 'cloud', name: '放空', icon: 'cloud', family: '能量气场', selected: false },
+  { id: 'brick', name: '搬砖', icon: 'brick', family: '工作学习', selected: false },
+  { id: 'book', name: '学习', icon: 'book', family: '工作学习', selected: true },
+  { id: 'meeting', name: '开会', icon: 'meeting', family: '工作学习', selected: false },
+  { id: 'overtime', name: '加班', icon: 'overtime', family: '工作学习', selected: false },
+  { id: 'commute', name: '通勤', icon: 'commute', family: '出行移动', selected: false },
+  { id: 'business_trip', name: '出差', icon: 'business_trip', family: '出行移动', selected: false },
+  { id: 'travel', name: '旅行', icon: 'travel', family: '出行移动', selected: false },
+  { id: 'home', name: '回家', icon: 'home', family: '出行移动', selected: false },
+  { id: 'food', name: '美食', icon: 'food', family: '生活日常', selected: false },
+  { id: 'sleep', name: '睡觉', icon: 'sleep', family: '生活日常', selected: false },
+  { id: 'housework', name: '家务', icon: 'housework', family: '生活日常', selected: false },
+  { id: 'shopping', name: '购物', icon: 'shopping', family: '生活日常', selected: false },
+  { id: 'sports', name: '运动', icon: 'sports', family: '运动健康', selected: false },
+  { id: 'fitness', name: '健身', icon: 'fitness', family: '运动健康', selected: false },
+  { id: 'outdoor', name: '户外', icon: 'outdoor', family: '运动健康', selected: false },
+  { id: 'wellness', name: '养生', icon: 'wellness', family: '运动健康', selected: false },
+  { id: 'stay_home', name: '宅家', icon: 'stay_home', family: '休闲社交', selected: false },
+  { id: 'entertainment', name: '娱乐', icon: 'entertainment', family: '休闲社交', selected: false },
+  { id: 'party', name: '聚会', icon: 'party', family: '休闲社交', selected: false },
+  { id: 'no_disturb', name: '勿扰', icon: 'no_disturb', family: '休闲社交', selected: false },
+];
+
+const STATUS_LABEL_ALIAS = {
+  '工作': '搬砖',
+  '学习': '学习',
+  '美食': '美食',
+  '生病': '养生',
+  '运动': '运动',
+  '出游': '旅行',
+  '出行': '旅行',
+  '远足': '旅行',
+  '吃饭': '美食',
+  '喝咖啡': '美食',
+  '做饭': '美食',
+  '散步': '户外',
+  '拉伸': '健身',
+  '独处': '放空',
+};
+
+function buildStatusList(selectedNames = ['学习']) {
+  return STATUS_OPTIONS.map(item => ({
+    ...item,
+    selected: selectedNames.includes(item.name),
+  }));
+}
+
+function normalizeStatusLabel(label) {
+  return STATUS_LABEL_ALIAS[label] || label;
+}
+
+const COLOR_OPTIONS = [
+  { id: 'warm_sun_orange', name: '暖阳橙', value: '#FFB35C', group: '暖光明亮', description: '开心、被鼓励、有活力', selected: false },
+  { id: 'cream_yellow', name: '奶油黄', value: '#FFE08A', group: '暖光明亮', description: '轻松、满足、治愈', selected: false },
+  { id: 'peach_pink', name: '蜜桃粉', value: '#FF9FB2', group: '暖光明亮', description: '温柔、亲近、被照顾', selected: false },
+  { id: 'coral_red', name: '珊瑚红', value: '#FF7A70', group: '暖光明亮', description: '热烈、兴奋、行动感', selected: false },
+  { id: 'mint_green', name: '薄荷绿', value: '#8FD7A5', group: '清透自然', description: '安心、恢复、舒服', selected: false },
+  { id: 'lake_blue', name: '湖水蓝', value: '#6EC6D9', group: '清透自然', description: '平静、清醒、流动', selected: false },
+  { id: 'sky_blue', name: '晴空蓝', value: '#8BB8FF', group: '清透自然', description: '开阔、自由、专注', selected: true },
+  { id: 'lime_green', name: '青柠绿', value: '#B7E36D', group: '清透自然', description: '新鲜、轻快、元气', selected: false },
+  { id: 'lavender_purple', name: '薰衣紫', value: '#B9A7F0', group: '柔和梦感', description: '敏感、柔软、想象', selected: false },
+  { id: 'cherry_mist_pink', name: '樱雾粉', value: '#F6B6C8', group: '柔和梦感', description: '细腻、浪漫、松弛', selected: false },
+  { id: 'berry_red', name: '浅莓红', value: '#D96C8A', group: '柔和梦感', description: '心动、委屈、情绪浓', selected: false },
+  { id: 'moonlight_white', name: '月光白', value: '#F5F1E8', group: '柔和梦感', description: '空白、安静、轻盈', selected: false },
+  { id: 'fog_blue_gray', name: '雾灰蓝', value: '#91A7B4', group: '阴雨安静', description: '疲惫、缓慢、低能量', selected: false },
+  { id: 'raindrop_blue', name: '雨滴蓝', value: '#6F8FBF', group: '阴雨安静', description: '难过、失落、想安静', selected: false },
+  { id: 'cloud_gray', name: '云朵灰', value: '#C7CDD1', group: '阴雨安静', description: '麻木、平淡、无力', selected: false },
+  { id: 'deep_sea_blue', name: '深海蓝', value: '#4B6584', group: '阴雨安静', description: '沉重、孤独、压抑', selected: false },
+  { id: 'flame_red', name: '火焰红', value: '#E85D5D', group: '紧绷浓郁', description: '生气、冲突、不甘', selected: false },
+  { id: 'caramel_brown', name: '焦糖棕', value: '#B9794A', group: '紧绷浓郁', description: '烦躁、消耗、压力', selected: false },
+  { id: 'midnight_purple', name: '午夜紫', value: '#665C99', group: '紧绷浓郁', description: '焦虑、混乱、难眠', selected: false },
+  { id: 'ink_green', name: '墨绿', value: '#557C70', group: '紧绷浓郁', description: '克制、防御、自我保护', selected: false },
+  { id: 'wood_tan', name: '木色', value: '#C8A27A', group: '沉稳大地', description: '稳定、生活感、真实', selected: false },
+  { id: 'cocoa_brown', name: '可可棕', value: '#8B6A5A', group: '沉稳大地', description: '疲惫、踏实、厚重', selected: false },
+  { id: 'turquoise_green', name: '松石绿', value: '#4FA39A', group: '沉稳大地', description: '平衡、恢复、慢慢变好', selected: false },
+  { id: 'charcoal_black', name: '炭黑', value: '#3F3F46', group: '沉稳大地', description: '沉默、封闭、很累', selected: false },
+];
+
+function buildColorList(selectedValue = '#8BB8FF') {
+  const alias = {
+    '#FF8A80': '#FF7A70',
+    '#FFB74D': '#FFB35C',
+    '#FFC107': '#FFE08A',
+    '#81D4FA': '#8BB8FF',
+    '#A5D6A7': '#8FD7A5',
+    '#B39DDB': '#B9A7F0',
+    '#F48FB1': '#F6B6C8',
+    '#BCAAA4': '#C8A27A',
+  };
+  const normalizedValue = alias[selectedValue] || selectedValue;
+  const colors = COLOR_OPTIONS.map(item => ({
+    ...item,
+    selected: item.value.toLowerCase() === normalizedValue.toLowerCase(),
+  }));
+  if (!colors.some(item => item.selected)) {
+    colors.forEach(item => item.selected = item.value === '#8BB8FF');
+  }
+  return colors;
+}
+
+function getSelectedColorInfo(colors) {
+  return colors.find(item => item.selected) || colors[0];
+}
+
+function normalizeImageUrl(url) {
+  if (!url) return '';
+  if (/^https?:\/\//.test(url) || url.startsWith('wxfile://') || url.startsWith('cloud://')) {
+    return url;
+  }
+  return `${API_BASE_URL}${url}`;
+}
+
+function toServerImageUrl(url) {
+  if (!url) return '';
+  if (url.startsWith(API_BASE_URL)) {
+    return url.slice(API_BASE_URL.length);
+  }
+  return url;
+}
+
+function parseImageUrls(data) {
+  const urls = [];
+  const rawImageUrls = data.image_urls;
+
+  if (Array.isArray(rawImageUrls)) {
+    urls.push(...rawImageUrls);
+  } else if (typeof rawImageUrls === 'string' && rawImageUrls.trim()) {
+    try {
+      const parsed = JSON.parse(rawImageUrls);
+      if (Array.isArray(parsed)) urls.push(...parsed);
+    } catch (error) {
+      urls.push(rawImageUrls);
+    }
+  }
+
+  if (data.image_url) urls.push(data.image_url);
+
+  return Array.from(new Set(urls.filter(Boolean))).slice(0, MAX_PHOTOS);
+}
+
+function buildServerPhotos(data) {
+  return parseImageUrls(data).map((url, index) => ({
+    id: `server_${index}`,
+    url: normalizeImageUrl(url),
+    serverUrl: toServerImageUrl(url),
+    tempFilePath: '',
+    source: 'server',
+  }));
+}
+
 Page({
-  /**
-   * 页面的初始数据
-   */
   data: {
-    // 1. 心情数据
-    moods: [
-      { name: '开心', icon: 'happy', selected: false },
-      { name: '平静', icon: 'calm', selected: false },
-      { name: '难过', icon: 'sad', selected: false },
-      { name: '生气', icon: 'angry', selected: false },
-      { name: '放松', icon: 'relaxed', selected: false },
-      { name: '迷茫', icon: 'confused', selected: false },
-      { name: '尴尬', icon: 'embarass', selected: false },
-      { name: '疲惫', icon: 'tired', selected: false },
-      { name: '兴奋', icon: 'excited', selected: false },
-    ],
-    // 2. 状态数据 (标签) - 支持多选
-    statuses: [
-      { name: '工作', icon: 'work', selected: false },
-      { name: '学习', icon: 'study', selected: false },
-      { name: '美食', icon: 'food', selected: false },
-      { name: '生病', icon: 'health', selected: false },
-      { name: '远足', icon: 'outdoor', selected: false },
-      { name: '娱乐', icon: 'game', selected: false },
-      { name: '躺平', icon: 'sleep', selected: false },
-      { name: '运动', icon: 'sports', selected: false },
-    ],
-    // 3. 颜色数据
-    colors: [
-      { value: '#FFC107', name: '暖阳橙', selected: false },
-      { value: '#81D4FA', name: '晴空蓝', selected: false },
-      { value: '#A5D6A7', name: '薄荷绿', selected: false },
-      { value: '#B0BEC5', name: '静谧灰', selected: false },
-      { value: '#F48FB1', name: '樱花粉', selected: false },
-      { value: '#C5CAE9', name: '香芋紫', selected: false },
-      { value: '#FF8A80', name: '珊瑚红', selected: false },
-      { value: '#FFF59D', name: '柠檬黄', selected: false },
-      { value: '#80CBC4', name: '湖水青', selected: false },
-      { value: '#7986CB', name: '深海蓝', selected: false },
-      { value: '#BCAAA4', name: '奶咖棕', selected: false },
-      { value: '#F5F5F5', name: '云朵白', selected: false },
-    ],
-    // 4. 用户输入数据
-    textContent: "",
-    imageUrl: "", // 用于显示的URL（可能是本地或远程）
-    tempFilePath: "", // 仅用于记录用户新选择的本地图片路径
-    
-    // 5. 模式相关状态
-    isEditMode: false,  // 是否是加载了已有数据的模式 (包括可编辑的今天和只读的过去)
-    isLocked: false,    // 页面是否锁定为只读 (当查看过去记录时为 true)
+    navTitle: '今日心情记录',
+    statusBarHeight: 0,
+    navBarHeight: 44,
+    totalNavBarHeight: 44,
+    dateLabel: '',
+    locationText: '选择位置',
+    locationAddress: '',
+    locationLatitude: null,
+    locationLongitude: null,
+
+    moods: buildMoodList(),
+
+    statuses: buildStatusList(),
+
+    colors: buildColorList(),
+    selectedColorInfo: getSelectedColorInfo(buildColorList()),
+
+    textContent: '',
+    textCount: 0,
+    maxPhotos: MAX_PHOTOS,
+    photos: [],
+    scrollIntoView: '',
+
+    isEditMode: false,
+    isLocked: false,
     checkinId: null,
-    pageDate: null,     // 记录当前页面的日期
+    pageDate: null,
   },
 
-  /**
-   * 【重构】生命周期函数--监听页面加载
-   */
   onLoad(options) {
+    this.updateNavMetrics();
+
     if (options.mode === 'edit' || options.mode === 'view') {
-      // --- 编辑或查看模式 ---
-      // 从日历查看时，会传入 date；从首页编辑今日时，date 为空
-      const dateStr = options.date || this.getTodayString(); 
-      this.setData({ 
+      const dateStr = options.date || this.getTodayString();
+      this.setData({
         isEditMode: true,
-        pageDate: dateStr 
+        pageDate: dateStr,
+        dateLabel: this.formatDateLabel(dateStr),
       });
-      this.loadCheckinData(dateStr); // 使用新的通用函数加载指定日期的数据
+      this.loadCheckinData(dateStr);
     } else {
-      // --- 新建模式 ---
-      this.setData({ 
+      const today = this.getTodayString();
+      this.setData({
         isEditMode: false,
         isLocked: false,
-        pageDate: this.getTodayString()
+        pageDate: today,
+        dateLabel: this.formatDateLabel(today),
+        navTitle: '今日心情记录',
       });
       wx.setNavigationBarTitle({ title: '记录今日心情' });
     }
   },
 
-  /**
-   * 【新增】通用函数：获取指定日期的记录并填充表单
-   * @param {string} dateStr - 'YYYY-MM-DD' 格式的日期字符串
-   */
-  loadCheckinData(dateToFetch) {
-    // 1. 判断是否为今天，以决定是否锁定页面
-    const isToday = dateToFetch === this.getTodayString();
+  onShow() {
+    this.updateNavMetrics();
+  },
 
-    if (!isToday) {
-      this.setData({ isLocked: true });
-      wx.setNavigationBarTitle({ title: '查看历史心情' });
-    } else {
-      this.setData({ isLocked: false });
-      wx.setNavigationBarTitle({ title: '修改今日心情' });
+  updateNavMetrics() {
+    try {
+      const windowInfo = wx.getWindowInfo();
+      const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+      const statusBarHeight = windowInfo.statusBarHeight || 0;
+      const navBarHeight = (menuButtonInfo.top - statusBarHeight) * 2 + menuButtonInfo.height;
+      this.setData({
+        statusBarHeight,
+        navBarHeight,
+        totalNavBarHeight: statusBarHeight + navBarHeight,
+      });
+    } catch (error) {
+      this.setData({
+        statusBarHeight: 24,
+        navBarHeight: 48,
+        totalNavBarHeight: 72,
+      });
+    }
+  },
+
+  chooseRecordLocation() {
+    if (this.data.isLocked) return;
+
+    const options = {
+      success: (location) => {
+        const locationText = location.name || location.address || '已选择位置';
+        this.setData({
+          locationText,
+          locationAddress: location.address || '',
+          locationLatitude: location.latitude || null,
+          locationLongitude: location.longitude || null,
+        });
+      },
+      fail: () => {
+        wx.showToast({ title: '没有选择位置', icon: 'none' });
+      }
+    };
+
+    if (this.data.locationLatitude && this.data.locationLongitude) {
+      options.latitude = this.data.locationLatitude;
+      options.longitude = this.data.locationLongitude;
     }
 
-    // 2. 发起网络请求获取数据
+    wx.chooseLocation(options);
+  },
+
+  goBack() {
+    wx.navigateBack({ delta: 1 });
+  },
+
+  goToStatistics() {
+    wx.navigateTo({
+      url: '/pkgDailyCheckin/analysis'
+    });
+  },
+
+  showMoreActions() {
+    const itemList = ['查看心情分析'];
+    if (!this.data.isLocked && this.data.photos.length < MAX_PHOTOS) itemList.push('添加照片');
+    if (!this.data.isLocked && this.data.photos.length > 0) itemList.push('管理照片');
+
+    wx.showActionSheet({
+      itemList,
+      success: (res) => {
+        const action = itemList[res.tapIndex];
+        if (action === '查看心情分析') this.goToStatistics();
+        if (action === '添加照片') this.selectNewImages();
+        if (action === '管理照片') {
+          this.setData({ scrollIntoView: 'photo-section' });
+        }
+      }
+    });
+  },
+
+  loadCheckinData(dateToFetch) {
+    const isToday = dateToFetch === this.getTodayString();
+    this.setData({
+      isLocked: !isToday,
+      navTitle: isToday ? '今日心情记录' : '历史心情记录',
+      dateLabel: this.formatDateLabel(dateToFetch),
+    });
+
+    wx.setNavigationBarTitle({ title: isToday ? '修改今日心情' : '查看历史心情' });
+
     const token = wx.getStorageSync('token');
     if (!token) return;
 
     wx.showLoading({ title: '加载中...' });
     wx.request({
-      url: `https://api.feelyourself.cn/api/v1/checkin/date/${dateToFetch}`,
+      url: `http://127.0.0.1:8000/api/v1/checkin/date/${dateToFetch}`,
       method: 'GET',
       header: { 'Authorization': `Bearer ${token}` },
       success: (res) => {
@@ -121,99 +360,172 @@ Page({
       }
     });
   },
-  
-  /**
-   * 【修正并增强】填充表单的辅助函数
-   */
+
   populateForm(data) {
-    let newMoods = JSON.parse(JSON.stringify(this.data.moods));
-    let moodIndex = newMoods.findIndex(item => item.name === data.mood);
+    const newMoods = JSON.parse(JSON.stringify(this.data.moods));
+    const moodIndex = newMoods.findIndex(item => item.name === data.mood);
     if (moodIndex > -1) {
       newMoods.forEach(item => item.selected = false);
       newMoods[moodIndex].selected = true;
     }
-    
-    let newStatuses = JSON.parse(JSON.stringify(this.data.statuses));
-    const selectedTags = data.tags ? data.tags.split(',') : [];
-    newStatuses.forEach(item => {
-      item.selected = selectedTags.includes(item.name);
-    });
 
-    let newColors = JSON.parse(JSON.stringify(this.data.colors));
-    let colorIndex = newColors.findIndex(item => item.value === data.color);
-    if (colorIndex > -1) {
-      newColors.forEach(item => item.selected = false);
-      newColors[colorIndex].selected = true;
-    }
-    
+    const selectedTags = data.tags ? data.tags.split(',').map(normalizeStatusLabel) : [];
+    const newStatuses = buildStatusList(selectedTags);
+
+    const newColors = buildColorList(data.color || '#8BB8FF');
+
+    const textContent = data.text_content || '';
     this.setData({
       moods: newMoods,
       statuses: newStatuses,
       colors: newColors,
-      textContent: data.text_content || '',
-      imageUrl: data.image_url ? `https://api.feelyourself.cn${data.image_url}` : '',
+      selectedColorInfo: getSelectedColorInfo(newColors),
+      textContent,
+      textCount: textContent.length,
+      photos: buildServerPhotos(data),
     });
   },
-  
-  /**
-   * 【修改】处理选择事件，增加锁定判断和多选逻辑
-   */
+
+  handleMoodSelect(e) {
+    if (this.data.isLocked) return;
+    const { id } = e.currentTarget.dataset;
+    const moods = this.data.moods.map(item => ({
+      ...item,
+      selected: item.id === id,
+    }));
+
+    this.setData({
+      moods,
+    });
+  },
+
   handleSelect(e) {
     if (this.data.isLocked) return;
     const { type, index } = e.currentTarget.dataset;
-    let list = this.data[type];
+    const list = this.data[type];
 
     if (type === 'statuses') {
+      const selectedCount = list.filter(item => item.selected).length;
+      if (!list[index].selected && selectedCount >= 3) {
+        wx.showToast({ title: '状态最多选 3 个', icon: 'none' });
+        return;
+      }
       list[index].selected = !list[index].selected;
     } else {
       if (list[index].selected) return;
       list.forEach(item => item.selected = false);
       list[index].selected = true;
     }
-    this.setData({ [type]: list });
+
+    const nextData = { [type]: list };
+    if (type === 'colors') {
+      nextData.selectedColorInfo = getSelectedColorInfo(list);
+    }
+    this.setData(nextData);
   },
 
   onTextInput(e) {
     if (this.data.isLocked) return;
-    this.setData({ textContent: e.detail.value });
+    const textContent = e.detail.value || '';
+    this.setData({
+      textContent,
+      textCount: textContent.length,
+    });
   },
 
-  chooseImage() {
+
+  chooseImage(e) {
     if (this.data.isLocked) return;
-    const isServerImage = this.data.imageUrl && !this.data.tempFilePath;
-    const itemList = isServerImage 
-      ? ['更换图片', '预览图片', '删除图片']
-      : ['更换图片', '删除图片'];
+
+    const { index } = e.currentTarget.dataset;
+    if (index === undefined || index === null || index === '') {
+      this.selectNewImages();
+      return;
+    }
+
+    const photoIndex = Number(index);
+    const photo = this.data.photos[photoIndex];
+    if (!photo) return;
+
+    const itemList = ['预览照片', '更换照片', '删除照片'];
 
     wx.showActionSheet({
-      itemList: itemList,
+      itemList,
       success: (res) => {
-        const tapIndex = res.tapIndex;
-        if (isServerImage) {
-          if (tapIndex === 0) this.selectNewImage();
-          if (tapIndex === 1) wx.previewImage({ urls: [this.data.imageUrl] });
-          if (tapIndex === 2) this.setData({ imageUrl: '', tempFilePath: '' });
-        } else {
-          if (tapIndex === 0) this.selectNewImage();
-          if (tapIndex === 1) this.setData({ imageUrl: '', tempFilePath: '' });
-        }
+        const action = itemList[res.tapIndex];
+        if (action === '预览照片') this.previewPhoto(photoIndex);
+        if (action === '更换照片') this.replacePhoto(photoIndex);
+        if (action === '删除照片') this.removePhoto(photoIndex);
       }
     });
   },
 
-  selectNewImage() {
+  selectNewImages() {
+    const remainingCount = MAX_PHOTOS - this.data.photos.length;
+    if (remainingCount <= 0) {
+      wx.showToast({ title: `最多添加 ${MAX_PHOTOS} 张照片`, icon: 'none' });
+      return;
+    }
+
     wx.chooseMedia({
-      count: 1, mediaType: ['image'], sourceType: ['album', 'camera'],
+      count: remainingCount,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
       success: (res) => {
-        const tempPath = res.tempFiles[0].tempFilePath;
-        this.setData({ imageUrl: tempPath, tempFilePath: tempPath });
+        const newPhotos = (res.tempFiles || []).slice(0, remainingCount).map((file, index) => ({
+          id: `local_${Date.now()}_${index}`,
+          url: file.tempFilePath,
+          tempFilePath: file.tempFilePath,
+          source: 'local',
+        }));
+
+        if (newPhotos.length === 0) return;
+
+        this.setData({
+          photos: this.data.photos.concat(newPhotos).slice(0, MAX_PHOTOS),
+          scrollIntoView: 'photo-section',
+        });
       }
     });
   },
 
-  /**
-   * 【修正并增强】提交函数
-   */
+  replacePhoto(index) {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        const tempFile = (res.tempFiles || [])[0];
+        if (!tempFile) return;
+
+        const photos = this.data.photos.slice();
+        photos[index] = {
+          id: `local_${Date.now()}_${index}`,
+          url: tempFile.tempFilePath,
+          tempFilePath: tempFile.tempFilePath,
+          source: 'local',
+        };
+        this.setData({ photos, scrollIntoView: 'photo-section' });
+      }
+    });
+  },
+
+  removePhoto(indexOrEvent) {
+    const index = typeof indexOrEvent === 'number'
+      ? indexOrEvent
+      : Number(indexOrEvent.currentTarget.dataset.index);
+    const photos = this.data.photos.slice();
+    photos.splice(index, 1);
+    this.setData({ photos, scrollIntoView: 'photo-section' });
+  },
+
+  previewPhoto(index) {
+    const urls = this.data.photos.map(photo => photo.url).filter(Boolean);
+    const current = urls[index] || urls[0];
+    if (!current) return;
+    wx.previewImage({ current, urls });
+  },
+
   submitCheckin() {
     if (this.data.isLocked) {
       wx.showToast({ title: '不能修改历史记录哦', icon: 'none' });
@@ -224,10 +536,11 @@ Page({
     const selectedStatuses = this.data.statuses.filter(item => item.selected);
     const selectedColor = this.data.colors.find(item => item.selected);
 
-    if (!selectedMood || selectedStatuses.length === 0 || !selectedColor) {
+    if (!selectedMood || selectedStatuses.length === 0 || selectedStatuses.length > 3 || !selectedColor) {
       wx.showToast({ title: '请完成所有选择', icon: 'none' });
       return;
     }
+
     const token = wx.getStorageSync('token');
     if (!token) return;
 
@@ -238,8 +551,8 @@ Page({
       text_content: this.data.textContent,
     };
 
-    wx.showLoading({ title: '正在处理...' });
-    
+    wx.showLoading({ title: '正在保存...' });
+
     if (this.data.isEditMode) {
       this.updateCheckinRecord(textData);
     } else {
@@ -247,71 +560,105 @@ Page({
     }
   },
 
-  /**
-   * 辅助函数：创建新记录
-   */
   createCheckinRecord(data) {
     this.sendRequest({
-      url: 'https://api.feelyourself.cn/api/v1/checkin/',
+      url: 'http://127.0.0.1:8000/api/v1/checkin/',
       method: 'POST',
-      data: data,
+      data,
       successCallback: (res) => {
         const checkinId = res.data.id;
-        if (this.data.tempFilePath) {
-          this.uploadImageForCheckin(checkinId, this.data.tempFilePath, "心情已封存");
-        } else {
-          this.handleSubmitSuccess("心情已封存");
-        }
+        this.syncPhotosForCheckin(checkinId, () => {
+          this.handleSubmitSuccess('保存成功');
+        });
       },
       failTitle: '提交失败'
     });
   },
 
-  /**
-   * 辅助函数：更新现有记录
-   */
   updateCheckinRecord(data) {
     this.sendRequest({
-      url: `https://api.feelyourself.cn/api/v1/checkin/${this.data.checkinId}`,
+      url: `http://127.0.0.1:8000/api/v1/checkin/${this.data.checkinId}`,
       method: 'PUT',
-      data: data,
-      successCallback: (res) => {
-        if (this.data.tempFilePath) {
-          this.uploadImageForCheckin(this.data.checkinId, this.data.tempFilePath, "修改成功");
-        } else {
-          this.handleSubmitSuccess("修改成功");
-        }
+      data,
+      successCallback: () => {
+        this.syncPhotosForCheckin(this.data.checkinId, () => {
+          this.handleSubmitSuccess('修改成功');
+        });
       },
       failTitle: '修改失败'
     });
   },
-  
-  /**
-   * 辅助函数：上传图片
-   */
-  uploadImageForCheckin(checkinId, filePath, successTitle) {
+
+  uploadImageForCheckin(checkinId, filePath, imageIndex) {
     const token = wx.getStorageSync('token');
-    wx.uploadFile({
-      url: `https://api.feelyourself.cn/api/v1/checkin/${checkinId}/image`,
-      filePath: filePath, name: 'image', header: { 'Authorization': `Bearer ${token}` },
-      success: (res) => {
-        if (res.statusCode === 200) {
-          this.handleSubmitSuccess(successTitle);
-        } else {
-          this.handleApiError(res, '图片上传失败');
-        }
-      },
-      fail: () => this.handleSubmitFail('图片上传失败')
+    return new Promise((resolve, reject) => {
+      wx.uploadFile({
+        url: `${API_BASE_URL}/api/v1/checkin/${checkinId}/images/${imageIndex}`,
+        filePath,
+        name: 'image',
+        header: { 'Authorization': `Bearer ${token}` },
+        success: (res) => {
+          if (res.statusCode === 200) {
+            try {
+              const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
+              const urls = parseImageUrls(data);
+              resolve(urls[imageIndex] || urls[urls.length - 1] || '');
+            } catch (error) {
+              reject(res);
+            }
+          } else {
+            reject(res);
+          }
+        },
+        fail: reject
+      });
     });
   },
 
-  /**
-   * 辅助函数：通用请求封装
-   */
-  sendRequest({url, method, data, successCallback, failTitle}) {
+  syncPhotosForCheckin(checkinId, successCallback) {
+    const photos = this.data.photos.slice(0, MAX_PHOTOS);
+    const finalUrls = [];
+    const uploadNext = (index) => {
+      if (index >= photos.length) {
+        this.setCheckinImages(checkinId, finalUrls, successCallback);
+        return;
+      }
+
+      const photo = photos[index];
+      if (photo.tempFilePath) {
+        this.uploadImageForCheckin(checkinId, photo.tempFilePath, index)
+          .then((uploadedUrl) => {
+            if (uploadedUrl) finalUrls.push(uploadedUrl);
+            uploadNext(index + 1);
+          })
+          .catch((error) => this.handleApiError(error, '图片上传失败'));
+        return;
+      }
+
+      const serverUrl = photo.serverUrl || toServerImageUrl(photo.url);
+      if (serverUrl) finalUrls.push(serverUrl);
+      uploadNext(index + 1);
+    };
+
+    uploadNext(0);
+  },
+
+  setCheckinImages(checkinId, imageUrls, successCallback) {
+    this.sendRequest({
+      url: `${API_BASE_URL}/api/v1/checkin/${checkinId}/images`,
+      method: 'PUT',
+      data: { image_urls: imageUrls.slice(0, MAX_PHOTOS) },
+      successCallback,
+      failTitle: '图片保存失败'
+    });
+  },
+
+  sendRequest({ url, method, data, successCallback, failTitle }) {
     const token = wx.getStorageSync('token');
     wx.request({
-      url, method, data,
+      url,
+      method,
+      data,
       header: { 'Authorization': `Bearer ${token}` },
       success: (res) => {
         if (res.statusCode === 200 || res.statusCode === 201) {
@@ -323,39 +670,34 @@ Page({
       fail: () => this.handleSubmitFail('网络请求失败')
     });
   },
-  
-  /**
-   * 辅助函数：通用成功处理
-   */
+
   handleSubmitSuccess(title) {
     wx.hideLoading();
-    wx.showToast({ title: title, icon: 'success' });
+    wx.showToast({ title, icon: 'success' });
     setTimeout(() => { wx.navigateBack(); }, 1500);
   },
 
-  /**
-   * 辅助函数：通用失败处理
-   */
   handleSubmitFail(title) {
     wx.hideLoading();
-    wx.showToast({ title: title, icon: 'none' });
+    wx.showToast({ title, icon: 'none' });
   },
 
-  /**
-   * 辅助函数：处理API返回的错误信息
-   */
   handleApiError(res, defaultTitle) {
-    try {
-      const responseData = JSON.parse(res.data);
-      this.handleSubmitFail(responseData.detail || defaultTitle);
-    } catch(e) {
-      this.handleSubmitFail(defaultTitle);
+    let detail = defaultTitle;
+    if (res && res.data) {
+      if (typeof res.data === 'string') {
+        try {
+          detail = JSON.parse(res.data).detail || defaultTitle;
+        } catch (error) {
+          detail = defaultTitle;
+        }
+      } else {
+        detail = res.data.detail || defaultTitle;
+      }
     }
+    this.handleSubmitFail(detail);
   },
 
-  /**
-   * 辅助函数：获取 'YYYY-MM-DD' 格式的当天日期
-   */
   getTodayString() {
     const today = new Date();
     const year = today.getFullYear();
@@ -364,11 +706,18 @@ Page({
     return `${year}-${month}-${day}`;
   },
 
-  onShareAppMessage: function () {
+  formatDateLabel(dateStr) {
+    const date = new Date(`${dateStr}T00:00:00`);
+    if (Number.isNaN(date.getTime())) return '';
+    const weekNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    return `${date.getMonth() + 1}月${date.getDate()}日 ${weekNames[date.getDay()]}`;
+  },
+
+  onShareAppMessage() {
     return getShareInfo();
   },
 
-  onShareTimeline: function () {
+  onShareTimeline() {
     return getTimelineInfo();
   }
 });

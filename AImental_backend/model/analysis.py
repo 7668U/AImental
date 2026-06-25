@@ -29,6 +29,10 @@ class MoodAnalysisContent(BaseModel):
     total_checkins: int
     dominant_mood: str
     mood_distribution: List[MoodDistributionItem]
+    dominant_mood_family: Optional[str] = None
+    mood_family_distribution: List[MoodDistributionItem] = Field(default_factory=list)
+    valence_distribution: List[MoodDistributionItem] = Field(default_factory=list)
+    energy_distribution: List[MoodDistributionItem] = Field(default_factory=list)
     interpretation: str
 
 # --- 模块二：生活状态关联分析 (无改动) ---
@@ -42,6 +46,9 @@ class TagMoodChartData(BaseModel):
 
 class TagMoodAnalysisContent(BaseModel):
     chart_data: TagMoodChartData
+    status_distribution: List[MoodDistributionItem] = Field(default_factory=list)
+    status_family_distribution: List[MoodDistributionItem] = Field(default_factory=list)
+    top_correlations: List[Dict[str, Any]] = Field(default_factory=list)
     interpretation: str
 
 # --- 模块三：文字内容分析 (词云) ---
@@ -63,6 +70,9 @@ class ColorPaletteItem(BaseModel):
 
 class ColorPaletteAnalysisContent(BaseModel):
     color_palette: List[ColorPaletteItem]
+    dominant_color_group: Optional[str] = None
+    color_group_distribution: List[MoodDistributionItem] = Field(default_factory=list)
+    color_tone_distribution: List[MoodDistributionItem] = Field(default_factory=list)
     interpretation: str
 
 # ===================================================

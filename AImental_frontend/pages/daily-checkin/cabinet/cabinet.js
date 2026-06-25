@@ -1,7 +1,7 @@
 // pages/daily-checkin/cabinet/cabinet.js (The final, correct version)
 
 // ---- Request Helper ----
-const BASE_URL = getApp().globalData?.apiBase || 'https://api.feelyourself.cn/api/v1';
+const BASE_URL = getApp().globalData?.apiBase || 'http://127.0.0.1:8000/api/v1';
 function request(options) {
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');

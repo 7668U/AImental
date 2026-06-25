@@ -1,8 +1,9 @@
 // pages/ai-therapist/index.js
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
+const { loginWithBackend } = require('../../utils/auth.js');
 
 // --- 全局配置与网络请求封装 ---
-const API_BASE_URL = 'https://api.feelyourself.cn/api/v1';
+const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 
 function request(options) {
   return new Promise((resolve, reject) => {
@@ -98,36 +99,20 @@ Page({
   },
 
   handleLogin() {
-    wx.showLoading({ title: '正在登录' });
-    wx.login({
-      success: (loginRes) => {
-        if (loginRes.code) {
-          request({ url: '/users/login', method: 'POST', data: { code: loginRes.code } })
-            .then(tokenRes => {
-              wx.hideLoading();
-              wx.setStorageSync('token', tokenRes.access_token);
-              this.checkLoginStatus(); 
-              wx.showToast({ title: '登录成功', icon: 'success' });
-
-              // 【核心修改】登录成功后，检查是否需要显示温馨提示
-              this.checkDisclaimer();
-
-            }).catch(err => {
-              wx.hideLoading();
-              console.error("后端登录接口失败", err);
-              wx.showToast({ title: '登录失败', icon: 'none' });
-            });
-        } else {
-          wx.hideLoading();
-          wx.showToast({ title: '凭证获取失败', icon: 'none' });
-        }
-      },
-      fail: (err) => {
+    wx.showLoading({ title: '???' });
+    loginWithBackend(API_BASE_URL)
+      .then(tokenRes => {
         wx.hideLoading();
-        console.error("登录接口调用失败:", err); 
-        wx.showToast({ title: '登录失败', icon: 'none' }); 
-      }
-    });
+        wx.setStorageSync('token', tokenRes.access_token);
+        this.checkLoginStatus();
+        wx.showToast({ title: '????', icon: 'success' });
+        this.checkDisclaimer();
+      })
+      .catch(err => {
+        wx.hideLoading();
+        console.error('????????', err);
+        wx.showToast({ title: '????', icon: 'none' });
+      });
   },
 
   async initializeChat() {

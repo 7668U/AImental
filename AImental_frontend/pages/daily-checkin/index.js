@@ -1,5 +1,6 @@
 // pages/daily-checkin/index.js (修改后)
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
+const { loginWithBackend } = require('../../utils/auth.js');
 
 // 从 ai-therapist 页面“借鉴”过来的网络请求函数，你也可以把它封装成公共模块
 function request(options) {
@@ -7,7 +8,7 @@ function request(options) {
     const token = wx.getStorageSync('token');
     wx.request({
       ...options,
-      url: `https://api.feelyourself.cn/api/v1${options.url}`,
+      url: `http://127.0.0.1:8000/api/v1${options.url}`,
       header: {
         ...options.header,
         'Authorization': `Bearer ${token}`
@@ -81,40 +82,23 @@ Page({
    * 新增：处理登录逻辑的函数，由 login-prompt 组件触发
    */
   handleLogin() {
-    wx.showLoading({ title: '正在登录' });
-    wx.login({
-      success: (loginRes) => {
-        if (loginRes.code) {
-          // 调用你原来的后端登录接口
-          wx.request({
-            url: 'https://api.feelyourself.cn/api/v1/users/login',
-            method: 'POST',
-            data: { code: loginRes.code },
-            success: (tokenRes) => {
-              if (tokenRes.statusCode === 200 && tokenRes.data.access_token) {
-                wx.hideLoading();
-                wx.setStorageSync('token', tokenRes.data.access_token);
-                wx.showToast({ title: '登录成功', icon: 'success' });
-                // 登录成功后，手动更新状态并加载页面数据
-                this.setData({ isLoggedIn: true });
-                this.fetchCheckinData();
-              } else {
-                 wx.hideLoading();
-                 wx.showToast({ title: '登录失败，请稍后重试', icon: 'none' });
-              }
-            },
-            fail: () => {
-              wx.hideLoading();
-              wx.showToast({ title: '登录失败，请检查网络', icon: 'none' });
-            }
-          });
+    wx.showLoading({ title: '???' });
+    loginWithBackend('http://127.0.0.1:8000/api/v1')
+      .then((tokenRes) => {
+        if (tokenRes.access_token) {
+          wx.hideLoading();
+          wx.setStorageSync('token', tokenRes.access_token);
+          wx.showToast({ title: '????', icon: 'success' });
+          this.setData({ isLoggedIn: true });
+          this.fetchCheckinData();
+        } else {
+          throw new Error('???????token');
         }
-      },
-      fail: () => {
-         wx.hideLoading();
-         wx.showToast({ title: '登录服务异常', icon: 'none' });
-      }
-    });
+      })
+      .catch(() => {
+        wx.hideLoading();
+        wx.showToast({ title: '??????????', icon: 'none' });
+      });
   },
 
   /**
@@ -182,18 +166,6 @@ Page({
   goToStatistics() {
     wx.navigateTo({
       url: '/pkgDailyCheckin/analysis'
-    });
-  },
-
-  goToPaperAirplane() {
-    wx.navigateTo({
-      url: '/pkgDailyCheckin/paper-airplane/index'
-    });
-  },
-
-  goToCabinet() {
-    wx.navigateTo({
-      url: '/pkgDailyCheckin/note/note'
     });
   },
 

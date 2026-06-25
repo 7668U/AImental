@@ -1,79 +1,153 @@
 <view class="page-container">
-  <view class="header">
-    <view class="main-title">{{isLocked ? '查看历史心情' : '记录今日心情'}}</view>
-    <view class="sub-title">看着这些记录，能想起那是怎样的一天吗？</view>
-  </view>
-
-  <view class="selector-container">
-    <view class="selector-row">
-      <view class="row-label">心情</view>
-      <scroll-view class="scroll-view" scroll-x="true" scroll-with-animation>
-        <view 
-          wx:for="{{moods}}" 
-          wx:key="name" 
-          class="item mood-item {{item.selected ? 'selected' : ''}} {{isLocked ? 'disabled' : ''}}"
-          bind:tap="handleSelect" 
-          data-type="moods" 
-          data-index="{{index}}"
-        >
-          <image class="item-icon" src="/images/daily-checkin/emotion/{{item.icon}}.png"></image>
-          <text class="item-text">{{item.name}}</text>
+  <view class="record-nav" style="padding-top: {{statusBarHeight}}px; height: {{totalNavBarHeight}}px;">
+    <view class="nav-row" style="height: {{navBarHeight}}px;">
+      <view class="nav-button nav-back" bindtap="goBack">‹</view>
+      <view class="nav-title">{{navTitle}}</view>
+      <view class="nav-actions">
+        <view class="nav-button nav-icon-button" bindtap="goToStatistics">
+          <image class="nav-icon" src="/images/icons/icon-report.png" mode="aspectFit"></image>
         </view>
-      </scroll-view>
-    </view>
-
-    <view class="selector-row">
-      <view class="row-label">状态</view>
-      <scroll-view class="scroll-view" scroll-x="true" scroll-with-animation>
-        <view 
-          wx:for="{{statuses}}" 
-          wx:key="name" 
-          class="item status-item {{item.selected ? 'selected' : ''}} {{isLocked ? 'disabled' : ''}}"
-          bind:tap="handleSelect" 
-          data-type="statuses" 
-          data-index="{{index}}"
-        >
-          <image class="item-icon" src="/images/daily-checkin/status/{{item.icon}}.png"></image>
-          <text class="item-text">{{item.name}}</text>
-        </view>
-      </scroll-view>
-    </view>
-
-    <view class="selector-row">
-      <view class="row-label">颜色</view>
-      <scroll-view class="scroll-view" scroll-x="true" scroll-with-animation>
-        <view 
-          wx:for="{{colors}}" 
-          wx:key="value" 
-          class="item color-item {{item.selected ? 'selected' : ''}} {{isLocked ? 'disabled' : ''}}"
-          bind:tap="handleSelect" 
-          data-type="colors" 
-          data-index="{{index}}"
-        >
-          <view class="color-dot" style="background-color: {{item.value}};"></view>
-        </view>
-      </scroll-view>
+        <view class="nav-button nav-more" bindtap="showMoreActions">•••</view>
+      </view>
     </view>
   </view>
 
-  <view class="journal-container">
-    <textarea 
-      class="text-area" 
-      placeholder="{{isLocked ? '这是过去的记录，无法修改哦' : '此刻，你想对自己说些什么？'}}"
-      value="{{textContent}}"
-      bindinput="onTextInput"
-      maxlength="500"
-      disabled="{{isLocked}}"
-    ></textarea>
-    <view class="image-uploader {{isLocked ? 'disabled' : ''}}" bind:tap="chooseImage">
-      <image wx:if="{{imageUrl}}" src="{{imageUrl}}" mode="aspectFill"></image>
-      <text wx:else class="plus-icon">+</text>
+  <scroll-view class="record-scroll" scroll-y="true" enhanced="true" show-scrollbar="false" scroll-into-view="{{scrollIntoView}}" scroll-with-animation="true">
+    <view class="record-content">
+      <view class="hero-card">
+        <view class="hero-copy">
+          <view class="hero-title">{{isLocked ? '回看那天心情' : '记录今日心情'}}</view>
+          <view class="hero-subtitle">看看这些记录，能想起那是怎样的一天吗？</view>
+        </view>
+        <image class="hero-art" src="/images/daily-checkin/record/banner-art.png" mode="aspectFit"></image>
+      </view>
+
+      <view class="section-card mood-section">
+        <view class="section-header mood-header">
+          <view class="section-title-wrap">
+            <image class="section-icon" src="/images/daily-checkin/record/section/mood.png" mode="aspectFit"></image>
+            <view class="section-title">心情</view>
+          </view>
+        </view>
+
+        <view class="mood-grid">
+          <view
+            wx:for="{{moods}}"
+            wx:key="id"
+            class="mood-card {{item.selected ? 'selected' : ''}} {{isLocked ? 'disabled' : ''}}"
+            bindtap="handleMoodSelect"
+            data-id="{{item.id}}"
+          >
+            <image class="mood-card-icon" src="/images/daily-checkin/record/mood24/{{item.icon}}.png" mode="aspectFit"></image>
+            <view class="mood-card-name">{{item.name}}</view>
+            <view wx:if="{{item.selected}}" class="selected-check mood-check">✓</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="section-card status-section">
+        <view class="section-header status-header">
+          <view class="section-title-wrap">
+            <image class="section-icon" src="/images/daily-checkin/record/section/status.png" mode="aspectFit"></image>
+            <view class="section-title">状态</view>
+          </view>
+          <view class="status-hint">最多选 3 个</view>
+        </view>
+        <view class="status-grid">
+          <view
+            wx:for="{{statuses}}"
+            wx:key="id"
+            class="status-card {{item.selected ? 'selected' : ''}} {{isLocked ? 'disabled' : ''}}"
+            bindtap="handleSelect"
+            data-type="statuses"
+            data-index="{{index}}"
+          >
+            <image class="status-card-icon" src="/images/daily-checkin/record/status24/{{item.icon}}.png" mode="aspectFit"></image>
+            <view class="status-card-name">{{item.name}}</view>
+            <view wx:if="{{item.selected}}" class="selected-check status-check">✓</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="section-card color-section">
+        <view class="section-header">
+          <image class="section-icon" src="/images/daily-checkin/record/section/color.png" mode="aspectFit"></image>
+          <view class="section-title">颜色</view>
+        </view>
+        <view class="color-grid">
+          <view
+            wx:for="{{colors}}"
+            wx:key="id"
+            class="color-swatch {{item.selected ? 'selected' : ''}} {{isLocked ? 'disabled' : ''}}"
+            bindtap="handleSelect"
+            data-type="colors"
+            data-index="{{index}}"
+          >
+            <view class="color-swatch-dot" style="background-color: {{item.value}};"></view>
+            <view wx:if="{{item.selected}}" class="color-check">✓</view>
+          </view>
+        </view>
+        <view class="color-selected-info">
+          <view class="color-selected-name">{{selectedColorInfo.name}}</view>
+        </view>
+      </view>
+
+      <view class="section-card journal-card">
+        <view class="journal-header">
+          <view class="section-header journal-title-wrap">
+            <image class="section-icon" src="/images/daily-checkin/record/section/note.png" mode="aspectFit"></image>
+            <view class="section-title">写下今天的小记忆</view>
+          </view>
+          <view class="meta-row">
+            <view class="meta-chip">▣ {{dateLabel}}</view>
+            <view class="meta-chip location-chip" bindtap="chooseRecordLocation">⌖ {{locationText}}</view>
+          </view>
+        </view>
+
+        <view class="textarea-wrap">
+          <textarea
+            class="text-area"
+            placeholder="{{isLocked ? '这是过去的记录，无法修改哦' : '今天发生了什么让你印象深刻的事呢？记录你的感受、想法，或者任何想留下的瞬间...'}}"
+            value="{{textContent}}"
+            bindinput="onTextInput"
+            maxlength="500"
+            disabled="{{isLocked}}"
+          ></textarea>
+          <view class="text-count">{{textCount}}/500</view>
+        </view>
+
+        <view id="photo-section" class="journal-tools">
+          <view class="photo-header">
+            <view class="photo-title">照片</view>
+            <view class="photo-count">{{photos.length}}/{{maxPhotos}}</view>
+          </view>
+          <view class="photo-grid">
+            <view
+              wx:for="{{photos}}"
+              wx:key="id"
+              class="photo-item {{isLocked ? 'disabled' : ''}}"
+              bindtap="chooseImage"
+              data-index="{{index}}"
+            >
+              <image src="{{item.url}}" mode="aspectFill"></image>
+              <view wx:if="{{!isLocked}}" class="photo-remove" catchtap="removePhoto" data-index="{{index}}">×</view>
+            </view>
+
+            <view wx:if="{{!isLocked && photos.length < maxPhotos}}" class="image-uploader" bindtap="chooseImage">
+              <view class="plus-icon">＋</view>
+              <view class="upload-text">添加照片</view>
+              <view class="upload-hint">最多 {{maxPhotos}} 张</view>
+            </view>
+          </view>
+
+        </view>
+      </view>
     </view>
-  </view>
+  </scroll-view>
 
   <view class="footer">
-    <button class="submit-btn" bind:tap="submitCheckin" disabled="{{isLocked}}">
-      {{ isLocked ? '不可修改过去状态' : (isEditMode ? '修改今日心情' : '封存今日心情') }}
+    <button class="submit-btn" bindtap="submitCheckin" disabled="{{isLocked}}">
+      {{isLocked ? '不可修改过去状态' : '保存今日心情'}}
     </button>
   </view>
 </view>

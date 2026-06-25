@@ -1,0 +1,41 @@
+<!-- pages/paper-airplane/index.wxml -->
+<view class="page-container">
+  <view class="sky-bg">
+    <image src="/images/cloud.png" class="cloud cloud-1"></image>
+  </view>
+
+  <view class="airplane-container">
+    <image wx:for="{{airplanes}}" wx:key="id"
+           src="/images/paper_airplane.png"
+           class="airplane"
+           style="top: {{item.top}}%; left: {{item.left}}%; transform: rotate({{item.rotate}}deg);"
+           data-id="{{item.id}}"
+           bindtap="onAirplaneTap">
+    </image>
+  </view>
+
+  <view class="actions-bar">
+    <button class="throw-button-container" bindtap="onThrowClick">
+      <image src="/images/send_airplane.png" class="throw-button-img"></image>
+      <text class="throw-button-text">扔一个</text>
+    </button>
+  </view>
+
+  <view class="modal-mask" wx:if="{{showWriteModal}}" bindtap="hideModals"></view>
+  <view class="modal-content write-modal" wx:if="{{showWriteModal}}">
+    <image src="/images/cancle.png" class="modal-cancel-btn" bindtap="hideModals"></image>
+
+    <textarea class="message-input" placeholder="把你的心事写在纸上，然后让它飞远吧..." maxlength="500" value="{{newMessage}}" bindinput="onMessageInput"></textarea>
+    <view class="modal-button" bindtap="sendAirplane">飞出去</view>
+  </view>
+
+  <view class="modal-mask" wx:if="{{showReadModal}}" bindtap="hideModals"></view>
+  <view class="modal-content read-modal" wx:if="{{showReadModal}}">
+    <image src="/images/cancle.png" class="modal-cancel-btn" bindtap="hideModals"></image>
+
+    <scroll-view scroll-y="true" class="message-display">
+      <text>{{openedMessage}}</text>
+    </scroll-view>
+    <view class="modal-button" bindtap="hideModals">收起来</view>
+  </view>
+</view>

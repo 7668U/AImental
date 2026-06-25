@@ -14,16 +14,16 @@ from openai import OpenAI
 # 1. API客户端设置
 # ---------------------------------------------------
 # 强烈建议将API密钥存储在环境变量中，而不是硬编码在代码里
-MOONSHOT_API_KEY = os.getenv("MOONSHOT_API_KEY", "sk-6gGW4lyWgHbvwFO8My2d1ivCkFY77iFBthp3J6TIolfAtJm3")
-MOONSHOT_BASE_URL = "https://api.moonshot.cn/v1"
+MOONSHOT_API_KEY = os.getenv("MOONSHOT_API_KEY")
+MOONSHOT_BASE_URL = os.getenv("MOONSHOT_BASE_URL", "https://api.moonshot.cn/v1")
 
 # 检查API密钥是否已设置，如果没有，则切换到模拟模式以便于测试
-IS_MOCK_API = "xxxx" in MOONSHOT_API_KEY
+IS_MOCK_API = not MOONSHOT_API_KEY
 if IS_MOCK_API:
     print("警告: Moonshot API密钥未设置或使用的是占位符。将使用模拟数据运行。")
 
 try:
-    client = OpenAI(api_key=MOONSHOT_API_KEY, base_url=MOONSHOT_BASE_URL)
+    client = OpenAI(api_key=MOONSHOT_API_KEY, base_url=MOONSHOT_BASE_URL) if MOONSHOT_API_KEY else None
 except Exception as e:
     print(f"无法初始化OpenAI客户端，请检查API Key和URL配置: {e}")
     client = None

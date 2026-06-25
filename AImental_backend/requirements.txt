@@ -1,0 +1,14 @@
+apscheduler==3.11.2
+fastapi==0.138.0
+jieba==0.42.1
+openai==2.43.0
+peewee==4.1.0
+peewee-extra-fields==2.8.2
+pydantic==2.13.4
+python-dotenv==1.2.2
+python-jose[cryptography]==3.5.0
+python-multipart==0.0.32
+pytz==2026.2
+redis==8.0.0
+requests==2.34.2
+uvicorn[standard]==0.49.0

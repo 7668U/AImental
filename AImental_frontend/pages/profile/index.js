@@ -1,11 +1,12 @@
 // index.js (正确分离的版本)
 
 // --- 配置 ---
-const SERVER_BASE_URL = 'https://api.feelyourself.cn'; 
+const SERVER_BASE_URL = 'http://127.0.0.1:8000'; 
 const API_BASE_URL = `${SERVER_BASE_URL}/api/v1/users`; 
 const defaultAvatarUrl = '/images/default-avatar.png';
 
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
+const { loginWithBackend } = require('../../utils/auth.js');
 Page({
   data: {
     isLogin: false,
@@ -44,56 +45,25 @@ Page({
   },
 
   login: function() {
-    wx.showLoading({ title: '正在登录...' });
-
-    // 步骤1: 调用微信登录获取临时 code
-    wx.login({
-      success: loginRes => {
-        if (loginRes.code) {
-          // 步骤2: 将 code 发送到后端服务器
-          wx.request({
-            url: `${API_BASE_URL}/login`,
-            method: 'POST',
-            data: {
-              // 只发送 code，不发送任何用户信息
-              code: loginRes.code,
-            },
-            success: (apiRes) => {
-              wx.hideLoading();
-              // 步骤3: 处理后端的响应
-              if (apiRes.statusCode === 200 && apiRes.data.access_token) {
-                // 登录成功
-                const token = apiRes.data.access_token;
-                wx.setStorageSync('token', token);
-                // 立刻获取用户信息并更新页面
-                this.fetchUserProfile(token);
-                wx.showToast({ title: '登录成功', icon: 'success' });
-              } else {
-                // 后端返回错误
-                console.error("登录API返回失败:", apiRes);
-                wx.showToast({ title: apiRes.data.detail || '登录失败', icon: 'none' });
-              }
-            },
-            fail: (err) => {
-              // 请求本身失败，如网络问题或IP不通
-              wx.hideLoading();
-              console.error("请求后端登录接口失败:", err);
-              wx.showToast({ title: '无法连接服务器', icon: 'none' });
-            }
-          });
-        } else {
-          // 获取 code 失败
-          wx.hideLoading();
-          wx.showToast({ title: '获取微信凭证失败', icon: 'none' });
-        }
-      },
-      fail: (err) => {
-        // wx.login 接口本身调用失败
+    wx.showLoading({ title: '???...' });
+    loginWithBackend(SERVER_BASE_URL + '/api/v1')
+      .then((apiRes) => {
         wx.hideLoading();
-        console.error("wx.login 调用失败:", err);
-        wx.showToast({ title: '微信登录调用失败', icon: 'none' });
-      }
-    });
+        if (apiRes.access_token) {
+          const token = apiRes.access_token;
+          wx.setStorageSync('token', token);
+          this.fetchUserProfile(token);
+          wx.showToast({ title: '????', icon: 'success' });
+        } else {
+          console.error('??API????:', apiRes);
+          wx.showToast({ title: apiRes.detail || '????', icon: 'none' });
+        }
+      })
+      .catch((err) => {
+        wx.hideLoading();
+        console.error('??????????:', err);
+        wx.showToast({ title: '???????', icon: 'none' });
+      });
   },
   fetchUserProfile: function(token) {
     wx.request({

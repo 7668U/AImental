@@ -1,6 +1,6 @@
 // pages/ai-community/chat-list/chat-list.js
 
-const SERVER_URL = 'https://api.feelyourself.cn';
+const SERVER_URL = 'http://127.0.0.1:8000';
 const app = getApp();
 
 // --- 统一网络请求函数 ---
@@ -44,6 +44,7 @@ function request(options) {
 }
 
 const { getShareInfo, getTimelineInfo } = require('../../../utils/share.js');
+const { loginWithBackend } = require('../../../utils/auth.js');
 Page({
   data: {
     // 保留原有数据结构
@@ -111,31 +112,21 @@ Page({
 
   // --- 使用 async/await 和新的 request 函数重构登录逻辑 ---
   async handleLogin() {
-    wx.showLoading({ title: '正在登录...' });
+    wx.showLoading({ title: '???...' });
     try {
-      const loginRes = await wx.login();
-      if (!loginRes.code) throw new Error('微信登录失败');
-
-      const tokenRes = await request({
-        url: '/users/login',
-        method: 'POST',
-        apiType: 'user', // 指定使用用户接口的URL前缀
-        data: { code: loginRes.code }
-      });
-      
+      const tokenRes = await loginWithBackend(SERVER_URL + '/api/v1');
       if (tokenRes.access_token) {
         wx.setStorageSync('token', tokenRes.access_token);
         wx.hideLoading();
-        wx.showToast({ title: '登录成功', icon: 'success' });
-        // 登录成功后，重新检查状态，会自动刷新UI并加载数据
+        wx.showToast({ title: '????', icon: 'success' });
         this.checkLoginStatus();
       } else {
-        throw new Error('后端未返回有效token');
+        throw new Error('???????token');
       }
     } catch (error) {
       wx.hideLoading();
-      wx.showToast({ title: '登录失败，请稍后重试', icon: 'none' });
-      console.error("登录流程失败: ", error);
+      wx.showToast({ title: '??????????', icon: 'none' });
+      console.error('??????: ' , error);
     }
   },
 

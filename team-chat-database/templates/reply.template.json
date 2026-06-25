@@ -1,0 +1,20 @@
+{
+  "id": "msg-YYYYMMDD-0000",
+  "room_id": "core-team",
+  "created_at": "YYYY-MM-DDTHH:mm:ss+08:00",
+  "author_role": "backend_engineer",
+  "author_name": "后端工程师",
+  "reply_to_id": "msg-YYYYMMDD-0000",
+  "topic": "same-topic-as-parent",
+  "message_type": "answer",
+  "status": "open",
+  "tags": [],
+  "mentions": ["product_manager"],
+  "body": "这里写回复内容。reply_to_id 必须填被回复消息的 id。",
+  "links": [],
+  "attachments": [],
+  "related_files": [],
+  "decisions": [],
+  "tasks": []
+}
+

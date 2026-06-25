@@ -13,52 +13,37 @@
     <view class="main-content" style="padding-top: {{totalNavBarHeight}}px;">
       
       <view class="welcome-wrapper">
-        <view class="title">你好，</view>
+        <view class="title-row">
+          <view class="title">你好，</view>
+          <text class="greeting-heart">♥</text>
+        </view>
         <view class="subtitle">今天也要好好关照自己</view>
       </view>
 
       <scroll-view class="card-scroll-area" scroll-y="true">
-        <view class="card-list">
-          <view class="card" bind:tap="openCalendar">
-            <image class="card-icon" src="/images/daily-checkin/calendar.png" mode="aspectFit"></image>
-            <view class="card-content">
-              <view class="card-title">心情日历</view>
-              <view class="card-subtitle">打开时光宝盒，重温每日心情</view>
+        <view class="daily-layout">
+          <view class="primary-checkin-card" bind:tap="goToRecord">
+            <view class="primary-copy">
+              <view class="primary-title">{{hasCheckedInToday ? '查看今日心情' : '今日打卡'}}</view>
+              <view class="primary-subtitle">{{hasCheckedInToday ? '今日已打卡，回看此刻的感受' : '关照此刻的感受，从这里开始'}}</view>
+            </view>
+            <image class="primary-illustration" src="/images/daily-checkin/layout/checkin-hero.png" mode="aspectFit"></image>
+            <view class="primary-action">
+              <text>{{hasCheckedInToday ? '查看记录' : '开始记录'}}</text>
             </view>
           </view>
-          <view wx:if="{{!hasCheckedInToday}}" class="card" bind:tap="goToRecord">
-            <image class="card-icon" src="/images/daily-checkin/illustration-welcome.png" mode="aspectFit"></image>
-            <view class="card-content">
-              <view class="card-title">今日打卡</view>
-              <view class="card-subtitle">关照此刻的感受，从这里开始</view>
+
+          <view class="secondary-grid">
+            <view class="secondary-card" bind:tap="openCalendar">
+              <image class="secondary-icon" src="/images/daily-checkin/layout/calendar-card.png" mode="aspectFit"></image>
+              <view class="secondary-title">心情日历</view>
+              <view class="secondary-subtitle">重温每日心情</view>
             </view>
-          </view>
-          <view wx:else class="card" bind:tap="goToRecord">
-            <image class="card-icon" src="/images/daily-checkin/already_checkin.png" mode="aspectFit"></image>
-            <view class="card-content">
-              <view class="card-title">查看今日心情</view>
-              <view class="card-subtitle">今日已打卡</view>
-            </view>
-          </view>
-          <view class="card" bind:tap="goToStatistics">
-            <image class="card-icon" src="/images/daily-checkin/report.png" mode="aspectFit"></image>
-            <view class="card-content">
-              <view class="card-title">我的心情报告</view>
-              <view class="card-subtitle">回顾点滴，发现情绪的流动</view>
-            </view>
-          </view>
-          <view class="card" bind:tap="goToCabinet">
-            <image class="card-icon" src="/images/icons/note.png" mode="aspectFit"></image>
-            <view class="card-content">
-              <view class="card-title">心灵记事簿</view>
-              <view class="card-subtitle">记录你的想法与感悟</view>
-            </view>
-          </view>
-          <view class="card" bind:tap="goToPaperAirplane">
-            <image class="card-icon" src="/images/airplane.png" mode="aspectFit"></image>
-            <view class="card-content">
-              <view class="card-title">纸飞机</view>
-              <view class="card-subtitle">和陌生人分享自己的一天</view>
+
+            <view class="secondary-card" bind:tap="goToStatistics">
+              <image class="secondary-icon" src="/images/daily-checkin/layout/analysis-card.png" mode="aspectFit"></image>
+              <view class="secondary-title">心情分析</view>
+              <view class="secondary-subtitle">发现情绪的流动</view>
             </view>
           </view>
         </view>

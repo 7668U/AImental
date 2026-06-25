@@ -1,0 +1,20 @@
+{
+  "id": "msg-YYYYMMDD-0000",
+  "room_id": "core-team",
+  "created_at": "YYYY-MM-DDTHH:mm:ss+08:00",
+  "author_role": "product_manager",
+  "author_name": "产品经理",
+  "reply_to_id": null,
+  "topic": "general",
+  "message_type": "message",
+  "status": "open",
+  "tags": [],
+  "mentions": [],
+  "body": "这里写消息正文。JSONL 中正文不要物理换行，需要换行就写 \\n。",
+  "links": [],
+  "attachments": [],
+  "related_files": [],
+  "decisions": [],
+  "tasks": []
+}
+

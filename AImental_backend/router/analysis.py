@@ -16,6 +16,13 @@ from model.analysis import (
     ColorPaletteAnalysisContent
 )
 from model.status import checkin_table
+from model.checkin_dimensions import (
+    COLOR_OPTIONS,
+    MOOD_OPTIONS,
+    build_status_meta_from_tags,
+    get_color_meta,
+    get_mood_meta,
+)
 
 # 认证依赖
 from .auth import get_current_user_id
@@ -35,6 +42,8 @@ router = APIRouter(
     dependencies=[Depends(get_current_user_id)]
 )
 
+ANALYSIS_SCHEMA_VERSION = "v2"
+
 # --- 辅助数据 ---
 # 中文停用词表 (一个简单的版本，您可以根据需要扩展)
 STOPWORDS = {
@@ -42,13 +51,8 @@ STOPWORDS = {
     '不', '都', '就', '还', '个', '一', '很', '什么', '怎么', '这个', '那个', '今天', '一个'
 }
 
-# 情绪色彩名称映射 (您可以自定义更丰富的名称)
-COLOR_NAME_MAP = {
-    '#FFC107': '暖阳橙', '#81D4FA': '晴空蓝', '#A5D6A7': '薄荷绿',
-    '#B0BEC5': '烟波灰', '#F48FB1': '落樱粉', '#C5CAE9': '香芋紫',
-    '#FF8A80': '珊瑚红', '#FFF59D': '柠檬黄', '#80CBC4': '青碧色',
-    '#7986CB': '鸢尾蓝', '#BCAAA4': '奶咖棕', '#F5F5F5': '云朵白'
-}
+COLOR_NAME_MAP = {item["hex"].upper(): item["label"] for item in COLOR_OPTIONS}
+MOOD_FAMILY_ORDER = list(dict.fromkeys(item["family"] for item in MOOD_OPTIONS))
 
 
 # ===================================================
@@ -61,33 +65,34 @@ AI_DETAILED_PROMPTS = {
 
 **你的任务:**
 1.  **角色**: 情绪心理学专家。
-2.  **核心分析对象**: 仅限`mood`字段。
+2.  **核心分析对象**: `mood`、`mood_family`、`mood_valence`、`mood_energy`。
 3.  **报告重点**:
     - 总结最主要的情绪，并解读这种主导情绪可能代表的心理状态。
-    - 分析情绪的多样性。情绪种类是丰富还是单一？这说明了什么？
-    - 观察情绪的波动性。情绪变化是平缓还是剧烈？这背后可能有哪些原因？
+    - 分析 6 个情绪族的分布，判断用户更偏明亮愉悦、安稳平静、低落难过、焦虑紧绷、生气受伤还是疲惫麻木。
+    - 结合正向/中性/负向和能量水平，识别用户近期是高能紧绷、低能疲惫，还是相对平稳。
     - 基于情绪分布，发现用户的潜在优势（如情绪稳定、能快速恢复等）并给予鼓励。
     - 提供1-2个针对性的、与情绪调节相关的实用小技巧。
 
-**用户的打卡数据摘要如下 (你只需关注 mood 字段):**
+**用户的打卡数据摘要如下 (请重点关注心情及其结构化元信息):**
 ---
 {data_summary}
 ---
 """,
     "tag-mood": """
-你是一位**行为心理学**和**生活方式**领域的AI顾问。你的任务是深入分析用户在 **{period_name}** 内的**活动标签(tags)**与**心情(mood)**之间的关联，揭示生活方式对情绪的深层影响。
+你是一位**行为心理学**和**生活方式**领域的AI顾问。你的任务是深入分析用户在 **{period_name}** 内的**状态(tags/status_ids)**与**心情结构(mood_family/mood_energy/color_group)**之间的关联，揭示日常生活模式与情绪的关系。
 
 **你的任务:**
 1.  **角色**: 行为心理学顾问。
-2.  **核心分析对象**: `tags` 和 `mood` 字段的关联。
+2.  **核心分析对象**: 状态标签与情绪族、能量水平、颜色组的关联。
 3.  **报告重点**:
-    - 找出用户的“快乐源泉”。哪些活动（标签）最常与积极情绪（如开心、放松）一同出现？
-    - 识别潜在的“压力来源”。哪些活动（标签）可能与负面情绪（如疲惫、难过）高度相关？
-    - 分析是否存在显著的行为-情绪模式。例如，“运动后总是更开心”或“工作日普遍感到疲惫”。
+    - 注意：状态是“今天在做什么/处于什么模式”，不是直接的情绪原因，不要武断归因。
+    - 找出哪些状态常和明亮、平静、低落、焦虑、疲惫等情绪族一起出现。
+    - 观察哪些生活模式更容易对应高能量或低能量。
+    - 分析状态和颜色组的搭配，例如“出差/加班”常搭配阴雨安静还是紧绷浓郁。
     - 基于这些发现，表扬用户积极的生活习惯。
     - 提供1-2个关于优化生活方式、趋利避害的温和建议。
 
-**用户的打卡数据摘要如下 (请重点分析 tags 和 mood 的关系):**
+**用户的打卡数据摘要如下 (请重点分析状态与心情结构的关系):**
 ---
 {data_summary}
 ---
@@ -115,14 +120,14 @@ AI_DETAILED_PROMPTS = {
 
 **你的任务:**
 1.  **角色**: 色彩心理学与艺术疗法专家。
-2.  **核心分析对象**: 仅限`color`字段。
+2.  **核心分析对象**: `color`、`color_label`、`color_group`、`color_tone`。
 3.  **报告重点**:
-    - 解读用户最常选择的主色调。这种颜色在色彩心理学中通常象征着什么？它可能反映了用户怎样的潜意识心境？
+    - 解读用户最常选择的颜色和颜色组，例如暖光明亮、清透自然、柔和梦感、阴雨安静、紧绷浓郁、沉稳大地。
     - 分析用户选择的色彩组合。这些颜色搭配在一起，像一幅怎样的画？传达了怎样的整体感觉？
     - 将用户的“情绪色板”比喻成一种自然景观、一首诗或一幅画，进行充满艺术感的解读。
     - 给予用户基于色彩的积极心理暗示和祝福。
 
-**用户的打卡数据摘要如下 (你只需关注 color 字段):**
+**用户的打卡数据摘要如下 (请重点关注颜色及其结构化元信息):**
 ---
 {data_summary}
 ---
@@ -179,7 +184,7 @@ def get_chart_data(
     - analysis_type: 'mood', 'tag-mood', 'word-cloud', 'color'
     """
     start_ts, end_ts, period_name = _get_period_info(period_type, year, value)
-    period_key = f"{year}-{value}-{period_type}-{analysis_type}-chart"
+    period_key = f"{ANALYSIS_SCHEMA_VERSION}-{year}-{value}-{period_type}-{analysis_type}-chart"
     
     # 1. 检查缓存
     if not force_refresh:
@@ -229,8 +234,8 @@ def get_ai_detailed_report(
         raise HTTPException(status_code=400, detail="无效的分析模块类型。")
 
     start_ts, end_ts, period_name = _get_period_info(period_type, year, value)
-    period_key = f"{year}-{value}-{period_type}-{analysis_type}-ai"
-    cache_type_key = f"ai_report_{analysis_type}"
+    period_key = f"{ANALYSIS_SCHEMA_VERSION}-{year}-{value}-{period_type}-{analysis_type}-ai"
+    cache_type_key = f"{ANALYSIS_SCHEMA_VERSION}_ai_report_{analysis_type}"
     
     # 1. 检查缓存
     if not force_refresh:
@@ -257,34 +262,120 @@ def get_ai_detailed_report(
 
 # ===================================================
 # 5. 各分析模块的具体实现逻辑 (私有函数)
-# (这些函数无需修改，因为它们已接收列表作为输入)
+# V2: 支持 24 心情、24 状态、24 色卡的结构化分析。
 # ===================================================
+def _distribution(counter: Counter, total: int | None = None) -> List[Dict[str, Any]]:
+    denominator = total or sum(counter.values())
+    if denominator <= 0:
+        return []
+    items = []
+    for name, count in counter.most_common():
+        items.append({
+            "name": name,
+            "value": count,
+            "percent": round((count / denominator) * 100, 1)
+        })
+    return items
+
+
 def _generate_mood_analysis(checkins: List[Dict], period_name: str) -> MoodAnalysisContent:
     total_checkins = len(checkins)
-    moods_list = [r['mood'] for r in checkins]
+    moods_list = [r['mood'] for r in checkins if r.get('mood')]
     mood_counts = Counter(moods_list)
     dominant_mood = mood_counts.most_common(1)[0][0] if mood_counts else "无"
-    mood_distribution = []
-    for mood, count in mood_counts.items():
-        mood_distribution.append({"name": mood, "value": count, "percent": round((count / total_checkins) * 100, 1)})
-    mood_distribution.sort(key=lambda x: x['value'], reverse=True)
-    interpretation = f"在{period_name}，你共记录了 {total_checkins} 天。'{dominant_mood}' 是你的主导情绪。"
-    return MoodAnalysisContent(total_checkins=total_checkins, dominant_mood=dominant_mood, mood_distribution=mood_distribution, interpretation=interpretation)
+    mood_distribution = _distribution(mood_counts, total_checkins)
+
+    family_counts, valence_counts, energy_counts = Counter(), Counter(), Counter()
+    for record in checkins:
+        meta = get_mood_meta(record.get('mood_id') or record.get('mood'))
+        if not meta:
+            continue
+        family_counts[record.get('mood_family') or meta.get('family', '未归类')] += 1
+        valence_counts[record.get('mood_valence') or meta.get('valence', 'unknown')] += 1
+        energy_counts[record.get('mood_energy') or meta.get('energy', 'unknown')] += 1
+
+    family_distribution = _distribution(family_counts, total_checkins)
+    valence_distribution = _distribution(valence_counts, total_checkins)
+    energy_distribution = _distribution(energy_counts, total_checkins)
+    dominant_family = family_distribution[0]["name"] if family_distribution else None
+
+    interpretation = (
+        f"在{period_name}，你共记录了 {total_checkins} 天。"
+        f"'{dominant_mood}' 是出现最多的心情"
+        f"{f'，主要落在「{dominant_family}」情绪族' if dominant_family else ''}。"
+    )
+    return MoodAnalysisContent(
+        total_checkins=total_checkins,
+        dominant_mood=dominant_mood,
+        dominant_mood_family=dominant_family,
+        mood_distribution=mood_distribution,
+        mood_family_distribution=family_distribution,
+        valence_distribution=valence_distribution,
+        energy_distribution=energy_distribution,
+        interpretation=interpretation
+    )
 
 def _generate_tag_mood_analysis(checkins: List[Dict]) -> TagMoodAnalysisContent:
-    tag_mood_counter, all_moods = {}, set()
+    tag_mood_counter, all_mood_families = {}, set()
+    status_counter, status_family_counter = Counter(), Counter()
+    status_family_by_label = {}
+
     for record in checkins:
-        mood, tags_str = record.get('mood'), record.get('tags')
-        if not tags_str or not mood: continue
-        all_moods.add(mood)
-        for tag in [t.strip() for t in tags_str.split(',')]:
-            if tag not in tag_mood_counter: tag_mood_counter[tag] = Counter()
-            tag_mood_counter[tag][mood] += 1
+        mood_meta = get_mood_meta(record.get('mood_id') or record.get('mood'))
+        mood_family = record.get('mood_family') or mood_meta.get('family')
+        status_metas = build_status_meta_from_tags(record.get('tags'), record.get('status_ids'))
+        if not status_metas or not mood_family:
+            continue
+
+        all_mood_families.add(mood_family)
+        for status_meta in status_metas:
+            status_label = status_meta.get('label')
+            status_family = status_meta.get('family', '未归类')
+            if not status_label:
+                continue
+            if status_label not in tag_mood_counter:
+                tag_mood_counter[status_label] = Counter()
+            tag_mood_counter[status_label][mood_family] += 1
+            status_counter[status_label] += 1
+            status_family_counter[status_family] += 1
+            status_family_by_label[status_label] = status_family
+
     if not tag_mood_counter: raise HTTPException(status_code=404, detail="无足够标签数据。")
-    categories = list(tag_mood_counter.keys())
-    series = [{"name": mood, "data": [tag_mood_counter.get(cat, {}).get(mood, 0) for cat in categories]} for mood in sorted(list(all_moods))]
-    interpretation = "我们发现了一些有趣的关联：某些活动似乎总是伴随着特定的心情。"
-    return TagMoodAnalysisContent(chart_data={"categories": categories, "series": series}, interpretation=interpretation)
+
+    categories = [name for name, _ in status_counter.most_common()]
+    ordered_families = [
+        family for family in MOOD_FAMILY_ORDER if family in all_mood_families
+    ] + sorted([family for family in all_mood_families if family not in MOOD_FAMILY_ORDER])
+    series = [
+        {
+            "name": family,
+            "data": [tag_mood_counter.get(cat, {}).get(family, 0) for cat in categories]
+        }
+        for family in ordered_families
+    ]
+
+    top_correlations = []
+    for status_label in categories:
+        counter = tag_mood_counter[status_label]
+        dominant_family, dominant_count = counter.most_common(1)[0]
+        total = sum(counter.values())
+        top_correlations.append({
+            "status": status_label,
+            "status_family": status_family_by_label.get(status_label, "未归类"),
+            "dominant_mood_family": dominant_family,
+            "count": dominant_count,
+            "total": total,
+            "percent": round((dominant_count / total) * 100, 1) if total else 0,
+        })
+
+    interpretation = "状态关联已升级为按生活状态与情绪族分析，能更清楚地看见哪些日常模式常和哪些情绪质感一起出现。"
+    return TagMoodAnalysisContent(
+        chart_data={"categories": categories, "series": series},
+        status_distribution=_distribution(status_counter),
+        status_family_distribution=_distribution(status_family_counter),
+        top_correlations=top_correlations[:8],
+        interpretation=interpretation
+    )
 
 def _generate_word_cloud_analysis(checkins: List[Dict], top_n: int = 30) -> WordCloudAnalysisContent:
     all_text = "".join([r['text_content'] for r in checkins if r.get('text_content')])
@@ -298,11 +389,36 @@ def _generate_word_cloud_analysis(checkins: List[Dict], top_n: int = 30) -> Word
 
 def _generate_color_analysis(checkins: List[Dict]) -> ColorPaletteAnalysisContent:
     total_checkins = len(checkins)
-    colors_list = [r['color'] for r in checkins if r.get('color')]
-    color_counts = Counter(colors_list)
+    color_counts, color_group_counts, color_tone_counts = Counter(), Counter(), Counter()
+
+    for record in checkins:
+        if not record.get('color'):
+            continue
+        color_meta = get_color_meta(record.get('color_id') or record.get('color'))
+        hex_code = color_meta.get("hex", record.get('color')).upper()
+        color_counts[hex_code] += 1
+        color_group_counts[record.get('color_group') or color_meta.get("group", "自定义")] += 1
+        color_tone_counts[record.get('color_tone') or color_meta.get("tone", "custom")] += 1
+
     color_palette = []
     for hex_code, count in color_counts.most_common(5):
-        color_palette.append({"hex": hex_code, "name": COLOR_NAME_MAP.get(hex_code, "自定义色"), "percent": round((count / total_checkins) * 100, 1)})
+        color_meta = get_color_meta(hex_code)
+        color_palette.append({
+            "hex": hex_code,
+            "name": COLOR_NAME_MAP.get(hex_code, color_meta.get("label", "自定义色")),
+            "percent": round((count / total_checkins) * 100, 1)
+        })
     top_color_name = color_palette[0]['name'] if color_palette else "五彩斑斓"
-    interpretation = f"这是专属于你的'情绪色卡'。'{top_color_name}' 是你最偏爱的色彩。"
-    return ColorPaletteAnalysisContent(color_palette=color_palette, interpretation=interpretation)
+    color_group_distribution = _distribution(color_group_counts, total_checkins)
+    dominant_color_group = color_group_distribution[0]["name"] if color_group_distribution else None
+    interpretation = (
+        f"这是专属于你的情绪色卡。'{top_color_name}' 是你最常选择的颜色"
+        f"{f'，主要来自「{dominant_color_group}」色彩组' if dominant_color_group else ''}。"
+    )
+    return ColorPaletteAnalysisContent(
+        color_palette=color_palette,
+        dominant_color_group=dominant_color_group,
+        color_group_distribution=color_group_distribution,
+        color_tone_distribution=_distribution(color_tone_counts, total_checkins),
+        interpretation=interpretation
+    )

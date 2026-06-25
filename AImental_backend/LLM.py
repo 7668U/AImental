@@ -14,13 +14,10 @@ from model.assessment import UserAssessment
 from model.assessment import assessment_tables # 用于综合报告
 
 # --- API客户端配置 ---
-# 建议使用环境变量管理API密钥
-# from dotenv import load_dotenv
-# load_dotenv()
-# MOONSHOT_API_KEY = os.getenv("MOONSHOT_API_KEY")
-MOONSHOT_API_KEY = "sk-6gGW4lyWgHbvwFO8My2d1ivCkFY77iFBthp3J6TIolfAtJm3" 
-MOONSHOT_BASE_URL = "https://api.moonshot.cn/v1"
-client = OpenAI(api_key=MOONSHOT_API_KEY, base_url=MOONSHOT_BASE_URL)
+# 使用环境变量管理API密钥，不要在代码中硬编码真实密钥。
+MOONSHOT_API_KEY = os.getenv("MOONSHOT_API_KEY")
+MOONSHOT_BASE_URL = os.getenv("MOONSHOT_BASE_URL", "https://api.moonshot.cn/v1")
+client = OpenAI(api_key=MOONSHOT_API_KEY, base_url=MOONSHOT_BASE_URL) if MOONSHOT_API_KEY else None
 
 USER_DATA_HANDLING_PROMPT = """
 【重要】关于用户背景信息的使用指南:
@@ -81,8 +78,14 @@ def _get_user_context_for_chat(chat_id: str) -> str:
             for checkin in recent_checkins:
                 date_str = datetime.datetime.fromtimestamp(checkin.timestamp).strftime('%Y-%m-%d')
                 line = f"- {date_str}: 心情-{checkin.mood}"
+                if getattr(checkin, "mood_family", None):
+                    line += f", 情绪族-{checkin.mood_family}"
+                if getattr(checkin, "mood_energy", None):
+                    line += f", 能量-{checkin.mood_energy}"
                 if checkin.tags:
-                    line += f", 标签-{checkin.tags}"
+                    line += f", 状态-{checkin.tags}"
+                if getattr(checkin, "color_label", None):
+                    line += f", 颜色-{checkin.color_label}"
                 checkin_lines.append(line)
             context_parts.append("\n".join(checkin_lines))
     except Exception as e:
@@ -217,8 +220,20 @@ def generate_ai_analysis_report(checkin_data: List[Dict], prompt_template: str, 
         record_summary = f"- 日期: {date_str}"
         if record.get('mood'):
             record_summary += f", 心情: {record['mood']}"
+        if record.get('mood_family'):
+            record_summary += f", 情绪族: {record['mood_family']}"
+        if record.get('mood_valence'):
+            record_summary += f", 情绪倾向: {record['mood_valence']}"
+        if record.get('mood_energy'):
+            record_summary += f", 能量水平: {record['mood_energy']}"
         if record.get('tags'):
-            record_summary += f", 标签: {record['tags']}"
+            record_summary += f", 状态: {record['tags']}"
+        if record.get('status_families'):
+            record_summary += f", 状态组: {'/'.join(record['status_families'])}"
+        if record.get('color_label'):
+            record_summary += f", 颜色: {record['color_label']}"
+        if record.get('color_group'):
+            record_summary += f", 颜色组: {record['color_group']}"
         if record.get('text_content'):
             record_summary += f", 日记: '{record['text_content']}'"
         data_summary_parts.append(record_summary)
