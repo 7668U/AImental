@@ -307,16 +307,202 @@
 - 已通过群聊向后端工程师提出多图接口需求：`team-chat-database/views/thread-view.md` 中的 `msg-20260625-0004`。
 - 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-25-iteration-009-checkin-photo-grid.md`。
 
-## 2026-06-26 22:26 +08:00
+## 2026-06-26 00:10 +08:00
 
 用户说明：
 
-- 用户要求更改前端的“心理咨询界面”。
-- 用户提供两张参考图：进入心理咨询后显示“AI陪伴”聊天界面；点击左上角“项目”后弹出左侧项目栏，展示历史对话列表。
+- 用户要求我继续阅读本项目的前端项目角色卡，并成为用户的前端 UI 设计开发师。
 
 当前响应：
 
-- 已将 `AImental_frontend/pages/ai-therapist/index` 改为参考图中的暖色 AI 陪伴聊天界面。
-- 已复用原有聊天接口、历史会话、会话切换、新建、设置、发送消息逻辑。
-- 已实现点击“项目”展开左侧项目栏，项目栏展示历史对话标题、日期、摘要与当前选中态。
-- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-26-iteration-004-ai-therapist-redesign.md`。
+- 已用 UTF-8 重新阅读 `frontend-design-iterations/frontend-ui-designer-role-card.md`，确认角色职责、素材生成规范、fhl Images API 使用边界和安全规则。
+- 已同步阅读 `frontend-design-iterations/README.md`、`decision-log.md`、`backlog.md`、`chat-log.md` 和最近迭代记录。
+- 已阅读产品侧角色卡、产品决策日志、每日打卡三维度和 24 色方案，确认前端优先承接产品方案。
+- 已阅读 `team-chat-database/USAGE.md`、`roles.json`、`thread-view.md`，确认跨角色沟通需要通过群聊留档。
+- 已抽查 `AImental_frontend/app.json`、每日打卡首页、每日打卡记录页和个人页代码，了解当前前端实现骨架。
+- 后续我将以本项目小程序前端 UI 设计开发师身份工作：负责页面结构、视觉层级、交互状态、素材生成、前端实现、联调问题同步和前端迭代记录。
+
+## 2026-06-26 00:33 +08:00
+
+用户说明：
+
+- 用户提供夕阳天台图，要求替换纸飞机页面背景。
+- 用户强调只换背景图，其它元素保持不动，因为上一轮改动把页面改乱了。
+- 用户补充如果不知道原本页面长什么样，可以看 GitHub；随后要求先隐藏飘动云朵。
+
+当前响应：
+
+- 已用本地 Git 中的原版纸飞机页面作为基准恢复页面元素。
+- 已确认用户提供图片和当前 `AImental_frontend/images/paper-airplane/background.png` 的 SHA256 一致。
+- 已将 `AImental_frontend/pages/paper-airplane/index.wxml` 中旧云朵背景替换为背景图节点。
+- 已在 `AImental_frontend/pages/paper-airplane/index.wxss` 仅新增 `.sky-bg-img` 全屏展示规则。
+- 按用户要求隐藏飘动云朵，未改纸飞机、按钮、弹窗和 `index.js` 逻辑。
+- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-26-iteration-012-paper-airplane-background-only.md`。
+- 用户随后提供第二张浅色天台背景图，已直接覆盖 `AImental_frontend/images/paper-airplane/background.png`，未再改动页面结构或交互逻辑。
+
+## 2026-06-26 03:21 +08:00
+
+用户说明：
+
+- 用户要求将纸飞机页面重做成参考图效果。
+- 右下角新增可点击飞机篓，用于打开曾经收起的飞机。
+- 需要新增“收飞机”逻辑，并通知后端修改数据库。
+- 用户提供标题、飞机篓和按钮素材；飞行纸飞机素材暂时未找到，先留空缺。
+- 用户随后提供新的无网格透明素材，并要求裁掉标题右侧半截星星。
+- 用户要求背景处理过头后换回原始浅色天台背景。
+
+当前响应：
+
+- 已将标题、飞机篓、按钮素材落地到 `AImental_frontend/images/paper-airplane/`。
+- 已裁掉标题素材右侧半截星星。
+- 已把天空纸飞机改为透明点击热区占位，等待后续素材。
+- 已重做 `AImental_frontend/pages/paper-airplane/index.wxml` 和 `index.wxss`，接入标题图、提示文案、左下按钮素材和右下飞机篓。
+- 已更新 `AImental_frontend/pages/paper-airplane/index.js`，新增打开飞机篓、收进飞机篓逻辑。
+- 已通过群聊向后端同步接口和数据库需求：`msg-20260626-0001`。
+- 已在 `AImental_backend/model/airplane.py` 和 `AImental_backend/router/airplane.py` 中完成最小后端实现，并通过群聊补充验证结果：`msg-20260626-0002`。
+- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-26-iteration-013-paper-airplane-redesign-basket.md`。
+- 用户随后提供 `paper_planes_24_png.zip`，已解压到 `AImental_frontend/images/paper-airplane/flying/`，前端会随机选择纸飞机素材并放在安全点位轻微慢速摆动。
+- 用户提供新的提示小字素材，已保存为 `AImental_frontend/images/paper-airplane/guide-text.png`，并删除原两行普通说明文字。
+- 用户提供新的按钮素材，已保存为 `AImental_frontend/images/paper-airplane/throw-button.png` 并替换左下按钮。
+- 用户反馈提示小字需要更靠近标题，飞机篓稍微变小并右移，按钮左移以拉开距离；已在 `AImental_frontend/pages/paper-airplane/index.wxss` 中完成微调。
+
+## 2026-06-26 03:36 +08:00
+
+用户说明：
+
+- 用户要求我阅读本项目的前端项目角色卡，成为用户的前端 UI 设计开发师。
+
+当前响应：
+
+- 已阅读 `frontend-design-iterations/frontend-ui-designer-role-card.md`，确认角色职责、素材生成规范、fhl Images API 使用边界、安装检查清单和安全规则。
+- 已同步阅读 `frontend-design-iterations/README.md`、`decision-log.md`、`backlog.md`，确认前端迭代留档规则。
+- 已阅读产品侧角色卡、产品决策日志、需求池和最新 24 色方案，确认前端工作优先承接产品方案。
+- 已抽查 `AImental_frontend/app.json` 和近期前端迭代记录，确认当前小程序主入口为心理咨询、心理测评、心情日记、纸飞机、我的，社区入口已降级。
+- 后续我将以本项目小程序前端 UI 设计开发师身份工作，负责页面结构、视觉层级、交互状态、素材生成、前端实现、联调同步和前端迭代记录。
+
+## 2026-06-26 03:50 +08:00
+
+用户说明：
+
+- 用户反馈纸飞机页面打开纸飞机后的展示框仍然简陋。
+- 用户希望改成类似参考图的信纸展开模式：打开是一张纸，中间写手写体内容。
+- 用户希望用 fhl 生图生成所需背景素材，并帮忙改前端 UI。
+- 用户要求去掉“今日小纸条”“来自远方的纸飞机”等不必要小字，按钮也按参考图气质重做。
+
+当前响应：
+
+- 已按项目角色卡使用 fhl Images API 尝试生成信纸背景素材。
+- fhl 参考图编辑和纯文本生成均返回 `503 No available compatible accounts`，判断为服务/账户侧暂无兼容账号可用。
+- 为不阻塞前端落地，已本地生成无文字信纸背景素材：`AImental_frontend/images/paper-airplane/letter-paper-bg.png`。
+- 已将读取纸飞机弹窗改成 `letter-modal` 信纸模式，动态内容覆盖在信纸中心，使用楷体/仿宋优先字体栈模拟手写感。
+- 已把底部操作改为“收进纸篓”和“轻轻收起”两个胶囊按钮，删除旧读取弹窗中的标题、副标题和说明小字。
+- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-26-iteration-014-paper-airplane-letter-modal.md`。
+
+## 2026-06-26 04:00 +08:00
+
+用户说明：
+
+- 用户提供新的精修信纸 UI 素材，要求使用该素材。
+- 用户要求右上角关闭按钮和底部两个按钮重新设计位置，不能偏。
+- 用户要求两个按钮文案简化为“收下”和“放飞”。
+
+当前响应：
+
+- 已用用户提供的新素材覆盖 `AImental_frontend/images/paper-airplane/letter-paper-bg.png`。
+- 已按新素材比例重新调整信纸弹窗尺寸、关闭按钮位置、正文区域和底部按钮位置。
+- 已将按钮文案改为“收下”和“放飞”。
+- 已新增 `releaseOpenedAirplane()`，右上角关闭和“放飞”共用放飞逻辑，“收下”继续走收藏逻辑。
+- `node --check AImental_frontend/pages/paper-airplane/index.js` 通过。
+
+## 2026-06-26 04:04 +08:00
+
+用户说明：
+
+- 用户反馈上一版仍不好看，提供去掉底部按钮槽的自然纸张素材。
+- 用户要求替换新素材，按钮稍微往上一点。
+- 用户要求去掉右上角 `×`，不再需要关闭按钮，“放飞”就是关闭含义。
+
+当前响应：
+
+- 已用用户提供的去底槽自然纸素材覆盖 `AImental_frontend/images/paper-airplane/letter-paper-bg.png`。
+- 已从读取弹窗中删除右上角 `×` 按钮和相关样式。
+- 已将底部“收下 / 放飞”按钮作为前端浮层重新设计，整体上移并脱离素材底槽。
+- 当前“放飞”绑定 `releaseOpenedAirplane()`，用于关闭/释放当前纸飞机；“收下”继续绑定收藏逻辑。
+- `node --check AImental_frontend/pages/paper-airplane/index.js` 通过。
+
+## 2026-06-26 04:12 +08:00
+
+用户说明：
+
+- 用户要求删除后端已查看过的纸飞机记录，让它们重新显示为未查看。
+- 用户要求新增 100 条假数据，保证可以连续点击足够多的纸飞机。
+- 用户要求把“扔一个”写信界面也改成刚刚的信纸模式：中间白色纸张区域作为输入框，底部按钮变成“扔出去”。
+- 写信界面需要关闭按钮，用于撤回/不扔了。
+
+当前响应：
+
+- 已清空 `AImental_backend/db/paper_airplane.db` 中的 `user_picked_airplanes` 表，将已查看/已捡起状态重置为未查看。
+- 已保留 `user_collected_airplanes`，不删除已收进飞机篓的纸飞机。
+- 已新增 100 条系统测试纸飞机；当前 `paper_airplanes` 共 115 条，`user_picked_airplanes` 为 0。
+- 已将写信弹窗改成同款信纸 UI，中间白色便签区域为 `textarea` 输入框。
+- 已将写信弹窗底部按钮改为“扔出去”，并保留轻量关闭按钮。
+- 已校准读信正文区和写信输入区，使其更贴合新信纸素材的中间便签范围。
+- `node --check AImental_frontend/pages/paper-airplane/index.js` 通过。
+
+## 2026-06-26 04:15 +08:00
+
+用户说明：
+
+- 用户反馈信纸周围仍有一块大的白底。
+- 用户反馈写信界面的 `×` 很丑，希望模仿飞机篓的关闭符号。
+
+当前响应：
+
+- 已对 `AImental_frontend/images/paper-airplane/letter-paper-bg.png` 做透明化处理，去掉外圈近白色矩形画布，保留信纸本体和阴影。
+- 已将写信界面关闭控件从默认 `button` 改成普通 `view`，样式改为和飞机篓类似的轻量橙色 `×`。
+- 已确认 `letter-paper-bg.png` 为 `1086x1448 RGBA PNG`，四角 alpha 为 0。
+- `node --check AImental_frontend/pages/paper-airplane/index.js` 通过。
+
+## 2026-06-26 04:21 +08:00
+
+用户说明：
+
+- 用户反馈打开纸飞机后的正文会飘出便签外，没有被控制在中间白色便签内。
+- 用户反馈外围仍像有白色光晕/白底。
+- 用户提供新的无背景信纸素材。
+
+当前响应：
+
+- 已基于用户新素材生成 `AImental_frontend/images/paper-airplane/letter-paper-bg-clean.png`。
+- 已通过边缘连通区域抠图方式移除导出图里的白色/棋盘预览背景，避免外围白底。
+- 写信和读信弹窗均改为引用 `letter-paper-bg-clean.png`。
+- 已将读信正文节点从 `text` 改为块级 `view`，并收窄正文区域、降低字号、加入强制换行规则。
+- 已新增 `formatLetterMessage()`，打开纸飞机时按约 13 个字一行自动断行，避免长句飘出便签。
+- `node --check AImental_frontend/pages/paper-airplane/index.js` 通过。
+
+## 2026-06-26 Paper Airplane Motion Follow-up
+
+用户说明：
+- “扔一个”按钮需要上移到天空位置。
+- 天空纸飞机不要颤抖，只保留低速漂移和轻微旋转。
+- 纸飞机需要重新检查，不能碰到已有标题、小字、按钮、飞机篓等元素。
+
+当前响应：
+- 已将纸飞机节点拆成固定点击热区和内部动画图片，避免动画覆盖基础定位。
+- 已将纸飞机动画从 margin 摆动改为慢速 `translate3d` 漂移和轻微旋转，节奏拉长到 12-16 秒。
+- 已把纸飞机安全点位从百分比改为固定 rpx 坐标，减少不同屏幕高度下碰到 UI 的风险。
+- 已将“扔一个”按钮上移到左侧天空偏下位置，并与右下飞机篓拉开距离。
+- 已用脚本按 1334rpx 和 1624rpx 估算高度检查 6 个纸飞机活动范围，未发现与标题、小字、按钮、飞机篓重叠。
+
+## 2026-06-26 Paper Airplane Grounded Basket
+
+用户说明：
+- 用户希望“扔一个”按钮放到页面差不多中间，纸飞机篓放在按钮正下方，并继续往下移动，像放在地板上一样。
+- 用户随后反馈还要“再往下很多，放到地上”。
+
+当前响应：
+- 已将 `.actions-bar` 改为水平居中，并放在页面中部偏下位置。
+- 已将 `.basket-entry` 改为水平居中，并把飞机篓下压到 `top: 1120rpx`，让篮子更贴近地板区域。
+- 已根据后续反馈，把“扔一个”按钮再下移一点，并从 `324rpx x 124rpx` 放大到 `368rpx x 140rpx`。
+- 已重新调整天空纸飞机安全点位，避开居中按钮和下移后的飞机篓。
+- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-26-iteration-015-paper-airplane-grounded-basket.md`。

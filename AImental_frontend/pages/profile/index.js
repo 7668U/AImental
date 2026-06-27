@@ -10,14 +10,33 @@ const { loginWithBackend } = require('../../utils/auth.js');
 Page({
   data: {
     isLogin: false,
+    topSafeHeight: 72,
     userInfo: {
       avatar_url: defaultAvatarUrl,
       nickname: '访客'
     },
   },
 
+  onLoad: function () {
+    this.initLayoutMetrics();
+  },
+
   onShow: function () {
     this.checkLoginStatus();
+  },
+
+  initLayoutMetrics: function() {
+    const fallback = { statusBarHeight: 24 };
+    let systemInfo = fallback;
+    try {
+      systemInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
+    } catch (e) {
+      systemInfo = fallback;
+    }
+    const statusBarHeight = systemInfo.statusBarHeight || fallback.statusBarHeight;
+    this.setData({
+      topSafeHeight: statusBarHeight + 36,
+    });
   },
   
   checkLoginStatus: function() {

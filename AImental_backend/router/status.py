@@ -34,6 +34,11 @@ class CheckinImageUrlsPayload(BaseModel):
     image_urls: List[str] = Field(default_factory=list, max_length=MAX_CHECKIN_IMAGES)
 
 
+class SeedFiveDaysPayload(BaseModel):
+    year: Optional[int] = None
+    month: Optional[int] = Field(default=None, ge=1, le=12)
+
+
 def get_owned_checkin_or_404(checkin_id: str, current_user_id: str):
     existing_checkin = checkin_table.get_checkin_by_id(checkin_id)
     if not existing_checkin or existing_checkin.user_id != current_user_id:
@@ -204,6 +209,19 @@ def get_checkin_dimensions():
         "statuses": STATUS_OPTIONS,
         "colors": COLOR_OPTIONS,
     }
+
+
+@router.post("/dev/seed-five-days", summary="【本地开发】为当前用户补 5 天打卡假数据")
+def seed_five_days_for_current_user(
+    payload: SeedFiveDaysPayload = Body(default_factory=SeedFiveDaysPayload),
+    current_user_id: str = Depends(get_current_user_id),
+):
+    """创建当前月前 5 天假打卡记录，已有记录不覆盖，方便测试分析页。"""
+    return checkin_table.seed_five_days_for_month(
+        user_id=current_user_id,
+        year=payload.year,
+        month=payload.month,
+    )
 
 # Find the get_checkin_for_date endpoint and modify the signature
 @router.get("/date/{record_date}", response_model=CheckinModel, summary="获取指定日期的打卡记录")

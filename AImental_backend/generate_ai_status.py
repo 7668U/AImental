@@ -1,6 +1,5 @@
 # generate_ai_status.py
 
-import os
 import json
 from datetime import date, timedelta
 from typing import List, Dict, Any
@@ -8,19 +7,10 @@ from typing import List, Dict, Any
 # Pydantic 用于定义我们期望从AI获得的、严格的JSON数据结构
 from pydantic import BaseModel, Field, ValidationError
 
-# 导入你的LLM客户端
-from openai import OpenAI
+from llm_config import HEPAI_MODEL, client
 
 # --- 1. 配置LLM客户端 ---
-# 使用环境变量管理API Key，不要在代码中硬编码真实密钥。
-MOONSHOT_API_KEY = os.getenv("MOONSHOT_API_KEY")
-MOONSHOT_BASE_URL = os.getenv("MOONSHOT_BASE_URL", "https://api.moonshot.cn/v1")
-
-try:
-    client = OpenAI(api_key=MOONSHOT_API_KEY, base_url=MOONSHOT_BASE_URL) if MOONSHOT_API_KEY else None
-except Exception as e:
-    print(f"无法初始化OpenAI客户端，请检查API Key和URL配置: {e}")
-    client = None
+# LLM 调用统一走 HEPAI 的 OpenAI-compatible API，配置见 llm_config.py。
 
 # --- 2. 定义期望的JSON输出结构 (已升级) ---
 
@@ -133,7 +123,7 @@ def generate_daily_schedule(
 
     try:
         response = client.chat.completions.create(
-            model="moonshot-v1-8k",
+            model=HEPAI_MODEL,
             messages=[
                 {"role": "system", "content": "你是一个遵循指令的JSON生成助手。"},
                 {"role": "user", "content": prompt}

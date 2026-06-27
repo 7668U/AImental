@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>情绪调色盘初测版</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Emotion Palette Lab</p>
+            <h1>情绪调色盘</h1>
+          </div>
+          <div class="status-strip">
+            <span id="selectedCount">0 / 30</span>
+            <span id="mixedHex">#------</span>
+          </div>
+        </header>
+
+        <section class="controls-row" aria-label="操作">
+          <button id="randomBtn" type="button">随机</button>
+          <button id="clearBtn" type="button">清空</button>
+          <label class="toggle">
+            <input id="imageToggle" type="checkbox" />
+            <span>AI 背景</span>
+          </label>
+          <button id="generateBtn" type="button" class="primary" disabled>开始混合</button>
+        </section>
+
+        <section class="selected-rail" aria-label="已选颜色">
+          <div id="selectedRail" class="selected-empty">先选 7 个颜色</div>
+        </section>
+
+        <section id="colorGroups" class="color-groups" aria-label="颜色库"></section>
+      </section>
+
+      <aside class="result-panel">
+        <div class="result-header">
+          <div>
+            <p class="eyebrow">Canvas Preview</p>
+            <h2 id="resultName">今日综合色</h2>
+          </div>
+          <div id="loadingBadge" class="loading-badge" hidden>生成中</div>
+        </div>
+        <p id="resultSubtitle" class="result-subtitle">选色后会在这里生成你的情绪色卡。</p>
+        <div class="tag-row" id="tagRow"></div>
+        <canvas id="resultCanvas" width="1080" height="1440" aria-label="情绪色卡预览"></canvas>
+        <div class="result-actions">
+          <button id="saveBtn" type="button" disabled>保存图片</button>
+          <button id="copyBtn" type="button" disabled>复制色值</button>
+          <button id="regenBtn" type="button" disabled>重生背景</button>
+        </div>
+        <p id="notice" class="notice"></p>
+      </aside>
+    </main>
+    <script src="/static/app.js" type="module"></script>
+  </body>
+</html>
+

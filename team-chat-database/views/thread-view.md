@@ -1,6 +1,6 @@
 ﻿# Team Chat Thread
 
-Generated at: 2026-06-25 21:17:56 +08:00
+Generated at: 2026-06-26 03:21:16 +08:00
 
 ## msg-20260622-0001
 
@@ -138,4 +138,28 @@ Generated at: 2026-06-25 21:17:56 +08:00
 - related: AImental_backend/model/status.py, AImental_backend/router/status.py, AImental_frontend/pkgDailyCheckin/record.js, backend-work-iterations/notes/2026-06-25-daily-checkin-multi-photos.md
 
 后端已完成每日打卡多照片接入，并同步最小前端调用逻辑。接口形态：1. 响应新增 image_urls: string[]，旧 image_url 保留为首图；旧记录只有 image_url 时会自动返回 image_urls=[image_url]。2. POST /api/v1/checkin/{checkin_id}/images 支持追加上传，最多 3 张。3. PUT /api/v1/checkin/{checkin_id}/images 接收 { image_urls: string[] }，用于删除、重排或保存最终照片墙。4. POST/PUT /api/v1/checkin/{checkin_id}/images/{image_index} 支持按下标替换；当 image_index 等于当前照片数时追加。5. DELETE /api/v1/checkin/{checkin_id}/images/{image_index} 删除指定下标。6. 旧 POST /api/v1/checkin/{checkin_id}/image 继续作为首图替换兼容。已验证 py_compile、路由导入、Pydantic 校验、模型级 set/replace/append-limit/delete/legacy 兼容；前端 record.js 已改为上传本地照片后 PUT 最终 image_urls。注意：删除/替换只更新 URL 列表，暂不物理删除历史上传文件。
+
+## msg-20260626-0001
+
+**frontend_designer** - `frontend_designer` - 2026-06-26T03:07:04+08:00 - new thread
+
+- topic: `paper-airplane-basket`
+- type/status: `handoff` / `open`
+- tags: #paper-airplane #basket #api #backend
+- mentions: @backend_engineer @product_manager
+- related: AImental_frontend/pages/paper-airplane/index.wxml, AImental_frontend/pages/paper-airplane/index.js, AImental_backend/model/airplane.py, AImental_backend/router/airplane.py
+
+背景：用户要求纸飞机页面右下角新增可点击的飞机篓，用于打开曾经收起的纸飞机；读到天空中的纸飞机后，可以把它收进飞机篓。\n\n前端方案：页面已准备调用 POST /api/v1/airplane/{airplane_id}/collect 收起当前打开的纸飞机；点击飞机篓时调用 GET /api/v1/airplane/collected 拉取当前用户已收起的纸飞机列表。\n\n建议后端：新增 user_collected_airplanes 关系表，字段包含 user_id、airplane_id、collected_time，用户+飞机唯一。收起接口需要校验该飞机已被当前用户捡起或可被当前用户访问，避免收藏自己的飞机或未读飞机；列表接口按 collected_time 倒序返回 PaperAirplaneResponse 列表。\n\n影响：前端右下角飞机篓入口依赖该接口完整持久化；如果接口暂未完成，前端会打开空列表或 toast 报错。
+
+## msg-20260626-0002
+
+**frontend_designer** - `frontend_designer` - 2026-06-26T03:20:52+08:00 - reply_to `msg-20260626-0001`
+
+- topic: `paper-airplane-basket`
+- type/status: `answer` / `resolved`
+- tags: #paper-airplane #basket #api #backend
+- mentions: @backend_engineer @product_manager
+- related: AImental_backend/model/airplane.py, AImental_backend/router/airplane.py, AImental_frontend/pages/paper-airplane/index.js, AImental_frontend/pages/paper-airplane/index.wxml
+
+更新：前端侧已同步完成最小后端实现，避免页面接口悬空。\n\n已落地：1. 新增 UserCollectedAirplane/user_collected_airplanes 关系表。2. 新增 POST /api/v1/airplane/{airplane_id}/collect，用于把已捡起的纸飞机收进飞机篓。3. 新增 GET /api/v1/airplane/collected，用于读取当前用户飞机篓列表。4. collect 会校验不能收藏自己的飞机，且必须已被当前用户捡起。\n\n验证：已通过 venv 运行 py_compile；已做模型级 smoke test，未捡起时不能收，捡起后可收，列表可查到。后续如后端工程师继续接手，可补充更正式的迁移脚本或接口测试。
 

@@ -21,32 +21,35 @@ import redis
 
 # --- 导入我们项目的所有组件 ---
 from db import chat_db, status_db, user_db
-from model.ai_character import ai_character_table
-from model.ai_status import ai_status_table
-from model.ai_task import ai_task_table
-from model.friendship import friendship_table, Friendship
-from model.chat_community import community_chat_table, ChatMessageModel
-
-# --- 导入AI能力生成器 ---
-from generate_ai_status import generate_daily_schedule
-# 【重要】从 generate_community_response 导入两个函数
-from generate_community_response import generate_ai_response, generate_proactive_message
-from generate_friend_response import generate_friend_request_decision
-
+from feature_flags import ENABLE_COMMUNITY_BACKEND
 # 导入我们全局配置好的日志记录器
 from logger_config import logger
+
+if ENABLE_COMMUNITY_BACKEND:
+    from model.ai_character import ai_character_table
+    from model.ai_status import ai_status_table
+    from model.ai_task import ai_task_table
+    from model.friendship import friendship_table, Friendship
+    from model.chat_community import community_chat_table, ChatMessageModel
+
+    # --- 导入AI能力生成器 ---
+    from generate_ai_status import generate_daily_schedule
+    # 【重要】从 generate_community_response 导入两个函数
+    from generate_community_response import generate_ai_response, generate_proactive_message
+    from generate_friend_response import generate_friend_request_decision
 
 # 定义北京时区
 BEIJING_TZ = pytz.timezone('Asia/Shanghai')
 
 # --- Redis 同步客户端 ---
-try:
-    redis_client_sync = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
-    redis_client_sync.ping()
-    logger.info("✅ 后台工作进程已成功连接到Redis。")
-except redis.exceptions.ConnectionError as e:
-    logger.error(f"❌ 后台工作进程无法连接到Redis: {e}")
-    redis_client_sync = None
+redis_client_sync = None
+if ENABLE_COMMUNITY_BACKEND:
+    try:
+        redis_client_sync = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+        redis_client_sync.ping()
+        logger.info("✅ 后台工作进程已成功连接到Redis。")
+    except redis.exceptions.ConnectionError as e:
+        logger.error(f"❌ 后台工作进程无法连接到Redis: {e}")
 
 # ---------------------------------------------------
 # 核心工作函数 (Jobs for the Scheduler)
@@ -122,6 +125,10 @@ def schedule_daily_status_generation():
     """
     【已升级】为所有AI角色生成第二天的完整行程，并保存 focus_level。
     """
+    if not ENABLE_COMMUNITY_BACKEND:
+        logger.info("JOB_STATUS_GEN: 心灵社区后端已下线，跳过角色日程生成。")
+        return
+
     target_date = date.today() + timedelta(days=1)
     logger.info(f"JOB_STATUS_GEN: 开始为所有角色生成 {target_date} 的日程...")
 
@@ -168,6 +175,10 @@ def check_for_resumable_conversations():
     """
     【全新任务】检查所有被暂停的对话，看是否有AI可以回归了。
     """
+    if not ENABLE_COMMUNITY_BACKEND:
+        logger.info("JOB_RESUME_CHECK: 心灵社区后端已下线，跳过恢复对话检查。")
+        return
+
     logger.info("JOB_RESUME_CHECK: 开始检查可恢复的对话...")
     resumable_chats = community_chat_table.get_resumable_conversations()
     
@@ -200,6 +211,10 @@ def process_pending_tasks():
     """
     【已全面升级】处理所有到期任务的核心函数。
     """
+    if not ENABLE_COMMUNITY_BACKEND:
+        logger.info("JOB_TASK_PROC: 心灵社区后端已下线，跳过任务队列处理。")
+        return
+
     if not redis_client_sync:
         return
 
@@ -364,6 +379,9 @@ def process_pending_tasks():
 # 主程序入口 (已升级)
 # ---------------------------------------------------
 if __name__ == "__main__":
+    if not ENABLE_COMMUNITY_BACKEND:
+        logger.info("心灵社区后端已下线，background_worker 不启动任何社区调度任务。")
+        raise SystemExit(0)
     
     all_dbs = [user_db, chat_db, status_db]
     for db in all_dbs:

@@ -115,9 +115,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(255, 255, 255, 0.4); /* 给数字一个半透明背景，避免和彩色背景糊在一起 */
+  background-color: #FFFFFF; /* 给数字一个白色圆底，避免和彩色背景糊在一起 */
   border-radius: 50%;
   font-weight: bold;
+  box-shadow: 0 4rpx 12rpx rgba(72, 58, 43, 0.08);
 }
 
 /* 空状态 */

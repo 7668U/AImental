@@ -2,6 +2,7 @@
 .venv-wsl/
 .env
 .env.*
+!.env.example
 AImental_backend/.env
 *.log
 backend-server.*.log
@@ -13,6 +14,7 @@ __pycache__/
 *.rdb
 *.bak
 output/imagegen/
+emotion-color-palette-lab/generated/
 AImental_backend/db/
 AImental_backend/static/status/
 AImental_frontend/project.private.config.json

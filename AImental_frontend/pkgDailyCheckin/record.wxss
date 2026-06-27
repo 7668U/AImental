@@ -61,24 +61,6 @@ page {
   box-sizing: border-box;
 }
 
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 22rpx;
-}
-
-.nav-icon {
-  width: 38rpx;
-  height: 38rpx;
-}
-
-.nav-more {
-  color: #8d5b3f;
-  font-size: 34rpx;
-  font-weight: 800;
-  letter-spacing: 2rpx;
-}
-
 .record-scroll {
   flex: 1;
   min-height: 0;
@@ -93,7 +75,7 @@ page {
   position: relative;
   min-height: 188rpx;
   border-radius: 28rpx;
-  padding: 40rpx 34rpx;
+  padding: 38rpx 34rpx 36rpx;
   margin-bottom: 28rpx;
   background: linear-gradient(110deg, #fff8eb 0%, #fff1dd 62%, #ffe5ca 100%);
   border: 1rpx solid rgba(239, 198, 146, 0.48);
@@ -105,11 +87,11 @@ page {
 .hero-copy {
   position: relative;
   z-index: 2;
-  max-width: 430rpx;
+  max-width: 350rpx;
 }
 
 .hero-title {
-  font-size: 58rpx;
+  font-size: 54rpx;
   line-height: 1.08;
   font-weight: 900;
   color: #6a432c;
@@ -117,19 +99,21 @@ page {
 }
 
 .hero-subtitle {
-  margin-top: 20rpx;
-  font-size: 27rpx;
-  line-height: 1.35;
+  max-width: 312rpx;
+  margin-top: 18rpx;
+  font-size: 25rpx;
+  line-height: 1.32;
   color: #8d6d58;
   letter-spacing: 0;
+  word-break: break-all;
 }
 
 .hero-art {
   position: absolute;
-  right: 10rpx;
-  bottom: -6rpx;
-  width: 360rpx;
-  height: 170rpx;
+  right: -30rpx;
+  bottom: -12rpx;
+  width: 392rpx;
+  height: 186rpx;
   z-index: 1;
 }
 
@@ -188,11 +172,6 @@ page {
   grid-template-columns: repeat(6, 1fr);
   column-gap: 8rpx;
   row-gap: 14rpx;
-}
-
-.status-hint {
-  font-size: 22rpx;
-  color: #b88652;
 }
 
 .mood-card {
@@ -468,15 +447,8 @@ page {
 .photo-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-bottom: 14rpx;
-}
-
-.photo-title {
-  font-size: 26rpx;
-  line-height: 1.2;
-  font-weight: 800;
-  color: #6a432c;
 }
 
 .photo-count {

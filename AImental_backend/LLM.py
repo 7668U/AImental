@@ -1,10 +1,11 @@
 # LLM.py
 
-import os
 import json
-from openai import OpenAI
+import re
 from typing import Optional, List, Dict
 import datetime
+
+from llm_config import HEPAI_MODEL, client
 
 # --- 模型导入 ---
 # 从你的 chat.py 文件中导入 chat_table 实例和 NewMessageForm 模型
@@ -14,10 +15,7 @@ from model.assessment import UserAssessment
 from model.assessment import assessment_tables # 用于综合报告
 
 # --- API客户端配置 ---
-# 使用环境变量管理API密钥，不要在代码中硬编码真实密钥。
-MOONSHOT_API_KEY = os.getenv("MOONSHOT_API_KEY")
-MOONSHOT_BASE_URL = os.getenv("MOONSHOT_BASE_URL", "https://api.moonshot.cn/v1")
-client = OpenAI(api_key=MOONSHOT_API_KEY, base_url=MOONSHOT_BASE_URL) if MOONSHOT_API_KEY else None
+# LLM 调用统一走 HEPAI 的 OpenAI-compatible API，配置见 llm_config.py。
 
 USER_DATA_HANDLING_PROMPT = """
 【重要】关于用户背景信息的使用指南:
@@ -158,7 +156,7 @@ def get_ai_response_and_update_history(chat_id: str, user_message: str) -> Optio
     try:
         # 4. 调用大模型 API
         response = client.chat.completions.create(
-            model="moonshot-v1-8k",
+            model=HEPAI_MODEL,
             messages=messages_for_api,
             stream=False
         )
@@ -198,7 +196,7 @@ def generate_chat_title(first_message: str) -> str:
     ]
     try:
         response = client.chat.completions.create(
-            model="moonshot-v1-8k",
+            model=HEPAI_MODEL,
             messages=messages_for_title_api,
             temperature=0.2,
             max_tokens=25
@@ -210,7 +208,34 @@ def generate_chat_title(first_message: str) -> str:
         return "新的聊天"
 
 
-def generate_ai_analysis_report(checkin_data: List[Dict], prompt_template: str, period_name: str) -> str:
+def _clean_analysis_text(text: object) -> str:
+    if text is None:
+        return ""
+    text = str(text)
+    if not text:
+        return ""
+    text = re.sub(r"```(?:json)?|```", "", text)
+    text = re.sub(r"^#{1,6}\s*", "", text, flags=re.MULTILINE)
+    text = text.replace("***", "").replace("**", "").replace("*", "")
+    text = re.sub(r"^\s*[-*_]{3,}\s*$", "", text, flags=re.MULTILINE)
+    text = re.sub(r"^\s*(?:\d+[.、]|[-•])\s*", "", text, flags=re.MULTILINE)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+
+def _compact_summary_text(text: object) -> str:
+    text = _clean_analysis_text(text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text[:70]
+
+
+def generate_ai_analysis_report(
+    checkin_data: List[Dict],
+    prompt_template: str,
+    period_name: str,
+    analysis_type: str = "mood",
+    focus_summary: Optional[str] = None
+) -> Dict[str, str]:
     """
     根据用户的打卡数据和指定的Prompt模板，调用大模型生成一份心理分析报告。
     """
@@ -218,29 +243,61 @@ def generate_ai_analysis_report(checkin_data: List[Dict], prompt_template: str, 
     for record in checkin_data:
         date_str = datetime.datetime.fromtimestamp(record['timestamp']).strftime('%Y-%m-%d')
         record_summary = f"- 日期: {date_str}"
-        if record.get('mood'):
-            record_summary += f", 心情: {record['mood']}"
-        if record.get('mood_family'):
-            record_summary += f", 情绪族: {record['mood_family']}"
-        if record.get('mood_valence'):
-            record_summary += f", 情绪倾向: {record['mood_valence']}"
-        if record.get('mood_energy'):
-            record_summary += f", 能量水平: {record['mood_energy']}"
-        if record.get('tags'):
-            record_summary += f", 状态: {record['tags']}"
-        if record.get('status_families'):
-            record_summary += f", 状态组: {'/'.join(record['status_families'])}"
-        if record.get('color_label'):
-            record_summary += f", 颜色: {record['color_label']}"
-        if record.get('color_group'):
-            record_summary += f", 颜色组: {record['color_group']}"
-        if record.get('text_content'):
-            record_summary += f", 日记: '{record['text_content']}'"
+
+        if analysis_type == "tag-mood":
+            if not record.get('tags'):
+                continue
+            if record.get('tags'):
+                record_summary += f", 状态: {record['tags']}"
+            if record.get('status_families'):
+                record_summary += f", 状态组: {'/'.join(record['status_families'])}"
+            if record.get('mood'):
+                record_summary += f", 心情: {record['mood']}"
+            if record.get('mood_family'):
+                record_summary += f", 情绪族: {record['mood_family']}"
+            if record.get('mood_energy'):
+                record_summary += f", 能量水平: {record['mood_energy']}"
+        elif analysis_type == "word-cloud":
+            if not record.get('text_content'):
+                continue
+            if record.get('text_content'):
+                record_summary += f", 日记: '{record['text_content']}'"
+            if record.get('mood'):
+                record_summary += f", 对应心情: {record['mood']}"
+            if record.get('mood_family'):
+                record_summary += f", 对应情绪族: {record['mood_family']}"
+        elif analysis_type == "color":
+            if not (record.get('color_label') or record.get('color')):
+                continue
+            if record.get('color_label'):
+                record_summary += f", 颜色: {record['color_label']}"
+            elif record.get('color'):
+                record_summary += f", 颜色: {record['color']}"
+            if record.get('color_group'):
+                record_summary += f", 颜色组: {record['color_group']}"
+            if record.get('color_tone'):
+                record_summary += f", 色调: {record['color_tone']}"
+        else:
+            if not record.get('mood'):
+                continue
+            if record.get('mood'):
+                record_summary += f", 心情: {record['mood']}"
+            if record.get('mood_family'):
+                record_summary += f", 情绪族: {record['mood_family']}"
+            if record.get('mood_valence'):
+                record_summary += f", 情绪倾向: {record['mood_valence']}"
+            if record.get('mood_energy'):
+                record_summary += f", 能量水平: {record['mood_energy']}"
         data_summary_parts.append(record_summary)
 
     if not data_summary_parts:
-        return "分析失败：该时间段内没有任何有效的打卡数据。"
+        return {
+            "summary_text": "这段时间的记录还不够完整，暂时很难提炼出稳定特征。",
+            "report_text": "这段时间的有效打卡数据还比较少，暂时无法形成可靠的分析。你可以继续记录几天，再回来看看变化。"
+        }
     data_summary = "\n".join(data_summary_parts)
+    if focus_summary:
+        data_summary = f"本模块聚合摘要：\n{focus_summary.strip()}\n\n逐日记录：\n{data_summary}"
 
     final_prompt = prompt_template.format(
         period_name=period_name,
@@ -248,19 +305,42 @@ def generate_ai_analysis_report(checkin_data: List[Dict], prompt_template: str, 
     )
     messages_for_api = [
         {"role": "system", "content": final_prompt},
-        {"role": "user", "content": "请根据以上信息，为我生成这份心理健康分析报告。"}
+        {"role": "user", "content": "请只返回严格 JSON，不要添加 Markdown、代码块或额外说明。"}
     ]
     try:
         response = client.chat.completions.create(
-            model="moonshot-v1-8k",
+            model=HEPAI_MODEL,
             messages=messages_for_api,
             temperature=0.7,
+            response_format={"type": "json_object"},
             stream=False
         )
-        return response.choices[0].message.content
+        raw_content = response.choices[0].message.content or ""
+        try:
+            payload = json.loads(raw_content)
+        except json.JSONDecodeError:
+            cleaned = _clean_analysis_text(raw_content)
+            return {
+                "summary_text": _compact_summary_text(cleaned.split("\n", 1)[0]) if cleaned else "这段时间有一些值得留意的变化。",
+                "report_text": cleaned or "这段时间有一些值得留意的变化，可以再多记录几天，让趋势更清楚。"
+            }
+
+        summary_text = _compact_summary_text(payload.get("summary_text") or "")
+        report_text = _clean_analysis_text(payload.get("report_text") or "")
+        if not summary_text:
+            summary_text = _compact_summary_text(report_text.split("\n", 1)[0]) if report_text else "这段时间有一些值得留意的变化。"
+        if not report_text:
+            report_text = summary_text
+        return {
+            "summary_text": summary_text,
+            "report_text": report_text
+        }
     except Exception as e:
         print(f"调用AI生成分析报告时发生错误: {e}")
-        return "抱歉，AI分析服务暂时出了一点小问题，请稍后再试。"
+        return {
+            "summary_text": "AI 分析暂时没有生成成功，可以稍后再试。",
+            "report_text": "抱歉，AI 分析服务暂时出了一点小问题，请稍后再试。"
+        }
 
 
 def generate_assessment_synthesis_report(user_id: str, history_ids: List[str]) -> Optional[Dict[str, str]]:
@@ -336,7 +416,7 @@ def generate_assessment_synthesis_report(user_id: str, history_ids: List[str]) -
     ]
     try:
         response = client.chat.completions.create(
-            model="moonshot-v1-8k",
+            model=HEPAI_MODEL,
             messages=messages_for_api,
             temperature=0.6,
             stream=False
