@@ -506,3 +506,16 @@
 - 已根据后续反馈，把“扔一个”按钮再下移一点，并从 `324rpx x 124rpx` 放大到 `368rpx x 140rpx`。
 - 已重新调整天空纸飞机安全点位，避开居中按钮和下移后的飞机篓。
 - 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-26-iteration-015-paper-airplane-grounded-basket.md`。
+
+## 2026-06-27 Daily Checkin Background
+
+用户说明：
+- 用户要求阅读本项目前端项目角色卡，成为前端 UI 设计开发师。
+- 用户要求查看“心情日记”界面，并添加用户提供的暖橙色云朵花叶背景图。
+
+当前响应：
+- 已阅读 `frontend-design-iterations/frontend-ui-designer-role-card.md`。
+- 已将用户提供的背景图转为轻量 JPG：`AImental_frontend/images/daily-checkin/layout/mood-diary-bg.jpg`。
+- 已在 `AImental_frontend/pages/daily-checkin/index.wxml` 增加全屏背景 image。
+- 已在 `AImental_frontend/pages/daily-checkin/index.wxss` 调整页面底层、顶部导航渐隐、卡片半透明和文字色彩。
+- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-27-iteration-020-daily-checkin-background.md`。

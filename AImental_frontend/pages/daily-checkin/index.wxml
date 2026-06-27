@@ -1,6 +1,7 @@
 <calendar show="{{showCalendar}}" bind:daytap="onDayTap" bind:hide="hideCalendar"></calendar>
 
 <view class="page-container">
+  <image class="diary-bg" src="/images/daily-checkin/layout/mood-diary-bg.jpg" mode="aspectFill"></image>
 
   <block wx:if="{{isLoggedIn}}">
 
