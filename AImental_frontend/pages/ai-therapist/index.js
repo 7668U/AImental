@@ -4,6 +4,8 @@ const { loginWithBackend } = require('../../utils/auth.js');
 
 // --- 全局配置与网络请求封装 ---
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
+const WELCOME_MESSAGE = '你好呀，我是你的AI伙伴 😊\n今天想聊些什么呢？';
+const DEFAULT_HISTORY_PREVIEW = '继续这段对话，和AI伙伴慢慢聊。';
 
 function request(options) {
   return new Promise((resolve, reject) => {
@@ -52,6 +54,8 @@ Page({
     totalNavBarHeight: 0,
     isSettingsVisible: false,
     allowAiReadData: false,
+    isEmojiPanelVisible: false,
+    emojiOptions: ['😊', '🙂', '😌', '🥰', '🤗', '😢', '😭', '😔', '😴', '😮', '😤', '✨', '🌙', '☀️', '🍀', '💛', '🧡', '👍'],
     // 【新增】控制温馨提示弹窗的显示/隐藏
     isDisclaimerVisible: false,
   },
@@ -92,7 +96,7 @@ Page({
         this.setData({
           isLoggedIn: false, messages: [], chatHistory: [],
           activeChatId: null, isSidebarVisible: false, inputValue: '',
-          isSettingsVisible: false,
+          isSettingsVisible: false, isEmojiPanelVisible: false,
         });
       }
     }
@@ -133,12 +137,105 @@ Page({
     try {
       const chatSummaries = await request({ url: '/chats/' }); 
       if (chatSummaries) {
-        this.setData({ chatHistory: chatSummaries });
+        const formattedHistory = this.formatChatSummaries(chatSummaries);
+        this.setData({ chatHistory: formattedHistory });
+        this.enrichChatSummaries(formattedHistory);
       }
     } catch (error) {
       console.error("加载聊天历史失败", error);
       this.setData({ chatHistory: [] });
     }
+  },
+
+  formatChatSummaries(chatSummaries = []) {
+    return chatSummaries.map((chat, index) => this.formatHistoryItem(chat, index));
+  },
+
+  formatHistoryItem(chat = {}, index = 0) {
+    const timestamp = Number(chat.timestamp || chat.updated_at || chat.created_at) || 0;
+    const title = (chat.title || '新的对话').trim();
+    const preview = this.getChatPreview(chat.message) || chat.preview || chat.summary || DEFAULT_HISTORY_PREVIEW;
+
+    return {
+      ...chat,
+      title,
+      preview: this.truncateText(preview, 28),
+      displayDate: this.formatHistoryDate(timestamp, index)
+    };
+  },
+
+  enrichChatSummaries(chatSummaries = []) {
+    if (!chatSummaries.length) return;
+
+    const enrichCount = Math.min(chatSummaries.length, 12);
+    Promise.all(
+      chatSummaries.slice(0, enrichCount).map(async (chat, index) => {
+        try {
+          const detail = await request({ url: `/chats/${chat.id}` });
+          return this.formatHistoryItem({ ...chat, ...detail }, index);
+        } catch (error) {
+          return chat;
+        }
+      })
+    ).then((enrichedItems) => {
+      const currentHistory = this.data.chatHistory || [];
+      const restItems = currentHistory.slice(enrichCount);
+      this.setData({ chatHistory: [...enrichedItems, ...restItems] });
+    });
+  },
+
+  getChatPreview(rawMessage) {
+    if (!rawMessage) return '';
+
+    try {
+      const parsedMessages = typeof rawMessage === 'string' ? JSON.parse(rawMessage) : rawMessage;
+      if (!Array.isArray(parsedMessages) || parsedMessages.length === 0) return '';
+
+      const userMessage = [...parsedMessages].reverse().find((msg) => msg.role === 'user' && msg.content);
+      const lastMessage = userMessage || [...parsedMessages].reverse().find((msg) => msg.content);
+      return lastMessage ? lastMessage.content : '';
+    } catch (error) {
+      return '';
+    }
+  },
+
+  truncateText(text, maxLength) {
+    if (!text) return '';
+    const normalized = String(text).replace(/\s+/g, ' ').trim();
+    if (normalized.length <= maxLength) return normalized;
+    return `${normalized.slice(0, maxLength)}...`;
+  },
+
+  formatHistoryDate(timestamp, index = 0) {
+    if (!timestamp) return index === 0 ? '最近' : '';
+    const date = new Date(timestamp * 1000);
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    return `${month}/${day}`;
+  },
+
+  formatMessageTime(timestamp) {
+    const date = timestamp ? new Date(timestamp * 1000) : new Date();
+    const hours = `${date.getHours()}`.padStart(2, '0');
+    const minutes = `${date.getMinutes()}`.padStart(2, '0');
+    return `${hours}:${minutes}`;
+  },
+
+  syncActiveChatPreview(text) {
+    const now = Math.floor(Date.now() / 1000);
+    const activeChatId = this.data.activeChatId;
+    if (!activeChatId) return;
+
+    const chatHistory = (this.data.chatHistory || []).map((chat, index) => {
+      if (chat.id !== activeChatId) return chat;
+      return {
+        ...chat,
+        timestamp: now,
+        preview: this.truncateText(text, 28),
+        displayDate: this.formatHistoryDate(now, index)
+      };
+    });
+    this.setData({ chatHistory });
   },
 
   async startNewChat() {
@@ -156,13 +253,18 @@ Page({
       });
       
       const currentHistory = this.data.chatHistory;
-      const newHistoryItem = { id: newChat.chat_id, title: newChat.title };
+      const newHistoryItem = this.formatHistoryItem({
+        id: newChat.chat_id,
+        title: newChat.title,
+        timestamp: Math.floor(Date.now() / 1000),
+        preview: '刚刚开启一段新的陪伴。'
+      });
       currentHistory.unshift(newHistoryItem);
       this.setData({
         messages: [], messageCounter: 0, activeChatId: newChat.chat_id,
-        isSidebarVisible: false, chatHistory: currentHistory
+        isSidebarVisible: false, isEmojiPanelVisible: false, chatHistory: currentHistory
       });
-      this.addMessage('ai', '你好呀，和我分享一下今天的心情吧！');
+      this.addMessage('ai', WELCOME_MESSAGE);
     } catch (error) {
       console.error("创建新聊天失败", error);
       wx.showToast({ title: '创建失败', icon: 'none' });
@@ -197,7 +299,7 @@ Page({
       return;
     }
     this.loadChat(chatId);
-    this.setData({ isSidebarVisible: false });
+    this.setData({ isSidebarVisible: false, isEmojiPanelVisible: false });
   },
 
   async loadChat(chatId) {
@@ -205,13 +307,21 @@ Page({
     try {
       const chatSession = await request({ url: `/chats/${chatId}` });
       const historyMessages = JSON.parse(chatSession.message);
+      const baseTimestamp = Number(chatSession.timestamp) || Math.floor(Date.now() / 1000);
+      const totalMessages = historyMessages.length || 1;
       const messages = historyMessages.map((msg, index) => ({
         id: index + 1,
         sender: msg.role === 'assistant' ? 'ai' : 'user',
-        text: msg.content
+        text: msg.content,
+        displayTime: this.formatMessageTime(baseTimestamp - Math.max(totalMessages - index - 1, 0) * 60)
       }));
       if (messages.length === 0) {
-          messages.push({ id: 1, sender: 'ai', text: '你好呀，和我分享一下今天的心情吧！' });
+          messages.push({
+            id: 1,
+            sender: 'ai',
+            text: WELCOME_MESSAGE,
+            displayTime: this.formatMessageTime(baseTimestamp)
+          });
       }
       this.setData({
         messages, messageCounter: messages.length, activeChatId: chatId,
@@ -229,8 +339,15 @@ Page({
   },
   
   closeSidebar() {
+    const updates = {};
     if (this.data.isSidebarVisible) {
-      this.setData({ isSidebarVisible: false });
+      updates.isSidebarVisible = false;
+    }
+    if (this.data.isEmojiPanelVisible) {
+      updates.isEmojiPanelVisible = false;
+    }
+    if (Object.keys(updates).length > 0) {
+      this.setData(updates);
     }
   },
 
@@ -308,6 +425,25 @@ Page({
     this.setData({ inputValue: e.detail.value });
   },
 
+  toggleEmojiPanel() {
+    this.setData({ isEmojiPanelVisible: !this.data.isEmojiPanelVisible });
+  },
+
+  selectEmoji(e) {
+    const emoji = e.currentTarget.dataset.emoji;
+    if (!emoji) return;
+    this.setData({
+      inputValue: `${this.data.inputValue}${emoji}`,
+      isEmojiPanelVisible: false
+    });
+  },
+
+  scrollToTop() {
+    this.setData({ latestMessageId: '' }, () => {
+      this.setData({ latestMessageId: 'chatTopAnchor' });
+    });
+  },
+
   async onSend() {
     if (!this.data.isLoggedIn) {
       wx.showToast({ title: '请先登录', icon: 'none' });
@@ -317,7 +453,8 @@ Page({
     if (!text) return;
     const isFirstUserMessage = this.data.messages.length <= 1;
     this.addMessage('user', text);
-    this.setData({ inputValue: '' });
+    this.syncActiveChatPreview(text);
+    this.setData({ inputValue: '', isEmojiPanelVisible: false });
     const loadingMessageId = this.addMessage('ai', '', true);
     try {
       const response = await request({ url: `/chats/${this.data.activeChatId}/respond`, method: 'POST', data: { message: text } });
@@ -335,7 +472,13 @@ Page({
   addMessage(sender, text, isLoading = false) {
     const messages = this.data.messages;
     const newMessageId = this.data.messageCounter + 1;
-    messages.push({ id: newMessageId, sender, text, isLoading });
+    messages.push({
+      id: newMessageId,
+      sender,
+      text,
+      isLoading,
+      displayTime: this.formatMessageTime()
+    });
     this.setData({ messages, messageCounter: newMessageId, latestMessageId: `msg-${newMessageId}` });
     return newMessageId;
   },

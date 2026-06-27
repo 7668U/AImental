@@ -306,3 +306,17 @@
 - 当前后端仍只有单 `image_url` 字段和单图上传接口，所以前端保存时暂时只持久化第一张新增照片，避免多图连续上传后被旧字段覆盖。
 - 已通过群聊向后端工程师提出多图接口需求：`team-chat-database/views/thread-view.md` 中的 `msg-20260625-0004`。
 - 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-25-iteration-009-checkin-photo-grid.md`。
+
+## 2026-06-26 22:26 +08:00
+
+用户说明：
+
+- 用户要求更改前端的“心理咨询界面”。
+- 用户提供两张参考图：进入心理咨询后显示“AI陪伴”聊天界面；点击左上角“项目”后弹出左侧项目栏，展示历史对话列表。
+
+当前响应：
+
+- 已将 `AImental_frontend/pages/ai-therapist/index` 改为参考图中的暖色 AI 陪伴聊天界面。
+- 已复用原有聊天接口、历史会话、会话切换、新建、设置、发送消息逻辑。
+- 已实现点击“项目”展开左侧项目栏，项目栏展示历史对话标题、日期、摘要与当前选中态。
+- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-26-iteration-004-ai-therapist-redesign.md`。

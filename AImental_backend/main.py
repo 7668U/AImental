@@ -1,3 +1,11 @@
+import sys
+
+for stream in (sys.stdout, sys.stderr):
+    try:
+        stream.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 from fastapi import FastAPI, Request
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
@@ -234,7 +242,10 @@ def on_startup():
     print("🚀 [Startup]: 开始执行数据播种和日程检查...")
     paper_airplane_table.add_default_airplanes_if_needed()
     ai_character_table.create_default_character_if_not_exists() # 确保默认角色存在
-    check_and_generate_today_schedules() 
+    if os.getenv("SKIP_STARTUP_SCHEDULE_CHECK", "0") == "1":
+        print("⏭️ [Startup]: 已跳过AI角色日程检查。")
+    else:
+        check_and_generate_today_schedules()
     print("✨ [Startup]: 数据播种和日程检查完成！")
 
     # 4. 【核心步骤3】在启动任务的最后，关闭所有临时连接

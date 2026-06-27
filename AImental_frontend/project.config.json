@@ -19,6 +19,8 @@
     "minifyWXSS": true,
     "localPlugins": false,
     "disableUseStrict": false,
+    "ignoreDevUnusedFiles": false,
+    "ignoreUploadUnusedFiles": false,
     "condition": false,
     "swc": false,
     "disableSWC": true
@@ -29,7 +31,7 @@
     "ignore": [],
     "include": []
   },
-  "appid": "wxd90fc334d65b9a0a",
+  "appid": "wx87018ae3626d4acb",
   "editorSetting": {},
   "libVersion": "3.8.10"
 }
