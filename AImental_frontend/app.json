@@ -64,7 +64,7 @@
     "list": [
       {
         "pagePath": "pages/ai-therapist/index",
-        "text": "心理咨询",
+        "text": "心情树洞",
         "iconPath": "/images/tabbar/chat_default.png",
         "selectedIconPath": "/images/tabbar/chat_selected.png"
       },

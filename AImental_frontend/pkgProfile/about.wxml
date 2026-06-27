@@ -1,27 +1,43 @@
-<view class="container">
-  <view class="custom-nav" style="padding-top: {{statusBarHeight}}px;">
-    <view class="nav-back" bindtap="navigateBack">
-      <image class="nav-back-icon" src="/images/icons/icon-back.png" mode="aspectFit" />
-    </view>
-    <view class="nav-title">关于我们</view>
-  </view>
+<view class="about-page">
+  <image class="page-bg" src="/images/profile/about-bg.png" mode="scaleToFill"></image>
 
-  <image class="bg-image" src="/images/logo.png" mode="aspectFit"></image>
-
-  <view class="content">
-    <view class="info-list">
-      <view class="info-item">
-        <text class="item-label">版本信息</text>
-        <text class="item-value">{{version}}</text>
+  <view class="custom-nav-wrapper" style="padding-top: {{navTop}}px;">
+    <view class="custom-nav" style="height: {{navHeight}}px;">
+      <view class="nav-left" bindtap="navigateBack">
+        <view class="nav-back-icon"></view>
       </view>
-      <view class="info-item clickable" bindtap="copyContact">
-        <text class="item-label">联系我们</text>
-        <text class="item-value">{{contactInfo}}</text>
+      <view class="nav-center">
+        <text class="nav-title">关于我们</text>
       </view>
+      <view class="nav-right"></view>
     </view>
   </view>
 
-  <view class="footer">
-    <text>Copyright © 2025 Your Company</text>
+  <view class="content" style="padding-top: {{navTop + navHeight}}px;">
+    <view class="hero-space"></view>
+
+    <view class="bottom-panel">
+      <view class="info-card">
+        <view class="info-item">
+          <view class="item-left">
+            <image class="item-icon" src="/images/icons/icon-about.png" mode="aspectFit"></image>
+            <text class="item-label">版本信息</text>
+          </view>
+          <text class="item-value">{{version}}</text>
+        </view>
+
+        <view class="info-item clickable" bindtap="copyContact">
+          <view class="item-left">
+            <image class="item-icon" src="/images/icons/icon-feedback.png" mode="aspectFit"></image>
+            <text class="item-label">联系我们</text>
+          </view>
+          <text class="item-value contact-value">{{contactInfo}}</text>
+        </view>
+      </view>
+
+      <view class="footer">
+        <text>Copyright © 2025 Your Company</text>
+      </view>
+    </view>
   </view>
 </view>

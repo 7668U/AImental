@@ -506,3 +506,29 @@
 - 已根据后续反馈，把“扔一个”按钮再下移一点，并从 `324rpx x 124rpx` 放大到 `368rpx x 140rpx`。
 - 已重新调整天空纸飞机安全点位，避开居中按钮和下移后的飞机篓。
 - 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-26-iteration-015-paper-airplane-grounded-basket.md`。
+
+## 2026-06-27 Daily Checkin Background
+
+用户说明：
+- 用户要求阅读本项目前端项目角色卡，成为前端 UI 设计开发师。
+- 用户要求查看“心情日记”界面，并添加用户提供的暖橙色云朵花叶背景图。
+
+当前响应：
+- 已阅读 `frontend-design-iterations/frontend-ui-designer-role-card.md`。
+- 已将用户提供的背景图转为轻量 JPG：`AImental_frontend/images/daily-checkin/layout/mood-diary-bg.jpg`。
+- 已在 `AImental_frontend/pages/daily-checkin/index.wxml` 增加全屏背景 image。
+- 已在 `AImental_frontend/pages/daily-checkin/index.wxss` 调整页面底层、顶部导航渐隐、卡片半透明和文字色彩。
+- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-27-iteration-020-daily-checkin-background.md`。
+
+## 2026-06-27 AI Therapist Nav Cleanup
+
+用户说明：
+- 用户反馈心理咨询界面右上角三点按钮多余，希望去掉。
+- 用户要求将底部 tab 的“心理咨询”改成“心情树洞”。
+
+当前响应：
+- 已移除 `AImental_frontend/pages/ai-therapist/index.wxml` 中页面自定义的右上角三点设置按钮。
+- 已删除 `AImental_frontend/pages/ai-therapist/index.wxss` 中不再使用的 `.more-button` / `.more-dot` 样式。
+- 已将 `AImental_frontend/app.json` tabBar 文案更新为“心情树洞”。
+- 设置入口仍保留在历史抽屉顶部齿轮按钮。
+- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-27-iteration-021-ai-therapist-nav-cleanup.md`。

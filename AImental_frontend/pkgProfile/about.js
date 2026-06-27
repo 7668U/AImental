@@ -3,7 +3,8 @@ const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 
 Page({
   data: {
-    statusBarHeight: 0, // 用于WXML设置导航栏样式的状态栏高度
+    navTop: 0,
+    navHeight: 0,
     version: '2.0.0',
     contactInfo: 'feelyourself12138@163.com'
   },
@@ -12,14 +13,30 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    // 获取手机系统信息，得到状态栏高度
-    wx.getSystemInfo({
-      success: (res) => {
-        this.setData({
-          statusBarHeight: res.statusBarHeight
-        });
-      },
-    })
+    this.setNavSize();
+  },
+
+  setNavSize() {
+    const fallback = { statusBarHeight: 24 };
+    let systemInfo = fallback;
+    let menuButtonInfo = null;
+
+    try {
+      systemInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
+      menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+    } catch (e) {
+      menuButtonInfo = null;
+    }
+
+    const statusBarHeight = systemInfo.statusBarHeight || fallback.statusBarHeight;
+    const navHeight = menuButtonInfo
+      ? menuButtonInfo.height + (menuButtonInfo.top - statusBarHeight) * 2
+      : 44;
+
+    this.setData({
+      navTop: statusBarHeight,
+      navHeight
+    });
   },
 
   /**

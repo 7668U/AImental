@@ -1,152 +1,256 @@
-/* pages/inform/inform.wxss */
 page {
-  background-color: #f7f7f7;
+  min-height: 100%;
+  background: #fff4dd;
+  color: #65412d;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
 }
 
-/* --- 自定义导航栏样式 (稳定版 Flex 方案) --- */
+.page-container {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.page-bg {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
+
 .custom-nav-wrapper {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  background-color: #ffffff;
   z-index: 1000;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  background: rgba(255, 251, 245, 0.82);
+  box-shadow: 0 1rpx 0 rgba(228, 198, 151, 0.2);
+  backdrop-filter: blur(8px);
 }
 
 .custom-nav {
+  position: relative;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
   box-sizing: border-box;
 }
 
-.nav-left, .nav-right {
+.nav-left,
+.nav-right {
+  width: 132rpx;
+  height: 100%;
   display: flex;
   align-items: center;
-  width: 120rpx; 
 }
 
 .nav-left {
   justify-content: flex-start;
-  padding-left: 24rpx;
+  padding-left: 34rpx;
+  box-sizing: border-box;
 }
 
-.nav-right {
-  justify-content: flex-end;
+.nav-left:active {
+  opacity: 0.68;
 }
 
 .nav-back-icon {
-  width: 36rpx;
-  height: 36rpx;
+  width: 28rpx;
+  height: 28rpx;
+  border-left: 7rpx solid #75462d;
+  border-bottom: 7rpx solid #75462d;
+  border-radius: 3rpx;
+  transform: rotate(45deg);
 }
 
 .nav-center {
   flex: 1;
+  min-width: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
 }
 
 .nav-title {
-  font-size: 17px;
-  font-weight: 600;
-  color: #000000;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  max-width: 420rpx;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 38rpx;
+  line-height: 1.2;
+  font-weight: 900;
+  color: #70472f;
+  letter-spacing: 0;
 }
-/* --- 导航栏样式结束 --- */
 
-
-/* 主内容区域 */
 .main-content {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  padding-left: 48rpx;
+  padding-right: 48rpx;
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
-  width: 100%;
 }
 
-/* 头像区域 */
-.avatar-wrapper {
+.profile-hero {
   display: flex;
   justify-content: center;
-  padding-top: 60rpx;
-  padding-bottom: 40rpx;
+  padding-top: 86rpx;
+  padding-bottom: 78rpx;
+  box-sizing: border-box;
+}
+
+.avatar-wrapper {
+  position: relative;
+  width: 178rpx;
+  height: 178rpx;
+  border-radius: 50%;
+  padding: 7rpx;
+  box-sizing: border-box;
+  background: rgba(255, 179, 62, 0.92);
+  box-shadow:
+    0 18rpx 32rpx rgba(177, 105, 27, 0.18),
+    0 0 0 8rpx rgba(255, 255, 255, 0.56);
+}
+
+.avatar-wrapper:active {
+  transform: scale(0.98);
 }
 
 .avatar {
-  width: 160rpx;
-  height: 160rpx;
-  border-radius: 50%;
   display: block;
-  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #ffd47b;
 }
 
-/* 通用信息区块样式 */
 .info-section {
-  background-color: #ffffff; /* 您可以修改成您喜欢的颜色 */
-  border-radius: 16rpx;
-  margin: 0 24rpx;
-  padding: 0 30rpx;
+  position: relative;
+  margin: 0;
+  padding: 28rpx 34rpx;
+  border-radius: 30rpx;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 18rpx 42rpx rgba(152, 111, 50, 0.1);
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .info-item {
+  position: relative;
+  min-height: 136rpx;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 32rpx 0;
-  border-bottom: 1rpx solid #f0f0f0; /* 您可以修改成您喜欢的颜色 */
+  box-sizing: border-box;
 }
 
-.info-section .info-item:last-child {
-  border-bottom: none;
+.info-item::after {
+  content: '';
+  position: absolute;
+  left: 114rpx;
+  right: 0;
+  bottom: 0;
+  height: 1rpx;
+  background: rgba(182, 144, 100, 0.24);
 }
 
-/* 新增这个样式，让 picker 填满右侧空间 */
-.picker-container {
-  flex: 1; /* 让 picker 占据所有剩余空间 */
-  display: flex; /* 让 picker 内部的 value-container 可以正常布局 */
+.info-section .info-item:last-child::after {
+  display: none;
+}
+
+.info-item:active {
+  opacity: 0.76;
+}
+
+.info-icon {
+  width: 78rpx;
+  height: 78rpx;
+  margin-right: 24rpx;
+  flex-shrink: 0;
 }
 
 .label {
+  width: 96rpx;
+  flex-shrink: 0;
   font-size: 32rpx;
-  font-weight: 500;
-  color: #333333;
+  line-height: 1.2;
+  font-weight: 900;
+  color: #684531;
+  letter-spacing: 0;
 }
 
 .value-container {
+  flex: 1;
+  min-width: 0;
+  margin-left: 20rpx;
   display: flex;
   align-items: center;
-  color: #888888;
-  font-size: 30rpx;
-  flex: 1;
   justify-content: flex-end;
-  margin-left: 20rpx;
 }
 
 .info-input {
+  flex: 1;
+  min-width: 0;
+  height: 70rpx;
   text-align: right;
-  width: 100%;
-  color: #333;
-  display: block;
+  color: #7a6252;
+  font-size: 30rpx;
+  line-height: 70rpx;
+  font-weight: 500;
+}
+
+.input-placeholder {
+  color: #c0a999;
 }
 
 .user-info-text {
-  max-width: 450rpx;
+  max-width: 320rpx;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #888;
+  color: #8c7666;
+  font-size: 30rpx;
+  line-height: 1.25;
+  font-weight: 500;
+  text-align: right;
+  letter-spacing: 0;
 }
 
-.value-container::after {
-  content: '';
-  display: inline-block;
-  width: 16rpx;
-  height: 16rpx;
-  border-top: 2rpx solid #c8c8c8;
-  border-right: 2rpx solid #c8c8c8;
-  transform: rotate(45deg);
-  margin-left: 20rpx;
+.value-arrow {
+  width: 30rpx;
+  margin-left: 16rpx;
+  color: #c9ac95;
+  font-size: 54rpx;
+  line-height: 1;
+  font-weight: 300;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+@media (max-height: 700px) {
+  .profile-hero {
+    padding-top: 52rpx;
+    padding-bottom: 48rpx;
+  }
+
+  .avatar-wrapper {
+    width: 158rpx;
+    height: 158rpx;
+  }
+
+  .info-section {
+    padding-top: 18rpx;
+    padding-bottom: 18rpx;
+  }
+
+  .info-item {
+    min-height: 118rpx;
+  }
 }

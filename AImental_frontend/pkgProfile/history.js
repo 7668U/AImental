@@ -3,25 +3,52 @@
 const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 const ASSESSMENTS_API_URL = `${SERVER_BASE_URL}/api/v1/assessments`;
 const ANALYSIS_API_URL = `${SERVER_BASE_URL}/api/v1/history-analysis`;
-const { getScaleDisplayName, getScaleIconName } = require('../utils/assessment-display.js');
+const { getScaleDisplayName } = require('../utils/assessment-display.js');
 
-const DEFAULT_ICON_PATH = '/images/assessment/default.png';
 const DELETE_BTN_WIDTH = 80;
+const REQUEST_TIMEOUT = 8000;
 
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 Page({
   data: {
+    navTop: 0,
+    navHeight: 0,
     isLoading: true,
     groupedHistory: [],
     touchStartX: 0,
   },
 
   onLoad(options) {
+    this.setNavSize();
     this.fetchHistory();
   },
 
+  setNavSize() {
+    const fallback = { statusBarHeight: 24 };
+    let sysInfo = fallback;
+    let menuButtonInfo = null;
+    try {
+      sysInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
+      menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+    } catch (e) {
+      menuButtonInfo = null;
+    }
+    const statusBarHeight = sysInfo.statusBarHeight || fallback.statusBarHeight;
+    const navHeight = menuButtonInfo
+      ? menuButtonInfo.height + (menuButtonInfo.top - statusBarHeight) * 2
+      : 44;
+    this.setData({
+      navTop: statusBarHeight,
+      navHeight
+    });
+  },
+
+  navigateBack() {
+    wx.navigateBack({ delta: 1 });
+  },
+
   goToAnalysis(e) {
-    const { scale, records } = e.currentTarget.dataset.scale;
+    const { records } = e.currentTarget.dataset.scale;
     // 此处的判断在WXML中已经处理，但为保险起见，JS中也可以保留
     if (records.length < 5) {
       wx.showToast({ title: '测试次数不足5次，暂时无法分析', icon: 'none' });
@@ -45,6 +72,7 @@ Page({
       data: {
         history_ids: history_ids
       },
+      timeout: REQUEST_TIMEOUT,
       success: (res) => {
         if (res.statusCode === 200) {
           const analysisReport = res.data;
@@ -83,6 +111,7 @@ Page({
       header: {
         'Authorization': 'Bearer ' + wx.getStorageSync('token')
       },
+      timeout: REQUEST_TIMEOUT,
       success: (res) => {
         if (res.statusCode === 200 && Array.isArray(res.data)) {
           const groupedData = this.processHistoryData(res.data);
@@ -102,14 +131,6 @@ Page({
 
   handleFetchError(title = '加载失败，请重试') {
     wx.showToast({ title: title, icon: 'none' });
-  },
-
-  handleIconError(e) {
-    const { index } = e.currentTarget.dataset;
-    const errorPath = `groupedHistory[${index}].iconPath`;
-    if (this.data.groupedHistory[index].iconPath !== DEFAULT_ICON_PATH) {
-      this.setData({ [errorPath]: DEFAULT_ICON_PATH });
-    }
   },
 
   toggleExpand(e) {
@@ -169,15 +190,11 @@ Page({
         historyMap.get(scaleId).count += 1;
       } else {
         const shortName = record.scale_info.short_name;
-        const iconName = getScaleIconName(shortName);
-        const iconPath = `/images/assessment/scale-icons/${iconName}.png`;
-        
         historyMap.set(scaleId, {
           scale_id: scaleId,
           scale_name: getScaleDisplayName(shortName, record.scale_info.name),
-          iconPath: iconPath,
           count: 1,
-          is_expanded: false,
+          is_expanded: true,
           records: [record],
           // ✅ 【核心修改已集成】
           // 从当前记录的 scale_info 中获取 assessment_type，并存入分组信息

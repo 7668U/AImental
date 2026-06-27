@@ -1,70 +1,86 @@
-<view class="container">
-  <view class="page-title-wrapper">
-    <view class="page-title">您的历史测试记录</view>
+<view class="history-page">
+  <image class="page-bg" src="/images/profile/profile-info-bg.png" mode="aspectFill"></image>
+
+  <view class="custom-nav-wrapper" style="padding-top: {{navTop}}px;">
+    <view class="custom-nav" style="height: {{navHeight}}px;">
+      <view class="nav-left" bindtap="navigateBack">
+        <view class="nav-back-icon"></view>
+      </view>
+      <view class="nav-center">
+        <text class="nav-title">测试历史</text>
+      </view>
+      <view class="nav-right"></view>
+    </view>
   </view>
 
-  <view wx:if="{{isLoading}}" class="loading-tip">
-    <text>正在加载历史记录...</text>
-  </view>
-
-  <block wx:else>
-    <view wx:if="{{groupedHistory.length === 0}}" class="empty-container">
-      <image class="empty-icon" src="/images/icons/icon-no-data.png" mode="aspectFit"></image>
-      <text class="empty-text">暂无测试记录</text>
-      <text class="empty-subtext">去完成一次测试，回顾自己的心灵足迹吧</text>
+  <scroll-view class="main-content" scroll-y enhanced show-scrollbar="{{false}}" style="padding-top: {{navHeight + navTop}}px;">
+    <view wx:if="{{isLoading}}" class="loading-tip">
+      <text>正在加载历史记录...</text>
     </view>
 
-    <view class="scale-card" wx:for="{{groupedHistory}}" wx:for-item="group" wx:for-index="groupIndex" wx:key="scale_id">
-      <view class="card-header">
-        <view class="card-left">
-          <image class="scale-icon" src="{{group.iconPath}}" binderror="handleIconError" data-index="{{groupIndex}}" mode="aspectFit"></image>
-          <text class="scale-name">{{group.scale_name}}</text>
-        </view>
-          <view class="card-right">
-            <view class="expand-trigger" catchtap="toggleExpand" data-index="{{groupIndex}}">
-              <text class="test-count-number">{{group.count}} 次</text>
-              <image class="arrow-icon {{group.is_expanded ? 'expanded' : ''}}" src="/images/icons/icon-arrow-down.png"></image>
-          </view>
-          
-          <block wx:if="{{group.assessment_type === 'scoring'}}">
-            <view class="analysis-btn-container" catchtap="goToAnalysis" data-scale="{{group}}">
-              <block wx:if="{{group.count >= 5}}">
-                <image class="analysis-icon" src="/images/icons/icon-analysis-plane-orange.png"></image>
-                <text class="analysis-text">去分析</text>
-              </block>
-              <text wx:else class="analysis-disabled-tip">(5次后可分析)</text>
-            </view>
-          </block>
-
-        </view>
+    <block wx:else>
+      <view wx:if="{{groupedHistory.length === 0}}" class="empty-container">
+        <image class="empty-icon" src="/images/icons/icon-no-data.png" mode="aspectFit"></image>
+        <text class="empty-text">暂无测试记录</text>
+        <text class="empty-subtext">去完成一次测试，回顾自己的心灵足迹吧</text>
       </view>
+
+      <view class="history-card" wx:for="{{groupedHistory}}" wx:for-item="group" wx:for-index="groupIndex" wx:key="scale_id">
+        <view class="card-header">
+          <view class="scale-title">
+            <view class="scale-title-dot"></view>
+            <view class="scale-name">{{group.scale_name}}</view>
+          </view>
+          <view class="card-actions">
+            <text class="test-count-number">{{group.count}}次</text>
+
+            <block wx:if="{{group.assessment_type === 'scoring'}}">
+              <view class="analysis-btn-container" catchtap="goToAnalysis" data-scale="{{group}}">
+                <text wx:if="{{group.count >= 5}}" class="analysis-text">去分析</text>
+                <text wx:else class="analysis-disabled-tip">(5次后可分析)</text>
+              </view>
+            </block>
+
+            <view class="expand-trigger" catchtap="toggleExpand" data-index="{{groupIndex}}">
+              <view class="header-arrow {{group.is_expanded ? 'expanded' : ''}}"></view>
+            </view>
+          </view>
+        </view>
 
         <view class="history-list {{group.is_expanded ? 'expanded' : ''}}">
           <view class="history-item" wx:for="{{group.records}}" wx:for-item="record" wx:for-index="recordIndex" wx:key="id">
             <view class="delete-action">
+              <view
+                class="delete-btn"
+                catchtap="handleConfirmDelete"
+                data-group-index="{{groupIndex}}"
+                data-record-index="{{recordIndex}}"
+                data-record-id="{{record.id}}">
+                <text class="delete-text">删除</text>
               </view>
-            
-            <view 
-              class="history-item-content" 
-              style="transform: translateX({{record.x_offset || 0}}px) translateZ(0);" 
-              bindtouchstart="handleTouchStart" 
-              bindtouchmove="handleTouchMove" 
-              bindtouchend="handleTouchEnd" 
-              bindtap="goToResultDetail" 
-              data-record="{{record}}" 
-              data-group-index="{{groupIndex}}" 
-              data-record-index="{{recordIndex}}">
-            <view class="item-left">
-              <view class="item-time">{{record.completed_at_formatted}}</view>
-              <view class="item-score" wx:if="{{record.scale_info.assessment_type === 'scoring'}}">得分：{{record.display_final_score}}</view>
             </view>
-            <view class="item-right">
-              <view class="item-result {{record.scale_info.assessment_type === 'scoring' ? 'item-result-scoring' : ''}}">{{record.display_result_level}}</view>
-              <image class="item-arrow" src="/images/right.png"></image>
+
+            <view
+              class="history-item-content"
+              style="transform: translateX({{record.x_offset || 0}}px) translateZ(0);"
+              bindtouchstart="handleTouchStart"
+              bindtouchmove="handleTouchMove"
+              bindtouchend="handleTouchEnd"
+              bindtap="goToResultDetail"
+              data-record="{{record}}"
+              data-group-index="{{groupIndex}}"
+              data-record-index="{{recordIndex}}">
+              <view class="item-left">
+                <view class="item-time">{{record.completed_at_formatted}}</view>
+                <view class="item-score" wx:if="{{record.scale_info.assessment_type === 'scoring'}}">得分：{{record.display_final_score}}</view>
+              </view>
+              <view class="item-right">
+                <view class="item-result">{{record.display_result_level}}</view>
+              </view>
             </view>
           </view>
         </view>
-        </view>
-    </view>
-  </block>
+      </view>
+    </block>
+  </scroll-view>
 </view>
