@@ -519,3 +519,16 @@
 - 已在 `AImental_frontend/pages/daily-checkin/index.wxml` 增加全屏背景 image。
 - 已在 `AImental_frontend/pages/daily-checkin/index.wxss` 调整页面底层、顶部导航渐隐、卡片半透明和文字色彩。
 - 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-27-iteration-020-daily-checkin-background.md`。
+
+## 2026-06-27 AI Therapist Nav Cleanup
+
+用户说明：
+- 用户反馈心理咨询界面右上角三点按钮多余，希望去掉。
+- 用户要求将底部 tab 的“心理咨询”改成“心情树洞”。
+
+当前响应：
+- 已移除 `AImental_frontend/pages/ai-therapist/index.wxml` 中页面自定义的右上角三点设置按钮。
+- 已删除 `AImental_frontend/pages/ai-therapist/index.wxss` 中不再使用的 `.more-button` / `.more-dot` 样式。
+- 已将 `AImental_frontend/app.json` tabBar 文案更新为“心情树洞”。
+- 设置入口仍保留在历史抽屉顶部齿轮按钮。
+- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-27-iteration-021-ai-therapist-nav-cleanup.md`。

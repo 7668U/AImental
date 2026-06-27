@@ -83,12 +83,6 @@
             <view class="history-clock"></view>
             <text>历史</text>
           </view>
-
-          <view class="more-button" catchtap="toggleSettings">
-            <view class="more-dot"></view>
-            <view class="more-dot"></view>
-            <view class="more-dot"></view>
-          </view>
         </view>
       </view>
 
