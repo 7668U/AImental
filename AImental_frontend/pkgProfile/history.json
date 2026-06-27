@@ -1,4 +1,5 @@
 {
   "usingComponents": {},
-  "navigationBarTitleText": ""
+  "navigationStyle": "custom",
+  "navigationBarTitleText": "测试历史"
 }

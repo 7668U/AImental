@@ -50,10 +50,12 @@ async def startup_event():
     global redis_client
     try:
         redis_client = aioredis.from_url(
-            "redis://localhost", # 在docker-compose网络中使用服务名'redis'
+            "redis://127.0.0.1", # 本地运行时避免 localhost 解析到不可用地址
             # 如果你是本地运行，请使用 "redis://localhost"
             encoding="utf-8", 
-            decode_responses=True
+            decode_responses=True,
+            socket_connect_timeout=2,
+            socket_timeout=2
         )
         await redis_client.ping()
         logger.info("✅ Router 'ai_community' 已成功连接到 aioredis。")
