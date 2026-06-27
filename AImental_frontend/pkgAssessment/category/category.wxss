@@ -1,0 +1,258 @@
+page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 85% 8%, rgba(255, 214, 165, 0.45) 0, rgba(255, 214, 165, 0) 280rpx),
+    linear-gradient(180deg, #fff7ee 0%, #fffaf5 34%, #f8f5ef 100%);
+  color: #25282d;
+}
+
+.category-page {
+  min-height: 100vh;
+  padding: 22rpx 46rpx 56rpx;
+  box-sizing: border-box;
+}
+
+.nav-row {
+  height: 78rpx;
+  display: flex;
+  align-items: center;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 62rpx;
+  height: 62rpx;
+  border-radius: 50%;
+}
+
+.category-interest .back-button {
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 8rpx 22rpx rgba(143, 101, 59, 0.1);
+}
+
+.back-symbol {
+  margin-top: -6rpx;
+  font-size: 70rpx;
+  line-height: 1;
+  color: #111318;
+  font-weight: 300;
+}
+
+.hero-section {
+  position: relative;
+  min-height: 314rpx;
+  margin-top: 10rpx;
+  margin-bottom: 34rpx;
+  overflow: visible;
+}
+
+.hero-art {
+  position: absolute;
+  right: -34rpx;
+  bottom: -8rpx;
+  width: 444rpx;
+  height: 258rpx;
+}
+
+.category-relationship .hero-art {
+  right: -24rpx;
+  width: 474rpx;
+  height: 282rpx;
+}
+
+.category-interest .hero-art {
+  right: -12rpx;
+  width: 356rpx;
+  height: 286rpx;
+}
+
+.hero-copy {
+  position: relative;
+  z-index: 1;
+  padding-top: 100rpx;
+  max-width: 430rpx;
+}
+
+.category-interest .hero-copy {
+  padding-top: 82rpx;
+  max-width: 420rpx;
+}
+
+.hero-title {
+  font-size: 64rpx;
+  line-height: 1.14;
+  font-weight: 900;
+  color: #22262b;
+}
+
+.category-interest .hero-title {
+  font-size: 50rpx;
+  color: #4a2b1c;
+}
+
+.hero-subtitle {
+  display: block;
+  margin-top: 28rpx;
+  font-size: 30rpx;
+  line-height: 1.32;
+  color: #7f858f;
+}
+
+.category-interest .hero-subtitle {
+  margin-top: 22rpx;
+  font-size: 28rpx;
+  color: #987c67;
+}
+
+.scale-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22rpx;
+}
+
+.scale-card {
+  display: flex;
+  align-items: center;
+  min-height: 146rpx;
+  padding: 28rpx 30rpx;
+  box-sizing: border-box;
+  border-radius: 30rpx;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 16rpx 44rpx rgba(151, 113, 74, 0.1);
+}
+
+.scale-card:active {
+  transform: scale(0.988);
+}
+
+.scale-icon {
+  flex: 0 0 auto;
+  width: 108rpx;
+  height: 108rpx;
+  margin-right: 34rpx;
+  border-radius: 26rpx;
+  background: #fff3ea;
+}
+
+.scale-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.scale-title-row {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.scale-title {
+  max-width: 100%;
+  font-size: 36rpx;
+  line-height: 1.24;
+  font-weight: 900;
+  color: #22262b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scale-desc {
+  display: block;
+  margin-top: 16rpx;
+  font-size: 28rpx;
+  line-height: 1.34;
+  color: #848a94;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.test-action {
+  flex: 0 0 auto;
+  width: 148rpx;
+  height: 64rpx;
+  margin-left: 16rpx;
+}
+
+.interest-card {
+  align-items: center;
+  min-height: 238rpx;
+  padding: 36rpx 34rpx;
+  border-radius: 34rpx;
+}
+
+.interest-card .scale-icon {
+  width: 150rpx;
+  height: 150rpx;
+  margin-right: 34rpx;
+  border-radius: 30rpx;
+}
+
+.interest-card .scale-content {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.interest-card .scale-title {
+  font-size: 31rpx;
+  line-height: 1.32;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.interest-card .scale-desc {
+  margin-top: 18rpx;
+  max-width: 320rpx;
+  font-size: 26rpx;
+  line-height: 1.55;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.scale-subnote {
+  display: block;
+  margin-top: 22rpx;
+  font-size: 24rpx;
+  line-height: 1.25;
+  color: #a5958a;
+}
+
+.interest-tip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 34rpx;
+  padding: 28rpx 36rpx;
+  border-radius: 26rpx;
+  border: 2rpx dashed #f3d8c4;
+  background: rgba(255, 250, 245, 0.7);
+}
+
+.tip-line {
+  display: block;
+  font-size: 27rpx;
+  line-height: 1.6;
+  color: #9b7b67;
+}
+
+.tip-icon {
+  width: 86rpx;
+  height: 86rpx;
+  opacity: 0.82;
+}
+
+.feedback-container {
+  width: 100%;
+  padding: 120rpx 0;
+  text-align: center;
+  color: #999;
+  font-size: 27rpx;
+}

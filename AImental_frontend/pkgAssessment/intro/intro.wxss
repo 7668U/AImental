@@ -1,100 +1,221 @@
-/* --- 全局容器设定 --- */
-.container {
-  /* 设定为相对定位，作为所有绝对定位元素的父容器 */
-  position: relative; 
-  height: 100vh; /* 必须占满整个屏幕高度 */
+page {
   width: 100vw;
-  background-color: #f8f8f8;
-  overflow: hidden; /* 防止意外溢出 */
+  height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(255, 226, 188, 0.64) 0, rgba(255, 226, 188, 0) 260rpx),
+    radial-gradient(circle at 84% 46%, rgba(255, 207, 148, 0.32) 0, rgba(255, 207, 148, 0) 280rpx),
+    linear-gradient(180deg, #fffaf4 0%, #fff8ef 100%);
+  color: #352111;
+}
+
+.container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
   box-sizing: border-box;
 }
 
-/* --- 标题：固定在顶部 10% 处 --- */
-.intro-title {
-  position: absolute; 
-  top: 10%; 
-  left: 50%; 
-  transform: translate(-50%, -50%); 
-  width: 90%; 
-  font-size: 48rpx;
-  font-weight: bold;
-  color: #333;
+.hero-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 80rpx;
+  bottom: 0;
+  padding: 74rpx 40rpx 168rpx;
+  box-sizing: border-box;
+  border-radius: 82rpx 82rpx 0 0;
+  background: rgba(255, 255, 255, 0.64);
+  box-shadow: inset 0 2rpx 0 rgba(255, 255, 255, 0.85);
+}
+
+.state-panel {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx;
+  box-sizing: border-box;
+  color: #9a8d82;
+  font-size: 28rpx;
   text-align: center;
 }
 
-/* --- 中间滚动内容区域 --- */
-.content-area {
-  position: absolute;
-  top: calc(10% + 80rpx);
+.title-zone {
+  position: relative;
+  z-index: 1;
+  height: 122rpx;
+  margin-bottom: 20rpx;
+}
 
-  /* --- 修正：根据按钮最新的 25% 位置重新计算 --- */
-  bottom: calc(25% + 100rpx); /* 原为 calc(15% + 120rpx) */
-
-  left: 40rpx;
-  right: 40rpx;
-  
+.intro-title {
+  width: 100%;
+  height: 104rpx;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  
-  justify-content: flex-start;
-
-  overflow-y: auto; 
+  justify-content: center;
+  padding: 0 32rpx;
+  box-sizing: border-box;
+  font-size: 50rpx;
+  line-height: 1.12;
+  font-weight: 900;
+  color: #352111;
+  text-align: center;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
-/* --- 中间内容元素的样式 --- */
 .intro-icon {
-  width: 200rpx;
-  height: 200rpx;
-  border-radius: 20rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
-  flex-shrink: 0;
-  
-  /* --- 调整2：增大图片与描述的间距 --- */
-  margin-bottom: 60rpx; /* 原为 40rpx */
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 342rpx;
+  height: 342rpx;
+  margin: 0 auto 30rpx;
+  border-radius: 58rpx;
 }
 
-.intro-description {
-  font-size: 36rpx;
-  color: #000;
-  
-  /* --- 调整1：字体加粗 --- */
-  font-weight: bold;
+.card-zone {
+  position: relative;
+  z-index: 1;
+  height: 380rpx;
+}
 
-  line-height: 1.6;
+.info-card {
+  display: flex;
+  align-items: center;
+  gap: 28rpx;
+  width: 100%;
+  height: 176rpx;
+  padding: 24rpx 32rpx;
+  box-sizing: border-box;
+  border-radius: 30rpx;
+  background: rgba(255, 255, 255, 0.88);
+  border: 2rpx solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 12rpx 28rpx rgba(158, 119, 76, 0.08);
+}
+
+.primary-card {
+  margin-bottom: 26rpx;
+}
+
+.mini-icon-wrap {
+  flex: 0 0 auto;
+  width: 124rpx;
+  height: 124rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 28rpx;
+  background: linear-gradient(180deg, #fff1e8, #fff8f1);
+  overflow: hidden;
+}
+
+.mini-icon {
+  width: 124rpx;
+  height: 124rpx;
+}
+
+.card-copy {
+  flex: 1;
+  min-width: 0;
   text-align: left;
-  
-  /* --- 调整2：增大描述与指导语的间距 --- */
-  margin-bottom: 60rpx; /* 原为 30rpx */
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.intro-instructions {
-  /* --- 调整3：增大指导语的字号 --- */
-  font-size: 32rpx; /* 原为 26rpx */
-  
-  color: #888888;
-  line-height: 1.5;
-  text-align: left;
+.strong-copy {
+  -webkit-line-clamp: 3;
+  font-size: 30rpx;
+  line-height: 1.48;
+  font-weight: 800;
+  color: #3c2b1f;
 }
 
+.muted-copy {
+  -webkit-line-clamp: 3;
+  font-size: 29rpx;
+  line-height: 1.48;
+  font-weight: 500;
+  color: #85817d;
+}
 
-/* --- 按钮：固定在距离底部 25% 处 --- */
+.sparkle {
+  position: absolute;
+  z-index: 0;
+  color: #f6bf73;
+  line-height: 1;
+  opacity: 0.72;
+}
+
+.sparkle-a {
+  top: 108rpx;
+  left: 94rpx;
+  font-size: 26rpx;
+}
+
+.sparkle-b {
+  top: 124rpx;
+  right: 94rpx;
+  font-size: 32rpx;
+}
+
+.sparkle-c {
+  top: 402rpx;
+  right: 106rpx;
+  font-size: 28rpx;
+}
+
+.bottom-action {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 80rpx;
+  z-index: 5;
+  padding: 18rpx 142rpx calc(30rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  background: linear-gradient(180deg, rgba(255, 250, 246, 0), rgba(255, 250, 246, 0.96) 32%);
+}
+
 .start-test-button {
-  position: absolute; 
-  bottom: 25%; /* 这是你最新调整的位置 */
-  left: 50%; 
-  transform: translateX(-50%); 
-  
-  width: 80%;
-  padding: 20rpx;
-  background-color: #FFA500;
-  color: white;
-  font-size: 36rpx;
-  border-radius: 50rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
-  transition: background-color 0.3s ease;
+  position: relative;
+  width: 100%;
+  height: 90rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #ffb833 0%, #ff9f18 100%);
+  color: #ffffff;
+  font-size: 32rpx;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 16rpx 30rpx rgba(255, 162, 31, 0.28);
+}
+
+.start-test-button::after {
+  border: none;
 }
 
 .start-test-button:active {
-  background-color: #FF8C00;
+  transform: scale(0.985);
+  background: linear-gradient(135deg, #ffaa22 0%, #f39013 100%);
+}
+
+.button-sparkle {
+  position: absolute;
+  left: 42rpx;
+  top: 22rpx;
+  font-size: 22rpx;
+  opacity: 0.86;
+}
+
+.button-sparkle.right {
+  left: auto;
+  right: 42rpx;
+  top: 34rpx;
 }

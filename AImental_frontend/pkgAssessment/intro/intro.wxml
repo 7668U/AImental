@@ -1,11 +1,50 @@
 <view class="container">
-  <view class="intro-title">{{scale.name}}</view>
-
-  <view class="content-area">
-    <image class="intro-icon" src="{{scale.iconPath}}" mode="aspectFit"></image>
-    <view class="intro-description">{{scale.description}}</view>
-    <view class="intro-instructions" wx:if="{{scale.instructions}}">{{scale.instructions}}</view>
+  <view class="state-panel" wx:if="{{isLoading}}">
+    <text>正在加载问卷介绍...</text>
   </view>
 
-  <button class="start-test-button" bindtap="startTest">开始测试</button>
+  <view class="state-panel" wx:elif="{{isError}}">
+    <text>问卷介绍加载失败，请返回后重试</text>
+  </view>
+
+  <view class="hero-panel" wx:else>
+    <view class="sparkle sparkle-a">✦</view>
+    <view class="sparkle sparkle-b">✧</view>
+    <view class="sparkle sparkle-c">✦</view>
+
+    <view class="title-zone">
+      <view class="intro-title">{{scale.name}}</view>
+    </view>
+
+    <image
+      class="intro-icon"
+      src="{{scale.iconPath}}"
+      mode="aspectFit"
+      binderror="handleIconError"
+    />
+
+    <view class="card-zone">
+      <view class="info-card primary-card">
+        <view class="mini-icon-wrap">
+          <image class="mini-icon" src="/images/assessment/intro/intro-heart.png" mode="aspectFit" />
+        </view>
+        <view class="card-copy strong-copy">{{scale.coverSummary}}</view>
+      </view>
+
+      <view class="info-card">
+        <view class="mini-icon-wrap note-icon">
+          <image class="mini-icon" src="/images/assessment/intro/intro-note.png" mode="aspectFit" />
+        </view>
+        <view class="card-copy muted-copy">{{scale.coverInstruction}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="bottom-action">
+    <button class="start-test-button" bindtap="startTest">
+      <text class="button-sparkle">✦</text>
+      <text>开始测试</text>
+      <text class="button-sparkle right">✦</text>
+    </button>
+  </view>
 </view>

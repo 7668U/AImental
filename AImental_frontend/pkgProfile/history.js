@@ -6,6 +6,14 @@ const ANALYSIS_API_URL = `${SERVER_BASE_URL}/api/v1/history-analysis`;
 
 const DEFAULT_ICON_PATH = '/images/assessment/default.png';
 const DELETE_BTN_WIDTH = 80;
+const SCALE_ICON_ALIASES = {
+  'BDI-II': 'bdi-ii',
+  SDS: 'sds'
+};
+
+const SCALE_DISPLAY_NAMES = {
+  IAS: '互动焦虑量表'
+};
 
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 Page({
@@ -159,6 +167,8 @@ Page({
         
       record.x_offset = 0;
       record.completed_at_formatted = this.formatDateToYYYYMMDD(record.completed_at);
+      record.display_result_level = this.getDisplayResultLevel(record.result_level);
+      record.display_final_score = this.formatScore(record.final_score);
       
       const scaleId = record.scale_info.id;
       if (historyMap.has(scaleId)) {
@@ -166,12 +176,12 @@ Page({
         historyMap.get(scaleId).count += 1;
       } else {
         const shortName = record.scale_info.short_name;
-        const iconName = shortName ? shortName.toLowerCase() : 'default';
-        const iconPath = `/images/assessment/${iconName}.png`;
+        const iconName = SCALE_ICON_ALIASES[shortName] || (shortName ? shortName.toLowerCase() : 'default');
+        const iconPath = `/images/assessment/scale-icons/${iconName}.png`;
         
         historyMap.set(scaleId, {
           scale_id: scaleId,
-          scale_name: record.scale_info.name,
+          scale_name: SCALE_DISPLAY_NAMES[shortName] || record.scale_info.name,
           iconPath: iconPath,
           count: 1,
           is_expanded: false,
@@ -183,6 +193,20 @@ Page({
       }
     });
     return Array.from(historyMap.values());
+  },
+
+  getDisplayResultLevel(level) {
+    if (level === null || level === undefined) return '结果待确认';
+    const text = String(level).trim();
+    if (!text || text.toLowerCase() === 'null') return '结果待确认';
+    return text;
+  },
+
+  formatScore(score) {
+    if (score === null || score === undefined || score === '') return '--';
+    const numericScore = Number(score);
+    if (!Number.isFinite(numericScore)) return String(score);
+    return String(Math.round(numericScore * 100) / 100);
   },
 
   handleTouchStart(e) {

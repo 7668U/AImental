@@ -100,3 +100,35 @@ Verification:
 Next:
 - Frontend can call `image_urls` directly from all check-in query/create/update responses.
 - Physical cleanup of replaced/deleted uploaded files remains a possible later maintenance task.
+
+## 2026-06-26 - WeChat App Config Rewritten
+
+Status: Runtime configuration recreated.
+
+Summary:
+- Recreated `AImental_backend/.env` after it was missing.
+- Wrote the provided WeChat Mini Program AppID and AppSecret back into backend runtime configuration.
+
+Next:
+- Backend dotenv loading and Python compile checks have passed.
+
+## 2026-06-26 - Assessment Grouping And AI Analysis
+
+Status: Completed.
+
+Summary:
+- Added four-group display metadata to assessment list/detail responses.
+- Added deterministic SDS / BDI-II AI analysis with emotion, interest, body, cognition, and risk dimensions.
+- Q9 risk is handled separately and escalates support wording for medium/high risk.
+- Submit and history/detail responses now expose both `result_details.ai_analysis` and top-level `ai_analysis`.
+- Fixed APS JSON internal short name from `TPS` to `APS`.
+- Added fallback defaults for empty assessment category/type metadata.
+
+Verification:
+- Backend py_compile passed for assessment model and router.
+- Model-level checks verified list grouping, SDS detail metadata, AI analysis structure, and Q9 risk handling.
+- Temporary SDS record create/response/cleanup verification passed.
+- Pydantic response model validation passed for assessment list items and SDS response payloads.
+
+Next:
+- Frontend can switch assessment tabs to `display_group` and render AI analysis from `result_details.ai_analysis` or top-level `ai_analysis`.

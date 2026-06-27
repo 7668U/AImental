@@ -56,10 +56,10 @@
               data-record-index="{{recordIndex}}">
             <view class="item-left">
               <view class="item-time">{{record.completed_at_formatted}}</view>
-              <view class="item-score" wx:if="{{record.scale_info.assessment_type === 'scoring'}}">得分：{{record.final_score}}</view>
+              <view class="item-score" wx:if="{{record.scale_info.assessment_type === 'scoring'}}">得分：{{record.display_final_score}}</view>
             </view>
             <view class="item-right">
-              <view class="item-result {{record.scale_info.assessment_type === 'scoring' ? 'item-result-scoring' : ''}}">{{record.result_level}}</view>
+              <view class="item-result {{record.scale_info.assessment_type === 'scoring' ? 'item-result-scoring' : ''}}">{{record.display_result_level}}</view>
               <image class="item-arrow" src="/images/right.png"></image>
             </view>
           </view>

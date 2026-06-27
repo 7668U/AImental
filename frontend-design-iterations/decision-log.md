@@ -62,3 +62,64 @@
 
 - 决定定位交互使用微信官方 `wx.chooseLocation` 地图选点，而不是直接展示经纬度。
 - 当前前端优先显示中文地点名；位置持久化等待后端扩展字段后再接入。
+
+## 2026-06-26 Assessment Grouping And Result AI Analysis
+
+- 决定测评首页从“专业测试 / 趣味测试”两个 tab 改为“心理健康 / 自我人格 / 关系亲密 / 趣味探索”四组 tab。
+- 决定测评分组优先使用后端 `display_group` 字段，并保留前端 `short_name` 本地映射作为兼容兜底。
+- 按用户最新要求，测评结果页不再展示“详细解读”和“给你的建议”两个原始结果卡片。
+- 结果页保留顶部明确等级和分数判断，结果说明区域改为展示 AI 分析卡片组。
+
+## 2026-06-27 Assessment Intro Icon Cover
+
+- 决定问卷介绍页封面不重新生图，直接使用用户提供的 `量表图标/` 素材库。
+- 决定前端统一从 `AImental_frontend/images/assessment/scale-icons/` 读取量表图标，`BDI-II/SDS` 保留别名兼容。
+- 决定将问卷介绍页改为参考图风格：暖白背景、直接展示量表图标、放大的说明卡和橙色胶囊开始按钮。
+- 决定封面页保持一整屏呈现，不做翻动/滚动；标题下方不加横线，量表图标不加外层框。
+
+## 2026-06-26 Assessment Home UI Redesign
+
+- 决定心理测评首页采用“顶部温柔插画 + 四张分类入口卡 + 底部提示横幅”的结构，不再把具体量表宫格作为首屏主体。
+- 决定四个分类卡仍承载心理健康、自我人格、关系亲密、趣味探索四组，并展示对应量表缩写摘要和数量。
+- 决定点击分类卡后在首页展开该组具体测评列表，保留用户直接进入单项测评的能力。
+- 决定本轮完全使用用户提供素材，不调用 imagegen；正式素材落地到 `AImental_frontend/images/assessment/home/`，归档到 `frontend-design-iterations/assets/assessment-home/`。
+
+## 2026-06-27 Assessment Category Pages
+
+- 决定心理测评首页只保留四个分类入口，不再展示底部横幅，也不在首页展开具体量表列表。
+- 决定点击“心理健康 / 自我人格 / 关系亲密 / 趣味探索”后进入独立分类子页面，由子页面展示对应量表。
+- 决定新增 `pkgAssessment/category/category` 作为统一分类子页面，根据 `group` 参数切换顶部插画、标题、副标题和量表卡片样式。
+- 决定前端具体量表图标统一替换为用户提供的 `量表图标/` 素材，落地到 `AImental_frontend/images/assessment/scale-icons/`。
+- 决定为 BDI-II/SDS 保留双文件名兼容，避免后端 short_name 口径变化导致图标丢失。
+
+## 2026-06-27 Assessment Test Question Style
+
+- 决定测评答题页改为用户参考图中的暖白卡片风格：自定义导航、题目大卡、选项白卡、底部固定进度与上一题/下一题按钮。
+- 决定用户提供的跑步小人素材作为答题进度条图标，落地到 `AImental_frontend/images/assessment/test/runner.png`。
+- 决定答题页不得向用户展示 `0分选项` 等内部计分占位；这类数据仅用于提交计分，前端需要拆出真实选项文案展示。
+- 决定答题页装饰统一使用用户提供的星星 PNG，不再使用 CSS 叉形/十字装饰。
+- 本轮仅调整答题页前端视觉与交互壳层，不改变测评题目接口、答案结构和提交接口。
+
+## 2026-06-27 Assessment Result Background
+
+- 决定测评结果页使用用户提供的暖色氛围背景图，落地到 `AImental_frontend/images/assessment/result/result-bg.png`。
+- 背景图作为固定底图铺满页面，结果卡片保持半透明暖白底和轻阴影，优先保证分数、量尺和 AI 分析内容可读。
+
+## 2026-06-27 Assessment Result Section Icons
+
+- 决定用户提供的太阳云朵和 AI 小机器人素材适合作为结果分析板块的低透明度背景水印。
+- 太阳云朵用于当前状态、可以先试试、持续记录等温和陪伴类板块；AI 小机器人用于主要影响维度、可能相关原因、专业支持等分析类板块。
+- 安全提醒板块不加背景图标，保持风险提示的清晰和严肃。
+
+## 2026-06-27 Assessment Result Fallback Analysis
+
+- 决定结果页优先展示后端返回的 `ai_analysis`。
+- 当测评没有 `ai_analysis` 时，前端不展示空的 AI 分析提示，而是用 `result_details`、`result_interpretation`、`result_recommendation` 生成“结果分析”。
+- 分类测评的维度得分放在解读前展示，帮助用户先理解结果来源。
+- 结果页局部覆盖全局 `.container` 的高度和两端分布规则，避免结果卡与分析卡被拉开。
+
+## 2026-06-27 Assessment Go Test Button Asset
+
+- 决定测评首页分类入口和分类页量表入口统一使用高清“去测试”图片按钮，不再使用文字箭头或 CSS 圆形箭头。
+- 用户提供的参考图为白底截图，正式前端资源改为按参考样式重绘的透明 PNG，避免白边和低清晰度问题。
+- 答题页的“下一题”箭头属于问卷内部翻页操作，保持原有按钮，不纳入“去测试”入口素材替换范围。

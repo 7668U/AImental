@@ -1,0 +1,61 @@
+<view class="category-page category-{{groupMeta.key}}" style="padding-top: {{statusBarHeight}}px;">
+  <view class="nav-row">
+    <view class="back-button" bindtap="goBack">
+      <text class="back-symbol">‹</text>
+    </view>
+  </view>
+
+  <view class="hero-section">
+    <image class="hero-art" src="{{groupMeta.hero}}" mode="aspectFit" />
+    <view class="hero-copy">
+      <view class="hero-title">{{groupMeta.title}}</view>
+      <view class="hero-subtitle">{{groupMeta.subtitle}}</view>
+    </view>
+  </view>
+
+  <view class="feedback-container" wx:if="{{isLoading}}">
+    <text>正在加载测评列表...</text>
+  </view>
+
+  <view class="feedback-container" wx:elif="{{isError}}">
+    <text>加载失败，请下拉刷新重试</text>
+  </view>
+
+  <view class="feedback-container" wx:elif="{{scaleList.length === 0}}">
+    <text>该分类下暂无测评</text>
+  </view>
+
+  <view class="scale-list" wx:else>
+    <view
+      wx:for="{{scaleList}}"
+      wx:key="id"
+      class="scale-card {{groupMeta.key === 'interest' ? 'interest-card' : ''}}"
+      bindtap="goToTest"
+      data-id="{{item.id}}"
+    >
+      <image
+        class="scale-icon"
+        src="{{item.iconPath}}"
+        mode="aspectFill"
+        binderror="handleIconError"
+        data-index="{{index}}"
+      />
+      <view class="scale-content">
+        <view class="scale-title-row">
+          <text class="scale-title">{{item.displayTitle}}</text>
+        </view>
+        <text class="scale-desc">{{item.displayDescription}}</text>
+        <text wx:if="{{item.displaySubnote}}" class="scale-subnote">{{item.displaySubnote}}</text>
+      </view>
+      <image class="test-action" src="/images/assessment/common/go-test-button.png" mode="aspectFit" />
+    </view>
+  </view>
+
+  <view wx:if="{{groupMeta.key === 'interest' && scaleList.length > 0}}" class="interest-tip">
+    <view>
+      <text class="tip-line">人生就像开盲盒，</text>
+      <text class="tip-line">每一次探索都是惊喜！</text>
+    </view>
+    <image class="tip-icon" src="/images/assessment/home/group-health.png" mode="aspectFit" />
+  </view>
+</view>

@@ -23,6 +23,7 @@
       "root": "pkgAssessment",
       "name": "assessment",
       "pages": [
+        "category/category",
         "intro/intro",
         "test",
         "result"

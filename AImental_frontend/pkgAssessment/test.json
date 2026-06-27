@@ -2,5 +2,6 @@
   "usingComponents": {},
   "navigationBarTitleText": "心理测评",
   "navigationBarBackgroundColor": "#ffffff",
-  "navigationBarTextStyle": "black"
+  "navigationBarTextStyle": "black",
+  "navigationStyle": "custom"
 }

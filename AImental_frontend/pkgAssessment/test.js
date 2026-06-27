@@ -3,6 +3,63 @@ const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 
 const API_BASE_URL = 'http://127.0.0.1:8000';
 
+function isScorePlaceholder(text) {
+  return /^\s*-?\d+分选项\s*$/.test(String(text || ''));
+}
+
+function splitQuestionTextOptions(text, expectedCount) {
+  const parts = String(text || '')
+    .split(/\s*[\/／]\s*/)
+    .map(part => part.trim())
+    .filter(Boolean);
+
+  if (parts.length < expectedCount) {
+    return null;
+  }
+
+  const optionTexts = parts.slice(-expectedCount);
+  if (optionTexts.some(part => isScorePlaceholder(part))) {
+    return null;
+  }
+
+  return {
+    text: parts.length === expectedCount
+      ? '请选择最符合你最近两周状态的一项'
+      : parts.slice(0, -expectedCount).join(' / '),
+    optionTexts,
+  };
+}
+
+function normalizeQuestion(question, commonChoices) {
+  const normalized = { ...question };
+  let choices = [];
+
+  if (Array.isArray(normalized.options) && normalized.options.length > 0) {
+    choices = normalized.options;
+    delete normalized.options;
+  } else if (Array.isArray(normalized.choices) && normalized.choices.length > 0) {
+    choices = normalized.choices;
+  } else if (Array.isArray(commonChoices)) {
+    choices = commonChoices;
+  }
+
+  choices = choices.map(choice => ({ ...choice }));
+
+  if (choices.length > 0 && choices.every(choice => isScorePlaceholder(choice.text))) {
+    const splitResult = splitQuestionTextOptions(normalized.text, choices.length);
+    if (splitResult) {
+      normalized.text = splitResult.text;
+      choices = choices.map((choice, index) => ({
+        ...choice,
+        text: splitResult.optionTexts[index],
+      }));
+    }
+  }
+
+  normalized.choices = choices;
+  return normalized;
+}
+
 Page({
   data: {
     scaleId: null,
@@ -14,9 +71,12 @@ Page({
     answers: {},
     isSubmitting: false,
     answeredCount: 0,
+    statusBarHeight: 0,
+    navBarHeight: 56,
   },
 
   onLoad(options) {
+    this.setupNavBar();
     if (options.id) {
       this.setData({ scaleId: options.id });
       this.fetchScaleData(options.id);
@@ -24,6 +84,22 @@ Page({
       wx.showToast({ title: '参数错误', icon: 'error' });
       setTimeout(() => wx.navigateBack(), 1500);
     }
+  },
+
+  setupNavBar() {
+    try {
+      const windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
+      const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+      const statusBarHeight = windowInfo.statusBarHeight || 0;
+      const navBarHeight = (menuButtonInfo.top - statusBarHeight) * 2 + menuButtonInfo.height;
+      this.setData({ statusBarHeight, navBarHeight });
+    } catch (err) {
+      this.setData({ statusBarHeight: 24, navBarHeight: 56 });
+    }
+  },
+
+  goBack() {
+    wx.navigateBack();
   },
 
   fetchScaleData(scaleId) {
@@ -48,17 +124,7 @@ Page({
 
 
 
-          // 这个处理逻辑非常棒，它确保了无论是哪种测试，选项数组的字段名都统一为 'choices'
-          questions = questions.map(question => {
-            if (question.options && question.options.length > 0) {
-              question.choices = question.options;
-              delete question.options;
-            }
-            if ((!question.choices || question.choices.length === 0) && commonChoices) {
-              return { ...question, choices: commonChoices };
-            }
-            return question;
-          });
+          questions = questions.map(question => normalizeQuestion(question, commonChoices));
           
           this.setData({
             scaleData: scaleData, // 存储完整数据，供 WXML 判断类型
@@ -148,6 +214,8 @@ Page({
     if (this.data.answers.hasOwnProperty(currentQuestionOrder) && this.data.answers[currentQuestionOrder] !== '') {
       if (this.data.currentIndex < this.data.totalQuestions - 1) {
         this.setData({ currentIndex: this.data.currentIndex + 1 });
+      } else {
+        this.submitAssessment();
       }
     } else {
       wx.showToast({

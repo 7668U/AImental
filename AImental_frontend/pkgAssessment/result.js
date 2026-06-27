@@ -14,6 +14,10 @@ Page({
     pointerPosition: 0,
     pointerLabelAlign: 'center',
     scoreMarkers: [],
+    aiAnalysis: null,
+    aiAnalysisSections: [],
+    analysisTitle: 'AI 分析',
+    analysisIsFallback: false,
   },
 
   onLoad(options) {
@@ -60,12 +64,22 @@ Page({
   
   processAndRender(resultData) {
     console.log("--- 接收到的测评结果数据 (resultData) ---", resultData);
-    this.setData({ result: resultData });
+    const normalizedResult = this.normalizeResultData(resultData);
+    const aiAnalysis = this.normalizeAiAnalysis(resultData);
+    const aiSections = this.buildAiAnalysisSections(aiAnalysis);
+    const fallbackSections = aiSections.length > 0 ? [] : this.buildFallbackAnalysisSections(normalizedResult);
+    this.setData({
+      result: normalizedResult,
+      aiAnalysis: aiAnalysis,
+      aiAnalysisSections: aiSections.length > 0 ? aiSections : fallbackSections,
+      analysisTitle: aiSections.length > 0 ? 'AI 分析' : '结果分析',
+      analysisIsFallback: aiSections.length === 0
+    });
     
-    const type = resultData?.scale_details?.assessment_type;
+    const type = normalizedResult?.scale_details?.assessment_type;
 
     if (type === 'scoring') {
-      const jsonData = resultData.scale_details.json_data;
+      const jsonData = normalizedResult.scale_details.json_data;
       const interpretations = jsonData.interpretations || [];
       
       if (interpretations.length === 0) {
@@ -73,7 +87,7 @@ Page({
         return;
       }
 
-      const userScore = resultData.final_score;
+      const userScore = normalizedResult.final_score;
       
       const minPossibleScore = interpretations[0].min_score;
       const maxPossibleScore = interpretations[interpretations.length - 1].max_score;
@@ -101,7 +115,9 @@ const scoreSegments = interpretations.map(interp => {
   };
 });
 
-      const pointerPosition = ((userScore - minPossibleScore) / totalScorableRange) * 100;
+      const numericUserScore = Number(userScore);
+      const safeUserScore = Number.isFinite(numericUserScore) ? numericUserScore : minPossibleScore;
+      const pointerPosition = this.clampPercent(((safeUserScore - minPossibleScore) / totalScorableRange) * 100);
 
       let pointerLabelAlign = 'center';
       if (pointerPosition > 85) pointerLabelAlign = 'left';
@@ -133,6 +149,229 @@ const scoreSegments = interpretations.map(interp => {
       console.error("无法识别的结果类型", resultData);
       this.showErrorAndGoBack('结果类型无法识别');
     }
+  },
+
+  clampPercent(value) {
+    if (!Number.isFinite(value)) return 0;
+    return Math.max(0, Math.min(100, value));
+  },
+
+  normalizeResultData(resultData) {
+    if (!resultData) return resultData;
+
+    const normalized = { ...resultData };
+    const isEmptyLevel = normalized.result_level === null
+      || normalized.result_level === undefined
+      || String(normalized.result_level).trim() === ''
+      || String(normalized.result_level).trim().toLowerCase() === 'null';
+
+    if (isEmptyLevel) {
+      normalized.result_level = '结果待确认';
+    }
+
+    if (normalized.final_score !== null && normalized.final_score !== undefined) {
+      const numericScore = Number(normalized.final_score);
+      normalized.final_score = Number.isFinite(numericScore)
+        ? Math.round(numericScore * 100) / 100
+        : normalized.final_score;
+    }
+
+    return normalized;
+  },
+
+  normalizeAiAnalysis(resultData) {
+    const detailsAnalysis = resultData?.result_details?.ai_analysis;
+    return resultData?.ai_analysis || detailsAnalysis || null;
+  },
+
+  buildAiAnalysisSections(aiAnalysis) {
+    if (!aiAnalysis) return [];
+
+    const sections = [];
+
+    if (aiAnalysis.state_summary) {
+      sections.push({
+        key: 'state',
+        title: '当前状态',
+        type: 'text',
+        bgIcon: '/images/assessment/result/section-sun.png',
+        text: aiAnalysis.state_summary
+      });
+    }
+
+    if (Array.isArray(aiAnalysis.dimensions) && aiAnalysis.dimensions.length > 0) {
+      sections.push({
+        key: 'dimensions',
+        title: '主要影响维度',
+        type: 'dimensions',
+        bgIcon: '/images/assessment/result/section-ai.png',
+        dimensions: aiAnalysis.dimensions.map(item => ({
+          ...item,
+          evidenceText: Array.isArray(item.evidence) ? item.evidence.join('、') : ''
+        }))
+      });
+    }
+
+    if (Array.isArray(aiAnalysis.possible_causes) && aiAnalysis.possible_causes.length > 0) {
+      sections.push({
+        key: 'causes',
+        title: '可能相关原因',
+        type: 'list',
+        bgIcon: '/images/assessment/result/section-ai.png',
+        list: aiAnalysis.possible_causes
+      });
+    }
+
+    if (Array.isArray(aiAnalysis.small_actions) && aiAnalysis.small_actions.length > 0) {
+      sections.push({
+        key: 'actions',
+        title: '可以先试试',
+        type: 'list',
+        bgIcon: '/images/assessment/result/section-sun.png',
+        list: aiAnalysis.small_actions
+      });
+    }
+
+    const support = aiAnalysis.professional_support;
+    if (support && support.text) {
+      sections.push({
+        key: 'support',
+        title: '专业支持',
+        type: 'support',
+        bgIcon: '/images/assessment/result/section-ai.png',
+        recommended: !!support.recommended,
+        urgency: support.urgency || '',
+        text: support.text
+      });
+    }
+
+    const recording = aiAnalysis.emotion_recording;
+    if (recording && recording.text) {
+      sections.push({
+        key: 'recording',
+        title: '持续记录',
+        type: 'recording',
+        bgIcon: '/images/assessment/result/section-sun.png',
+        recommended: !!recording.recommended,
+        focusText: Array.isArray(recording.focus) ? recording.focus.join('、') : '',
+        text: recording.text
+      });
+    }
+
+    const riskNote = aiAnalysis.risk_note;
+    if (riskNote && riskNote.triggered && riskNote.text) {
+      sections.unshift({
+        key: 'risk',
+        title: '安全提醒',
+        type: 'risk',
+        bgIcon: '',
+        level: riskNote.level || '',
+        text: riskNote.text
+      });
+    }
+
+    return sections;
+  },
+
+  buildFallbackAnalysisSections(resultData) {
+    if (!resultData) return [];
+
+    const sections = [];
+    const interpretation = typeof resultData.result_interpretation === 'string'
+      ? resultData.result_interpretation.trim()
+      : '';
+    const recommendation = typeof resultData.result_recommendation === 'string'
+      ? resultData.result_recommendation.trim()
+      : '';
+    const detailItems = this.buildResultDetailItems(resultData.result_details);
+
+    if (detailItems.length > 0) {
+      sections.push({
+        key: 'details',
+        title: '维度得分',
+        type: 'details',
+        bgIcon: '/images/assessment/result/section-ai.png',
+        detailItems: detailItems
+      });
+    }
+
+    if (interpretation) {
+      sections.push({
+        key: 'interpretation',
+        title: '当前状态',
+        type: 'text',
+        bgIcon: '/images/assessment/result/section-ai.png',
+        text: interpretation
+      });
+    }
+
+    if (recommendation) {
+      sections.push({
+        key: 'recommendation',
+        title: '可以先试试',
+        type: 'text',
+        bgIcon: '/images/assessment/result/section-sun.png',
+        text: recommendation
+      });
+    }
+
+    if (sections.length === 0) {
+      const level = typeof resultData.result_level === 'string' ? resultData.result_level.trim() : '';
+      const score = resultData.final_score ?? resultData.raw_score;
+      sections.push({
+        key: 'generated',
+        title: '结果说明',
+        type: 'text',
+        bgIcon: '/images/assessment/result/section-sun.png',
+        text: level && level !== '结果待确认'
+          ? `本次结果为“${level}”。你可以先把它作为一次自我观察，结合最近的真实状态继续留意变化。`
+          : `本次结果已生成，得分为 ${score ?? '当前分数'}。暂未匹配到完整解读，请稍后从历史测评中再次查看。`
+      });
+    }
+
+    return sections;
+  },
+
+  buildResultDetailItems(resultDetails) {
+    if (!resultDetails || Array.isArray(resultDetails) || typeof resultDetails !== 'object') {
+      return [];
+    }
+
+    const hiddenKeys = {
+      ai_analysis: true,
+      image_url: true,
+      college: true,
+      college_motto: true,
+      title: true,
+      type_code: true,
+      condition: true
+    };
+    const labelMap = {
+      anxiety_score: '焦虑得分',
+      avoidance_score: '回避得分'
+    };
+
+    return Object.keys(resultDetails)
+      .filter(key => !hiddenKeys[key])
+      .map(key => {
+        const value = resultDetails[key];
+        if (value === null || value === undefined || typeof value === 'object') {
+          return null;
+        }
+
+        const displayValue = typeof value === 'number'
+          ? String(Math.round(value * 100) / 100)
+          : String(value).trim();
+
+        if (!displayValue) return null;
+
+        return {
+          label: labelMap[key] || key,
+          value: displayValue
+        };
+      })
+      .filter(Boolean)
+      .slice(0, 6);
   },
 
   handleConfirm() {

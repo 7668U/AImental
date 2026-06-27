@@ -1,68 +1,87 @@
-<view class="container">
+<view class="test-page">
+  <view class="warm-bg warm-bg-top"></view>
+  <view class="warm-bg warm-bg-bottom"></view>
+  <view class="bg-dot bg-dot-one"></view>
+  <view class="bg-dot bg-dot-two"></view>
+  <image class="sparkle-img bg-sparkle-one" src="/images/assessment/test/sparkle.png" mode="aspectFit"></image>
+
+  <view class="test-nav" style="padding-top: {{statusBarHeight}}px; height: {{navBarHeight}}px;">
+    <view class="nav-back" bindtap="goBack">
+      <text class="nav-back-icon">‹</text>
+    </view>
+    <view class="nav-title">心理测评</view>
+  </view>
+
   <view class="loading-container" wx:if="{{!scaleData}}">
     <text>正在为您加载题目...</text>
   </view>
 
-  <view class="main-content" wx:else>
+  <view class="main-content" wx:else style="padding-top: calc({{statusBarHeight + navBarHeight}}px + 30rpx);">
     <swiper class="question-swiper" current="{{currentIndex}}" bindchange="onSwiperChange" duration="300">
       <block wx:for="{{questions}}" wx:key="order" wx:for-index="index">
         <swiper-item>
-          <view class="swiper-item-content">
-            <view class="question-text">{{item.order}}. {{item.text}}</view>
-            
-            <view class="options-container">
-              <radio-group class="option-group" bindchange="onRadioChange" data-order="{{item.order}}">
-                
-                <block wx:if="{{scaleData.assessment_type === 'scoring'}}">
-                  <label class="option-row {{answers[item.order] == option.score ? 'selected' : ''}}" wx:for="{{item.choices}}" wx:key="score" wx:for-item="option">
-                    <view class="option-dot-wrapper">
+          <scroll-view class="swiper-scroll" scroll-y="true" enable-flex="true">
+            <view class="swiper-item-content">
+              <view class="question-card">
+                <view class="question-index-row">
+                  <view class="index-line"></view>
+                  <view class="question-index">第 {{item.order}} 题</view>
+                  <view class="index-line"></view>
+                </view>
+                <image class="sparkle-img question-sparkle-one" src="/images/assessment/test/sparkle.png" mode="aspectFit"></image>
+                <image class="sparkle-img question-sparkle-two" src="/images/assessment/test/sparkle.png" mode="aspectFit"></image>
+                <view class="question-text">{{item.order}}. {{item.text}}</view>
+              </view>
+
+              <view class="options-panel">
+                <radio-group class="option-group" bindchange="onRadioChange" data-order="{{item.order}}">
+                  <block wx:if="{{scaleData.assessment_type === 'scoring'}}">
+                    <label class="option-row {{answers[item.order] == option.score ? 'selected' : ''}}" wx:for="{{item.choices}}" wx:key="score" wx:for-item="option">
                       <view class="option-dot {{answers[item.order] == option.score ? 'selected' : ''}}"></view>
-                    </view>
-                    <view class="option-text">{{option.text}}</view>
-                    <radio class="option-radio-hidden" value="{{option.score}}" checked="{{answers[item.order] == option.score}}"></radio>
-                  </label>
-                </block>
+                      <view class="option-text">{{option.text}}</view>
+                      <image class="sparkle-img option-sparkle" src="/images/assessment/test/sparkle.png" mode="aspectFit"></image>
+                      <radio class="option-radio-hidden" value="{{option.score}}" checked="{{answers[item.order] == option.score}}"></radio>
+                    </label>
+                  </block>
 
-                <block wx:else>
-                   <label class="option-row {{answers[item.order] == option.id ? 'selected' : ''}}" wx:for="{{item.choices}}" wx:key="id" wx:for-item="option">
-                    <view class="option-dot-wrapper">
+                  <block wx:else>
+                    <label class="option-row {{answers[item.order] == option.id ? 'selected' : ''}}" wx:for="{{item.choices}}" wx:key="id" wx:for-item="option">
                       <view class="option-dot {{answers[item.order] == option.id ? 'selected' : ''}}"></view>
-                    </view>
-                    <view class="option-text">{{option.text}}</view>
-                    <radio class="option-radio-hidden" value="{{option.id}}" checked="{{answers[item.order] == option.id}}"></radio>
-                  </label>
-                </block>
-
-              </radio-group>
-            </view>
-
-            <view class="in-page-submit-container" wx:if="{{index === totalQuestions - 1}}">
-              <view 
-                class="submit-btn-view {{ (isSubmitting || answeredCount < totalQuestions) ? 'disabled' : '' }}"
-                bindtap="submitAssessment">
-                查看我的结果
+                      <view class="option-text">{{option.text}}</view>
+                      <image class="sparkle-img option-sparkle" src="/images/assessment/test/sparkle.png" mode="aspectFit"></image>
+                      <radio class="option-radio-hidden" value="{{option.id}}" checked="{{answers[item.order] == option.id}}"></radio>
+                    </label>
+                  </block>
+                </radio-group>
               </view>
             </view>
-
-          </view>
+          </scroll-view>
         </swiper-item>
       </block>
     </swiper>
-    
-    <view class="footer">
-      <view class="progress-bar-container">
-        <view class="progress-wrapper">
-          <view class="progress-bar-bg">
-            <view class="progress-bar-fg" style="width: {{progress}}%;"></view>
+
+    <view class="footer-card">
+      <view class="progress-row">
+        <view class="progress-track-wrap">
+          <view class="progress-track">
+            <view class="progress-fill" style="width: {{progress}}%;"></view>
           </view>
-          <image class="runner-icon" src="/images/assessment/run.png" style="left: {{progress}}%;"></image>
+          <image class="runner-icon" src="/images/assessment/test/runner.png" style="left: {{progress}}%;"></image>
         </view>
         <view class="progress-text">{{answeredCount}}/{{totalQuestions}}</view>
       </view>
-      
+
       <view class="action-buttons">
-        <image class="nav-icon" src="/images/left.png" bindtap="prevQuestion" />
-        <image class="nav-icon" src="/images/right.png" bindtap="nextQuestion" />
+        <view class="prev-btn {{currentIndex === 0 ? 'disabled' : ''}}" bindtap="prevQuestion">
+          <text class="btn-chevron">‹</text>
+          <text>上一题</text>
+        </view>
+        <view class="next-btn {{isSubmitting ? 'disabled' : ''}}" bindtap="nextQuestion">
+          <image class="sparkle-img btn-sparkle-one" src="/images/assessment/test/sparkle.png" mode="aspectFit"></image>
+          <text>{{currentIndex === totalQuestions - 1 ? '查看结果' : '下一题'}}</text>
+          <text class="btn-chevron">›</text>
+          <image class="sparkle-img btn-sparkle-two" src="/images/assessment/test/sparkle.png" mode="aspectFit"></image>
+        </view>
       </view>
     </view>
   </view>

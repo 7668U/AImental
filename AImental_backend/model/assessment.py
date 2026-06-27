@@ -4,7 +4,7 @@ import uuid
 import json
 import os
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Set, Tuple
 
 from peewee import Model, CharField, IntegerField, DateTimeField, TextField, ForeignKeyField, FloatField
 from pydantic import BaseModel, Field
@@ -14,6 +14,112 @@ from .user import User  # 假设 User 模型可以从 .user 导入
 
 # --- 静态配置 ---
 ASSESSMENT_DATA_DIR = "assessment_data/"
+
+ASSESSMENT_DISPLAY_GROUPS = {
+    "SDS": ("心理健康", 1, 1),
+    "SAS": ("心理健康", 1, 2),
+    "BRMS": ("心理健康", 1, 3),
+    "SAD": ("心理健康", 1, 4),
+    "IAS": ("心理健康", 1, 5),
+    "Lonely": ("心理健康", 1, 6),
+    "SES": ("自我人格", 2, 1),
+    "APS": ("自我人格", 2, 2),
+    "CLT": ("自我人格", 2, 3),
+    "mbti-93": ("自我人格", 2, 4),
+    "AAS": ("亲密关系", 3, 1),
+    "ECR": ("亲密关系", 3, 2),
+    "LAMT": ("亲密关系", 3, 3),
+    "LDCT": ("亲密关系", 3, 4),
+    "TPS": ("趣味探索", 4, 1),
+    "ICI": ("趣味探索", 4, 2),
+    "REAL-MAJOR-V1": ("趣味探索", 4, 3),
+    "AGLT": ("趣味探索", 4, 4),
+}
+
+BDI_DIMENSIONS = {
+    "emotion": {
+        "label": "情绪",
+        "questions": [1, 2, 10, 11],
+        "evidence_labels": {
+            1: "难过",
+            2: "对未来悲观",
+            10: "哭泣变化",
+            11: "烦躁",
+        },
+        "stable": "情绪低落、无望感和烦躁目前不明显。",
+        "mild": "情绪有一些波动，可能偶尔低落、悲观或更容易烦躁。",
+        "moderate": "低落、悲观或烦躁已经比较明显，可能正在影响日常状态。",
+        "high": "情绪困扰较重，低落、无望感或烦躁需要被认真关注。",
+    },
+    "interest": {
+        "label": "兴趣",
+        "questions": [4, 12, 20],
+        "evidence_labels": {
+            4: "日常兴趣下降",
+            12: "对人与事的兴趣下降",
+            20: "亲密或愉悦感相关兴趣变化",
+        },
+        "stable": "对日常事物和人际连接的兴趣整体保持得还可以。",
+        "mild": "兴趣和连接感有一些下降，适合继续观察。",
+        "moderate": "兴趣下降较明显，可能让日常行动和人际连接变得更费力。",
+        "high": "兴趣和愉悦感受困扰较重，可能明显削弱生活动力。",
+    },
+    "body": {
+        "label": "身体",
+        "questions": [15, 16, 17, 18, 19],
+        "evidence_labels": {
+            15: "精力变化",
+            16: "睡眠变化",
+            17: "食欲变化",
+            18: "体重变化",
+            19: "健康担忧",
+        },
+        "stable": "精力、睡眠、食欲和身体担忧目前整体较稳定。",
+        "mild": "身体状态有些波动，可能和精力、睡眠或食欲有关。",
+        "moderate": "身体相关困扰比较明显，可能会放大情绪负担。",
+        "high": "身体层面的压力较重，精力、睡眠、食欲或健康担忧需要认真照顾。",
+    },
+    "cognition": {
+        "label": "认知",
+        "questions": [3, 5, 6, 7, 8, 13, 14, 21],
+        "evidence_labels": {
+            3: "失败感",
+            5: "罪恶感",
+            6: "受惩罚感",
+            7: "对自己失望",
+            8: "自责",
+            13: "决策困难",
+            14: "无价值感",
+            21: "注意力变化",
+        },
+        "stable": "自我评价、决策和注意力相关困扰目前不突出。",
+        "mild": "自责、自我评价或专注力有一些波动，建议温和观察。",
+        "moderate": "自责、自我价值感或决策专注困难比较明显，可能正在影响行动感。",
+        "high": "认知层面的压力较重，自责、无价值感或专注困难需要被认真对待。",
+    },
+}
+
+
+def get_assessment_display_meta(short_name: str) -> Dict[str, Any]:
+    group, group_order, display_order = ASSESSMENT_DISPLAY_GROUPS.get(
+        short_name,
+        ("其他", 99, 99),
+    )
+    return {
+        "display_group": group,
+        "display_group_order": group_order,
+        "display_order": display_order,
+    }
+
+
+def _level_from_average(score: float) -> str:
+    if score < 0.75:
+        return "相对稳定"
+    if score < 1.5:
+        return "有些波动"
+    if score < 2.25:
+        return "需要关注"
+    return "明显承压"
 
 # ---------------------------------------------------
 # 1. Peewee 数据模型 (数据库表结构)
@@ -34,6 +140,18 @@ class Scale(Model):
     class Meta:
         database = assessment_db
         table_name = 'scales'
+
+    @property
+    def display_group(self) -> str:
+        return get_assessment_display_meta(self.short_name)["display_group"]
+
+    @property
+    def display_group_order(self) -> int:
+        return get_assessment_display_meta(self.short_name)["display_group_order"]
+
+    @property
+    def display_order(self) -> int:
+        return get_assessment_display_meta(self.short_name)["display_order"]
 
 class UserAssessment(Model):
     """用户测评记录表"""
@@ -66,6 +184,9 @@ class ScaleInfoResponse(BaseModel):
     instructions: Optional[str] = None  # <--- 在这里添加 instructions 字段
     category: str
     assessment_type: str
+    display_group: Optional[str] = None
+    display_group_order: Optional[int] = None
+    display_order: Optional[int] = None
     class Config:
         from_attributes = True
 
@@ -87,6 +208,7 @@ class UserAssessmentResponse(BaseModel):
     result_interpretation: Optional[str] = None
     result_recommendation: Optional[str] = None
     result_details: Optional[Dict[str, Any]] = None
+    ai_analysis: Optional[Dict[str, Any]] = None
     completed_at: datetime
     scale_info: Optional[ScaleInfoResponse] = None
     scale_details: Optional[Dict[str, Any]] = None
@@ -124,8 +246,26 @@ class AssessmentTables:
                 # 2. 查询数据库，检查该 short_name 是否已存在
                 # Peewee的 .get_or_none() 方法非常适合这个场景
                 if Scale.get_or_none(Scale.short_name == short_name_from_file):
-                    # 3. 如果已存在，打印信息并跳过
-                    print(f"ℹ️ Scale '{short_name_from_file}' already exists. Skipping file '{filename}'.")
+                    print(f"ℹ️ Scale '{short_name_from_file}' already exists. Refreshing metadata from '{filename}'.")
+                    filepath = os.path.join(ASSESSMENT_DATA_DIR, filename)
+                    try:
+                        with open(filepath, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                            scale_info = data.get('scale_info', {})
+                            (
+                                Scale.update(
+                                    name=scale_info.get('name', 'N/A'),
+                                    description=scale_info.get('description', ''),
+                                    category=scale_info.get('category') or '专业测试',
+                                    assessment_type=scale_info.get('assessment_type') or 'scoring',
+                                    json_data=json.dumps(data, ensure_ascii=False),
+                                    updated_at=datetime.now()
+                                )
+                                .where(Scale.short_name == short_name_from_file)
+                                .execute()
+                            )
+                    except Exception as e:
+                        print(f"❌ Error refreshing file {filename}: {e}")
                     continue
                 
                 # 4. 如果不存在，执行加载和创建逻辑
@@ -142,8 +282,8 @@ class AssessmentTables:
                             short_name=short_name_from_file,
                             name=scale_info.get('name', 'N/A'),
                             description=scale_info.get('description', ''),
-                            category=scale_info.get('category', '专业测试'),
-                            assessment_type=scale_info.get('assessment_type', 'scoring'),
+                            category=scale_info.get('category') or '专业测试',
+                            assessment_type=scale_info.get('assessment_type') or 'scoring',
                             json_data=json.dumps(data, ensure_ascii=False)
                         )
                         print(f"✅ Scale '{short_name_from_file}' loaded successfully.")
@@ -174,13 +314,15 @@ class AssessmentTables:
         scale_info = full_data.get('scale_info', {})
 
         # 组装前端需要的最终数据结构
+        display_meta = get_assessment_display_meta(scale.short_name)
         response_data = {
             "id": scale.id,
             "short_name": scale.short_name,
             "name": scale.name,
             "description": scale.description,
-            "category": scale.category,
-            "assessment_type": scale.assessment_type,
+            "category": scale.category or "专业测试",
+            "assessment_type": scale.assessment_type or "scoring",
+            **display_meta,
             # 从解析后的JSON中提取 instructions
             "instructions": scale_info.get('instructions'),
             # 同时也可以把题目和选项带上，供测试页面使用
@@ -189,9 +331,10 @@ class AssessmentTables:
         }
         return response_data
     def get_all_scales(self) -> List[Scale]:
-        return list(Scale.select(
+        scales = list(Scale.select(
             Scale.id, Scale.short_name, Scale.name, Scale.description, Scale.category, Scale.assessment_type
         ))
+        return sorted(scales, key=lambda scale: (scale.display_group_order, scale.display_order, scale.name))
         
     def get_scale_by_id(self, scale_id: str) -> Optional[Scale]:
         return Scale.get_or_none(Scale.id == scale_id)
@@ -200,10 +343,15 @@ class AssessmentTables:
         """【修改版】处理打分测试的计分逻辑，支持反向计分和谎言量表"""
         rules = scale_data.get('scale_info', {}).get('scoring_rules', {})
         interpretations = scale_data.get('interpretations', [])
+        questions = scale_data.get('questions', [])
+        common_choice_scores = self._extract_choice_scores(scale_data.get('choices', []))
+        default_score_bounds = self._get_score_bounds(common_choice_scores)
+        question_score_bounds = self._build_question_score_bounds(questions, default_score_bounds)
         
         # 1. 获取计分规则
         # 兼容 "reverse_scoring_items" 和 "reverse_scored_items" 两种可能的拼写
         reverse_items = set(rules.get('reverse_scoring_items', []) + rules.get('reverse_scored_items', []))
+        reverse_items.update(self._get_question_level_reverse_items(questions))
         
         # 新增：获取谎言量表题目，如果JSON中定义了的话
         lie_scale_items = set(rules.get('lie_scale_items', []))
@@ -223,10 +371,8 @@ class AssessmentTables:
 
             # 4. 应用反向计分逻辑
             if q_order in reverse_items:
-                # 对于SEI的 "像我"(1分) / "不像我"(0分) 体系，反向计分就是用最高分1减去得分
-                # "像我"(得1分) -> 1 - 1 = 0分
-                # "不像我"(得0分) -> 1 - 0 = 1分
-                raw_score += (1 - score)
+                min_score, max_score = question_score_bounds.get(q_order, default_score_bounds)
+                raw_score += (min_score + max_score - score)
             else:
                 # 正常计分
                 raw_score += score
@@ -247,6 +393,262 @@ class AssessmentTables:
                 break
                 
         return result
+
+    def _extract_choice_scores(self, choices: List[Dict[str, Any]]) -> List[float]:
+        scores = []
+        for choice in choices or []:
+            try:
+                scores.append(float(choice.get("score")))
+            except (TypeError, ValueError):
+                continue
+        return scores
+
+    def _get_score_bounds(self, scores: List[float]) -> Tuple[float, float]:
+        if not scores:
+            return (0, 1)
+        return (min(scores), max(scores))
+
+    def _build_question_score_bounds(
+        self,
+        questions: List[Dict[str, Any]],
+        default_bounds: Tuple[float, float],
+    ) -> Dict[int, Tuple[float, float]]:
+        bounds = {}
+        for question in questions or []:
+            try:
+                order = int(question.get("order"))
+            except (TypeError, ValueError):
+                continue
+
+            question_choices = question.get("choices") or question.get("options") or []
+            question_scores = self._extract_choice_scores(question_choices)
+            bounds[order] = self._get_score_bounds(question_scores) if question_scores else default_bounds
+        return bounds
+
+    def _get_question_level_reverse_items(self, questions: List[Dict[str, Any]]) -> Set[int]:
+        reverse_items = set()
+        for question in questions or []:
+            if not (question.get("is_reverse_scored") or question.get("reverse_scored")):
+                continue
+            try:
+                reverse_items.add(int(question.get("order")))
+            except (TypeError, ValueError):
+                continue
+        return reverse_items
+
+    def _scale_uses_reverse_scoring(self, scale_data: Dict[str, Any]) -> bool:
+        rules = scale_data.get('scale_info', {}).get('scoring_rules', {})
+        if rules.get('reverse_scoring_items') or rules.get('reverse_scored_items'):
+            return True
+        return bool(self._get_question_level_reverse_items(scale_data.get('questions', [])))
+
+    def ensure_scoring_result_for_record(self, record: UserAssessment) -> None:
+        """Refresh historical scoring records that may have been saved before scoring fixes."""
+        if not record or not record.scale or record.scale.assessment_type != "scoring":
+            return
+
+        try:
+            scale_data = json.loads(record.scale.json_data)
+        except json.JSONDecodeError:
+            return
+
+        should_refresh = record.result_level is None or self._scale_uses_reverse_scoring(scale_data)
+        if not should_refresh:
+            return
+
+        try:
+            answers = json.loads(record.answers) if record.answers else {}
+        except json.JSONDecodeError:
+            return
+
+        result_data = self._calculate_scoring_result(answers, scale_data)
+        result_data = self._attach_ai_analysis(record.scale.short_name, answers, result_data)
+
+        has_changes = (
+            record.raw_score != result_data.get("raw_score")
+            or record.final_score != result_data.get("final_score")
+            or record.result_level != result_data.get("result_level")
+            or record.result_interpretation != result_data.get("result_interpretation")
+            or record.result_recommendation != result_data.get("result_recommendation")
+        )
+
+        next_details = result_data.get("result_details")
+        next_details_json = json.dumps(next_details, ensure_ascii=False) if next_details else None
+        if record.result_details != next_details_json:
+            has_changes = True
+
+        if not has_changes:
+            return
+
+        record.raw_score = result_data.get("raw_score")
+        record.final_score = result_data.get("final_score")
+        record.result_level = result_data.get("result_level")
+        record.result_interpretation = result_data.get("result_interpretation")
+        record.result_recommendation = result_data.get("result_recommendation")
+        record.result_details = next_details_json
+        record.save()
+
+    def _build_bdi_ai_analysis(
+        self,
+        request_answers: Dict[str, Any],
+        result_level: Optional[str],
+        final_score: Optional[float],
+    ) -> Dict[str, Any]:
+        numeric_answers: Dict[int, float] = {}
+        for q_order_str, score_str in request_answers.items():
+            try:
+                numeric_answers[int(q_order_str)] = float(score_str)
+            except (ValueError, TypeError):
+                continue
+
+        dimensions = []
+        elevated_labels = []
+        for key, config in BDI_DIMENSIONS.items():
+            question_ids = config["questions"]
+            scores = [numeric_answers.get(question_id, 0) for question_id in question_ids]
+            average_score = sum(scores) / len(question_ids) if question_ids else 0
+            level = _level_from_average(average_score)
+
+            if level == "相对稳定":
+                summary = config["stable"]
+            elif level == "有些波动":
+                summary = config["mild"]
+            elif level == "需要关注":
+                summary = config["moderate"]
+            else:
+                summary = config["high"]
+
+            evidence = [
+                config["evidence_labels"][question_id]
+                for question_id in question_ids
+                if numeric_answers.get(question_id, 0) > 0
+            ][:4]
+
+            if level in {"需要关注", "明显承压"}:
+                elevated_labels.append(config["label"])
+
+            dimensions.append({
+                "key": key,
+                "label": config["label"],
+                "level": level,
+                "score": round(average_score, 2),
+                "summary": summary,
+                "evidence": evidence,
+            })
+
+        q9_score = numeric_answers.get(9, 0)
+        risk_dimension_level = _level_from_average(q9_score)
+        if q9_score >= 2:
+            risk_summary = "你在自伤或自杀念头题项上选择了较高分值，这需要被立即认真对待。"
+        elif q9_score == 1:
+            risk_summary = "你提到过相关念头，虽然不一定代表会付诸行动，但很值得尽快获得支持。"
+        else:
+            risk_summary = "当前未从 Q9 看到明显自伤或自杀念头信号。"
+
+        dimensions.append({
+            "key": "risk",
+            "label": "风险",
+            "level": risk_dimension_level,
+            "score": q9_score,
+            "summary": risk_summary,
+            "evidence": ["自伤或自杀念头"] if q9_score > 0 else [],
+        })
+
+        if q9_score >= 2:
+            professional_support = {
+                "recommended": True,
+                "urgency": "urgent",
+                "text": "建议尽快联系身边可信任的人、心理咨询师或精神科医生；如果你担心自己可能会伤害自己，请立即联系当地紧急支持资源或急救服务。",
+            }
+            risk_note = {
+                "triggered": True,
+                "level": "high",
+                "text": "这份结果提示需要优先保障安全。请不要独自承受，尽快告诉一个可信任的人，并寻求专业或紧急支持。",
+            }
+        elif q9_score == 1:
+            professional_support = {
+                "recommended": True,
+                "urgency": "suggested",
+                "text": "建议尽快找可信任的人聊聊，也建议考虑联系心理咨询师或精神科医生获得支持。",
+            }
+            risk_note = {
+                "triggered": True,
+                "level": "medium",
+                "text": "你提到过相关念头，这已经值得被认真照顾。请优先让自己处在有人支持、相对安全的环境中。",
+            }
+        else:
+            professional_support = {
+                "recommended": bool(final_score is not None and final_score >= 20),
+                "urgency": "suggested" if final_score is not None and final_score >= 20 else "optional",
+                "text": "如果这种状态持续两周以上，或明显影响学习、工作、人际和生活，建议联系心理咨询师或精神科医生。",
+            }
+            risk_note = {
+                "triggered": False,
+                "level": "none",
+                "text": "",
+            }
+
+        if q9_score >= 2:
+            state_summary = f"你的结果为{result_level or '当前状态'}，并出现需要优先关注的安全风险信号，请先确保身边有人支持。"
+        elif q9_score == 1:
+            state_summary = f"你的结果为{result_level or '当前状态'}，同时出现过相关风险念头，建议尽快找可信任的人或专业人士聊聊。"
+        elif elevated_labels:
+            state_summary = f"你的结果为{result_level or '当前状态'}，主要需要关注{ '、'.join(elevated_labels[:3]) }相关变化。"
+        else:
+            state_summary = f"你的结果为{result_level or '当前状态'}，目前各维度整体较平稳，仍可以继续观察近期变化。"
+
+        possible_causes = [
+            "近期可能存在持续压力、恢复不足或生活节奏被打乱的情况。",
+            "当情绪、身体和自我评价同时承压时，低落感可能会被进一步放大。",
+        ]
+        if any(item["key"] == "body" and item["level"] in {"需要关注", "明显承压"} for item in dimensions):
+            possible_causes.append("睡眠、精力、食欲或身体担忧的变化，可能正在影响你的情绪恢复。")
+        if any(item["key"] == "interest" and item["level"] in {"需要关注", "明显承压"} for item in dimensions):
+            possible_causes.append("兴趣下降和与他人连接减少，可能让你更难从日常生活中获得支持感。")
+
+        small_actions = [
+            "今天先完成一件 10 分钟内能做完的小事，给自己一个可完成的起点。",
+            "连续 3 天记录心情、睡眠、精力和触发事件，观察状态是否有规律。",
+            "找一个可信任的人说一句真实近况，不需要一次讲完所有事情。",
+        ]
+        if q9_score > 0:
+            small_actions.insert(0, "先把自己移动到更安全、有人陪伴或更容易求助的环境里。")
+
+        return {
+            "state_summary": state_summary,
+            "dimensions": dimensions,
+            "possible_causes": possible_causes,
+            "small_actions": small_actions,
+            "professional_support": professional_support,
+            "emotion_recording": {
+                "recommended": True,
+                "focus": ["心情", "睡眠", "精力", "触发事件"],
+                "text": "建议接下来持续记录情绪，重点观察低落、睡眠、精力和触发事件的变化。",
+            },
+            "risk_note": risk_note,
+        }
+
+    def _attach_ai_analysis(
+        self,
+        scale_short_name: str,
+        request_answers: Dict[str, Any],
+        result_data: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        if scale_short_name != "SDS":
+            return result_data
+
+        ai_analysis = self._build_bdi_ai_analysis(
+            request_answers=request_answers,
+            result_level=result_data.get("result_level"),
+            final_score=result_data.get("final_score"),
+        )
+        result_details = result_data.get("result_details")
+        if not isinstance(result_details, dict):
+            result_details = {}
+        result_details["ai_analysis"] = ai_analysis
+        result_data["result_details"] = result_details
+        result_data["ai_analysis"] = ai_analysis
+        return result_data
 
 
     def _calculate_categorical_result(self, request_answers: Dict[str, str], scale_data: Dict) -> Dict:
@@ -453,6 +855,8 @@ class AssessmentTables:
             result_data = self._calculate_categorical_result(request_data.answers, scale_data)
         else:
             raise ValueError(f"Unsupported assessment type: {scale.assessment_type}")
+
+        result_data = self._attach_ai_analysis(scale.short_name, request_data.answers, result_data)
         
         user_assessment = UserAssessment.create(
             user=user_id,
@@ -469,11 +873,48 @@ class AssessmentTables:
 
     def get_assessments_by_user(self, user_id: str) -> List[UserAssessment]:
         """获取一个用户的所有测评历史记录"""
-        return list(UserAssessment.select().where(UserAssessment.user == user_id).order_by(UserAssessment.completed_at.desc()))
+        records = list(UserAssessment.select().where(UserAssessment.user == user_id).order_by(UserAssessment.completed_at.desc()))
+        for record in records:
+            self.ensure_scoring_result_for_record(record)
+        return records
 
     def get_assessment_by_id(self, record_id: str) -> Optional[UserAssessment]:
         """根据记录ID获取单条测评结果"""
-        return UserAssessment.get_or_none(UserAssessment.id == record_id)
+        record = UserAssessment.get_or_none(UserAssessment.id == record_id)
+        self.ensure_scoring_result_for_record(record)
+        return record
+
+    def ensure_ai_analysis_for_record(self, record: UserAssessment) -> Optional[Dict[str, Any]]:
+        """为历史 SDS/BDI-II 记录补齐 AI 分析，并返回分析对象。"""
+        if not record or not record.scale or record.scale.short_name != "SDS":
+            return None
+
+        try:
+            answers = json.loads(record.answers) if record.answers else {}
+        except json.JSONDecodeError:
+            answers = {}
+
+        try:
+            result_details = json.loads(record.result_details) if record.result_details else {}
+        except json.JSONDecodeError:
+            result_details = {}
+
+        if not isinstance(result_details, dict):
+            result_details = {}
+
+        existing_analysis = result_details.get("ai_analysis")
+        if isinstance(existing_analysis, dict):
+            return existing_analysis
+
+        ai_analysis = self._build_bdi_ai_analysis(
+            request_answers=answers,
+            result_level=record.result_level,
+            final_score=record.final_score,
+        )
+        result_details["ai_analysis"] = ai_analysis
+        record.result_details = json.dumps(result_details, ensure_ascii=False)
+        record.save()
+        return ai_analysis
 
     def delete_user_assessment(self, user_id: str, record_id: str) -> bool:
         """删除一条属于特定用户的测评记录"""

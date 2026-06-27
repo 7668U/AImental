@@ -1,123 +1,134 @@
-/* pages/assessment/index/index.wxss (最终完整版) */
 page {
-  background-color: #F9F7F3;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 85% 8%, rgba(255, 214, 165, 0.48) 0, rgba(255, 214, 165, 0) 260rpx),
+    linear-gradient(180deg, #fff7ee 0%, #fffaf4 36%, #f9f6f0 100%);
+  color: #303238;
 }
 
-/* 外层安全区容器的样式 */
-.safe-area-top {
-  width: 100%;
-  height: 100%;
+.assessment-page {
+  min-height: 100vh;
+  padding: 24rpx 42rpx 48rpx;
   box-sizing: border-box;
 }
 
-/* 内层内容容器，我们在这里定义布局边距 */
-.container {
-  padding: 80rpx 80rpx;
+.hero-section {
+  position: relative;
+  min-height: 372rpx;
+  margin-bottom: 24rpx;
+  overflow: hidden;
 }
 
-.page-title {
-  font-size: 44rpx;
-  font-weight: bold;
-  color: #333;
+.hero-art {
+  position: absolute;
+  right: -46rpx;
+  bottom: -8rpx;
+  width: 458rpx;
+  height: 292rpx;
+  opacity: 0.98;
 }
 
-.page-subtitle {
+.hero-copy {
+  position: relative;
+  z-index: 1;
+  padding-top: 90rpx;
+  max-width: 430rpx;
+}
+
+.hero-title {
+  display: block;
+  font-size: 48rpx;
+  line-height: 1.18;
+  font-weight: 800;
+  color: #2f3338;
+}
+
+.hero-subtitle {
+  display: block;
+  margin-top: 18rpx;
   font-size: 28rpx;
-  color: #999;
-  margin-top: 10rpx;
-  margin-bottom: 50rpx;
+  line-height: 1.22;
+  color: #96989c;
 }
 
-.tab-container {
-  display: flex;
-  justify-content: flex-start;
-  gap: 40rpx;
-  margin-bottom: 50rpx;
+.hero-subtitle + .hero-subtitle {
+  margin-top: 8rpx;
 }
 
-.tab-button {
-  padding: 12rpx 0;
-  font-size: 32rpx;
-  font-weight: 500;
-  color: #999;
-  background-color: transparent;
-  border-bottom: 3px solid transparent;
-  transition: all 0.25s ease;
-}
-
-.tab-button.active {
-  color: #333;
-  font-weight: bold;
-  border-bottom-color: #333;
-}
-
-.feedback-container {
-  width: 100%;
-  text-align: center;
-  color: #999;
-  padding: 100rpx 0;
-}
-
-.card-grid {
-  display: grid;
-  grid-template-columns: 270rpx 270rpx;
-  gap: 50rpx;
-  justify-content: center;
-}
-
-.card-item {
+.group-list {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 22rpx;
+}
+
+.group-card {
+  display: flex;
   align-items: center;
-  background-color: #ffffff;
-  border-radius: 24rpx;
-  padding: 40rpx 20rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease;
-  aspect-ratio: 1 / 1; 
+  min-height: 178rpx;
+  padding: 34rpx 28rpx;
+  box-sizing: border-box;
+  border-radius: 38rpx;
+  background: rgba(255, 255, 255, 0.92);
+  border: 2rpx solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 18rpx 46rpx rgba(167, 128, 83, 0.11);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.group-card:active {
+  transform: scale(0.985);
+}
+
+.group-icon {
+  flex: 0 0 auto;
+  width: 132rpx;
+  height: 132rpx;
+  border-radius: 30rpx;
+  margin-right: 26rpx;
+  background: #fff5ee;
+}
+
+.group-content {
+  flex: 1;
   min-width: 0;
 }
 
-.card-item:active {
-  transform: scale(0.96);
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
-}
-
-.card-icon {
-  width: 96rpx;
-  height: 96rpx;
-  margin-bottom: 24rpx;
-}
-
-.card-name {
+.group-title-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 100%; 
-  line-height: 1.4;
-  min-height: 2.8em;
+  justify-content: space-between;
+  gap: 16rpx;
 }
 
-.card-name text {
-  font-size: 28rpx;
-  font-weight: bold;
-  color: #333;
-  text-align: center;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+.group-title {
+  font-size: 36rpx;
+  line-height: 1.18;
+  font-weight: 800;
+  color: #2f3338;
+}
+
+.group-desc {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 25rpx;
+  line-height: 1.3;
+  color: #87898e;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  overflow-wrap: break-word;
 }
 
-/* [新增] 未登录页面的容器样式 */
+.group-action {
+  flex: 0 0 auto;
+  width: 148rpx;
+  height: 64rpx;
+  margin-left: 16rpx;
+}
+
 .login-wrapper {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   width: 100%;
-  /* 使用 vh 单位确保在任何屏幕上都相对于视窗高度居中 */
   height: 100vh;
+  background: linear-gradient(180deg, #fff7ee 0%, #f9f6f0 100%);
 }

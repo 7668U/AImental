@@ -1,4 +1,7 @@
 <view class="container">
+  <image class="result-bg" src="/images/assessment/result/result-bg.png" mode="aspectFill"></image>
+  <view class="result-bg-soften"></view>
+
   <view wx:if="{{isLoading}}" class="loading-container">
     <text>正在生成您的专属报告...</text>
   </view>
@@ -59,20 +62,62 @@
       </view>
     </block>
 
-    <view class="result-card detail-card" wx:if="{{result.result_interpretation}}">
+    <view class="result-card ai-card" wx:if="{{aiAnalysisSections.length > 0}}">
       <view class="card-title">
-        <image class="card-icon" src="/images/icons/interpretation.png"></image>
-        <text>详细解读</text>
+        <image class="card-icon" src="/images/icons/icon-report.png"></image>
+        <text>{{analysisTitle}}</text>
       </view>
-      <view class="card-content">{{result.result_interpretation}}</view>
+
+      <view class="ai-section {{item.type === 'risk' ? 'risk-section' : ''}} {{item.bgIcon ? 'has-section-icon' : ''}}" wx:for="{{aiAnalysisSections}}" wx:key="key">
+        <image wx:if="{{item.bgIcon}}" class="section-bg-icon section-bg-{{item.key}}" src="{{item.bgIcon}}" mode="aspectFit"></image>
+        <view class="ai-section-body">
+          <view class="ai-section-title">{{item.title}}</view>
+
+          <view wx:if="{{item.type === 'text' || item.type === 'risk' || item.type === 'support' || item.type === 'recording'}}" class="ai-section-text">
+            {{item.text}}
+          </view>
+
+          <view wx:if="{{item.type === 'recording' && item.focusText}}" class="focus-line">
+            重点观察：{{item.focusText}}
+          </view>
+
+          <view wx:if="{{item.type === 'dimensions'}}" class="dimension-list">
+            <view class="dimension-item" wx:for="{{item.dimensions}}" wx:for-item="dimension" wx:key="key">
+              <view class="dimension-heading">
+                <text class="dimension-label">{{dimension.label}}</text>
+                <text class="dimension-level">{{dimension.level}}</text>
+              </view>
+              <view class="dimension-summary">{{dimension.summary}}</view>
+              <view class="dimension-evidence" wx:if="{{dimension.evidenceText}}">
+                相关表现：{{dimension.evidenceText}}
+              </view>
+            </view>
+          </view>
+
+          <view wx:if="{{item.type === 'list'}}" class="analysis-list">
+            <view class="analysis-list-item" wx:for="{{item.list}}" wx:for-item="line" wx:key="*this">
+              <text class="list-dot"></text>
+              <text class="list-text">{{line}}</text>
+            </view>
+          </view>
+
+          <view wx:if="{{item.type === 'details'}}" class="detail-pair-list">
+            <view class="detail-pair-item" wx:for="{{item.detailItems}}" wx:for-item="detail" wx:key="label">
+              <text class="detail-pair-label">{{detail.label}}</text>
+              <text class="detail-pair-value">{{detail.value}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
     </view>
 
-    <view class="result-card detail-card" wx:if="{{result.result_recommendation}}">
+    <view class="result-card ai-empty-card" wx:else>
+      <image class="empty-bg-icon" src="/images/assessment/result/section-ai.png" mode="aspectFit"></image>
       <view class="card-title">
-        <image class="card-icon" src="/images/icons/recommendation.png"></image>
-        <text>给你的建议</text>
+        <image class="card-icon" src="/images/icons/icon-report.png"></image>
+        <text>分析结果</text>
       </view>
-      <view class="card-content">{{result.result_recommendation}}</view>
+      <view class="card-content">本次结果已生成，暂未获得可展示的分析内容。请稍后从历史测评中再次查看。</view>
     </view>
 
     <button class="confirm-btn" bindtap="handleConfirm">我知道了</button>

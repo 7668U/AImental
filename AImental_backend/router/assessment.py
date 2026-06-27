@@ -13,6 +13,7 @@ except (ImportError, ModuleNotFoundError):
 from model.assessment import (
     assessment_tables,
     ScaleInfoResponse,
+    get_assessment_display_meta,
     # ScaleDetailResponse,
     SubmitAnswersRequest,
     UserAssessmentResponse
@@ -39,6 +40,63 @@ class FormattedScaleResponse(ScaleInfoResponse):
     """用于单个量表详情页的、格式化后的响应模型"""
     questions: List[Dict[str, Any]]
     choices: List[Dict[str, Any]]
+
+
+def _build_scale_info(scale_obj, include_json_data: bool = False) -> Optional[Dict[str, Any]]:
+    if not scale_obj:
+        return None
+
+    scale_info = {
+        "id": scale_obj.id,
+        "short_name": scale_obj.short_name,
+        "name": scale_obj.name,
+        "description": scale_obj.description,
+        "category": scale_obj.category or "专业测试",
+        "assessment_type": scale_obj.assessment_type or "scoring",
+        **get_assessment_display_meta(scale_obj.short_name),
+    }
+    if include_json_data:
+        scale_info["json_data"] = json.loads(scale_obj.json_data)
+    return scale_info
+
+
+def _normalize_result_details(result_details: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    if not isinstance(result_details, dict):
+        return result_details
+
+    image_url = result_details.get("image_url")
+    if image_url and not image_url.startswith("http"):
+        result_details["image_url"] = f"{SERVER_BASE_URL}{image_url}"
+    return result_details
+
+
+def _build_assessment_response(record, include_scale_json: bool = False) -> Dict[str, Any]:
+    result_details = json.loads(record.result_details) if record.result_details else None
+    ai_analysis = None
+    if isinstance(result_details, dict):
+        ai_analysis = result_details.get("ai_analysis")
+    if not ai_analysis:
+        ai_analysis = assessment_tables.ensure_ai_analysis_for_record(record)
+        if ai_analysis:
+            result_details = json.loads(record.result_details) if record.result_details else None
+
+    response_dict = {
+        "id": record.id,
+        "user_id": record.user_id,
+        "scale_id": record.scale_id,
+        "answers": json.loads(record.answers) if record.answers else {},
+        "raw_score": record.raw_score,
+        "final_score": record.final_score,
+        "result_level": record.result_level,
+        "result_interpretation": record.result_interpretation,
+        "result_recommendation": record.result_recommendation,
+        "result_details": _normalize_result_details(result_details),
+        "ai_analysis": ai_analysis,
+        "completed_at": record.completed_at,
+        "scale_info": _build_scale_info(record.scale) if record.scale else None,
+        "scale_details": _build_scale_info(record.scale, include_json_data=include_scale_json) if record.scale else None,
+    }
+    return response_dict
     
     
 @router.get(
@@ -50,7 +108,7 @@ def get_all_available_scales(
     current_user_id: str = Depends(get_current_user_id)
 ):
     scales = assessment_tables.get_all_scales()
-    return scales
+    return [_build_scale_info(scale) for scale in scales]
 
 @router.get(
     "/{scale_id}", 
@@ -86,39 +144,7 @@ def submit_assessment_answers(
             detail="Failed to process assessment. Check scale_id or answers format."
         )
 
-    response_dict = {
-        "id": result_record.id,
-        "user_id": result_record.user_id,
-        "scale_id": result_record.scale_id,
-        "answers": json.loads(result_record.answers) if result_record.answers else {},
-        "raw_score": result_record.raw_score,
-        "final_score": result_record.final_score,
-        "result_level": result_record.result_level,
-        "result_interpretation": result_record.result_interpretation,
-        "result_recommendation": result_record.result_recommendation,
-        "result_details": json.loads(result_record.result_details) if result_record.result_details else None,
-        "completed_at": result_record.completed_at,
-        "scale_info": None,
-        "scale_details": None
-    }
-    
-    scale_obj = assessment_tables.get_scale_by_id(request_data.scale_id)
-    if scale_obj:
-        response_dict['scale_details'] = {
-            "id": scale_obj.id, "short_name": scale_obj.short_name,
-            "name": scale_obj.name, "description": scale_obj.description,
-            "category": scale_obj.category, "assessment_type": scale_obj.assessment_type,
-            "json_data": json.loads(scale_obj.json_data)
-        }
-    
-    # ✅ 【第 2 步】: 在返回前，为图片URL添加服务器地址前缀
-    if response_dict.get("result_details") and isinstance(response_dict["result_details"], dict):
-        image_url = response_dict["result_details"].get("image_url")
-        # 如果 image_url 存在，且不是以 http 开头的完整路径
-        if image_url and not image_url.startswith("http"):
-            response_dict["result_details"]["image_url"] = f"{SERVER_BASE_URL}{image_url}"
-
-    return response_dict
+    return _build_assessment_response(result_record, include_scale_json=True)
 
 @router.get(
     "/history/", 
@@ -130,28 +156,7 @@ def get_user_assessment_history(current_user_id: str = Depends(get_current_user_
     
     response_list = []
     for record in history:
-        item = {
-            "id": record.id, "user_id": record.user_id, "scale_id": record.scale_id,
-            "answers": json.loads(record.answers) if record.answers else {},
-            "raw_score": record.raw_score, "final_score": record.final_score,
-            "result_level": record.result_level,
-            "result_interpretation": record.result_interpretation,
-            "result_recommendation": record.result_recommendation,
-            "result_details": json.loads(record.result_details) if record.result_details else None,
-            "completed_at": record.completed_at,
-            "scale_details": None, "scale_info": None,
-        }
-        
-        if record.scale:
-            item['scale_info'] = ScaleInfoResponse.from_orm(record.scale).model_dump()
-        
-        # ✅ 【第 2 步】: 对列表中的每一项都进行URL拼接处理
-        if item.get("result_details") and isinstance(item["result_details"], dict):
-            image_url = item["result_details"].get("image_url")
-            if image_url and not image_url.startswith("http"):
-                item["result_details"]["image_url"] = f"{SERVER_BASE_URL}{image_url}"
-        
-        response_list.append(item)
+        response_list.append(_build_assessment_response(record, include_scale_json=False))
             
     return response_list
 
@@ -188,34 +193,6 @@ def get_single_assessment_record(
     if not record or record.user_id != current_user_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Record not found")
 
-    response_dict = {
-        "id": record.id, "user_id": record.user_id, "scale_id": record.scale_id,
-        "answers": json.loads(record.answers) if record.answers else {},
-        "raw_score": record.raw_score, "final_score": record.final_score,
-        "result_level": record.result_level,
-        "result_interpretation": record.result_interpretation,
-        "result_recommendation": record.result_recommendation,
-        "result_details": json.loads(record.result_details) if record.result_details else None,
-        "completed_at": record.completed_at,
-        "scale_info": None, "scale_details": None
-    }
-    
-    if record.scale:
-        scale_obj = record.scale
-        response_dict['scale_details'] = {
-            "id": scale_obj.id, "short_name": scale_obj.short_name,
-            "name": scale_obj.name, "description": scale_obj.description,
-            "category": scale_obj.category, "assessment_type": scale_obj.assessment_type,
-            "json_data": json.loads(scale_obj.json_data)
-        }
-
-   
-    # ✅ 【第 2 步】: 同样地，为这个接口也添加URL拼接逻辑
-    if response_dict.get("result_details") and isinstance(response_dict["result_details"], dict):
-        image_url = response_dict["result_details"].get("image_url")
-        if image_url and not image_url.startswith("http"):
-            response_dict["result_details"]["image_url"] = f"{SERVER_BASE_URL}{image_url}"
-
-    return response_dict
+    return _build_assessment_response(record, include_scale_json=True)
 
 
