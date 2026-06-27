@@ -1,4 +1,6 @@
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
+const { getScaleDisplayName, getScaleIconName } = require('../../utils/assessment-display.js');
+
 function request(options) {
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
@@ -24,14 +26,6 @@ function request(options) {
 }
 
 const DEFAULT_ICON_PATH = '/images/assessment/default.png';
-const SCALE_ICON_ALIASES = {
-  'BDI-II': 'bdi-ii',
-  SDS: 'sds'
-};
-
-const SCALE_DISPLAY_NAMES = {
-  IAS: '互动焦虑量表'
-};
 
 const SCALE_INTRO_COPY = {
   SDS: {
@@ -116,14 +110,19 @@ Page({
   data: {
     scale: null, // Stores the fetched scale details
     scaleId: null, // Stores the ID passed from the previous page
+    passedDisplayTitle: '',
     isLoading: true,
     isError: false
   },
 
   onLoad(options) {
     const scaleId = options.id; // Get the scaleId from the URL parameters
+    const displayTitle = options.title ? decodeURIComponent(options.title) : '';
     if (scaleId) {
-      this.setData({ scaleId: scaleId });
+      this.setData({
+        scaleId: scaleId,
+        passedDisplayTitle: displayTitle
+      });
       this.fetchScaleDetails(scaleId);
     } else {
       this.setData({ isError: true, isLoading: false });
@@ -139,10 +138,11 @@ Page({
     try {
       const scaleData = await request({ url: `/assessments/${scaleId}`, method: 'GET' });
 
-      const iconName = SCALE_ICON_ALIASES[scaleData.short_name] || (scaleData.short_name ? scaleData.short_name.toLowerCase() : 'default');
       const shortCopy = this.getShortCopy(scaleData);
-      scaleData.name = SCALE_DISPLAY_NAMES[scaleData.short_name] || scaleData.name;
-      scaleData.iconPath = `/images/assessment/scale-icons/${iconName}.png`;
+      const displayName = this.data.passedDisplayTitle || getScaleDisplayName(scaleData.short_name, scaleData.name);
+      scaleData.name = displayName;
+      scaleData.displayName = displayName;
+      scaleData.iconPath = `/images/assessment/scale-icons/${getScaleIconName(scaleData.short_name)}.png`;
       scaleData.coverSummary = shortCopy.summary;
       scaleData.coverInstruction = shortCopy.instruction;
 

@@ -3,17 +3,10 @@
 const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 const ASSESSMENTS_API_URL = `${SERVER_BASE_URL}/api/v1/assessments`;
 const ANALYSIS_API_URL = `${SERVER_BASE_URL}/api/v1/history-analysis`;
+const { getScaleDisplayName, getScaleIconName } = require('../utils/assessment-display.js');
 
 const DEFAULT_ICON_PATH = '/images/assessment/default.png';
 const DELETE_BTN_WIDTH = 80;
-const SCALE_ICON_ALIASES = {
-  'BDI-II': 'bdi-ii',
-  SDS: 'sds'
-};
-
-const SCALE_DISPLAY_NAMES = {
-  IAS: '互动焦虑量表'
-};
 
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 Page({
@@ -176,12 +169,12 @@ Page({
         historyMap.get(scaleId).count += 1;
       } else {
         const shortName = record.scale_info.short_name;
-        const iconName = SCALE_ICON_ALIASES[shortName] || (shortName ? shortName.toLowerCase() : 'default');
+        const iconName = getScaleIconName(shortName);
         const iconPath = `/images/assessment/scale-icons/${iconName}.png`;
         
         historyMap.set(scaleId, {
           scale_id: scaleId,
-          scale_name: SCALE_DISPLAY_NAMES[shortName] || record.scale_info.name,
+          scale_name: getScaleDisplayName(shortName, record.scale_info.name),
           iconPath: iconPath,
           count: 1,
           is_expanded: false,

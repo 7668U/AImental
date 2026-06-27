@@ -119,8 +119,8 @@ page {
 
 .group-action {
   flex: 0 0 auto;
-  width: 148rpx;
-  height: 64rpx;
+  width: 180rpx;
+  height: 80rpx;
   margin-left: 16rpx;
 }
 

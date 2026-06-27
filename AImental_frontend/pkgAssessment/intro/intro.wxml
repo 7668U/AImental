@@ -13,7 +13,7 @@
     <view class="sparkle sparkle-c">✦</view>
 
     <view class="title-zone">
-      <view class="intro-title">{{scale.name}}</view>
+      <view class="intro-title">{{scale.displayName || scale.name}}</view>
     </view>
 
     <image

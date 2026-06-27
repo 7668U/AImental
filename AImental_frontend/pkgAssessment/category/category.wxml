@@ -32,6 +32,7 @@
       class="scale-card {{groupMeta.key === 'interest' ? 'interest-card' : ''}}"
       bindtap="goToTest"
       data-id="{{item.id}}"
+      data-title="{{item.displayTitle}}"
     >
       <image
         class="scale-icon"
