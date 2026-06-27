@@ -9,6 +9,7 @@ import pytz
 
 # Load environment variables
 load_dotenv()
+from feature_flags import ENABLE_COMMUNITY_BACKEND
 
 # --- 1. 导入数据库连接 (保持不变) ---
 from db import all_dbs, user_db, chat_db, assessment_db, status_db, feedback_db, promotion_db, airplane_db, note_db
@@ -19,17 +20,19 @@ from model.chat import Chat
 from model.assessment import Scale, UserAssessment
 from model.status import Checkin
 from model.analysis import Analysis
+from model.emotion_color_card import EmotionColorCardCache
 from model.history_analysis import HistoryAnalysis
 from model.feedback import Feedback
 from model.promotion import TestRecord
 from model.airplane import PaperAirplane, paper_airplane_table
 from model.note import note_table, NoteItem
-from model.ai_character import AICharacter, ai_character_table
-from model.ai_status import AiStatus, ai_status_table
-from model.ai_task import AITask
-from model.chat_community import CommunityChat
-from model.friendship import Friendship
-from generate_ai_status import generate_daily_schedule
+if ENABLE_COMMUNITY_BACKEND:
+    from model.ai_character import AICharacter, ai_character_table
+    from model.ai_status import AiStatus, ai_status_table
+    from model.ai_task import AITask
+    from model.chat_community import CommunityChat
+    from model.friendship import Friendship
+    from generate_ai_status import generate_daily_schedule
 
 # --- 3. 导入所有路由 (保持不变) ---
 from router import user as user_router
@@ -43,7 +46,8 @@ from router import feedback as feedback_router
 from router import promotion as promotion_router
 from router import airplane as airplane_router
 from router import note as note_router
-from router import ai_community as ai_community_router
+if ENABLE_COMMUNITY_BACKEND:
+    from router import ai_community as ai_community_router
 
 # ---------------------------------------------------
 # FastAPI 应用实例
@@ -113,6 +117,10 @@ def check_and_generate_today_schedules():
     如果首次生成失败，会自动重试一次。
     强制使用北京时间来定义“今天”。
     """
+    if not ENABLE_COMMUNITY_BACKEND:
+        print("ℹ️ [Startup Check]: 心灵社区后端已下线，跳过AI角色日程检查与生成。")
+        return
+
     # --- 【核心修正】在这里统一定义“今天” ---
     BEIJING_TZ = pytz.timezone('Asia/Shanghai')
     today_in_beijing = datetime.now(BEIJING_TZ).date()
@@ -203,16 +211,20 @@ def on_startup():
         HistoryAnalysis: assessment_db,
         Checkin: status_db,
         Analysis: status_db,
+        EmotionColorCardCache: status_db,
         TestRecord: promotion_db,
         PaperAirplane: airplane_db,
         NoteItem: note_db,
-        # AI社区模型映射
-        AICharacter: chat_db,
-        CommunityChat: chat_db,
-        AITask: chat_db,
-        AiStatus: status_db,
-        Friendship: chat_db,
     }
+    if ENABLE_COMMUNITY_BACKEND:
+        model_db_mapping.update({
+            # AI社区模型映射
+            AICharacter: chat_db,
+            CommunityChat: chat_db,
+            AITask: chat_db,
+            AiStatus: status_db,
+            Friendship: chat_db,
+        })
 
     # 2. 【核心步骤1】在所有操作开始前，为每个【唯一】的数据库对象建立临时连接
     print("🚀 [Startup]: 正在建立临时数据库连接...")
@@ -233,8 +245,11 @@ def on_startup():
 
     print("🚀 [Startup]: 开始执行数据播种和日程检查...")
     paper_airplane_table.add_default_airplanes_if_needed()
-    ai_character_table.create_default_character_if_not_exists() # 确保默认角色存在
-    check_and_generate_today_schedules() 
+    if ENABLE_COMMUNITY_BACKEND:
+        ai_character_table.create_default_character_if_not_exists() # 确保默认角色存在
+        check_and_generate_today_schedules()
+    else:
+        print("ℹ️ [Startup]: 心灵社区后端已下线，跳过AI角色播种与日程补生成。")
     print("✨ [Startup]: 数据播种和日程检查完成！")
 
     # 4. 【核心步骤3】在启动任务的最后，关闭所有临时连接
@@ -263,5 +278,6 @@ app.include_router(feedback_router.router, prefix=API_PREFIX)
 app.include_router(promotion_router.router, prefix=API_PREFIX)
 app.include_router(airplane_router.router, prefix=API_PREFIX)
 app.include_router(note_router.router, prefix=API_PREFIX)
-# AI社区路由
-app.include_router(ai_community_router.router, prefix=API_PREFIX)
+# AI社区路由：前端已下线，后端暂时不注册社区接口。
+if ENABLE_COMMUNITY_BACKEND:
+    app.include_router(ai_community_router.router, prefix=API_PREFIX)

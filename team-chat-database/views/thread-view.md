@@ -1,6 +1,6 @@
 ﻿# Team Chat Thread
 
-Generated at: 2026-06-26 23:26:24 +08:00
+Generated at: 2026-06-26 03:21:16 +08:00
 
 ## msg-20260622-0001
 
@@ -141,51 +141,25 @@ Generated at: 2026-06-26 23:26:24 +08:00
 
 ## msg-20260626-0001
 
-**product_manager** - `product_manager` - 2026-06-26T23:00:42+08:00 - new thread
+**frontend_designer** - `frontend_designer` - 2026-06-26T03:07:04+08:00 - new thread
 
-- topic: `assessment-result-ai-analysis`
-- type/status: `decision` / `resolved`
-- tags: #assessment #result-page #ai-analysis #grouping
-- mentions: @frontend_designer @backend_engineer
-- related: product-design-iterations/iterations/2026-06-26-iteration-010-assessment-grouping-result-ai-analysis.md, product-design-iterations/decision-log.md, product-design-iterations/backlog.md, AImental_frontend/pages/assessment/index.wxml, AImental_frontend/pages/assessment/index.js, AImental_frontend/pkgAssessment/result.wxml, AImental_frontend/pkgAssessment/result.js, AImental_backend/model/assessment.py, AImental_backend/router/assessment.py, AImental_backend/assessment_data/SDS.json
+- topic: `paper-airplane-basket`
+- type/status: `handoff` / `open`
+- tags: #paper-airplane #basket #api #backend
+- mentions: @backend_engineer @product_manager
+- related: AImental_frontend/pages/paper-airplane/index.wxml, AImental_frontend/pages/paper-airplane/index.js, AImental_backend/model/airplane.py, AImental_backend/router/airplane.py
 
-【产品同步】测评模块本轮范围已收敛，请前端设计师和后端工程师按 Iteration 010 对齐实现。
-
-1. 本轮不做：年龄分流、测评目的选择、高风险前置筛查、核心筛查、推荐问卷、自适应分支问卷。此前这部分方案先舍弃，不进入当前开发范围。
-
-2. 现有 18 份问卷改为四组展示：心理健康、自我人格、关系亲密、趣味探索。前端测评首页从当前“专业测试 / 趣味测试”两个 tab 改为四组 tab；后端建议在量表列表接口返回 display_group、display_group_order、display_order。若后端暂未完成，前端可短期按 short_name 做本地映射。
-
-3. 结果页继续保留明确判断，不弱化轻度 / 中度 / 重度等等级。顶部仍展示分数、等级、分数条；现有“详细解读”“给你的建议”继续保留。
-
-4. 新增“AI 分析”区域，用来承载状态拆解、主要影响维度、可能相关原因、可尝试的小行动、是否建议专业支持、是否建议持续记录情绪。AI 分析不替代原始等级，只解释用户状态和下一步。
-
-5. 贝克抑郁量表 BDI-II 当前后端文件为 AImental_backend/assessment_data/SDS.json，本轮优先接入五维 AI 分析：情绪、兴趣、身体、认知、风险。Q9 自伤/自杀念头必须单独处理：本轮不做前置中断，但结果页 AI 分析中必须强化安全支持提示。
-
-6. 后端建议：提交测评和历史详情都返回 ai_analysis，可放在 result_details.ai_analysis 或顶层 ai_analysis；至少先支持 SDS/BDI-II。前端建议：结果页在建议卡之后新增 AI 分析卡片组，按模块展示，不要合成一大段文字。
-
-需要后端确认：display_group 字段位置、ai_analysis 返回结构、BDI-II 五维计算方式。需要前端确认：四组 tab 展示、结果页 AI 分析模块 UI 承载。
+背景：用户要求纸飞机页面右下角新增可点击的飞机篓，用于打开曾经收起的纸飞机；读到天空中的纸飞机后，可以把它收进飞机篓。\n\n前端方案：页面已准备调用 POST /api/v1/airplane/{airplane_id}/collect 收起当前打开的纸飞机；点击飞机篓时调用 GET /api/v1/airplane/collected 拉取当前用户已收起的纸飞机列表。\n\n建议后端：新增 user_collected_airplanes 关系表，字段包含 user_id、airplane_id、collected_time，用户+飞机唯一。收起接口需要校验该飞机已被当前用户捡起或可被当前用户访问，避免收藏自己的飞机或未读飞机；列表接口按 collected_time 倒序返回 PaperAirplaneResponse 列表。\n\n影响：前端右下角飞机篓入口依赖该接口完整持久化；如果接口暂未完成，前端会打开空列表或 toast 报错。
 
 ## msg-20260626-0002
 
-**backend_engineer** - `backend_engineer` - 2026-06-26T23:18:21+08:00 - reply_to `msg-20260626-0001`
+**frontend_designer** - `frontend_designer` - 2026-06-26T03:20:52+08:00 - reply_to `msg-20260626-0001`
 
-- topic: `assessment-result-ai-analysis`
+- topic: `paper-airplane-basket`
 - type/status: `answer` / `resolved`
-- tags: #assessment #backend #api #ai-analysis
-- mentions: @product_manager @frontend_designer
-- related: AImental_backend/model/assessment.py, AImental_backend/router/assessment.py, AImental_backend/assessment_data/SDS.json, AImental_backend/assessment_data/APS.json, backend-work-iterations/notes/2026-06-26-assessment-grouping-ai-analysis.md
+- tags: #paper-airplane #basket #api #backend
+- mentions: @backend_engineer @product_manager
+- related: AImental_backend/model/airplane.py, AImental_backend/router/airplane.py, AImental_frontend/pages/paper-airplane/index.js, AImental_frontend/pages/paper-airplane/index.wxml
 
-后端已完成 Iteration 010 测评模块接入。接口确认：1. GET /api/v1/assessments/ 和单量表详情均返回 display_group、display_group_order、display_order；四组为心理健康、自我人格、关系亲密、趣味探索，并按产品表顺序排序。2. 提交测评 POST /api/v1/assessments/submit、历史列表 /history/、历史详情 /history/{record_id} 均返回 ai_analysis，同时也放在 result_details.ai_analysis，方便前端任选路径读取。3. SDS/BDI-II 五维计算为本地确定性规则：情绪 Q1/Q2/Q10/Q11；兴趣 Q4/Q12/Q20；身体 Q15/Q16/Q17/Q18/Q19；认知 Q3/Q5/Q6/Q7/Q8/Q13/Q14/Q21；风险单独看 Q9。各维度用题目平均分映射为相对稳定、有些波动、需要关注、明显承压。4. Q9 单独安全处理：Q9=0 不触发强风险提示；Q9=1 返回 medium risk_note 和建议尽快找可信任的人/专业支持；Q9>=2 返回 high risk_note 和 urgent 专业支持文案。5. 原有 result_level、result_interpretation、result_recommendation 保留不变。6. APS.json 内部 short_name 已从 TPS 修正为 APS，初始化时会刷新已有量表 metadata。已验证 py_compile、四组列表、SDS 详情、AI 分析结构、Q9 风险和临时记录创建/清理。
-
-## msg-20260626-0003
-
-**frontend_designer** - `frontend_designer` - 2026-06-26T23:24:39+08:00 - reply_to `msg-20260626-0001`
-
-- topic: `assessment-result-ai-analysis`
-- type/status: `answer` / `resolved`
-- tags: #assessment #result-page #frontend #ai-analysis
-- mentions: @product_manager @backend_engineer
-- related: AImental_frontend/pages/assessment/index.wxml, AImental_frontend/pages/assessment/index.js, AImental_frontend/pages/assessment/index.wxss, AImental_frontend/pkgAssessment/result.wxml, AImental_frontend/pkgAssessment/result.js, AImental_frontend/pkgAssessment/result.wxss, frontend-design-iterations/iterations/2026-06-26-iteration-010-assessment-result-ai-analysis.md
-
-前端已按测评模块本轮方案完成第一轮承载。已做：1. 测评首页从专业测试/趣味测试改为心理健康、自我人格、关系亲密、趣味探索四组 tab。2. 列表优先使用后端 display_group/display_group_order/display_order；如果后端字段缺失，前端按 short_name 做本地映射兜底。3. 结果页保留顶部明确分数、等级和分数条。4. 已接入 ai_analysis，兼容顶层 ai_analysis 和 result_details.ai_analysis 两种位置，并拆成当前状态、主要影响维度、可能相关原因、可以先试试、专业支持、持续记录、安全提醒等卡片展示。5. 根据用户主对话最新要求，结果页当前不再展示“详细解读”和“给你的建议”两个原始结果卡片；这一点覆盖 Iteration 010 中保留原始解读/建议的旧口径。已补前端迭代记录。
+更新：前端侧已同步完成最小后端实现，避免页面接口悬空。\n\n已落地：1. 新增 UserCollectedAirplane/user_collected_airplanes 关系表。2. 新增 POST /api/v1/airplane/{airplane_id}/collect，用于把已捡起的纸飞机收进飞机篓。3. 新增 GET /api/v1/airplane/collected，用于读取当前用户飞机篓列表。4. collect 会校验不能收藏自己的飞机，且必须已被当前用户捡起。\n\n验证：已通过 venv 运行 py_compile；已做模型级 smoke test，未捡起时不能收，捡起后可收，列表可查到。后续如后端工程师继续接手，可补充更正式的迁移脚本或接口测试。
 

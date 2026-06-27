@@ -1,32 +1,20 @@
 # generate_community_response.py
 
-import os
 import json
 from typing import List, Dict, Optional
 
 # Pydantic用于定义和验证我们期望的AI输出结构
 from pydantic import BaseModel, Field, ValidationError
 
-# 导入并设置您提供的API客户端
-from openai import OpenAI
+from llm_config import HEPAI_MODEL, IS_MOCK_API, client
 from datetime import datetime
 import pytz
 BEIJING_TZ = pytz.timezone('Asia/Shanghai')
 # ---------------------------------------------------
 # 1. API客户端设置
 # ---------------------------------------------------
-MOONSHOT_API_KEY = os.getenv("MOONSHOT_API_KEY")
-MOONSHOT_BASE_URL = os.getenv("MOONSHOT_BASE_URL", "https://api.moonshot.cn/v1")
-
-IS_MOCK_API = not MOONSHOT_API_KEY
 if IS_MOCK_API:
-    print("警告: Moonshot API密钥未设置或使用的是占位符。将使用模拟数据运行。")
-
-try:
-    client = OpenAI(api_key=MOONSHOT_API_KEY, base_url=MOONSHOT_BASE_URL) if MOONSHOT_API_KEY else None
-except Exception as e:
-    print(f"无法初始化OpenAI客户端，请检查API Key和URL配置: {e}")
-    client = None
+    print("警告: HEPAI API密钥未设置或客户端不可用。将使用模拟数据运行。")
 
 # ---------------------------------------------------
 # 2. 定义AI输出的数据结构 (已升级)
@@ -161,7 +149,7 @@ def generate_ai_response(
             })
         else:
             response = client.chat.completions.create(
-                model="moonshot-v1-32k",
+                model=HEPAI_MODEL,
                 messages=[{"role": "system", "content": prompt}],
                 response_format={"type": "json_object"},
                 temperature=0.9,
@@ -242,7 +230,7 @@ def generate_proactive_message(
             raw_response_content = json.dumps({"messages": ["在吗？（模拟）", "突然想找你聊聊天。"]})
         else:
             response = client.chat.completions.create(
-                model="moonshot-v1-32k",
+                model=HEPAI_MODEL,
                 messages=[{"role": "system", "content": prompt}],
                 response_format={"type": "json_object"},
                 temperature=1.0,

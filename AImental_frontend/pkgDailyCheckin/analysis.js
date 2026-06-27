@@ -33,6 +33,9 @@ Page({
     // --- 内容区状态 ---
     isLoading: false,
     analysisResult: null,
+    isColorCardLoading: false,
+    colorCardResult: null,
+    colorCardError: '',
     ec: {
       lazyLoad: true
     }
@@ -78,7 +81,7 @@ navigateBack() {
     });
   },
   
-  selectAnalysis(e) {
+  async selectAnalysis(e) {
     if (!this.data.isReady) {
       wx.showToast({ title: '页面正在初始化...', icon: 'none' });
       return;
@@ -90,6 +93,9 @@ navigateBack() {
       selectedAnalysis: frontendType,
       isLoading: true,
       analysisResult: null,
+      isColorCardLoading: false,
+      colorCardResult: null,
+      colorCardError: '',
     });
 
     const range = this.data.selectedTimeRange;
@@ -108,6 +114,32 @@ navigateBack() {
       return;
     }
 
+    try {
+      const eligibilityRes = await this.fetchApiData(`/api/v1/report/eligibility/${range}/${year}/${value}`, token);
+      const eligibility = eligibilityRes.data || {};
+      if (!eligibility.can_analyze) {
+        this.setData({
+          isLoading: false,
+          analysisResult: null,
+          isColorCardLoading: false,
+          colorCardResult: null,
+          colorCardError: ''
+        });
+        this.showNotEnoughDataModal(eligibility);
+        return;
+      }
+    } catch (err) {
+      this.setData({
+        isLoading: false,
+        analysisResult: null,
+        isColorCardLoading: false,
+        colorCardResult: null,
+        colorCardError: ''
+      });
+      wx.showToast({ title: err.errMsg || '暂时无法检查打卡天数', icon: 'none' });
+      return;
+    }
+
     const chartPromise = this.fetchApiData(`/api/v1/report/chart/${backendType}/${range}/${year}/${value}`, token);
     const aiPromise = this.fetchApiData(`/api/v1/report/ai/${backendType}/${range}/${year}/${value}`, token);
 
@@ -116,21 +148,29 @@ navigateBack() {
         this.setData({
           analysisResult: {
             chartData: chartRes.data,
-            interpretation: chartRes.data.interpretation,
-            aiReport: aiRes.data.report_text
+            interpretation: aiRes.data.summary_text || chartRes.data.interpretation,
+            aiReport: aiRes.data.report_text || ''
           },
           isLoading: false
         }, () => {
-          // 现在所有分析类型都通过这个统一的函数来渲染图表
           wx.nextTick(() => {
             this.renderChart(frontendType, chartRes.data);
           });
+          if (frontendType === 'color_palette') {
+            this.loadColorCardBackground(range, year, value, token);
+          }
         });
       })
       .catch(err => {
         console.error("API请求失败:", err);
         wx.showToast({ title: err.errMsg || '生成报告失败', icon: 'none', duration: 2000 });
-        this.setData({ isLoading: false, analysisResult: null });
+        this.setData({
+          isLoading: false,
+          analysisResult: null,
+          isColorCardLoading: false,
+          colorCardResult: null,
+          colorCardError: ''
+        });
       });
   },
   
@@ -147,6 +187,67 @@ navigateBack() {
         fail: (err) => { reject(err); }
       });
     });
+  },
+
+  showNotEnoughDataModal(eligibility) {
+    const periodName = eligibility.period_name || '这个周期';
+    const minDays = eligibility.min_days || 5;
+    wx.showModal({
+      title: '还差一点点哦',
+      content: `您在${periodName}的打卡数据不大于5天，无法进行分析哦~\n快去积极记录心情吧~`,
+      confirmText: '去记录',
+      cancelText: '知道啦',
+      success: (res) => {
+        if (res.confirm) {
+          wx.navigateTo({ url: '/pkgDailyCheckin/record' });
+        }
+      }
+    });
+  },
+
+  normalizeAssetUrl(url) {
+    if (!url) return '';
+    if (/^https?:\/\//.test(url) || url.startsWith('wxfile://') || url.startsWith('cloud://')) {
+      return url;
+    }
+    return `${API_BASE_URL}${url}`;
+  },
+
+  loadColorCardBackground(range, year, value, token) {
+    this.setData({
+      isColorCardLoading: true,
+      colorCardResult: null,
+      colorCardError: ''
+    });
+
+    this.fetchApiData(`/api/v1/report/color-card/${range}/${year}/${value}`, token)
+      .then((res) => {
+        const payload = res.data || {};
+        const imageResult = payload.image_result || {};
+        this.setData({
+          colorCardResult: {
+            ...payload,
+            imageUrl: this.normalizeAssetUrl(imageResult.background_image_url),
+            isCached: !!imageResult.cached,
+          },
+          colorCardError: imageResult.background_image_url ? '' : (imageResult.error || 'AI 颜色背景图暂时生成失败')
+        });
+      })
+      .catch((err) => {
+        this.setData({
+          colorCardResult: null,
+          colorCardError: err.errMsg || 'AI 颜色背景图暂时生成失败'
+        });
+      })
+      .finally(() => {
+        this.setData({ isColorCardLoading: false });
+      });
+  },
+
+  previewColorCardImage() {
+    const url = this.data.colorCardResult && this.data.colorCardResult.imageUrl;
+    if (!url) return;
+    wx.previewImage({ current: url, urls: [url] });
   },
 
   renderChart(type, data) {
@@ -175,13 +276,45 @@ navigateBack() {
     });
   },
 
-  getMoodChartOption(data) {
+  getSoftPieChartOption({ name, data, tooltipFormatter, center = ['50%', '60%'], radius = '55%' }) {
     return {
-      title: { text: data.dominant_mood, subtext: `共打卡 ${data.total_checkins} 天`, left: 'center', top: 'center', textStyle: { fontSize: 24, fontWeight: 'bold', color: '#333' }, subtextStyle: { fontSize: 14, color: '#666' } },
-      tooltip: { trigger: 'item', formatter: '{b}: {c}次 ({d}%)' },
-      legend: { orient: 'vertical', left: 'left', top: 'center', data: data.mood_distribution.map(item => item.name) },
-      series: [{ name: '情绪分布', type: 'pie', radius: ['50%', '70%'], avoidLabelOverlap: false, label: { show: false }, emphasis: { scale: true, scaleSize: 8 }, labelLine: { show: false }, data: data.mood_distribution }]
+      tooltip: { trigger: 'item', formatter: tooltipFormatter },
+      legend: { top: '5%', left: 'center' },
+      series: [{
+        name,
+        type: 'pie',
+        radius,
+        center,
+        data,
+        label: { show: false },
+        labelLine: { show: false },
+        itemStyle: {
+          borderRadius: 8,
+          borderColor: '#fff',
+          borderWidth: 2,
+          shadowBlur: 20,
+          shadowColor: 'rgba(0, 0, 0, 0.2)',
+          shadowOffsetX: 5,
+          shadowOffsetY: 5,
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 25,
+            shadowOffsetX: 0,
+            shadowOffsetY: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      }]
     };
+  },
+
+  getMoodChartOption(data) {
+    return this.getSoftPieChartOption({
+      name: '情绪分布',
+      data: data.mood_distribution,
+      tooltipFormatter: '{b}: {c}次 ({d}%)'
+    });
   },
 
   getTagMoodChartOption(data) {
@@ -197,16 +330,11 @@ navigateBack() {
 
   getWordCloudPieChartOption(data) {
     const pieData = data.word_list.slice(0, 10);
-    return {
-      tooltip: { trigger: 'item', formatter: '{b} : {c}次 ({d}%)' },
-      legend: { top: '5%', left: 'center' },
-      series: [{
-          name: '高频词汇', type: 'pie', radius: '55%', center: ['50%', '60%'], data: pieData,
-          itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2, shadowBlur: 20, shadowColor: 'rgba(0, 0, 0, 0.2)', shadowOffsetX: 5, shadowOffsetY: 5, },
-          emphasis: { itemStyle: { shadowBlur: 25, shadowOffsetX: 0, shadowOffsetY: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' } }
-        }
-      ]
-    };
+    return this.getSoftPieChartOption({
+      name: '高频词汇',
+      data: pieData,
+      tooltipFormatter: '{b} : {c}次 ({d}%)'
+    });
   },
 
   /**
@@ -219,37 +347,17 @@ navigateBack() {
       return {};
     }
 
-    return {
-      tooltip: {
-        trigger: 'item',
-        formatter: '{b} : {c}%'
-      },
-      legend: {
-        top: 'bottom',
-        left: 'center'
-      },
-      series: [{
-        name: '情绪色卡',
-        type: 'pie',
-        radius: '60%', // 一个标准的饼图
-        center: ['50%', '50%'],
-        // 数据需要转换格式，并为每个扇区设置颜色
-        data: data.color_palette.map(item => ({
+    return this.getSoftPieChartOption({
+      name: '情绪色卡',
+      tooltipFormatter: '{b} : {c}%',
+      data: data.color_palette.map(item => ({
           value: item.percent,
           name: item.name,
           itemStyle: {
             color: item.hex
           }
-        })),
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
-          }
-        }
-      }]
-    };
+      }))
+    });
   },
 
   // ===================================================

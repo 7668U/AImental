@@ -9,6 +9,7 @@ from model.airplane import (
     paper_airplane_table, 
     PaperAirplaneCreate, 
     PaperAirplaneResponse,
+    PaperAirplaneCollect,
     PaperAirplane # Import PaperAirplane model for type hinting
 )
 
@@ -95,6 +96,71 @@ def pickup_specific_airplane(
         raise HTTPException(status_code=400, detail="无法捡起纸飞机，可能你已经捡过它了。")
 
     return target_airplane # Return the details of the picked airplane
+
+@router.post(
+    "/{airplane_id}/collect",
+    summary="把已捡起的纸飞机收进飞机篓",
+    response_model=PaperAirplaneResponse
+)
+def collect_specific_airplane(
+    airplane_id: int,
+    collect_data: Optional[PaperAirplaneCollect] = None,
+    current_user_id: str = Depends(get_current_user_id)
+):
+    """
+    将当前用户已经捡起的纸飞机收进自己的飞机篓。
+    """
+    collect_data = collect_data or PaperAirplaneCollect()
+    collected_airplane = paper_airplane_table.collect_airplane(
+        user_id=current_user_id,
+        airplane_id=airplane_id,
+        asset_number=collect_data.asset_number,
+        asset_path=collect_data.asset_path
+    )
+    if not collected_airplane:
+        raise HTTPException(status_code=404, detail="这个纸飞机还不能收进飞机篓哦。")
+
+    return collected_airplane
+
+@router.get(
+    "/collected",
+    summary="查看我的飞机篓",
+    response_model=List[PaperAirplaneResponse]
+)
+def get_collected_airplanes(
+    current_user_id: str = Depends(get_current_user_id),
+    page: int = Query(1, ge=1, description="页码"),
+    page_size: int = Query(20, ge=1, le=50, description="每页数量")
+):
+    """
+    获取当前用户收进飞机篓的纸飞机列表，按收起时间倒序排列。
+    """
+    collected_airplanes = paper_airplane_table.get_collected_airplanes(
+        user_id=current_user_id,
+        page=page,
+        page_size=page_size
+    )
+    return collected_airplanes
+
+@router.delete(
+    "/{airplane_id}/collect",
+    summary="从飞机篓丢弃一个已收起的纸飞机"
+)
+def discard_collected_airplane(
+    airplane_id: int,
+    current_user_id: str = Depends(get_current_user_id)
+):
+    """
+    从当前用户的飞机篓中移除一架纸飞机，不删除原始纸飞机内容。
+    """
+    success = paper_airplane_table.discard_collected_airplane(
+        user_id=current_user_id,
+        airplane_id=airplane_id
+    )
+    if not success:
+        raise HTTPException(status_code=404, detail="这个纸飞机不在你的纸篓里哦。")
+
+    return {"message": "已从飞机篓丢弃。"}
 
 @router.get("/my-history", summary="查看我扔出的纸飞机记录", response_model=List[PaperAirplaneResponse])
 def get_my_airplane_history(

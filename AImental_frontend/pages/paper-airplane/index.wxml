@@ -1,41 +1,117 @@
 <!-- pages/paper-airplane/index.wxml -->
 <view class="page-container">
   <view class="sky-bg">
-    <image src="/images/cloud.png" class="cloud cloud-1"></image>
+    <image src="/images/paper-airplane/background.png" class="sky-bg-img" mode="aspectFill"></image>
+  </view>
+
+  <view class="hero-copy">
+    <image class="title-image" src="/images/paper-airplane/title-fly-worries.png" mode="widthFix"></image>
+  </view>
+
+  <view class="guide-row">
+    <image class="guide-image" src="/images/paper-airplane/guide-text.png" mode="widthFix"></image>
   </view>
 
   <view class="airplane-container">
-    <image wx:for="{{airplanes}}" wx:key="id"
-           src="/images/paper_airplane.png"
-           class="airplane"
-           style="top: {{item.top}}%; left: {{item.left}}%; transform: rotate({{item.rotate}}deg);"
-           data-id="{{item.id}}"
-           bindtap="onAirplaneTap">
-    </image>
+    <view wx:for="{{airplanes}}" wx:key="id"
+      class="airplane-hit"
+      style="top: {{item.top}}rpx; left: {{item.left}}rpx; width: {{item.size}}rpx; height: {{item.size}}rpx; transform: rotate({{item.rotate}}deg);"
+      data-id="{{item.id}}"
+      bindtap="onAirplaneTap">
+      <image
+        src="{{item.icon}}"
+        class="airplane-image"
+        mode="aspectFit"
+        style="animation-delay: {{item.delay}}; animation-duration: {{item.duration}};">
+      </image>
+    </view>
   </view>
 
   <view class="actions-bar">
     <button class="throw-button-container" bindtap="onThrowClick">
-      <image src="/images/send_airplane.png" class="throw-button-img"></image>
-      <text class="throw-button-text">扔一个</text>
+      <image src="/images/paper-airplane/throw-button.png" class="throw-button-image" mode="aspectFit"></image>
     </button>
   </view>
 
-  <view class="modal-mask" wx:if="{{showWriteModal}}" bindtap="hideModals"></view>
-  <view class="modal-content write-modal" wx:if="{{showWriteModal}}">
-    <image src="/images/cancle.png" class="modal-cancel-btn" bindtap="hideModals"></image>
-
-    <textarea class="message-input" placeholder="把你的心事写在纸上，然后让它飞远吧..." maxlength="500" value="{{newMessage}}" bindinput="onMessageInput"></textarea>
-    <view class="modal-button" bindtap="sendAirplane">飞出去</view>
+  <view class="basket-entry" bindtap="openBasket">
+    <image class="basket-image" src="/images/paper-airplane/basket.png" mode="aspectFit"></image>
   </view>
 
-  <view class="modal-mask" wx:if="{{showReadModal}}" bindtap="hideModals"></view>
-  <view class="modal-content read-modal" wx:if="{{showReadModal}}">
-    <image src="/images/cancle.png" class="modal-cancel-btn" bindtap="hideModals"></image>
+  <view class="modal-mask" wx:if="{{showWriteModal}}" bindtap="hideModals"></view>
+  <view class="letter-modal write-letter-modal" wx:if="{{showWriteModal}}">
+    <image class="letter-bg" src="/images/paper-airplane/letter-paper-bg-clean.png" mode="aspectFit"></image>
+    <view class="write-letter-close" bindtap="hideModals">×</view>
+    <textarea
+      class="letter-input"
+      placeholder="把想说的话写在这里..."
+      placeholder-class="letter-input-placeholder"
+      maxlength="500"
+      value="{{newMessage}}"
+      bindinput="onMessageInput">
+    </textarea>
+    <view class="letter-actions write-letter-actions">
+      <button class="letter-action letter-action-primary write-letter-send" bindtap="sendAirplane">
+        <text>扔出去</text>
+      </button>
+    </view>
+  </view>
 
-    <scroll-view scroll-y="true" class="message-display">
-      <text>{{openedMessage}}</text>
+  <view class="modal-mask" wx:if="{{showReadModal}}" bindtap="closeReadModal"></view>
+  <view class="letter-modal" wx:if="{{showReadModal}}">
+    <image class="letter-bg" src="/images/paper-airplane/letter-paper-bg-clean.png" mode="aspectFit"></image>
+    <scroll-view scroll-y="true" class="letter-message-scroll">
+      <view class="letter-message">{{openedMessage}}</view>
     </scroll-view>
-    <view class="modal-button" bindtap="hideModals">收起来</view>
+    <view wx:if="{{!openedFromBasket}}" class="letter-actions">
+      <button wx:if="{{openedAirplaneId}}" class="letter-action letter-action-plain" bindtap="collectOpenedAirplane">
+        <text>收下</text>
+      </button>
+      <button class="letter-action letter-action-primary" bindtap="releaseOpenedAirplane">
+        <text>放飞</text>
+      </button>
+    </view>
+    <view wx:else class="letter-actions">
+      <button class="letter-action letter-action-plain" bindtap="returnOpenedAirplaneToBasket">
+        <text>放回纸篓</text>
+      </button>
+      <button class="letter-action letter-action-primary" bindtap="discardCollectedAirplane">
+        <text>丢弃</text>
+      </button>
+    </view>
+  </view>
+
+  <view class="modal-mask" wx:if="{{showBasketModal}}" bindtap="hideModals"></view>
+  <view class="basket-modal" wx:if="{{showBasketModal}}">
+    <view class="basket-close" bindtap="hideModals">×</view>
+    <view class="basket-emblem">
+      <image class="basket-emblem-plane" src="/images/paper-airplane/flying/paper_plane_02_01.png" mode="aspectFit"></image>
+    </view>
+    <view class="basket-modal-title">
+      <view class="basket-title-rule"></view>
+      <text>我的飞机篓</text>
+      <view class="basket-title-rule"></view>
+    </view>
+    <scroll-view scroll-y="true" class="basket-list">
+      <block wx:if="{{collectedAirplanes.length}}">
+        <view
+          wx:for="{{collectedAirplanes}}"
+          wx:key="id"
+          class="basket-message-card {{item.toneClass}}"
+          data-index="{{index}}"
+          bindtap="openCollectedAirplane">
+          <view class="basket-asset-wrap">
+            <image class="basket-asset-image" src="{{item.assetPath}}" mode="aspectFit"></image>
+          </view>
+          <view class="basket-message-body">
+            <view class="basket-message-text">{{item.message}}</view>
+          </view>
+          <text class="basket-message-time">{{item.collectedTimeLabel}}</text>
+        </view>
+      </block>
+      <view wx:else class="basket-empty">
+        <image class="basket-empty-plane" src="/images/paper-airplane/flying/paper_plane_06_01.png" mode="aspectFit"></image>
+        <text>还没有收起的纸飞机</text>
+      </view>
+    </scroll-view>
   </view>
 </view>

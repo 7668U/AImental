@@ -44,6 +44,21 @@ class UserPickedAirplane(Model):
         table_name = 'user_picked_airplanes'
         primary_key = pw.CompositeKey('user', 'airplane')
 
+class UserCollectedAirplane(Model):
+    """
+    记录用户收进飞机篓的纸飞机。
+    """
+    user = ForeignKeyField(User, backref='collected_airplanes', field='id', on_delete='CASCADE')
+    airplane = ForeignKeyField(PaperAirplane, backref='collected_by_users', field='id', on_delete='CASCADE')
+    asset_number = CharField(max_length=16, null=True)
+    asset_path = CharField(max_length=255, null=True)
+    collected_time = DateTimeField(default=datetime.now)
+
+    class Meta:
+        database = airplane_db
+        table_name = 'user_collected_airplanes'
+        primary_key = pw.CompositeKey('user', 'airplane')
+
 
 # ---------------------------------------------------
 # 2. Pydantic Models for API Data Validation
@@ -62,9 +77,19 @@ class PaperAirplaneResponse(BaseModel):
     id: int
     message: str
     create_time: datetime
+    asset_number: Optional[str] = None
+    asset_path: Optional[str] = None
+    collected_time: Optional[datetime] = None
 
     class Config:
         from_attributes = True
+
+class PaperAirplaneCollect(BaseModel):
+    """
+    收进飞机篓时记录当时使用的纸飞机素材。
+    """
+    asset_number: Optional[str] = None
+    asset_path: Optional[str] = None
 
 # ---------------------------------------------------
 # 3. Database Table Access Class (已更新)
@@ -77,7 +102,21 @@ class PaperAirplaneTable:
     def __init__(self, db_connection):
         self.db = db_connection
         # 【已更新】确保在服务启动时能自动创建两个表
-        self.db.create_tables([PaperAirplane, UserPickedAirplane])
+        self.db.create_tables([PaperAirplane, UserPickedAirplane, UserCollectedAirplane])
+        self._ensure_collected_asset_columns()
+
+    def _ensure_collected_asset_columns(self):
+        """
+        给已存在的飞机篓关系表补充素材记忆字段。
+        """
+        table_name = UserCollectedAirplane._meta.table_name
+        existing_columns = {column.name for column in self.db.get_columns(table_name)}
+
+        if 'asset_number' not in existing_columns:
+            self.db.execute_sql(f'ALTER TABLE {table_name} ADD COLUMN asset_number VARCHAR(16)')
+
+        if 'asset_path' not in existing_columns:
+            self.db.execute_sql(f'ALTER TABLE {table_name} ADD COLUMN asset_path VARCHAR(255)')
 
     def throw_airplane(self, user_id: str, message: str) -> PaperAirplane:
         """
@@ -127,6 +166,90 @@ class PaperAirplaneTable:
         except Exception as e:
             print(f"Error recording airplane pickup: {e}")
             return False
+
+    def collect_airplane(
+        self,
+        user_id: str,
+        airplane_id: int,
+        asset_number: Optional[str] = None,
+        asset_path: Optional[str] = None
+    ) -> Optional[dict]:
+        """
+        将已捡起的纸飞机收进当前用户的飞机篓。
+        """
+        airplane = PaperAirplane.get_or_none(PaperAirplane.id == airplane_id)
+        if not airplane or str(airplane.user.id) == str(user_id):
+            return None
+
+        has_picked = UserPickedAirplane.get_or_none(
+            (UserPickedAirplane.user == user_id) &
+            (UserPickedAirplane.airplane == airplane_id)
+        )
+        if not has_picked:
+            return None
+
+        try:
+            collected, created = UserCollectedAirplane.get_or_create(
+                user=user_id,
+                airplane=airplane_id,
+                defaults={
+                    'asset_number': asset_number,
+                    'asset_path': asset_path
+                }
+            )
+
+            if not created and (asset_number or asset_path):
+                should_save = False
+                if asset_number and not collected.asset_number:
+                    collected.asset_number = asset_number
+                    should_save = True
+                if asset_path and not collected.asset_path:
+                    collected.asset_path = asset_path
+                    should_save = True
+                if should_save:
+                    collected.save()
+
+            return self._serialize_collected_airplane(collected)
+        except Exception as e:
+            print(f"Error collecting airplane: {e}")
+            return None
+
+    def get_collected_airplanes(self, user_id: str, page: int = 1, page_size: int = 20) -> list[dict]:
+        """
+        获取当前用户收进飞机篓的纸飞机。
+        """
+        query = (UserCollectedAirplane
+                 .select(UserCollectedAirplane, PaperAirplane)
+                 .join(PaperAirplane)
+                 .where(UserCollectedAirplane.user == user_id)
+                 .order_by(UserCollectedAirplane.collected_time.desc())
+                 .paginate(page, page_size))
+
+        return [self._serialize_collected_airplane(collected) for collected in query]
+
+    def discard_collected_airplane(self, user_id: str, airplane_id: int) -> bool:
+        """
+        从当前用户的飞机篓中移除一架纸飞机，不删除原始纸飞机内容。
+        """
+        deleted_count = (UserCollectedAirplane
+                         .delete()
+                         .where(
+                             (UserCollectedAirplane.user == user_id) &
+                             (UserCollectedAirplane.airplane == airplane_id)
+                         )
+                         .execute())
+        return deleted_count > 0
+
+    def _serialize_collected_airplane(self, collected: UserCollectedAirplane) -> dict:
+        airplane = collected.airplane
+        return {
+            'id': airplane.id,
+            'message': airplane.message,
+            'create_time': airplane.create_time,
+            'asset_number': collected.asset_number,
+            'asset_path': collected.asset_path,
+            'collected_time': collected.collected_time
+        }
 
     def pickup_random_airplane(self, current_user_id: str) -> Optional[PaperAirplane]:
         """

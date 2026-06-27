@@ -307,208 +307,202 @@
 - 已通过群聊向后端工程师提出多图接口需求：`team-chat-database/views/thread-view.md` 中的 `msg-20260625-0004`。
 - 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-25-iteration-009-checkin-photo-grid.md`。
 
-## 2026-06-26 Assessment Result AI Analysis
+## 2026-06-26 00:10 +08:00
 
 用户说明：
 
-- 用户要求查看团队群聊，按产品经理已完成的心理测评模块意见修改前端。
-- 用户进一步明确：测评结果页不要展示“详细解读”和“给你的建议”两个部分，只给出分析后的结果。
+- 用户要求我继续阅读本项目的前端项目角色卡，并成为用户的前端 UI 设计开发师。
 
 当前响应：
 
-- 已阅读群聊 `msg-20260626-0001` 和产品经理 Iteration 010。
-- 已将测评首页从“专业测试 / 趣味测试”两个 tab 改为“心理健康 / 自我人格 / 关系亲密 / 趣味探索”四组 tab。
-- 已兼容后端 `display_group` 字段，并保留 `short_name` 本地映射兜底。
-- 已移除结果页“详细解读”和“给你的建议”两个卡片。
-- 已新增“AI 分析”卡片组，展示当前状态、主要影响维度、可能相关原因、小行动、专业支持、持续记录和安全提醒。
-- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-26-iteration-010-assessment-result-ai-analysis.md`。
+- 已用 UTF-8 重新阅读 `frontend-design-iterations/frontend-ui-designer-role-card.md`，确认角色职责、素材生成规范、fhl Images API 使用边界和安全规则。
+- 已同步阅读 `frontend-design-iterations/README.md`、`decision-log.md`、`backlog.md`、`chat-log.md` 和最近迭代记录。
+- 已阅读产品侧角色卡、产品决策日志、每日打卡三维度和 24 色方案，确认前端优先承接产品方案。
+- 已阅读 `team-chat-database/USAGE.md`、`roles.json`、`thread-view.md`，确认跨角色沟通需要通过群聊留档。
+- 已抽查 `AImental_frontend/app.json`、每日打卡首页、每日打卡记录页和个人页代码，了解当前前端实现骨架。
+- 后续我将以本项目小程序前端 UI 设计开发师身份工作：负责页面结构、视觉层级、交互状态、素材生成、前端实现、联调问题同步和前端迭代记录。
 
-## 2026-06-27 Assessment Intro Icon Cover
+## 2026-06-26 00:33 +08:00
 
 用户说明：
 
-- 用户提供一张问卷介绍页参考图，希望根据该图片风格重新设计每个问卷的封面。
-- 用户随后明确：量表图标素材库已经提供在 `C:\Users\cxj\Desktop\feelyourself\量表图标`，不需要重新生成图片，封面图直接使用量表图标即可。
-- 用户进一步要求封面只保留一整页，不要可翻动；量表介绍精简；所有封面的位置、大小和字体保持一致。
-- 用户最新要求去掉标题下方横线，去掉量表图标外框，并将量表图标下面两个说明部分稍微放大。
+- 用户提供夕阳天台图，要求替换纸飞机页面背景。
+- 用户强调只换背景图，其它元素保持不动，因为上一轮改动把页面改乱了。
+- 用户补充如果不知道原本页面长什么样，可以看 GitHub；随后要求先隐藏飘动云朵。
 
 当前响应：
 
-- 已停止重新生成封面图的方向，并清理误生成的 `covers` 目录和归档目录。
-- 已确认 `量表图标/` 有 18 张 PNG，前端 `AImental_frontend/images/assessment/scale-icons/` 有 19 张 PNG，其中 `bdi-ii.png` 为兼容别名。
-- 已将问卷介绍页改为参考图风格：暖白背景、大标题、中央量表图标、两张放大说明卡和底部橙色胶囊按钮。
-- 已去掉标题下方横线和量表图标外层框，封面保持固定一屏展示。
-- 已确认介绍页直接使用 `scale-icons` 中的量表图标，不使用新生成封面图。
-- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-27-iteration-012-assessment-intro-icon-cover.md`。
+- 已用本地 Git 中的原版纸飞机页面作为基准恢复页面元素。
+- 已确认用户提供图片和当前 `AImental_frontend/images/paper-airplane/background.png` 的 SHA256 一致。
+- 已将 `AImental_frontend/pages/paper-airplane/index.wxml` 中旧云朵背景替换为背景图节点。
+- 已在 `AImental_frontend/pages/paper-airplane/index.wxss` 仅新增 `.sky-bg-img` 全屏展示规则。
+- 按用户要求隐藏飘动云朵，未改纸飞机、按钮、弹窗和 `index.js` 逻辑。
+- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-26-iteration-012-paper-airplane-background-only.md`。
+- 用户随后提供第二张浅色天台背景图，已直接覆盖 `AImental_frontend/images/paper-airplane/background.png`，未再改动页面结构或交互逻辑。
 
-## 2026-06-26 Assessment Home UI Redesign
+## 2026-06-26 03:21 +08:00
 
 用户说明：
 
-- 用户提供心理测评首页参考图和两张已准备好的透明背景插画素材。
-- 用户要求按参考图重新设计心理测评 UI 界面。
+- 用户要求将纸飞机页面重做成参考图效果。
+- 右下角新增可点击飞机篓，用于打开曾经收起的飞机。
+- 需要新增“收飞机”逻辑，并通知后端修改数据库。
+- 用户提供标题、飞机篓和按钮素材；飞行纸飞机素材暂时未找到，先留空缺。
+- 用户随后提供新的无网格透明素材，并要求裁掉标题右侧半截星星。
+- 用户要求背景处理过头后换回原始浅色天台背景。
 
 当前响应：
 
-- 已将用户提供的顶部插画、底部横幅和从参考图裁切的四个分类图标落地到 `AImental_frontend/images/assessment/home/`。
-- 已将心理测评首页重构为顶部 hero、四张分类入口卡、点击展开的测评列表和底部提示横幅。
-- 四个分类卡保留心理健康、自我人格、关系亲密、趣味探索四组，并展示量表缩写摘要和接口计算出的数量。
-- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-26-iteration-011-assessment-home-ui-redesign.md`。
+- 已将标题、飞机篓、按钮素材落地到 `AImental_frontend/images/paper-airplane/`。
+- 已裁掉标题素材右侧半截星星。
+- 已把天空纸飞机改为透明点击热区占位，等待后续素材。
+- 已重做 `AImental_frontend/pages/paper-airplane/index.wxml` 和 `index.wxss`，接入标题图、提示文案、左下按钮素材和右下飞机篓。
+- 已更新 `AImental_frontend/pages/paper-airplane/index.js`，新增打开飞机篓、收进飞机篓逻辑。
+- 已通过群聊向后端同步接口和数据库需求：`msg-20260626-0001`。
+- 已在 `AImental_backend/model/airplane.py` 和 `AImental_backend/router/airplane.py` 中完成最小后端实现，并通过群聊补充验证结果：`msg-20260626-0002`。
+- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-26-iteration-013-paper-airplane-redesign-basket.md`。
+- 用户随后提供 `paper_planes_24_png.zip`，已解压到 `AImental_frontend/images/paper-airplane/flying/`，前端会随机选择纸飞机素材并放在安全点位轻微慢速摆动。
+- 用户提供新的提示小字素材，已保存为 `AImental_frontend/images/paper-airplane/guide-text.png`，并删除原两行普通说明文字。
+- 用户提供新的按钮素材，已保存为 `AImental_frontend/images/paper-airplane/throw-button.png` 并替换左下按钮。
+- 用户反馈提示小字需要更靠近标题，飞机篓稍微变小并右移，按钮左移以拉开距离；已在 `AImental_frontend/pages/paper-airplane/index.wxss` 中完成微调。
 
-## 2026-06-27 Assessment Category Pages
+## 2026-06-26 03:36 +08:00
 
 用户说明：
 
-- 用户要求不要首页最下面的横幅图。
-- 用户指出具体测评内容应进入每个子界面后展示，即点击四个类别跳转到新的 UI 子页面。
-- 用户提供四个分类子页面参考图和分类页顶部素材。
-- 用户要求将前端具体量表图标替换为 `C:\Users\cxj\Desktop\feelyourself\量表图标` 中的素材。
+- 用户要求我阅读本项目的前端项目角色卡，成为用户的前端 UI 设计开发师。
 
 当前响应：
 
-- 已移除心理测评首页底部横幅和首页内展开量表列表。
-- 已新增 `pkgAssessment/category/category` 统一分类子页面，并注册到 `app.json`。
-- 四个分类入口现在跳转到对应子页面，子页面再展示具体量表卡片。
-- 已将 18 个量表图标复制到 `AImental_frontend/images/assessment/scale-icons/`，并为 SDS/BDI-II 做双文件名兼容。
-- 已将分类页顶部素材复制到 `AImental_frontend/images/assessment/category/` 并处理外部棋盘格透明化。
-- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-27-iteration-012-assessment-category-pages.md`。
+- 已阅读 `frontend-design-iterations/frontend-ui-designer-role-card.md`，确认角色职责、素材生成规范、fhl Images API 使用边界、安装检查清单和安全规则。
+- 已同步阅读 `frontend-design-iterations/README.md`、`decision-log.md`、`backlog.md`，确认前端迭代留档规则。
+- 已阅读产品侧角色卡、产品决策日志、需求池和最新 24 色方案，确认前端工作优先承接产品方案。
+- 已抽查 `AImental_frontend/app.json` 和近期前端迭代记录，确认当前小程序主入口为心理咨询、心理测评、心情日记、纸飞机、我的，社区入口已降级。
+- 后续我将以本项目小程序前端 UI 设计开发师身份工作，负责页面结构、视觉层级、交互状态、素材生成、前端实现、联调同步和前端迭代记录。
 
-后续追加：
-
-- 用户要求首页分类卡去掉每个分组的量表英文名和“x 项”数量。
-- 用户要求进入每个组别后的 UI 页面也去掉量表英文名。
-- 已移除首页分类卡中的英文缩写摘要和数量徽标。
-- 已移除分类子页面量表卡片的英文简称 tag，并将趣味探索标题中的括号英文去掉。
-- 首页不再请求量表列表统计数量，分类子页面打开后再加载具体量表。
-
-## 2026-06-27 Frontend Role Card Sync
+## 2026-06-26 03:50 +08:00
 
 用户说明：
 
-- 用户要求我阅读本项目的前端项目角色卡，并成为用户的前端 UI 设计开发师。
+- 用户反馈纸飞机页面打开纸飞机后的展示框仍然简陋。
+- 用户希望改成类似参考图的信纸展开模式：打开是一张纸，中间写手写体内容。
+- 用户希望用 fhl 生图生成所需背景素材，并帮忙改前端 UI。
+- 用户要求去掉“今日小纸条”“来自远方的纸飞机”等不必要小字，按钮也按参考图气质重做。
 
 当前响应：
 
-- 已阅读 `frontend-design-iterations/frontend-ui-designer-role-card.md`。
-- 已同步阅读前端迭代目录说明、前端决策日志、前端待办，以及产品侧角色卡、产品迭代规则、产品决策日志和产品待办。
-- 后续我将以小程序前端 UI 设计开发师身份工作：优先承接产品方案，结合 `AImental_frontend` 现有结构与小程序限制，负责页面结构、视觉层级、交互状态、素材生成、前端实现和迭代记录。
-- 如需跨角色确认页面方案、接口字段、验收截图或联调问题，我会按角色卡先阅读 `team-chat-database/USAGE.md`，再通过团队群聊同步。
+- 已按项目角色卡使用 fhl Images API 尝试生成信纸背景素材。
+- fhl 参考图编辑和纯文本生成均返回 `503 No available compatible accounts`，判断为服务/账户侧暂无兼容账号可用。
+- 为不阻塞前端落地，已本地生成无文字信纸背景素材：`AImental_frontend/images/paper-airplane/letter-paper-bg.png`。
+- 已将读取纸飞机弹窗改成 `letter-modal` 信纸模式，动态内容覆盖在信纸中心，使用楷体/仿宋优先字体栈模拟手写感。
+- 已把底部操作改为“收进纸篓”和“轻轻收起”两个胶囊按钮，删除旧读取弹窗中的标题、副标题和说明小字。
+- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-26-iteration-014-paper-airplane-letter-modal.md`。
 
-## 2026-06-27 Assessment Test Question Style
+## 2026-06-26 04:00 +08:00
 
 用户说明：
 
-- 用户希望把每个测评题目的背景样式改成提供的参考图风格。
-- 用户提供完整答题页视觉参考图和跑步小人素材。
+- 用户提供新的精修信纸 UI 素材，要求使用该素材。
+- 用户要求右上角关闭按钮和底部两个按钮重新设计位置，不能偏。
+- 用户要求两个按钮文案简化为“收下”和“放飞”。
 
 当前响应：
 
-- 已将答题页 `AImental_frontend/pkgAssessment/test.*` 改为暖白卡片式 UI：自定义导航、题目大卡、选项卡、底部进度与上一题/下一题按钮。
-- 已将用户提供的参考图和原始跑步小人归档到 `frontend-design-iterations/assets/assessment-test-question-style/`。
-- 已将跑步小人处理为透明 PNG：`AImental_frontend/images/assessment/test/runner.png`，并用于进度条。
-- 保留原有题目加载、答案结构、滑动校验和提交接口逻辑。
-- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-27-iteration-013-assessment-test-question-style.md`。
+- 已用用户提供的新素材覆盖 `AImental_frontend/images/paper-airplane/letter-paper-bg.png`。
+- 已按新素材比例重新调整信纸弹窗尺寸、关闭按钮位置、正文区域和底部按钮位置。
+- 已将按钮文案改为“收下”和“放飞”。
+- 已新增 `releaseOpenedAirplane()`，右上角关闭和“放飞”共用放飞逻辑，“收下”继续走收藏逻辑。
+- `node --check AImental_frontend/pages/paper-airplane/index.js` 通过。
 
-后续修正：
-
-- 用户指出选项被错误展示为 `0分选项 / 1分选项 / 2分选项 / 3分选项`，并要求把叉叉装饰换成提供的星星素材。
-- 已在 `AImental_frontend/pkgAssessment/test.js` 增加展示修正：遇到内部计分占位时，从题目 `/` 分隔内容中拆出真实选项展示，提交值仍保持原始 score。
-- 已将星星素材处理为透明 PNG：`AImental_frontend/images/assessment/test/sparkle.png`，并替换答题页所有叉形/十字装饰。
-
-## 2026-06-27 Assessment Result Background
+## 2026-06-26 04:04 +08:00
 
 用户说明：
 
-- 用户希望在测评结果分析界面添加背景图。
-- 用户提供暖色背景图素材和当前结果页截图。
+- 用户反馈上一版仍不好看，提供去掉底部按钮槽的自然纸张素材。
+- 用户要求替换新素材，按钮稍微往上一点。
+- 用户要求去掉右上角 `×`，不再需要关闭按钮，“放飞”就是关闭含义。
 
 当前响应：
 
-- 已将背景图落地到 `AImental_frontend/images/assessment/result/result-bg.png`。
-- 已将原始背景图和当前结果页截图归档到 `frontend-design-iterations/assets/assessment-result-background/`。
-- 已在 `AImental_frontend/pkgAssessment/result.wxml` 新增固定背景图层和柔化遮罩层。
-- 已调整 `AImental_frontend/pkgAssessment/result.wxss`，让卡片以半透明暖白底叠在背景上，保留分数、量尺和 AI 分析内容可读性。
-- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-27-iteration-014-assessment-result-background.md`。
+- 已用用户提供的去底槽自然纸素材覆盖 `AImental_frontend/images/paper-airplane/letter-paper-bg.png`。
+- 已从读取弹窗中删除右上角 `×` 按钮和相关样式。
+- 已将底部“收下 / 放飞”按钮作为前端浮层重新设计，整体上移并脱离素材底槽。
+- 当前“放飞”绑定 `releaseOpenedAirplane()`，用于关闭/释放当前纸飞机；“收下”继续绑定收藏逻辑。
+- `node --check AImental_frontend/pages/paper-airplane/index.js` 通过。
 
-## 2026-06-27 Assessment Result Section Icons
+## 2026-06-26 04:12 +08:00
 
 用户说明：
 
-- 用户希望给结果分析图中的其他板块添加背景图标。
-- 用户提供太阳云朵和 AI 小机器人两张候选素材，并询问是否合适。
+- 用户要求删除后端已查看过的纸飞机记录，让它们重新显示为未查看。
+- 用户要求新增 100 条假数据，保证可以连续点击足够多的纸飞机。
+- 用户要求把“扔一个”写信界面也改成刚刚的信纸模式：中间白色纸张区域作为输入框，底部按钮变成“扔出去”。
+- 写信界面需要关闭按钮，用于撤回/不扔了。
 
 当前响应：
 
-- 判断两张素材风格合适：太阳云朵适合陪伴/行动/记录类板块，AI 小机器人适合维度/原因/专业支持等分析类板块。
-- 已将原始素材归档到 `frontend-design-iterations/assets/assessment-result-section-icons/`。
-- 已处理出透明 PNG 并落地到：
-  - `AImental_frontend/images/assessment/result/section-sun.png`
-  - `AImental_frontend/images/assessment/result/section-ai.png`
-- 已在 `AImental_frontend/pkgAssessment/result.js` 为 AI 分析板块配置背景图标。
-- 已在 `AImental_frontend/pkgAssessment/result.wxml` 和 `result.wxss` 中以低透明度水印形式渲染板块背景图标。
-- 安全提醒板块不加装饰，保持风险信息清晰。
-- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-27-iteration-015-assessment-result-section-icons.md`。
+- 已清空 `AImental_backend/db/paper_airplane.db` 中的 `user_picked_airplanes` 表，将已查看/已捡起状态重置为未查看。
+- 已保留 `user_collected_airplanes`，不删除已收进飞机篓的纸飞机。
+- 已新增 100 条系统测试纸飞机；当前 `paper_airplanes` 共 115 条，`user_picked_airplanes` 为 0。
+- 已将写信弹窗改成同款信纸 UI，中间白色便签区域为 `textarea` 输入框。
+- 已将写信弹窗底部按钮改为“扔出去”，并保留轻量关闭按钮。
+- 已校准读信正文区和写信输入区，使其更贴合新信纸素材的中间便签范围。
+- `node --check AImental_frontend/pages/paper-airplane/index.js` 通过。
 
-后续修正：
-
-- 用户反馈素材没有在结果分析板块中明显体现。
-- 已将分析板块背景图标从极淡水印改为右侧明确可见的背景图标，并提高透明度。
-- 已为带图标的文字板块增加右侧留白，避免图标遮挡文字。
-
-## 2026-06-27 Assessment Result Fallback Analysis
+## 2026-06-26 04:15 +08:00
 
 用户说明：
 
-- 用户反馈成人依恋等测试结果页只显示“焦虑型”和空的“分析结果”，中间留有大块空白，询问是什么情况。
+- 用户反馈信纸周围仍有一块大的白底。
+- 用户反馈写信界面的 `×` 很丑，希望模仿飞机篓的关闭符号。
 
 当前响应：
 
-- 已定位原因：后端目前只为 SDS/BDI-II 类结果生成 `ai_analysis`，AAS 这类分类测评只返回 `result_interpretation`、`result_recommendation` 和 `result_details`。
-- 因上一轮结果页改为优先渲染 AI 分析板块，非 AI 测评没有进入原始解读展示，因此出现空分析卡。
-- 已在 `AImental_frontend/pkgAssessment/result.js` 增加兜底分析结构：无 AI 分析时，用量表自带解读、建议和维度得分生成“结果分析”。
-- 已在 `AImental_frontend/pkgAssessment/result.wxml` 增加维度得分渲染，并让分析卡标题在 `AI 分析` / `结果分析` 间切换。
-- 已在 `AImental_frontend/pkgAssessment/result.wxss` 修复结果页继承全局 `.container` 的 `space-between` 和 `height: 100%` 导致的大块空白问题。
+- 已对 `AImental_frontend/images/paper-airplane/letter-paper-bg.png` 做透明化处理，去掉外圈近白色矩形画布，保留信纸本体和阴影。
+- 已将写信界面关闭控件从默认 `button` 改成普通 `view`，样式改为和飞机篓类似的轻量橙色 `×`。
+- 已确认 `letter-paper-bg.png` 为 `1086x1448 RGBA PNG`，四角 alpha 为 0。
+- `node --check AImental_frontend/pages/paper-airplane/index.js` 通过。
 
-## 2026-06-27 Frontend UI Designer Role Confirmed
+## 2026-06-26 04:21 +08:00
 
 用户说明：
 
-- 用户要求我阅读本项目的前端项目角色卡，并成为用户的前端 UI 设计开发师。
+- 用户反馈打开纸飞机后的正文会飘出便签外，没有被控制在中间白色便签内。
+- 用户反馈外围仍像有白色光晕/白底。
+- 用户提供新的无背景信纸素材。
 
 当前响应：
 
-- 已阅读 `frontend-design-iterations/frontend-ui-designer-role-card.md`。
-- 已同步阅读前端迭代目录说明、前端决策日志、前端待办，以及产品侧角色卡、产品迭代说明和产品决策日志。
-- 后续我将以小程序前端 UI 设计开发师身份工作：优先承接 `product-design-iterations/` 的产品方案，结合 `AImental_frontend` 现有结构与小程序实现限制，负责页面结构、视觉层级、交互状态、素材生成、前端实现和迭代记录。
-- 涉及跨角色确认页面方案、接口字段、验收截图或联调问题时，将先按角色卡阅读 `team-chat-database/USAGE.md`，再通过团队群聊同步。
+- 已基于用户新素材生成 `AImental_frontend/images/paper-airplane/letter-paper-bg-clean.png`。
+- 已通过边缘连通区域抠图方式移除导出图里的白色/棋盘预览背景，避免外围白底。
+- 写信和读信弹窗均改为引用 `letter-paper-bg-clean.png`。
+- 已将读信正文节点从 `text` 改为块级 `view`，并收窄正文区域、降低字号、加入强制换行规则。
+- 已新增 `formatLetterMessage()`，打开纸飞机时按约 13 个字一行自动断行，避免长句飘出便签。
+- `node --check AImental_frontend/pages/paper-airplane/index.js` 通过。
 
-## 2026-06-27 IAS Scoring And Null Result Fix
+## 2026-06-26 Paper Airplane Motion Follow-up
 
 用户说明：
-
-- 用户反馈互动焦虑量表完成后显示为“交往焦虑量表”。
-- 用户反馈结果页和历史记录里等级显示 `null`，分析结果区域没有内容。
+- “扔一个”按钮需要上移到天空位置。
+- 天空纸飞机不要颤抖，只保留低速漂移和轻微旋转。
+- 纸飞机需要重新检查，不能碰到已有标题、小字、按钮、飞机篓等元素。
 
 当前响应：
+- 已将纸飞机节点拆成固定点击热区和内部动画图片，避免动画覆盖基础定位。
+- 已将纸飞机动画从 margin 摆动改为慢速 `translate3d` 漂移和轻微旋转，节奏拉长到 12-16 秒。
+- 已把纸飞机安全点位从百分比改为固定 rpx 坐标，减少不同屏幕高度下碰到 UI 的风险。
+- 已将“扔一个”按钮上移到左侧天空偏下位置，并与右下飞机篓拉开距离。
+- 已用脚本按 1334rpx 和 1624rpx 估算高度检查 6 个纸飞机活动范围，未发现与标题、小字、按钮、飞机篓重叠。
 
-- 已定位后端 IAS 数据名与前端展示口径不一致，已统一为“互动焦虑量表”。
-- 已定位后端反向计分通用逻辑错误：旧逻辑使用 `1 - score`，不适合 IAS 的 1-5 分选项，导致总分低于量表最小分并无法匹配解释区间。
-- 已将反向计分修为按选项实际 `min_score + max_score - score` 计算，并兼容题目级反向计分字段。
-- 已为历史列表和历史详情增加后端自愈重算，异常旧记录再次请求时会被修复。
-- 已为结果页和历史页增加前端防空展示，不再裸露 `null`。
-- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-27-iteration-017-ias-scoring-null-result-fix.md`。
-
-## 2026-06-27 Assessment Go Test Button Asset
+## 2026-06-26 Paper Airplane Grounded Basket
 
 用户说明：
-
-- 用户希望将测评入口中“切换到下一个量表/进入量表”的箭头全部替换为第一张图中的高清“去测试”按钮素材。
-- 用户提供当前首页分类卡和分类量表列表截图作为替换范围参考。
+- 用户希望“扔一个”按钮放到页面差不多中间，纸飞机篓放在按钮正下方，并继续往下移动，像放在地板上一样。
+- 用户随后反馈还要“再往下很多，放到地上”。
 
 当前响应：
-
-- 已将用户原始素材归档到 `frontend-design-iterations/assets/assessment-go-test-button/go-test-source.png`。
-- 原始素材为截图式白底图，直接使用会带白色边缘；已按参考样式重新绘制透明高清 PNG：`AImental_frontend/images/assessment/common/go-test-button.png`。
-- 已将测评首页分类卡右侧箭头替换为图片按钮。
-- 已将分类页量表卡右侧圆形箭头和趣味探索页“去测试”CSS 按钮统一替换为图片按钮。
-- 答题页“下一题”的箭头属于题目翻页操作，本轮未改为“去测试”按钮。
+- 已将 `.actions-bar` 改为水平居中，并放在页面中部偏下位置。
+- 已将 `.basket-entry` 改为水平居中，并把飞机篓下压到 `top: 1120rpx`，让篮子更贴近地板区域。
+- 已根据后续反馈，把“扔一个”按钮再下移一点，并从 `324rpx x 124rpx` 放大到 `368rpx x 140rpx`。
+- 已重新调整天空纸飞机安全点位，避开居中按钮和下移后的飞机篓。
+- 已新增迭代记录：`frontend-design-iterations/iterations/2026-06-26-iteration-015-paper-airplane-grounded-basket.md`。

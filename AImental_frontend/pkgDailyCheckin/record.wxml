@@ -3,12 +3,6 @@
     <view class="nav-row" style="height: {{navBarHeight}}px;">
       <view class="nav-button nav-back" bindtap="goBack">‹</view>
       <view class="nav-title">{{navTitle}}</view>
-      <view class="nav-actions">
-        <view class="nav-button nav-icon-button" bindtap="goToStatistics">
-          <image class="nav-icon" src="/images/icons/icon-report.png" mode="aspectFit"></image>
-        </view>
-        <view class="nav-button nav-more" bindtap="showMoreActions">•••</view>
-      </view>
     </view>
   </view>
 
@@ -19,7 +13,7 @@
           <view class="hero-title">{{isLocked ? '回看那天心情' : '记录今日心情'}}</view>
           <view class="hero-subtitle">看看这些记录，能想起那是怎样的一天吗？</view>
         </view>
-        <image class="hero-art" src="/images/daily-checkin/record/banner-art.png" mode="aspectFit"></image>
+        <image class="hero-art" src="/images/daily-checkin/record/banner-art-sun.png" mode="aspectFit"></image>
       </view>
 
       <view class="section-card mood-section">
@@ -51,7 +45,6 @@
             <image class="section-icon" src="/images/daily-checkin/record/section/status.png" mode="aspectFit"></image>
             <view class="section-title">状态</view>
           </view>
-          <view class="status-hint">最多选 3 个</view>
         </view>
         <view class="status-grid">
           <view
@@ -118,7 +111,6 @@
 
         <view id="photo-section" class="journal-tools">
           <view class="photo-header">
-            <view class="photo-title">照片</view>
             <view class="photo-count">{{photos.length}}/{{maxPhotos}}</view>
           </view>
           <view class="photo-grid">

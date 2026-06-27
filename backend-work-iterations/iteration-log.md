@@ -101,34 +101,55 @@ Next:
 - Frontend can call `image_urls` directly from all check-in query/create/update responses.
 - Physical cleanup of replaced/deleted uploaded files remains a possible later maintenance task.
 
-## 2026-06-26 - WeChat App Config Rewritten
-
-Status: Runtime configuration recreated.
-
-Summary:
-- Recreated `AImental_backend/.env` after it was missing.
-- Wrote the provided WeChat Mini Program AppID and AppSecret back into backend runtime configuration.
-
-Next:
-- Backend dotenv loading and Python compile checks have passed.
-
-## 2026-06-26 - Assessment Grouping And AI Analysis
+## 2026-06-27 - HEPAI LLM Migration and Community Backend Pause
 
 Status: Completed.
 
 Summary:
-- Added four-group display metadata to assessment list/detail responses.
-- Added deterministic SDS / BDI-II AI analysis with emotion, interest, body, cognition, and risk dimensions.
-- Q9 risk is handled separately and escalates support wording for medium/high risk.
-- Submit and history/detail responses now expose both `result_details.ai_analysis` and top-level `ai_analysis`.
-- Fixed APS JSON internal short name from `TPS` to `APS`.
-- Added fallback defaults for empty assessment category/type metadata.
+- Added a shared HEPAI OpenAI-compatible LLM config for the main backend.
+- Migrated all backend text LLM call sites from Moonshot model names to `HEPAI_MODEL`.
+- Configured `AImental_backend/.env` with HEPAI base URL, the temporary API key, and `hepai/deepseek-v4-pro`.
+- Added `ENABLE_COMMUNITY_BACKEND=false` and used it to temporarily disable the heart/community backend surface.
+- Stopped registering the `/community` router while disabled.
+- Skipped AI character seeding, startup schedule generation, and background worker community jobs while disabled.
+- Changed `/users/me/unlock-community` to return 503 while the community module is paused.
 
 Verification:
-- Backend py_compile passed for assessment model and router.
-- Model-level checks verified list grouping, SDS detail metadata, AI analysis structure, and Q9 risk handling.
-- Temporary SDS record create/response/cleanup verification passed.
-- Pydantic response model validation passed for assessment list items and SDS response payloads.
+- `py_compile` passed in the backend virtual environment for modified backend modules.
+- HEPAI client initialization passed and `hepai/deepseek-v4-pro` was found in `client.models.list()`.
+- Importing `main.app` showed no registered paths containing `community`.
+- Running `background_worker.py` with the flag disabled exited immediately without starting community scheduling.
 
 Next:
-- Frontend can switch assessment tabs to `display_group` and render AI analysis from `result_details.ai_analysis` or top-level `ai_analysis`.
+- When the community feature returns, set `ENABLE_COMMUNITY_BACKEND=true` and re-check startup seeding, schedule generation, worker jobs, and frontend integration.
+
+## 2026-06-27 - Analysis Report Prompt Cleanup
+
+Status: Completed.
+
+Summary:
+- Split the daily check-in AI analysis response into `summary_text` and `report_text`.
+- Reworked the four analysis prompts to produce a short, salient card summary plus a warmer detailed report.
+- Removed role self-introductions, letter-style openings, Markdown headings, separators, and bold markers from the desired report style.
+- Added response JSON enforcement and a cleanup fallback that strips common Markdown artifacts before returning text.
+- Versioned AI report cache keys to `v3` so old AI-heavy cached reports are not reused.
+
+Verification:
+- `python -m py_compile AImental_backend/LLM.py AImental_backend/router/analysis.py` passed.
+
+## 2026-06-27 - Analysis Report Module Boundaries
+
+Status: Completed.
+
+Summary:
+- Tightened the four daily check-in AI report prompts so each module analyzes a distinct slice of data.
+- Added module-specific AI input summaries:
+  - mood only sees mood, mood family, valence, and energy.
+  - tag-mood only sees status-to-mood/mood-family pairings.
+  - word-cloud only sees text frequency and the mood attached to those text records.
+  - color only sees color, color group, and tone.
+- Bumped AI report cache keys to `v4` so prior cross-topic reports are not reused.
+
+Verification:
+- Backend venv `py_compile` passed for `LLM.py` and `router/analysis.py`.
+- Sample focus summaries confirmed the four modules no longer pass color/status/text fields into unrelated report types.
