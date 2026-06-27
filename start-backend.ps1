@@ -8,6 +8,9 @@ $WorkerPidFile = Join-Path $Logs "worker.pid"
 
 New-Item -ItemType Directory -Force -Path $Logs | Out-Null
 
+$env:PYTHONUTF8 = "1"
+$env:PYTHONIOENCODING = "utf-8"
+
 function Start-ManagedProcess {
     param(
         [Parameter(Mandatory = $true)][string]$FilePath,

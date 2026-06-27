@@ -3,6 +3,7 @@ const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 
 const SERVER_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 const API_BASE_URL = `${SERVER_BASE_URL}/users`;
+const REQUEST_TIMEOUT = 8000;
 
 Page({
   data: {
@@ -54,13 +55,14 @@ Page({
       url: `${API_BASE_URL}/me/info`,
       method: 'GET',
       header: { 'Authorization': `Bearer ${token}` },
+      timeout: REQUEST_TIMEOUT,
       success: (res) => {
         if (res.statusCode === 200) {
           const data = res.data;
           let genderIndex = 2;
           if (data.gender === 1) genderIndex = 0;
           if (data.gender === 2) genderIndex = 1;
-          const cachedUserInfo = wx.getStorageSync('userInfo');
+          const cachedUserInfo = wx.getStorageSync('userInfo') || {};
           const profile = {
             nickname: data.nickname || '',
             birthday: data.birthday || '请选择您的生日',
@@ -70,7 +72,15 @@ Page({
           this.setData({ ...profile, _originalData: profile });
         }
       },
-      complete: () => { wx.hideLoading(); }
+      fail: (err) => {
+        console.error('fetchUserInfo failed:', err);
+      },
+      complete: (res) => {
+        wx.hideLoading();
+        if (res && res.errMsg && res.errMsg.indexOf('fail') !== -1) {
+          wx.showToast({ title: '加载失败，请检查后端服务', icon: 'none' });
+        }
+      }
     });
   },
 
@@ -82,6 +92,7 @@ Page({
       method: 'PUT',
       header: { 'Authorization': `Bearer ${token}` },
       data: updateData,
+      timeout: REQUEST_TIMEOUT,
       success: (res) => {
         if (res.statusCode === 200) {
           wx.showToast({ title: '保存成功', icon: 'success' });

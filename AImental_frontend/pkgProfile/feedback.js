@@ -9,8 +9,8 @@ Page({
    * 页面的初始数据
    */
   data: {
-    statusBarHeight: 0,
-    navBarHeight: 0,
+    navTop: 0,
+    navHeight: 0,
     feedbackType: 'optimization', // 'optimization' 或 'bug'
     content: '',
   },
@@ -19,11 +19,29 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    const systemInfo = wx.getSystemInfoSync();
-    const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+    this.setNavSize();
+  },
+
+  setNavSize() {
+    const fallback = { statusBarHeight: 24 };
+    let systemInfo = fallback;
+    let menuButtonInfo = null;
+
+    try {
+      systemInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
+      menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+    } catch (e) {
+      menuButtonInfo = null;
+    }
+
+    const statusBarHeight = systemInfo.statusBarHeight || fallback.statusBarHeight;
+    const navHeight = menuButtonInfo
+      ? menuButtonInfo.height + (menuButtonInfo.top - statusBarHeight) * 2
+      : 44;
+
     this.setData({
-      statusBarHeight: systemInfo.statusBarHeight,
-      navBarHeight: menuButtonInfo.height + (menuButtonInfo.top - systemInfo.statusBarHeight) * 2
+      navTop: statusBarHeight,
+      navHeight
     });
   },
 
@@ -31,6 +49,10 @@ Page({
    * 返回上一页
    */
   goBack() {
+    wx.navigateBack({ delta: 1 });
+  },
+
+  navigateBack() {
     wx.navigateBack({ delta: 1 });
   },
 

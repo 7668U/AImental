@@ -1,48 +1,61 @@
-<view class="page-container">
-  <view class="custom-nav" style="padding-top: {{statusBarHeight}}px; height: {{navBarHeight}}px;">
-    <image class="nav-back-button" src="/images/left.png" mode="aspectFit" bindtap="goBack"></image>
-    <view class="nav-title">意见反馈</view>
+<view class="feedback-page">
+  <image class="page-bg" src="/images/profile/feedback-bg.png" mode="scaleToFill"></image>
+
+  <view class="custom-nav-wrapper" style="padding-top: {{navTop}}px;">
+    <view class="custom-nav" style="height: {{navHeight}}px;">
+      <view class="nav-left" bindtap="navigateBack">
+        <view class="nav-back-icon"></view>
+      </view>
+      <view class="nav-center">
+        <text class="nav-title">意见反馈</text>
+      </view>
+      <view class="nav-right"></view>
+    </view>
   </view>
 
-  <view class="main-content" style="padding-top: {{statusBarHeight + navBarHeight}}px;">
-    
-    <view class="feedback-section">
-      <view class="section-title">
-        <text style="font-weight: bold;">反馈类型</text>
-      </view>
+  <scroll-view class="main-content" scroll-y enhanced show-scrollbar="{{false}}" style="padding-top: {{navHeight + navTop}}px;">
+    <view class="hero-spacer"></view>
+
+    <view class="feedback-card type-card">
+      <view class="section-title">反馈类型</view>
       <view class="type-selector">
-        <view 
-          class="type-option {{feedbackType === 'optimization' ? 'active' : ''}}" 
-          bindtap="switchType" 
-          data-type="optimization">
+        <view
+          class="type-option {{feedbackType === 'optimization' ? 'active' : ''}}"
+          bindtap="switchType"
+          data-type="optimization"
+        >
           优化意见
         </view>
-        <view 
-          class="type-option {{feedbackType === 'bug' ? 'active' : ''}}" 
-          bindtap="switchType" 
-          data-type="bug">
+        <view
+          class="type-option {{feedbackType === 'bug' ? 'active' : ''}}"
+          bindtap="switchType"
+          data-type="bug"
+        >
           功能异常
         </view>
       </view>
     </view>
 
-    <view class="feedback-section">
-      <view class="section-title" style="font-weight: bold;">
-        {{ feedbackType === 'optimization' ? '建议内容' : '问题描述' }}
+    <view class="feedback-card content-card">
+      <view class="section-title">
+        {{feedbackType === 'optimization' ? '建议内容' : '问题描述'}}
       </view>
       <view class="textarea-wrapper">
-        <textarea 
+        <textarea
           class="content-textarea"
           value="{{content}}"
           bindinput="handleTextareaInput"
           placeholder="请详细描述您的问题或建议，我们将及时跟进处理"
-          maxlength="100">
-        </textarea>
+          placeholder-class="textarea-placeholder"
+          maxlength="100"
+          cursor-spacing="24"
+        ></textarea>
         <view class="char-counter">{{content.length}}/100</view>
       </view>
     </view>
 
-    <button class="submit-btn" bindtap="submitFeedback">提交反馈</button>
-
-  </view>
+    <button class="submit-btn" hover-class="submit-btn-hover" bindtap="handleSubmit">
+      提交反馈
+    </button>
+  </scroll-view>
 </view>

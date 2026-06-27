@@ -6,7 +6,7 @@
 
   <view class="top-safe" style="height: {{topSafeHeight}}px;"></view>
 
-  <view class="profile-hero" bindtap="onChangeAvatar">
+  <view class="profile-hero">
     <view class="avatar-ring">
       <image class="avatar" src="{{userInfo.avatar_url || '/images/default-avatar.png'}}" mode="aspectFill"></image>
     </view>
