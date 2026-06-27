@@ -15,7 +15,16 @@
 <view class="main-content" style="padding-top: {{navHeight + navTop}}px;">
   
   <view class="controls-wrapper">
-    <view class="page-title">心情分析报告</view>
+    <view class="page-title-wrap">
+      <view class="title-deco title-deco-left">
+        <view class="title-petal"></view>
+        <view class="title-line"></view>
+      </view>
+      <view class="page-title">心情分析报告</view>
+      <view class="title-deco title-deco-right">
+        <view class="title-line"></view>
+      </view>
+    </view>
     <view class="time-selector">
       <view class="time-option {{selectedTimeRange === 'monthly' ? 'active' : ''}}" bind:tap="openPicker" data-range="monthly">
         {{ periodLabels.monthly }}
@@ -29,20 +38,32 @@
     </view>
     <view class="analysis-grid">
       <view class="analysis-btn {{selectedAnalysis === 'mood_distribution' ? 'active' : ''}}" bind:tap="selectAnalysis" data-type="mood_distribution">
-        <image class="btn-icon" src="/images/daily-checkin/analysis/circle.png" mode="aspectFit"></image>
-        <text class="btn-text">情绪分布</text>
+        <image class="btn-icon" src="/images/daily-checkin/analysis/report-mood-distribution.png" mode="aspectFit"></image>
+        <view class="analysis-copy">
+          <text class="btn-text">情绪分布</text>
+          <text class="btn-desc">了解情绪占比</text>
+        </view>
       </view>
       <view class="analysis-btn {{selectedAnalysis === 'tag_correlation' ? 'active' : ''}}" bind:tap="selectAnalysis" data-type="tag_correlation">
-        <image class="btn-icon" src="/images/daily-checkin/analysis/bar.png" mode="aspectFit"></image>
-        <text class="btn-text">状态关联</text>
+        <image class="btn-icon" src="/images/daily-checkin/analysis/report-status-correlation.png" mode="aspectFit"></image>
+        <view class="analysis-copy">
+          <text class="btn-text">状态关联</text>
+          <text class="btn-desc">发现状态关系</text>
+        </view>
       </view>
       <view class="analysis-btn {{selectedAnalysis === 'word_cloud' ? 'active' : ''}}" bind:tap="selectAnalysis" data-type="word_cloud">
-        <image class="btn-icon" src="/images/daily-checkin/analysis/cloud.png" mode="aspectFit"></image>
-        <text class="btn-text">文字分析</text>
+        <image class="btn-icon" src="/images/daily-checkin/analysis/report-text-analysis.png" mode="aspectFit"></image>
+        <view class="analysis-copy">
+          <text class="btn-text">文字分析</text>
+          <text class="btn-desc">解析心情记录</text>
+        </view>
       </view>
       <view class="analysis-btn {{selectedAnalysis === 'color_palette' ? 'active' : ''}}" bind:tap="selectAnalysis" data-type="color_palette">
-        <image class="btn-icon" src="/images/daily-checkin/analysis/color.png" mode="aspectFit"></image>
-        <text class="btn-text">情绪色卡</text>
+        <image class="btn-icon" src="/images/daily-checkin/analysis/report-color-card.png" mode="aspectFit"></image>
+        <view class="analysis-copy">
+          <text class="btn-text">情绪色卡</text>
+          <text class="btn-desc">探索情绪色彩</text>
+        </view>
       </view>
     </view>
   </view>
@@ -53,13 +74,44 @@
     </view>
     <view class="result-wrapper" wx:if="{{analysisResult && !isLoading}}">
       <view class="chart-container">
-        <ec-canvas id="analysis-chart" canvas-id="mychart" ec="{{ ec }}"></ec-canvas>
+        <view class="chart-header">
+          <view class="chart-title-wrap">
+            <image class="leaf-mark" src="/images/daily-checkin/analysis/report-leaf.png" mode="aspectFit"></image>
+            <text wx:if="{{selectedAnalysis === 'mood_distribution'}}" class="chart-title">情绪分布总览</text>
+            <text wx:elif="{{selectedAnalysis === 'tag_correlation'}}" class="chart-title">状态关联总览</text>
+            <text wx:elif="{{selectedAnalysis === 'word_cloud'}}" class="chart-title">文字分析总览</text>
+            <text wx:elif="{{selectedAnalysis === 'color_palette'}}" class="chart-title">情绪色卡总览</text>
+          </view>
+          <image class="chart-star" src="/images/daily-checkin/analysis/report-star.png" mode="aspectFit"></image>
+        </view>
+        <view class="chart-canvas-wrap">
+          <ec-canvas id="analysis-chart" canvas-id="mychart" ec="{{ ec }}"></ec-canvas>
+        </view>
       </view>
-      <view class="result-card">
-        <view class="card-title">心情解读</view>
+      <view wx:if="{{selectedAnalysis === 'color_palette'}}" class="color-card-preview">
+        <view wx:if="{{isColorCardLoading}}" class="color-card-loading">
+          <view class="color-card-loading-dot"></view>
+          <text>专属色卡产生中...</text>
+        </view>
+        <view wx:elif="{{colorCardResult && colorCardResult.imageUrl}}" class="color-card-image-wrap" bindtap="previewColorCardImage">
+          <image class="color-card-image" src="{{colorCardResult.imageUrl}}" mode="aspectFill"></image>
+          <view class="color-card-name-layer">
+            <view class="color-card-name">{{colorCardResult.naming_result.color_name}}</view>
+          </view>
+        </view>
+        <view wx:elif="{{colorCardError}}" class="color-card-error">{{colorCardError}}</view>
+      </view>
+      <view class="result-card interpretation-card">
+        <image class="interpretation-deco" src="/images/daily-checkin/analysis/report-sun-cloud.png" mode="aspectFit"></image>
+        <view class="card-title">
+          <image class="heart-mark" src="/images/daily-checkin/analysis/report-heart.png" mode="aspectFit"></image>
+          <text>心情解读</text>
+        </view>
+        <view class="card-divider"></view>
         <text class="card-content" user-select="{{true}}">{{ analysisResult.interpretation }}</text>
       </view>
       <view class="result-card ai-card">
+        <image class="ai-deco" src="/images/daily-checkin/analysis/report-ai-deco.png" mode="aspectFit"></image>
         <view class="card-title">
           <image class="ai-icon" src="/images/daily-checkin/analysis/robot.png" mode="aspectFit"></image>
           <text>AI 分析报告</text>

@@ -145,8 +145,9 @@ Page({
     const { date, hasCheckin } = e.detail;
     
     if (hasCheckin) {
+      const mode = this.isWithinRecentDays(date, 3) ? 'edit' : 'view';
       wx.navigateTo({
-        url: `/pkgDailyCheckin/record?mode=view&date=${date}`
+        url: `/pkgDailyCheckin/record?mode=${mode}&date=${date}`
       });
     } else {
       const today = new Date();
@@ -161,6 +162,16 @@ Page({
         });
       }
     }
+  },
+
+  isWithinRecentDays(dateStr, days) {
+    const target = new Date(`${dateStr}T00:00:00`);
+    if (Number.isNaN(target.getTime())) return false;
+
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const diffDays = Math.floor((todayStart.getTime() - target.getTime()) / (24 * 60 * 60 * 1000));
+    return diffDays >= 0 && diffDays < days;
   },
 
   goToStatistics() {

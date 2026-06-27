@@ -237,6 +237,86 @@ class CheckinTable:
         print(f"Dummy data generation complete. Created {created_count} new records.")
         return {"message": f"Process complete. Created {created_count} new records."}
 
+    def seed_five_days_for_month(
+        self,
+        user_id: str,
+        year: Optional[int] = None,
+        month: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """
+        Creates up to five deterministic check-ins in a month for local analysis testing.
+        Existing days are kept intact and counted toward the five-day target.
+        """
+        today = datetime.datetime.now()
+        target_year = year or today.year
+        target_month = month or today.month
+        num_days = calendar.monthrange(target_year, target_month)[1]
+        seed_days = [day for day in [1, 2, 3, 4, 5] if day <= num_days]
+
+        seed_rows = [
+            {
+                "mood": "平静",
+                "tags": "学习,放空",
+                "color": "#8BB8FF",
+                "text_content": "今天像一小片晴空，慢慢把心里的声音整理清楚。",
+            },
+            {
+                "mood": "放松",
+                "tags": "充电,宅家",
+                "color": "#8FD7A5",
+                "text_content": "给自己留了一点安静时间，像把窗户打开透了透气。",
+            },
+            {
+                "mood": "期待",
+                "tags": "元气满满,户外",
+                "color": "#FFB35C",
+                "text_content": "有一点新的期待冒出来，整个人也亮了一点。",
+            },
+            {
+                "mood": "疲惫",
+                "tags": "低电量,勿扰",
+                "color": "#91A7B4",
+                "text_content": "身体有点累，但我还是认真记下了今天的感受。",
+            },
+            {
+                "mood": "满足",
+                "tags": "美食,娱乐",
+                "color": "#FFE08A",
+                "text_content": "一点小小的满足感，让这一天有了温柔的收尾。",
+            },
+        ]
+
+        created_dates = []
+        skipped_dates = []
+        for index, day in enumerate(seed_days):
+            target_date_str = f"{target_year}-{target_month:02d}-{day:02d}"
+            if self.get_checkin_by_date(user_id, target_date_str):
+                skipped_dates.append(target_date_str)
+                continue
+
+            checkin_dt = datetime.datetime.combine(
+                datetime.date(target_year, target_month, day),
+                datetime.time(12, 0),
+            )
+            checkin_timestamp = int(checkin_dt.timestamp())
+            payload = enrich_checkin_payload({
+                "user_id": user_id,
+                **seed_rows[index],
+                "timestamp": checkin_timestamp,
+                "updated_at": checkin_timestamp,
+            })
+            Checkin.create(**payload)
+            created_dates.append(target_date_str)
+
+        return {
+            "created_count": len(created_dates),
+            "created_dates": created_dates,
+            "skipped_dates": skipped_dates,
+            "target_total_days": len(seed_days),
+            "year": target_year,
+            "month": target_month,
+        }
+
     def _prepare_checkin_payload(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         data = enrich_checkin_payload(payload)
         if "image_urls" in data or "image_url" in data:

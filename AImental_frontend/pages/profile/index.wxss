@@ -1,63 +1,149 @@
-/* /pages/profile/index.wxss (匹配新WXML的最终版) */
 page {
-  /* 新增样式以实现垂直居中 */
-  height: 100vh; /* 让页面容器占满整个屏幕高度 */
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* 核心：将所有内容作为一个整体垂直居中 */
-
-  /* 保留原有样式 */
-  background-color: #F9F7F3;
+  min-height: 100%;
+  background: #fff8ed;
+  color: #3f3229;
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
 }
 
-/* 1. 单独给需要内缩的元素添加左右边距 */
-.user-info-top {
+.profile-page {
+  position: relative;
+  min-height: 100vh;
+  padding: 0 44rpx calc(190rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255, 210, 134, 0.38) 0, rgba(255, 210, 134, 0.18) 18%, rgba(255, 210, 134, 0) 34%),
+    radial-gradient(circle at 92% 38%, rgba(255, 255, 255, 0.82) 0, rgba(255, 255, 255, 0.42) 22%, rgba(255, 255, 255, 0) 38%),
+    linear-gradient(180deg, #fff4dd 0%, #fffaf4 45%, #ffffff 100%);
+}
+
+.top-safe {
+  height: 72px;
+}
+
+.ambient {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.ambient-left {
+  left: -84rpx;
+  top: 210rpx;
+  width: 330rpx;
+  height: 330rpx;
+  background: rgba(255, 220, 150, 0.2);
+}
+
+.ambient-right {
+  right: -140rpx;
+  top: 360rpx;
+  width: 320rpx;
+  height: 320rpx;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.spark {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 34rpx;
+  line-height: 1;
+}
+
+.spark-one {
+  left: 252rpx;
+  top: 330rpx;
+}
+
+.spark-two {
+  right: 166rpx;
+  top: 212rpx;
+}
+
+.profile-hero {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 60rpx 40rpx;
+  padding-top: 24rpx;
+}
+
+.avatar-ring {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  padding: 10rpx;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 18rpx 36rpx rgba(184, 116, 39, 0.12);
 }
 
 .avatar {
-  width: 170rpx;
-  height: 170rpx;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-  border: 4rpx solid #eee;
-  margin-bottom: 24rpx;
+  display: block;
+  background: #ffe1a8;
 }
 
 .nickname {
-  font-size: 40rpx;
-  font-weight: 500;
-  color: #303133;
+  max-width: 620rpx;
+  margin-top: 32rpx;
+  font-size: 44rpx;
+  line-height: 1.18;
+  font-weight: 800;
+  color: #4b392c;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0;
 }
 
-/* 2. 让菜单列表的背景和边框都为0，实现贴边 */
-.menu-list {
-  background-color: #ffffff;
-  margin: 0 0 30rpx 0; 
-  padding: 0; /* 确保自身没有内边距 */
-  border-radius: 0;
+.profile-slogan {
+  margin-top: 16rpx;
+  font-size: 27rpx;
+  line-height: 1.35;
+  color: #aa6c35;
+  text-align: center;
+  letter-spacing: 0;
 }
 
-/* 3. 给菜单项的内容添加内边距，防止文字和图标贴边 */
-.menu-item {
-  display: flex;
-  align-items: center; /* 修正垂直居中 */
-  padding: 55rpx 40rpx; 
+.heart-mark {
+  margin-top: 16rpx;
+  color: #ffad71;
+  font-size: 28rpx;
+  line-height: 1;
+}
+
+.menu-card {
   position: relative;
+  z-index: 2;
+  margin-top: 34rpx;
+  padding: 24rpx 40rpx;
+  border-radius: 40rpx;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 18rpx 44rpx rgba(142, 98, 50, 0.09);
+  box-sizing: border-box;
 }
 
-/* 使用伪元素创建下划线，并控制其左右边距 */
+.menu-item {
+  position: relative;
+  min-height: 124rpx;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
 .menu-item::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 40rpx;
-    right: 0;
-    height: 1rpx;
-    background-color: #f2f2f2;
+  content: '';
+  position: absolute;
+  left: 116rpx;
+  right: 0;
+  bottom: 0;
+  height: 1rpx;
+  background: rgba(112, 83, 58, 0.12);
 }
 
 .menu-item:last-child::after {
@@ -65,48 +151,127 @@ page {
 }
 
 .menu-item:active {
-  background-color: #f7f8fa;
+  opacity: 0.72;
 }
 
-.menu-item-left {
+.menu-icon-wrap {
+  width: 88rpx;
+  height: 88rpx;
+  margin-right: 28rpx;
+  border-radius: 50%;
+  background: linear-gradient(145deg, rgba(255, 250, 243, 0.96), rgba(255, 238, 216, 0.9));
+  box-shadow: inset 0 0 0 1rpx rgba(255, 216, 178, 0.42);
   display: flex;
   align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .menu-icon {
-  width: 60rpx;
-  height: 60rpx;
-  margin-right: 35rpx;
+  width: 52rpx;
+  height: 52rpx;
 }
 
-.menu-text {
-  font-size: 36rpx;
-  color: #333;
+.menu-copy {
+  flex: 1;
+  min-width: 0;
 }
 
-/* 4. 单独给需要内缩的按钮容器添加左右边距 */
+.menu-title {
+  font-size: 32rpx;
+  line-height: 1.2;
+  font-weight: 800;
+  color: #3d332d;
+  letter-spacing: 0;
+}
+
+.menu-desc {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  line-height: 1.32;
+  color: #8d8178;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0;
+}
+
+.menu-arrow {
+  width: 34rpx;
+  margin-left: 16rpx;
+  color: #a6a09b;
+  font-size: 54rpx;
+  line-height: 1;
+  font-weight: 300;
+  text-align: right;
+  flex-shrink: 0;
+}
+
 .action-btn-container {
-  margin: 40rpx 30rpx 0 30rpx;
+  position: relative;
+  z-index: 2;
+  margin: 32rpx 40rpx 0;
 }
 
 .action-btn {
-  color: #ffffff;
-  font-size: 34rpx; 
-  font-weight: 500;
-  padding: 32rpx;
-  text-align: center;
-  border-radius: 50rpx;
-  transition: opacity 0.2s;
+  height: 90rpx;
+  border-radius: 999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+  box-shadow: 0 18rpx 34rpx rgba(255, 128, 31, 0.26);
 }
 
 .action-btn:active {
-  opacity: 0.8;
+  opacity: 0.84;
 }
 
-.login-btn {
-  background-color: #F7931E; 
+.action-icon {
+  margin-right: 16rpx;
+  font-size: 36rpx;
+  line-height: 1;
 }
 
+.login-btn,
 .logout-btn {
-  background-color: #fa5151;
+  background: linear-gradient(135deg, #ffad55 0%, #ff7d21 100%);
+}
+
+@media (max-height: 700px) {
+  .top-safe {
+    height: 54px;
+  }
+
+  .profile-hero {
+    padding-top: 8rpx;
+  }
+
+  .avatar-ring {
+    width: 138rpx;
+    height: 138rpx;
+  }
+
+  .nickname {
+    margin-top: 22rpx;
+    font-size: 38rpx;
+  }
+
+  .menu-card {
+    margin-top: 24rpx;
+    padding-top: 16rpx;
+    padding-bottom: 16rpx;
+  }
+
+  .menu-item {
+    min-height: 108rpx;
+  }
+
+  .action-btn-container {
+    margin-top: 24rpx;
+  }
 }

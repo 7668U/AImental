@@ -23,6 +23,7 @@ from model.checkin_dimensions import (
     get_color_meta,
     get_mood_meta,
 )
+from model.emotion_color_card import emotion_color_card_cache_table
 
 # 认证依赖
 from .auth import get_current_user_id
@@ -43,6 +44,8 @@ router = APIRouter(
 )
 
 ANALYSIS_SCHEMA_VERSION = "v2"
+AI_REPORT_SCHEMA_VERSION = "v4"
+MIN_ANALYSIS_CHECKIN_DAYS = 6
 
 # --- 辅助数据 ---
 # 中文停用词表 (一个简单的版本，您可以根据需要扩展)
@@ -56,81 +59,72 @@ MOOD_FAMILY_ORDER = list(dict.fromkeys(item["family"] for item in MOOD_OPTIONS))
 
 
 # ===================================================
-# 2. 【全新】为四个独立报告设计的 AI PROMPT 模板
+# 2. 为四个独立报告设计的 AI PROMPT 模板
 # ===================================================
-# 每套Prompt都为AI设定了独特的专家角色和分析任务
+AI_REPORT_STYLE_RULES = """
+你要根据用户在 {period_name} 的打卡数据，生成一份小程序里的心情分析文案。
+
+输出必须是严格 JSON，只包含两个字符串字段：summary_text 和 report_text。
+
+模块边界：
+- 只能使用下面提供的“本模块数据摘要”，不要主动引入摘要里没有出现的维度。
+- 四个模块各自分析不同内容，不要把其他模块的话题揉进来。
+
+summary_text 的要求：
+- 只写 1 到 2 句，最多 70 个中文字符。
+- 只提最明显、最有信息量的特征。
+- 不要泛泛安慰，不要写成报告导语。
+
+report_text 的要求：
+- 直接进入分析，不要寒暄，不要自我介绍，不要说“作为/我是/你的顾问/亲爱的/来访者/请查收”。
+- 不要使用 Markdown，不要出现 #、*、---、编号标题、列表符号或书信格式。
+- 写 3 到 5 个自然段，每段 1 到 2 句，整体控制在 250 到 450 字。
+- 语气亲切、平实、像产品里的温和解读，不要过度专业化，不要诊断，不要承诺疗效。
+- 可以使用“可能、看起来、比较像、值得留意”这类谨慎表达。
+- 不要重复图表已经显而易见的信息，要解释最值得注意的模式。
+"""
+
 AI_DETAILED_PROMPTS = {
-    "mood": """
-你是一位精通**情绪心理学**的AI分析师。你的任务是深入解读用户在 **{period_name}** 内的**心情(mood)**数据，生成一份专业、温暖的情绪状态报告。
+    "mood": AI_REPORT_STYLE_RULES + """
+分析重点：
+- 只分析心情本身：mood、mood_family、mood_valence、mood_energy。
+- 不要分析生活状态、文字高频词、颜色或色彩组。
+- summary_text 只概括最突出的心情或情绪族，例如“这段时间最常出现的是平静，整体更偏稳定低起伏。”
+- report_text 说明主导心情、情绪族倾向、能量状态，以及一个温和的小建议。
 
-**你的任务:**
-1.  **角色**: 情绪心理学专家。
-2.  **核心分析对象**: `mood`、`mood_family`、`mood_valence`、`mood_energy`。
-3.  **报告重点**:
-    - 总结最主要的情绪，并解读这种主导情绪可能代表的心理状态。
-    - 分析 6 个情绪族的分布，判断用户更偏明亮愉悦、安稳平静、低落难过、焦虑紧绷、生气受伤还是疲惫麻木。
-    - 结合正向/中性/负向和能量水平，识别用户近期是高能紧绷、低能疲惫，还是相对平稳。
-    - 基于情绪分布，发现用户的潜在优势（如情绪稳定、能快速恢复等）并给予鼓励。
-    - 提供1-2个针对性的、与情绪调节相关的实用小技巧。
-
-**用户的打卡数据摘要如下 (请重点关注心情及其结构化元信息):**
----
+用户打卡数据摘要：
 {data_summary}
----
 """,
-    "tag-mood": """
-你是一位**行为心理学**和**生活方式**领域的AI顾问。你的任务是深入分析用户在 **{period_name}** 内的**状态(tags/status_ids)**与**心情结构(mood_family/mood_energy/color_group)**之间的关联，揭示日常生活模式与情绪的关系。
+    "tag-mood": AI_REPORT_STYLE_RULES + """
+分析重点：
+- 只分析生活状态 tags/status_ids 与心情、情绪族、能量状态的关联。
+- 不要分析颜色、色彩组、文字高频词或日记主题。
+- 不要把状态写成直接原因，只说“常一起出现、比较容易同框、值得留意”。
+- summary_text 只概括最明显的关联，例如“你常在学习状态下记录到平静，说明这段时间学习和稳定感关系更近。”
+- report_text 说明最常出现的状态、它对应的心情或情绪族，以及一个生活节奏上的轻建议。
 
-**你的任务:**
-1.  **角色**: 行为心理学顾问。
-2.  **核心分析对象**: 状态标签与情绪族、能量水平、颜色组的关联。
-3.  **报告重点**:
-    - 注意：状态是“今天在做什么/处于什么模式”，不是直接的情绪原因，不要武断归因。
-    - 找出哪些状态常和明亮、平静、低落、焦虑、疲惫等情绪族一起出现。
-    - 观察哪些生活模式更容易对应高能量或低能量。
-    - 分析状态和颜色组的搭配，例如“出差/加班”常搭配阴雨安静还是紧绷浓郁。
-    - 基于这些发现，表扬用户积极的生活习惯。
-    - 提供1-2个关于优化生活方式、趋利避害的温和建议。
-
-**用户的打卡数据摘要如下 (请重点分析状态与心情结构的关系):**
----
+用户打卡数据摘要：
 {data_summary}
----
 """,
-    "word-cloud": """
-你是一位擅长**叙事疗法**的AI心理倾听者。你的任务是通过分析用户在 **{period_name}** 内的**日记内容(text_content)**，解读他们内心的叙事、关注点和潜在的情感需求。
+    "word-cloud": AI_REPORT_STYLE_RULES + """
+分析重点：
+- 只分析 text_content 的高频词、反复出现的主题，以及这些词所在记录对应的心情或情绪族。
+- 不要分析生活状态、颜色、色彩组。
+- summary_text 直接指出最明显的词或主题，例如“这段时间你最常提到‘学习’，记录重点更偏向日常推进和自我整理。”
+- report_text 说明高频词、词语与心情的对应关系，以及一个可以继续记录的小问题。
 
-**你的任务:**
-1.  **角色**: 叙事治疗师。
-2.  **核心分析对象**: 仅限`text_content`字段。
-3.  **报告重点**:
-    - 从用户的高频词汇中，识别并总结出近期的核心议题或生活焦点。
-    - 分析这些关键词所反映的潜在情感或态度。它们是积极的、消极的还是中性的？
-    - 用户在日记中是更多地向内探索自我，还是在记录外部事件？
-    - 发现并赞美用户在文字中流露出的自我关怀、深刻反思或积极心态。
-    - 基于用户的叙事，提出一个开放性的、能引发用户进一步思考的启发性问题。
-
-**用户的打卡数据摘要如下 (你只需关注 text_content 字段):**
----
+用户打卡数据摘要：
 {data_summary}
----
 """,
-    "color": """
-你是一位富有创意的**色彩心理学**和**艺术疗法**专家。你的任务是解读用户在 **{period_name}** 内所选**颜色(color)**的象征意义，为他们生成一份充满美感和想象力的情绪色彩报告。
+    "color": AI_REPORT_STYLE_RULES + """
+分析重点：
+- 只分析 color、color_label、color_group、color_tone。
+- 不要分析生活状态、文字高频词或具体事件。
+- summary_text 只概括最明显的色彩偏向，例如“这段时间你的色彩更偏暖光明亮，整体给人的感觉比较柔和、轻快。”
+- report_text 说明主色、色彩组、整体画面感，以及一个温和的色彩观察建议。
 
-**你的任务:**
-1.  **角色**: 色彩心理学与艺术疗法专家。
-2.  **核心分析对象**: `color`、`color_label`、`color_group`、`color_tone`。
-3.  **报告重点**:
-    - 解读用户最常选择的颜色和颜色组，例如暖光明亮、清透自然、柔和梦感、阴雨安静、紧绷浓郁、沉稳大地。
-    - 分析用户选择的色彩组合。这些颜色搭配在一起，像一幅怎样的画？传达了怎样的整体感觉？
-    - 将用户的“情绪色板”比喻成一种自然景观、一首诗或一幅画，进行充满艺术感的解读。
-    - 给予用户基于色彩的积极心理暗示和祝福。
-
-**用户的打卡数据摘要如下 (请重点关注颜色及其结构化元信息):**
----
+用户打卡数据摘要：
 {data_summary}
----
 """
 }
 # ===================================================
@@ -185,6 +179,15 @@ def get_chart_data(
     """
     start_ts, end_ts, period_name = _get_period_info(period_type, year, value)
     period_key = f"{ANALYSIS_SCHEMA_VERSION}-{year}-{value}-{period_type}-{analysis_type}-chart"
+
+    checkins = checkin_table.get_checkins_by_period(current_user_id, start_ts, end_ts)
+    if not checkins:
+        raise HTTPException(status_code=404, detail="该时间段内无打卡记录。")
+    if len(checkins) < MIN_ANALYSIS_CHECKIN_DAYS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"{period_name} 的打卡数据不大于 5 天，无法进行分析。",
+        )
     
     # 1. 检查缓存
     if not force_refresh:
@@ -193,10 +196,6 @@ def get_chart_data(
             return json.loads(cached.content)
 
     # 2. 获取数据
-    checkins = checkin_table.get_checkins_by_period(current_user_id, start_ts, end_ts)
-    if not checkins:
-        raise HTTPException(status_code=404, detail="该时间段内无打卡记录。")
-    
     # 3. 根据类型分发到不同分析函数
     if analysis_type == 'mood':
         result_model = _generate_mood_analysis(checkins, period_name)
@@ -234,31 +233,100 @@ def get_ai_detailed_report(
         raise HTTPException(status_code=400, detail="无效的分析模块类型。")
 
     start_ts, end_ts, period_name = _get_period_info(period_type, year, value)
-    period_key = f"{ANALYSIS_SCHEMA_VERSION}-{year}-{value}-{period_type}-{analysis_type}-ai"
-    cache_type_key = f"{ANALYSIS_SCHEMA_VERSION}_ai_report_{analysis_type}"
+    period_key = f"{AI_REPORT_SCHEMA_VERSION}-{year}-{value}-{period_type}-{analysis_type}-ai"
+    cache_type_key = f"{AI_REPORT_SCHEMA_VERSION}_ai_report_{analysis_type}"
+
+    checkins = checkin_table.get_checkins_by_period(current_user_id, start_ts, end_ts)
+    if not checkins:
+        raise HTTPException(status_code=404, detail="该时间段内无打卡记录，无法生成AI报告。")
+    if len(checkins) < MIN_ANALYSIS_CHECKIN_DAYS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"{period_name} 的打卡数据不大于 5 天，无法进行分析。",
+        )
     
     # 1. 检查缓存
     if not force_refresh:
         cached = analysis_table.get_analysis(current_user_id, period_key, cache_type_key)
         if cached:
-            return {"report_text": json.loads(cached.content).get("report_text")}
+            cached_content = json.loads(cached.content)
+            return {
+                "summary_text": cached_content.get("summary_text", ""),
+                "report_text": cached_content.get("report_text", ""),
+            }
 
     # 2. 获取数据
-    checkins = checkin_table.get_checkins_by_period(current_user_id, start_ts, end_ts)
-    if not checkins:
-        raise HTTPException(status_code=404, detail="该时间段内无打卡记录，无法生成AI报告。")
-
     # 3. 调用LLM生成报告
     prompt_template = AI_DETAILED_PROMPTS[analysis_type]
-    report_text = generate_ai_analysis_report(checkins, prompt_template, period_name)
+    focus_summary = _build_ai_focus_summary(checkins, analysis_type)
+    report_payload = generate_ai_analysis_report(
+        checkins,
+        prompt_template,
+        period_name,
+        analysis_type,
+        focus_summary
+    )
 
     # 4. 存入缓存并返回
     class AIReportContent(BaseModel):
+        summary_text: str
         report_text: str
-    content_model = AIReportContent(report_text=report_text)
+    content_model = AIReportContent(
+        summary_text=report_payload.get("summary_text", ""),
+        report_text=report_payload.get("report_text", "")
+    )
     analysis_table.save_analysis(current_user_id, period_key, cache_type_key, content_model)
 
-    return {"report_text": report_text}
+    return content_model.model_dump()
+
+
+@router.get(
+    "/color-card/{period_type}/{year}/{value}",
+    response_model=Dict[str, Any],
+    summary="获取情绪色卡 AI 背景图，按综合色板缓存复用"
+)
+def get_color_card_background(
+    period_type: str = Path(..., description="周期类型: 'monthly', 'quarterly', 'yearly'"),
+    year: int = Path(..., description="年份"),
+    value: int = Path(..., description="月份(1-12) 或 季度(1-4)"),
+    current_user_id: str = Depends(get_current_user_id),
+):
+    start_ts, end_ts, period_name = _get_period_info(period_type, year, value)
+    checkins = checkin_table.get_checkins_by_period(current_user_id, start_ts, end_ts)
+    if not checkins:
+        raise HTTPException(status_code=404, detail="该时间段内无打卡记录。")
+    if len(checkins) < MIN_ANALYSIS_CHECKIN_DAYS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"{period_name} 的打卡数据不大于 5 天，无法生成色卡。",
+        )
+
+    try:
+        return emotion_color_card_cache_table.get_or_generate(checkins)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.get(
+    "/eligibility/{period_type}/{year}/{value}",
+    response_model=Dict[str, Any],
+    summary="检查当前周期打卡天数是否足够分析"
+)
+def get_analysis_eligibility(
+    period_type: str = Path(..., description="周期类型: 'monthly', 'quarterly', 'yearly'"),
+    year: int = Path(..., description="年份"),
+    value: int = Path(..., description="月份(1-12) 或 季度(1-4)"),
+    current_user_id: str = Depends(get_current_user_id),
+):
+    start_ts, end_ts, period_name = _get_period_info(period_type, year, value)
+    checkins = checkin_table.get_checkins_by_period(current_user_id, start_ts, end_ts)
+    checkin_days = len(checkins)
+    return {
+        "can_analyze": checkin_days >= MIN_ANALYSIS_CHECKIN_DAYS,
+        "checkin_days": checkin_days,
+        "min_days": MIN_ANALYSIS_CHECKIN_DAYS,
+        "period_name": period_name,
+    }
 
 # ===================================================
 # 5. 各分析模块的具体实现逻辑 (私有函数)
@@ -276,6 +344,86 @@ def _distribution(counter: Counter, total: int | None = None) -> List[Dict[str, 
             "percent": round((count / denominator) * 100, 1)
         })
     return items
+
+
+def _split_tag_labels(tags: str | None) -> List[str]:
+    if not tags:
+        return []
+    return [tag.strip() for tag in tags.split(",") if tag.strip()]
+
+
+def _build_ai_focus_summary(checkins: List[Dict], analysis_type: str) -> str:
+    if analysis_type == "tag-mood":
+        pair_counter, status_counter = Counter(), Counter()
+        for record in checkins:
+            mood_family = record.get("mood_family") or record.get("mood") or "未标注心情"
+            for tag in _split_tag_labels(record.get("tags")):
+                status_counter[tag] += 1
+                pair_counter[(tag, mood_family)] += 1
+        top_pairs = [
+            f"{status} + {mood_family}: {count}次"
+            for (status, mood_family), count in pair_counter.most_common(8)
+        ]
+        top_statuses = [f"{name}: {count}次" for name, count in status_counter.most_common(6)]
+        return "\n".join([
+            "只看生活状态与心情/情绪族的对应关系，不涉及颜色或文字主题。",
+            f"高频状态：{'；'.join(top_statuses) or '暂无'}",
+            f"状态-情绪族高频配对：{'；'.join(top_pairs) or '暂无'}",
+        ])
+
+    if analysis_type == "word-cloud":
+        word_counter, word_mood_counter = Counter(), {}
+        for record in checkins:
+            text = record.get("text_content") or ""
+            mood_label = record.get("mood") or record.get("mood_family") or "未标注心情"
+            for word in jieba.lcut(text):
+                if len(word) <= 1 or word in STOPWORDS:
+                    continue
+                word_counter[word] += 1
+                word_mood_counter.setdefault(word, Counter())[mood_label] += 1
+        top_words = []
+        for word, count in word_counter.most_common(10):
+            mood_name, mood_count = word_mood_counter[word].most_common(1)[0]
+            top_words.append(f"{word}: {count}次，最常对应{mood_name}{mood_count}次")
+        return "\n".join([
+            "只看日记文字的高频词，以及这些词所在记录对应的心情，不涉及状态或颜色。",
+            f"高频词与对应心情：{'；'.join(top_words) or '暂无'}",
+        ])
+
+    if analysis_type == "color":
+        color_counter, group_counter, tone_counter = Counter(), Counter(), Counter()
+        for record in checkins:
+            color_name = record.get("color_label") or record.get("color")
+            if color_name:
+                color_counter[color_name] += 1
+            if record.get("color_group"):
+                group_counter[record["color_group"]] += 1
+            if record.get("color_tone"):
+                tone_counter[record["color_tone"]] += 1
+        return "\n".join([
+            "只看颜色选择、色彩组和色调，不涉及状态、文字或具体事件。",
+            f"高频颜色：{'；'.join(f'{name}: {count}次' for name, count in color_counter.most_common(6)) or '暂无'}",
+            f"高频色彩组：{'；'.join(f'{name}: {count}次' for name, count in group_counter.most_common(6)) or '暂无'}",
+            f"高频色调：{'；'.join(f'{name}: {count}次' for name, count in tone_counter.most_common(6)) or '暂无'}",
+        ])
+
+    mood_counter, family_counter, valence_counter, energy_counter = Counter(), Counter(), Counter(), Counter()
+    for record in checkins:
+        if record.get("mood"):
+            mood_counter[record["mood"]] += 1
+        if record.get("mood_family"):
+            family_counter[record["mood_family"]] += 1
+        if record.get("mood_valence"):
+            valence_counter[record["mood_valence"]] += 1
+        if record.get("mood_energy"):
+            energy_counter[record["mood_energy"]] += 1
+    return "\n".join([
+        "只看心情、情绪族、情绪倾向和能量状态，不涉及状态、文字或颜色。",
+        f"高频心情：{'；'.join(f'{name}: {count}次' for name, count in mood_counter.most_common(6)) or '暂无'}",
+        f"情绪族分布：{'；'.join(f'{name}: {count}次' for name, count in family_counter.most_common(6)) or '暂无'}",
+        f"情绪倾向：{'；'.join(f'{name}: {count}次' for name, count in valence_counter.most_common(6)) or '暂无'}",
+        f"能量状态：{'；'.join(f'{name}: {count}次' for name, count in energy_counter.most_common(6)) or '暂无'}",
+    ])
 
 
 def _generate_mood_analysis(checkins: List[Dict], period_name: str) -> MoodAnalysisContent:

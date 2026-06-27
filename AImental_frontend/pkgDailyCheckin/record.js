@@ -301,39 +301,16 @@ Page({
     wx.navigateBack({ delta: 1 });
   },
 
-  goToStatistics() {
-    wx.navigateTo({
-      url: '/pkgDailyCheckin/analysis'
-    });
-  },
-
-  showMoreActions() {
-    const itemList = ['查看心情分析'];
-    if (!this.data.isLocked && this.data.photos.length < MAX_PHOTOS) itemList.push('添加照片');
-    if (!this.data.isLocked && this.data.photos.length > 0) itemList.push('管理照片');
-
-    wx.showActionSheet({
-      itemList,
-      success: (res) => {
-        const action = itemList[res.tapIndex];
-        if (action === '查看心情分析') this.goToStatistics();
-        if (action === '添加照片') this.selectNewImages();
-        if (action === '管理照片') {
-          this.setData({ scrollIntoView: 'photo-section' });
-        }
-      }
-    });
-  },
-
   loadCheckinData(dateToFetch) {
     const isToday = dateToFetch === this.getTodayString();
+    const canEdit = this.isWithinRecentDays(dateToFetch, 3);
     this.setData({
-      isLocked: !isToday,
-      navTitle: isToday ? '今日心情记录' : '历史心情记录',
+      isLocked: !canEdit,
+      navTitle: isToday ? '今日心情记录' : (canEdit ? '修改近期心情' : '历史心情记录'),
       dateLabel: this.formatDateLabel(dateToFetch),
     });
 
-    wx.setNavigationBarTitle({ title: isToday ? '修改今日心情' : '查看历史心情' });
+    wx.setNavigationBarTitle({ title: canEdit ? '修改心情记录' : '查看历史心情' });
 
     const token = wx.getStorageSync('token');
     if (!token) return;
@@ -704,6 +681,16 @@ Page({
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  },
+
+  isWithinRecentDays(dateStr, days) {
+    const target = new Date(`${dateStr}T00:00:00`);
+    if (Number.isNaN(target.getTime())) return false;
+
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const diffDays = Math.floor((todayStart.getTime() - target.getTime()) / (24 * 60 * 60 * 1000));
+    return diffDays >= 0 && diffDays < days;
   },
 
   formatDateLabel(dateStr) {

@@ -11,6 +11,7 @@ from jose import jwt, JWTError
 
 # 2. 从项目其他文件中导入
 from db import user_db
+from feature_flags import ENABLE_COMMUNITY_BACKEND
 from model.user import User, user_table, UserModel
 from .auth import create_access_token, get_current_user_id, TOKEN_DENYLIST 
 
@@ -238,6 +239,9 @@ def unlock_community_for_user(current_user_id: str = Depends(get_current_user_id
     这个接口在用户首次分享成功后被前端调用一次。
     它的作用就是把用户的 'has_unlocked_community' 标志位永久设为 True。
     """
+    if not ENABLE_COMMUNITY_BACKEND:
+        raise HTTPException(status_code=503, detail="心灵社区模块已暂时下线")
+
     rows_updated = (User
                     .update({User.has_unlocked_community: True})
                     .where(User.id == current_user_id)
