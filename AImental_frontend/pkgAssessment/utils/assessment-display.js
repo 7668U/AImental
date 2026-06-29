@@ -46,8 +46,8 @@ const SCALE_DISPLAY_META = {
     tagTone: 'purple'
   },
   CLT: {
-    title: '创造力水平测试',
-    description: '帮助了解个人思维与行为倾向',
+    title: '创造力倾向测试',
+    description: '探索好奇心、联想力与创意落地方式',
     tagTone: 'green'
   },
   'mbti-93': {
@@ -76,9 +76,9 @@ const SCALE_DISPLAY_META = {
     tagTone: 'green'
   },
   TPS: {
-    title: '性格类型测试',
-    description: '测一测你的性格类型，看看你是哪个小宇宙！',
-    subnote: '趣味性格探索',
+    title: '潜意识测试',
+    description: '从第一反应的意象选择里，看见你的内在倾向',
+    subnote: '潜意识联想探索',
     tagTone: 'orange'
   },
   ICI: {
@@ -89,15 +89,22 @@ const SCALE_DISPLAY_META = {
   },
   'REAL-MAJOR-V1': {
     title: '理想职业探索',
-    description: '如果没有限制，你最想做什么？一起找找你的理想方向！',
-    subnote: '职业兴趣探索',
+    description: '从任务偏好与工作风格里，看见更适合你的职业方向',
+    subnote: '职业方向测试',
     tagTone: 'orange'
   },
   AGLT: {
-    title: '天赋潜能小测验',
-    description: '解锁你的隐藏天赋，看看你有哪些超能力！',
-    subnote: '趣味天赋发现',
+    title: '天赋雷达：天赋与潜能测试',
+    description: '探索你身上的天赋信号，发现还没完全亮起来的潜能！',
+    subnote: '天赋扫描',
     tagTone: 'orange'
+  },
+  RFLT: {
+    title: '近期运势预测',
+    description: '测测你的近期好运，抽一张专属好运签！',
+    subnote: '近期好运签',
+    tagTone: 'orange',
+    iconKey: 'rflt'
   }
 };
 

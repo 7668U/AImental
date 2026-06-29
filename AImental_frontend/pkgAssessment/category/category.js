@@ -32,7 +32,7 @@ const GROUPS = {
     title: '趣味探索',
     subtitle: '轻松有趣，发现更多可能的自己',
     hero: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/category/interest-hero.png',
-    order: ['TPS', 'ICI', 'REAL-MAJOR-V1', 'AGLT']
+    order: ['TPS', 'ICI', 'REAL-MAJOR-V1', 'AGLT', 'RFLT']
   }
 };
 
@@ -61,6 +61,7 @@ const LOCAL_ASSESSMENT_GROUPS = {
   ICI: ['趣味探索', 2],
   'REAL-MAJOR-V1': ['趣味探索', 3],
   AGLT: ['趣味探索', 4],
+  RFLT: ['趣味探索', 5],
 };
 
 function request(options) {

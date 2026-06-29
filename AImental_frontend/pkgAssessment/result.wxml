@@ -45,7 +45,7 @@
     </block>
 
     <block wx:elif="{{result.scale_details.assessment_type === 'categorical'}}">
-      <view class="result-card personality-card">
+      <view class="result-card personality-card" wx:if="{{!fortuneReport}}">
         <view class="personality-image-container" wx:if="{{result.result_details.image_url}}">
           <image class="personality-image" src="{{result.result_details.image_url}}" mode="aspectFit" />
         </view>
@@ -58,7 +58,230 @@
         <view class="personality-motto" wx:if="{{result.result_details.college_motto}}">
           “{{result.result_details.college_motto}}”
         </view>
-        
+
+        <view class="career-teaser" wx:if="{{result.result_details.career_teaser}}">
+          {{result.result_details.career_teaser}}
+        </view>
+      </view>
+
+      <block wx:if="{{talentRadarReport}}">
+        <view class="result-card talent-hero-card">
+          <view class="talent-badge">显性天赋</view>
+          <view class="talent-hero-title">{{talentRadarReport.primaryTitle}}</view>
+          <view class="talent-hero-tagline" wx:if="{{talentRadarReport.primaryTagline}}">{{talentRadarReport.primaryTagline}}</view>
+          <view class="talent-hero-text" wx:if="{{talentRadarReport.primarySummary}}">{{talentRadarReport.primarySummary}}</view>
+        </view>
+
+        <view class="result-card detail-card" wx:if="{{talentRadarReport.radarSummary || talentRadarReport.pairSummary || talentRadarReport.primaryBestScene || talentRadarReport.primaryGrowthFocus}}">
+          <view class="card-title">
+            <image class="card-icon" src="/images/icons/icon-report.png"></image>
+            <text>你的雷达主线</text>
+          </view>
+          <view class="analysis-list">
+            <view class="analysis-list-item" wx:if="{{talentRadarReport.radarSummary}}">
+              <text class="list-dot"></text>
+              <text class="list-text">{{talentRadarReport.radarSummary}}</text>
+            </view>
+            <view class="analysis-list-item" wx:if="{{talentRadarReport.pairSummary}}">
+              <text class="list-dot"></text>
+              <text class="list-text">{{talentRadarReport.pairSummary}}</text>
+            </view>
+            <view class="analysis-list-item" wx:if="{{talentRadarReport.primaryBestScene}}">
+              <text class="list-dot"></text>
+              <text class="list-text">容易发光的场景：{{talentRadarReport.primaryBestScene}}</text>
+            </view>
+            <view class="analysis-list-item" wx:if="{{talentRadarReport.primaryGrowthFocus}}">
+              <text class="list-dot"></text>
+              <text class="list-text">接下来可以练：{{talentRadarReport.primaryGrowthFocus}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="result-card dual-talent-card" wx:if="{{talentRadarReport.secondaryTitle || talentRadarReport.latentTitle}}">
+          <view class="dual-talent-grid">
+            <view class="dual-talent-panel" wx:if="{{talentRadarReport.secondaryTitle}}">
+              <view class="dual-talent-badge">辅助天赋</view>
+              <view class="dual-talent-title">{{talentRadarReport.secondaryTitle}}</view>
+              <view class="dual-talent-tagline" wx:if="{{talentRadarReport.secondaryTagline}}">{{talentRadarReport.secondaryTagline}}</view>
+              <view class="dual-talent-text" wx:if="{{talentRadarReport.secondaryDescription}}">{{talentRadarReport.secondaryDescription}}</view>
+            </view>
+
+            <view class="dual-talent-panel" wx:if="{{talentRadarReport.latentTitle}}">
+              <view class="dual-talent-badge latent-badge">潜伏潜能</view>
+              <view class="dual-talent-title">{{talentRadarReport.latentTitle}}</view>
+              <view class="dual-talent-tagline" wx:if="{{talentRadarReport.latentTagline}}">{{talentRadarReport.latentTagline}}</view>
+              <view class="dual-talent-text" wx:if="{{talentRadarReport.latentBridge}}">{{talentRadarReport.latentBridge}}</view>
+              <view class="dual-talent-text" wx:if="{{talentRadarReport.latentSummary}}">{{talentRadarReport.latentSummary}}</view>
+              <view class="dual-talent-text" wx:if="{{talentRadarReport.latentDescription}}">{{talentRadarReport.latentDescription}}</view>
+            </view>
+          </view>
+        </view>
+
+        <view class="result-card detail-card" wx:if="{{talentRadarReport.stressTitle || talentRadarReport.stressSummary}}">
+          <view class="card-title">
+            <image class="card-icon" src="/images/icons/icon-report.png"></image>
+            <text>压力下的底牌</text>
+          </view>
+          <view class="analysis-list">
+            <view class="analysis-list-item" wx:if="{{talentRadarReport.stressTitle}}">
+              <text class="list-dot"></text>
+              <text class="list-text">你最容易本能启动的是：{{talentRadarReport.stressTitle}}</text>
+            </view>
+            <view class="analysis-list-item" wx:if="{{talentRadarReport.stressSummary}}">
+              <text class="list-dot"></text>
+              <text class="list-text">{{talentRadarReport.stressSummary}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="result-card detail-card" wx:if="{{talentRadarReport.scoreItems.length > 0}}">
+          <view class="card-title">
+            <image class="card-icon" src="/images/icons/icon-report.png"></image>
+            <text>八维天赋分布</text>
+          </view>
+          <view class="detail-pair-list">
+            <view class="detail-pair-item" wx:for="{{talentRadarReport.scoreItems}}" wx:key="label">
+              <text class="detail-pair-label">{{item.label}}</text>
+              <text class="detail-pair-value">{{item.value}} 题 · {{item.ratio}}%</text>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <block wx:if="{{fortuneReport}}">
+        <view class="result-card fortune-hero-card">
+          <view class="fortune-orbit">
+            <view class="fortune-orbit-inner"></view>
+          </view>
+          <view class="fortune-kicker">近期好运签</view>
+          <view class="fortune-title">{{fortuneReport.title}}</view>
+          <view class="fortune-keyword" wx:if="{{fortuneReport.keyword}}">关键词：{{fortuneReport.keyword}}</view>
+          <view class="fortune-anchor" wx:if="{{fortuneReport.emotionalAnchor}}">{{fortuneReport.emotionalAnchor}}</view>
+        </view>
+
+        <view class="result-card fortune-note-card" wx:if="{{fortuneReport.interpretation}}">
+          <view class="fortune-note-title">这张签在说</view>
+          <view class="fortune-note-text">{{fortuneReport.interpretation}}</view>
+        </view>
+
+        <view class="result-card fortune-grid-card">
+          <view class="fortune-grid">
+            <view class="fortune-grid-item" wx:if="{{fortuneReport.window}}">
+              <view class="fortune-grid-label">好运窗口</view>
+              <view class="fortune-grid-value">{{fortuneReport.window}}</view>
+            </view>
+            <view class="fortune-grid-item" wx:if="{{fortuneReport.luckyColor}}">
+              <view class="fortune-grid-label">幸运色</view>
+              <view class="fortune-grid-value">{{fortuneReport.luckyColor}}</view>
+            </view>
+            <view class="fortune-grid-item" wx:if="{{fortuneReport.luckyAction}}">
+              <view class="fortune-grid-label">开运小事</view>
+              <view class="fortune-grid-value">{{fortuneReport.luckyAction}}</view>
+            </view>
+            <view class="fortune-grid-item" wx:if="{{fortuneReport.luckyPhrase}}">
+              <view class="fortune-grid-label">今日暗号</view>
+              <view class="fortune-grid-value">{{fortuneReport.luckyPhrase}}</view>
+            </view>
+          </view>
+        </view>
+
+        <view class="result-card detail-card" wx:if="{{fortuneReport.recommendation || fortuneReport.relationship || fortuneReport.stress || fortuneReport.change}}">
+          <view class="card-title">
+            <image class="card-icon" src="/images/icons/icon-report.png"></image>
+            <text>接住这波好运</text>
+          </view>
+          <view class="analysis-list">
+            <view class="analysis-list-item" wx:if="{{fortuneReport.recommendation}}">
+              <text class="list-dot"></text>
+              <text class="list-text">{{fortuneReport.recommendation}}</text>
+            </view>
+            <view class="analysis-list-item" wx:if="{{fortuneReport.relationship}}">
+              <text class="list-dot"></text>
+              <text class="list-text">关系里：{{fortuneReport.relationship}}</text>
+            </view>
+            <view class="analysis-list-item" wx:if="{{fortuneReport.stress}}">
+              <text class="list-dot"></text>
+              <text class="list-text">压力时：{{fortuneReport.stress}}</text>
+            </view>
+            <view class="analysis-list-item" wx:if="{{fortuneReport.change}}">
+              <text class="list-dot"></text>
+              <text class="list-text">变化前：{{fortuneReport.change}}</text>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <view class="result-card sub-profile-card" wx:if="{{secondaryProfile && !talentRadarReport && !fortuneReport}}">
+        <view class="sub-profile-badge">副潜意识原型</view>
+        <view class="sub-profile-title">{{secondaryProfile.title}}</view>
+        <view class="sub-profile-text" wx:if="{{secondaryProfile.description}}">{{secondaryProfile.description}}</view>
+      </view>
+
+      <view class="result-card detail-card" wx:if="{{!talentRadarReport && !fortuneReport && (result.result_details.in_relationships || result.result_details.under_stress || result.result_details.facing_change)}}">
+        <view class="card-title">
+          <image class="card-icon" src="/images/icons/icon-report.png"></image>
+          <text>你的潜意识画像</text>
+        </view>
+        <view class="analysis-list">
+          <view class="analysis-list-item" wx:if="{{result.result_details.in_relationships}}">
+            <text class="list-dot"></text>
+            <text class="list-text">关系中：{{result.result_details.in_relationships}}</text>
+          </view>
+          <view class="analysis-list-item" wx:if="{{result.result_details.under_stress}}">
+            <text class="list-dot"></text>
+            <text class="list-text">压力下：{{result.result_details.under_stress}}</text>
+          </view>
+          <view class="analysis-list-item" wx:if="{{result.result_details.facing_change}}">
+            <text class="list-dot"></text>
+            <text class="list-text">面对变化时：{{result.result_details.facing_change}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="result-card detail-card" wx:if="{{secondaryProfile && !talentRadarReport && !fortuneReport && (secondaryProfile.inRelationships || secondaryProfile.underStress || secondaryProfile.facingChange)}}">
+        <view class="card-title">
+          <image class="card-icon" src="/images/icons/icon-report.png"></image>
+          <text>副原型会在哪出现</text>
+        </view>
+        <view class="analysis-list">
+          <view class="analysis-list-item" wx:if="{{secondaryProfile.inRelationships}}">
+            <text class="list-dot"></text>
+            <text class="list-text">关系里：{{secondaryProfile.inRelationships}}</text>
+          </view>
+          <view class="analysis-list-item" wx:if="{{secondaryProfile.underStress}}">
+            <text class="list-dot"></text>
+            <text class="list-text">压力时：{{secondaryProfile.underStress}}</text>
+          </view>
+          <view class="analysis-list-item" wx:if="{{secondaryProfile.facingChange}}">
+            <text class="list-dot"></text>
+            <text class="list-text">变化前：{{secondaryProfile.facingChange}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="result-card career-hero-card" wx:if="{{primaryCareer && !talentRadarReport && !fortuneReport}}">
+        <view class="career-hero-badge">职业盲盒主线</view>
+        <view class="career-hero-title">{{primaryCareer.title}}</view>
+        <view class="career-hero-en" wx:if="{{primaryCareer.title_en}}">{{primaryCareer.title_en}}</view>
+        <view class="career-hero-tag" wx:if="{{primaryCareer.fun_tag}}">{{primaryCareer.fun_tag}}</view>
+        <view class="career-hero-text" wx:if="{{primaryCareer.why_match}}">{{primaryCareer.why_match}}</view>
+      </view>
+
+      <view class="result-card career-list-card" wx:if="{{recommendedCareers.length > 0 && !talentRadarReport && !fortuneReport}}">
+        <view class="card-title">
+          <image class="card-icon" src="/images/icons/icon-report.png"></image>
+          <text>更多适合你的职业</text>
+        </view>
+        <view class="career-list">
+          <view class="career-item" wx:for="{{recommendedCareers}}" wx:key="title">
+            <view class="career-item-head">
+              <text class="career-item-title">{{item.title}}</text>
+              <text class="career-item-tag" wx:if="{{item.fun_tag}}">{{item.fun_tag}}</text>
+            </view>
+            <view class="career-item-en" wx:if="{{item.title_en}}">{{item.title_en}}</view>
+            <view class="career-item-text" wx:if="{{item.why_match}}">{{item.why_match}}</view>
+          </view>
+        </view>
       </view>
     </block>
 
@@ -98,13 +321,6 @@
             <view class="analysis-list-item" wx:for="{{item.list}}" wx:for-item="line" wx:key="*this">
               <text class="list-dot"></text>
               <text class="list-text">{{line}}</text>
-            </view>
-          </view>
-
-          <view wx:if="{{item.type === 'details'}}" class="detail-pair-list">
-            <view class="detail-pair-item" wx:for="{{item.detailItems}}" wx:for-item="detail" wx:key="label">
-              <text class="detail-pair-label">{{detail.label}}</text>
-              <text class="detail-pair-value">{{detail.value}}</text>
             </view>
           </view>
         </view>

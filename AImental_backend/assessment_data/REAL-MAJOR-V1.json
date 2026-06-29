@@ -2,499 +2,385 @@
   "scale_info": {
     "name": "理想职业探索",
     "short_name": "REAL-MAJOR-V1",
-    "description": "当代学生生活图鉴！15道题揭示你潜意识里真正的“专业”归属，快来康康你的隐藏身份吧！",
-    "instructions": "另类MBTI~看看你属于哪一类~",
+    "description": "这不是严肃到让人犯困的职业测评，也不是纯看热闹的趣味题。它会通过 16 个轻松情境，帮你找到自己更偏爱的任务类型、成就来源和工作风格，看看你更像哪一种职业方向的人。",
+    "instructions": "请不要选“别人觉得更厉害”的答案，而是选“你真的更愿意这样做”的答案。每题只选一个最贴近你的选项。",
     "category": "趣味测试",
     "assessment_type": "categorical"
   },
   "questions": [
     {
       "order": 1,
-      "text": "一个阳光明媚的周六下午，你没有课也没有作业，你会选择？",
+      "text": "如果你加入一个新项目，最让你兴奋的通常是？",
       "options": [
-        {
-          "id": "a",
-          "text": "去图书馆！泡在知识的海洋里才是最完美的周末。",
-          "target_personality_id": "p01"
-        },
-        {
-          "id": "b",
-          "text": "拿出日程本，开始规划下周的学习和生活，把所有事都安排好。",
-          "target_personality_id": "p02"
-        },
-        {
-          "id": "c",
-          "text": "整理电脑里的文件和笔记，确保个人知识库（PKM）保持最新状态。",
-          "target_personality_id": "p03"
-        },
-        {
-          "id": "d",
-          "text": "给自己的小窝换上新的装饰画和床单，营造满满的幸福感。",
-          "target_personality_id": "p04"
-        }
+        { "id": "a", "text": "先把目标、流程和时间线梳理清楚，让大家知道怎么推进。", "target_personality_id": "p01" },
+        { "id": "b", "text": "先去采访用户或观察现场，弄清楚大家到底卡在哪里。", "target_personality_id": "p02" },
+        { "id": "c", "text": "开始想点子：有没有更好玩、更出圈、更不一样的做法。", "target_personality_id": "p03" },
+        { "id": "d", "text": "先研究数据、资料和规则，看看问题的关键变量是什么。", "target_personality_id": "p04" }
       ]
     },
     {
       "order": 2,
-      "text": "这学期你选修了一门课，但老师讲得非常催眠，你会？",
+      "text": "朋友向你求助时，你最自然的反应是？",
       "options": [
-        {
-          "id": "a",
-          "text": "绝佳的补觉时机，正好可以弥补昨晚熬夜缺的觉。",
-          "target_personality_id": "p05"
-        },
-        {
-          "id": "b",
-          "text": "拿出零食和饮料，在座位上开启“不动声色”的茶话会模式。",
-          "target_personality_id": "p06"
-        },
-        {
-          "id": "c",
-          "text": "不慌，等到期末前一天晚上，我能把整本书都塞进脑子里。",
-          "target_personality_id": "p07"
-        },
-        {
-          "id": "d",
-          "text": "只要能过就行。开始研究这门课的考勤和作业占比，计算最低通过成本。",
-          "target_personality_id": "p08"
-        }
+        { "id": "a", "text": "陪他梳理情绪和处境，先让他感觉被理解。", "target_personality_id": "p02" },
+        { "id": "b", "text": "直接给出一个可执行的计划表：第一步做什么，第二步做什么。", "target_personality_id": "p01" },
+        { "id": "c", "text": "帮他从不同角度打开脑洞，看看有没有意想不到的路。", "target_personality_id": "p03" },
+        { "id": "d", "text": "先问清楚事实、限制和资源，再判断最优解。", "target_personality_id": "p04" }
       ]
     },
     {
       "order": 3,
-      "text": "看到校园BBS上有人发帖讨论“你校最灵的许愿地”，你的第一反应是？",
+      "text": "如果你要布置一个属于自己的工作角落，你更在意？",
       "options": [
-        {
-          "id": "a",
-          "text": "马上去拜一拜，最近考试多，急需一些玄学力量加持。",
-          "target_personality_id": "p09"
-        },
-        {
-          "id": "b",
-          "text": "点进去刷评论，结果被算法推荐了更多有趣视频，两个小时过去了。",
-          "target_personality_id": "p10"
-        },
-        {
-          "id": "c",
-          "text": "许愿？不如开一局游戏，用实力在虚拟世界里赢取荣耀。",
-          "target_personality_id": "p11"
-        },
-        {
-          "id": "d",
-          "text": "立刻截图发到群里，@所有人“速来吃瓜，前排围观！”",
-          "target_personality_id": "p12"
-        }
+        { "id": "a", "text": "整洁、高效、物品拿取顺手，像一个能立刻开工的指挥台。", "target_personality_id": "p01" },
+        { "id": "b", "text": "温暖、舒服、有情绪价值，让人一坐下就愿意久待。", "target_personality_id": "p02" },
+        { "id": "c", "text": "有灵感感，颜色、装饰和氛围都能激发创意。", "target_personality_id": "p03" },
+        { "id": "d", "text": "设备、资料和工具齐全，方便分析、记录和验证。", "target_personality_id": "p04" }
       ]
     },
     {
       "order": 4,
-      "text": "当你感觉压力巨大、情绪低落时，最能治愈你的方式是？",
+      "text": "你更容易在什么情况下进入心流？",
       "options": [
-        {
-          "id": "a",
-          "text": "在图书馆找个安静的角落，读一本喜欢的书，让内心平静下来。",
-          "target_personality_id": "p01"
-        },
-        {
-          "id": "b",
-          "text": "倒头就睡，没有什么是一场高质量的睡眠解决不了的。",
-          "target_personality_id": "p05"
-        },
-        {
-          "id": "c",
-          "text": "转发锦鲤，或者找塔罗牌算一算，寻求一些神秘主义的安慰。",
-          "target_personality_id": "p09"
-        },
-        {
-          "id": "d",
-          "text": "立刻打开待办事项清单，划掉几个已完成的任务，用成就感对抗压力。",
-          "target_personality_id": "p02"
-        }
+        { "id": "a", "text": "把复杂事情拆开，一项项推进，进度条不断往前走。", "target_personality_id": "p01" },
+        { "id": "b", "text": "和人深聊、理解需求、帮别人找到合适的支持方式。", "target_personality_id": "p02" },
+        { "id": "c", "text": "构思内容、设计表达、把平平无奇的东西做得有记忆点。", "target_personality_id": "p03" },
+        { "id": "d", "text": "看数据、找规律、验证假设，最后把问题讲明白。", "target_personality_id": "p04" }
       ]
     },
     {
       "order": 5,
-      "text": "你的手机相册里，存得最多的照片类型是？",
+      "text": "如果要组织一次活动，你最想负责哪一块？",
       "options": [
-        {
-          "id": "a",
-          "text": "各种零食的包装袋，和床上电脑桌的“生态系统”自拍。",
-          "target_personality_id": "p06"
-        },
-        {
-          "id": "b",
-          "text": "短视频里看到的搞笑/生活小技巧截图，虽然“码了等于做了”。",
-          "target_personality_id": "p10"
-        },
-        {
-          "id": "c",
-          "text": "各种课程的PPT、板书和资料，堪称移动的数字图书馆。",
-          "target_personality_id": "p03"
-        },
-        {
-          "id": "d",
-          "text": "咖啡、能量饮料和“奋斗到天明”的桌面，都是DDL的见证。",
-          "target_personality_id": "p07"
-        }
+        { "id": "a", "text": "排期、分工、预算和风险预案，保证活动不翻车。", "target_personality_id": "p01" },
+        { "id": "b", "text": "接待、沟通、现场氛围，让每个人都觉得被照顾到。", "target_personality_id": "p02" },
+        { "id": "c", "text": "主题创意、视觉风格、传播文案，让活动更有存在感。", "target_personality_id": "p03" },
+        { "id": "d", "text": "复盘和效果分析，看看这次到底哪些地方最有效。", "target_personality_id": "p04" }
       ]
     },
     {
       "order": 6,
-      "text": "朋友约你出去玩，但你有点懒得动，最可能让你改变主意的理由是？",
+      "text": "看到一个做得很差的产品或流程，你更可能想：",
       "options": [
-        {
-          "id": "a",
-          "text": "“来我家开黑吧，我新买了机械键盘！”",
-          "target_personality_id": "p11"
-        },
-        {
-          "id": "b",
-          "text": "“快来，我们一起把你宿舍的照片墙弄好，我买了好多好看的夹子！”",
-          "target_personality_id": "p04"
-        },
-        {
-          "id": "c",
-          "text": "“去参加那个讲座吧，听说签个到就算平时分，性价比超高。”",
-          "target_personality_id": "p08"
-        },
-        {
-          "id": "d",
-          "text": "“来吃瓜！我刚知道一个关于XXX的惊天大八卦！”",
-          "target_personality_id": "p12"
-        }
+        { "id": "a", "text": "这流程太乱了，我能把它重排得更顺。", "target_personality_id": "p01" },
+        { "id": "b", "text": "用户用起来一定很难受，我想知道他们最烦哪一步。", "target_personality_id": "p02" },
+        { "id": "c", "text": "它毫无吸引力，我已经想到三个更有意思的改法了。", "target_personality_id": "p03" },
+        { "id": "d", "text": "先别急着吐槽，我想先看看问题数据和真实表现。", "target_personality_id": "p04" }
       ]
     },
     {
       "order": 7,
-      "text": "一个理想的下午茶，对你来说应该是：",
+      "text": "别人夸你时，哪种评价最容易让你开心？",
       "options": [
-        {
-          "id": "a",
-          "text": "一杯咖啡，一本书，在图书馆的窗边安静地度过。",
-          "target_personality_id": "p01"
-        },
-        {
-          "id": "b",
-          "text": "躺在床上，一边吃零食，一边追着剧，手边五米内应有尽有。",
-          "target_personality_id": "p06"
-        },
-        {
-          "id": "c",
-          "text": "一边喝奶茶，一边和朋友激烈地讨论最新的游戏版本更新。",
-          "target_personality_id": "p11"
-        },
-        {
-          "id": "d",
-          "text": "一边喝茶，一边整理本周的知识星球和RSS订阅源。",
-          "target_personality_id": "p03"
-        }
+        { "id": "a", "text": "“有你在，事情就很稳，推进得特别清楚。”", "target_personality_id": "p01" },
+        { "id": "b", "text": "“你特别会理解人，也很会把复杂关系处理顺。”", "target_personality_id": "p02" },
+        { "id": "c", "text": "“你的想法真的很新，而且一出手就有风格。”", "target_personality_id": "p03" },
+        { "id": "d", "text": "“你总能抓到重点，把问题分析得特别透。”", "target_personality_id": "p04" }
       ]
     },
     {
       "order": 8,
-      "text": "临近期末，你的复习状态更接近于：",
+      "text": "如果你必须连续投入三个月做一件事，你更希望它是：",
       "options": [
-        {
-          "id": "a",
-          "text": "困了就睡，绝不硬撑，相信睡眠会帮助大脑巩固记忆。",
-          "target_personality_id": "p05"
-        },
-        {
-          "id": "b",
-          "text": "根本停不下来，手机里收藏的“学习妙招”短视频比复习资料还多。",
-          "target_personality_id": "p10"
-        },
-        {
-          "id": "c",
-          "text": "精心打扮一番，化上“考试必过锦鲤妆”，在寝室里营造出满满的复习仪式感。",
-          "target_personality_id": "p04"
-        },
-        {
-          "id": "d",
-          "text": "严格按照之前制定的复习计划表推进，每天的任务都清晰明确。",
-          "target_personality_id": "p02"
-        }
+        { "id": "a", "text": "一个能看见明确里程碑和成果交付的项目。", "target_personality_id": "p01" },
+        { "id": "b", "text": "一个能持续接触真实人群、理解他们需求的议题。", "target_personality_id": "p02" },
+        { "id": "c", "text": "一个可以不断迭代创意、输出作品或内容的主题。", "target_personality_id": "p03" },
+        { "id": "d", "text": "一个能深挖规律、形成洞察或研究结论的课题。", "target_personality_id": "p04" }
       ]
     },
     {
       "order": 9,
-      "text": "对于“摆烂”这个词，你的理解是？",
+      "text": "你更喜欢什么样的成就感？",
       "options": [
-        {
-          "id": "a",
-          "text": "这是一种顺应天命的哲学，是与自己和解的智慧。",
-          "target_personality_id": "p09"
-        },
-        {
-          "id": "b",
-          "text": "这是DDL来临前的蓄力阶段，是暴风雨前的宁静。",
-          "target_personality_id": "p07"
-        },
-        {
-          "id": "c",
-          "text": "这是在互联网信息海洋里冲浪时，必然会抵达的精神港湾。",
-          "target_personality_id": "p12"
-        },
-        {
-          "id": "d",
-          "text": "我只求六十分万岁，多一分都浪费，这不叫摆烂，叫精准控制。",
-          "target_personality_id": "p08"
-        }
+        { "id": "a", "text": "一切按计划落地，团队最终顺利完成目标。", "target_personality_id": "p01" },
+        { "id": "b", "text": "有人因为你的帮助，真的变轻松、变自信、变舒服了。", "target_personality_id": "p02" },
+        { "id": "c", "text": "你的作品、表达或点子被人记住、转发、讨论。", "target_personality_id": "p03" },
+        { "id": "d", "text": "你找到别人没看见的规律，并提出了可靠判断。", "target_personality_id": "p04" }
       ]
     },
     {
       "order": 10,
-      "text": "你的信息管理方式更偏向于：",
+      "text": "如果有一天突然不用为分数、KPI 或别人期待负责，你还是会想做的是：",
       "options": [
-        {
-          "id": "a",
-          "text": "所有信息都在图书馆的书架上，分门别类，井井有条。",
-          "target_personality_id": "p01"
-        },
-        {
-          "id": "b",
-          "text": "大脑就是我最好的收藏夹，虽然有点乱，但DDL前总能奇迹般地找到。",
-          "target_personality_id": "p07"
-        },
-        {
-          "id": "c",
-          "text": "刷到就是学到，我的大脑已经被短视频塑造成了信息瀑布流。",
-          "target_personality_id": "p10"
-        },
-        {
-          "id": "d",
-          "text": "睡眠是最好的信息处理器，一觉醒来，重要的事自然会浮现。",
-          "target_personality_id": "p05"
-        }
+        { "id": "a", "text": "搭系统、做项目、把一件事从混乱变有序。", "target_personality_id": "p01" },
+        { "id": "b", "text": "研究人、帮助人、做连接人与资源的事。", "target_personality_id": "p02" },
+        { "id": "c", "text": "表达、设计、创作、做能打动人的东西。", "target_personality_id": "p03" },
+        { "id": "d", "text": "拆问题、做判断、研究“为什么会这样”。", "target_personality_id": "p04" }
       ]
     },
     {
       "order": 11,
-      "text": "如果可以获得一种超能力，你希望是？",
+      "text": "团队开会时，你更常扮演：",
       "options": [
-        {
-          "id": "a",
-          "text": "拥有一个永远会自动执行的“人生计划”助手。",
-          "target_personality_id": "p02"
-        },
-        {
-          "id": "b",
-          "text": "点石成金，但只为了把考试成绩单上的59分变成60分。",
-          "target_personality_id": "p08"
-        },
-        {
-          "id": "c",
-          "text": "拥有千里眼和顺风耳，第一时间吃遍全网的瓜。",
-          "target_personality_id": "p12"
-        },
-        {
-          "id": "d",
-          "text": "在床上创造一个独立时空，吃喝玩乐都不需要下床。",
-          "target_personality_id": "p06"
-        }
+        { "id": "a", "text": "把讨论收束成行动项的人。", "target_personality_id": "p01" },
+        { "id": "b", "text": "发现情绪和关系变化、帮大家重新对齐的人。", "target_personality_id": "p02" },
+        { "id": "c", "text": "抛出新视角、新方向、新表达的人。", "target_personality_id": "p03" },
+        { "id": "d", "text": "追问逻辑、证据和关键判断依据的人。", "target_personality_id": "p04" }
       ]
     },
     {
       "order": 12,
-      "text": "你在社交媒体上最活跃的时刻通常是？",
+      "text": "如果你要经营一个账号/小项目，你最在意先做好的会是：",
       "options": [
-        {
-          "id": "a",
-          "text": "当有新的笔记软件或信息整理技巧出现时，积极参与讨论和分享。",
-          "target_personality_id": "p03"
-        },
-        {
-          "id": "b",
-          "text": "在各种祈福、抽奖、星座运势下留言，希望获得好运。",
-          "target_personality_id": "p09"
-        },
-        {
-          "id": "c",
-          "text": "晒出自己新装饰的寝室一角或新入手的提升幸福感的小物件。",
-          "target_personality_id": "p04"
-        },
-        {
-          "id": "d",
-          "text": "当喜欢的游戏发布新内容或有大型电竞赛事时。",
-          "target_personality_id": "p11"
-        }
+        { "id": "a", "text": "更新节奏、任务分工和执行流程。", "target_personality_id": "p01" },
+        { "id": "b", "text": "用户反馈、互动关系和社群氛围。", "target_personality_id": "p02" },
+        { "id": "c", "text": "风格、故事感和内容吸引力。", "target_personality_id": "p03" },
+        { "id": "d", "text": "数据指标、增长表现和内容效果分析。", "target_personality_id": "p04" }
       ]
     },
     {
       "order": 13,
-      "text": "毕业论文致谢部分，你最想感谢的是？",
+      "text": "以下哪种任务，最不容易让你拖延？",
       "options": [
-        {
-          "id": "a",
-          "text": "图书馆的每一位管理员和那个你最常坐的座位。",
-          "target_personality_id": "p01"
-        },
-        {
-          "id": "b",
-          "text": "那些陪你精准计算学分、研究及格线的“战友们”。",
-          "target_personality_id": "p08"
-        },
-        {
-          "id": "c",
-          "text": "你的床，感谢它在你无数个不想奋斗的日子里提供的无私怀抱。",
-          "target_personality_id": "p06"
-        },
-        {
-          "id": "d",
-          "text": "你的化妆品和好看的衣服们，它们给了你面对一切的勇气。",
-          "target_personality_id": "p04"
-        }
+        { "id": "a", "text": "把一堆混乱事项整理成一个清楚方案。", "target_personality_id": "p01" },
+        { "id": "b", "text": "跟人沟通、访谈、协调，弄清大家真实想法。", "target_personality_id": "p02" },
+        { "id": "c", "text": "起标题、做概念、写文案、出创意。", "target_personality_id": "p03" },
+        { "id": "d", "text": "查资料、比方案、做分析、下判断。", "target_personality_id": "p04" }
       ]
     },
     {
       "order": 14,
-      "text": "“deadline是第一生产力”这句话，你认为：",
+      "text": "面对一个模糊但重要的问题，你更习惯从哪里开始？",
       "options": [
-        {
-          "id": "a",
-          "text": "不，周密的计划才是。我从不让自己陷入需要deadline来拯救的境地。",
-          "target_personality_id": "p02"
-        },
-        {
-          "id": "b",
-          "text": "是的，但转发锦鲤也是。运气和努力同样重要。",
-          "target_personality_id": "p09"
-        },
-        {
-          "id": "c",
-          "text": "错，短视频才是。它能让我忘掉deadline，从而获得暂时的快乐。",
-          "target_personality_id": "p10"
-        },
-        {
-          "id": "d",
-          "text": "简直是真理！没有deadline，我的潜力可能永远无法被激发。",
-          "target_personality_id": "p07"
-        }
+        { "id": "a", "text": "先定边界和优先级，不然项目会失控。", "target_personality_id": "p01" },
+        { "id": "b", "text": "先去理解涉及的人，不然方案很可能不被接受。", "target_personality_id": "p02" },
+        { "id": "c", "text": "先发散可能性，不然很容易一开始就把自己框住。", "target_personality_id": "p03" },
+        { "id": "d", "text": "先搜集事实和信息，不然讨论容易飘。", "target_personality_id": "p04" }
       ]
     },
     {
       "order": 15,
-      "text": "你桌面/床头一定不能少的东西是？",
+      "text": "以下哪种工作日，会让你觉得“虽然累，但值了”？",
       "options": [
-        {
-          "id": "a",
-          "text": "一套分类清晰的文件收纳盒和标签机。",
-          "target_personality_id": "p03"
-        },
-        {
-          "id": "b",
-          "text": "你最喜欢的明星/博主的吃瓜汇总和表情包。",
-          "target_personality_id": "p12"
-        },
-        {
-          "id": "c",
-          "text": "一个让你最有安全感的抱枕或眼罩。",
-          "target_personality_id": "p05"
-        },
-        {
-          "id": "d",
-          "text": "你最喜欢的游戏的手办或者海报。",
-          "target_personality_id": "p11"
-        }
+        { "id": "a", "text": "项目推进顺畅，节点清晰，很多人因为你的统筹省了时间。", "target_personality_id": "p01" },
+        { "id": "b", "text": "你和很多人打了交道，也让他们的体验明显更好了。", "target_personality_id": "p02" },
+        { "id": "c", "text": "你产出了一个自己满意、别人也眼前一亮的作品。", "target_personality_id": "p03" },
+        { "id": "d", "text": "你终于把一个复杂问题看明白了，还给出了靠谱结论。", "target_personality_id": "p04" }
+      ]
+    },
+    {
+      "order": 16,
+      "text": "如果把未来工作想象成一部连续剧，你更想演哪种主角？",
+      "options": [
+        { "id": "a", "text": "节奏掌控型主角：事情多，但我能把全场调度明白。", "target_personality_id": "p01" },
+        { "id": "b", "text": "关系连接型主角：我擅长理解人，也擅长把人和资源连起来。", "target_personality_id": "p02" },
+        { "id": "c", "text": "创意表达型主角：我要让想法有风格、有记忆点、有感染力。", "target_personality_id": "p03" },
+        { "id": "d", "text": "洞察判断型主角：我负责把复杂世界看清楚，再做出判断。", "target_personality_id": "p04" }
       ]
     }
   ],
   "interpretations": {
     "p01": {
-      "college": "卷理学院",
-      "title": "图书馆生态信息学",
-      "college_motto": "知识的尽头是绩点，我们的尽头是图书馆。",
-      "description": "核心课程：《图书馆座位锁定技巧》、《专注力与环境噪音隔离》、《从入门到精通：各科文献综述》",
-      "recommendation": "生存指南：注意劳逸结合，偶尔也要看看窗外的世界，不要和书本融为一体了。",
-      "image_url": "/images/assessment/real_major/p01.png"
+      "college": "任务推进研究所",
+      "title": "项目统筹型方向",
+      "college_motto": "把混乱排成队，把目标推进到终点。",
+      "description": "你更容易在“把事情理顺并推动落地”的任务里发光。你通常重视节奏、结构、分工和执行，擅长把复杂目标拆成明确步骤，也更容易在看得见进展的项目里获得成就感。适合继续探索的方向包括项目管理、运营管理、活动统筹、供应协调、执行策划等。",
+      "recommendation": "你的优势是稳、清楚、能推进。下一步可以继续训练资源协调、优先级判断和跨团队沟通能力，让自己从“会做事的人”进一步成长为“能把一群人带着做成事的人”。",
+      "career_teaser": "你的职业盲盒开出了一个擅长把全场拧成一股绳的角色。",
+      "primary_career": {
+        "title": "项目管理专员",
+        "title_en": "Project Management Specialist",
+        "fun_tag": "进度条驱动型选手",
+        "why_match": "适合喜欢定目标、排流程、推节点、盯落地的人。",
+        "source_url": "https://www.bls.gov/ooh/business-and-financial/project-management-specialists.htm"
+      },
+      "recommended_careers": [
+        {
+          "title": "项目管理专员",
+          "title_en": "Project Management Specialist",
+          "fun_tag": "把复杂任务排成队",
+          "why_match": "你对目标、节点和协作很敏感，适合做统筹推进。",
+          "source_url": "https://www.bls.gov/ooh/business-and-financial/project-management-specialists.htm"
+        },
+        {
+          "title": "物流师",
+          "title_en": "Logistician",
+          "fun_tag": "流程流转大师",
+          "why_match": "如果你喜欢把资源、时间和路径安排得顺滑，这类岗位会很有成就感。",
+          "source_url": "https://www.bls.gov/ooh/business-and-financial/logisticians.htm"
+        },
+        {
+          "title": "会展与活动策划师",
+          "title_en": "Meeting, Convention, and Event Planner",
+          "fun_tag": "现场不翻车守护者",
+          "why_match": "需要统筹细节、控制节奏、协调多人，非常贴合你的推进型优势。",
+          "source_url": "https://www.bls.gov/ooh/business-and-financial/meeting-convention-and-event-planners.htm"
+        },
+        {
+          "title": "行政与设施经理",
+          "title_en": "Administrative Services and Facilities Manager",
+          "fun_tag": "组织运转润滑剂",
+          "why_match": "这类工作依赖秩序感和调度力，适合喜欢让系统稳定运行的人。",
+          "source_url": "https://www.bls.gov/ooh/management/administrative-services-managers.htm"
+        },
+        {
+          "title": "工业生产经理",
+          "title_en": "Industrial Production Manager",
+          "fun_tag": "大型任务控场官",
+          "why_match": "如果你享受把复杂流程、质量和进度统一起来，这条路会很对味。",
+          "source_url": "https://www.bls.gov/ooh/management/industrial-production-managers.htm"
+        }
+      ],
+      "image_url": ""
     },
     "p02": {
-      "college": "卷理学院",
-      "title": "应用行为规划学",
-      "college_motto": "知识的尽头是绩点，我们的尽头是图书馆。",
-      "description": "核心课程：《规划的艺术与实践》、《GTD时间管理法导论》、《多线程任务处理》",
-      "recommendation": "生存指南：请学会接受“意外”，有时候计划赶不上变化也是一种别样的惊喜。",
-      "image_url": "/images/assessment/real_major/p02.png"
+      "college": "人和关系实验室",
+      "title": "沟通支持型方向",
+      "college_motto": "理解人，不只是会说话，更是会接住人。",
+      "description": "你更适合那些需要理解人、连接人、支持人的职业方向。你通常能觉察他人的情绪和需求，也愿意在沟通、协作、服务与关系维护中投入精力。适合继续探索的方向包括心理支持、教育辅导、人力资源、用户研究、客户成功、社区运营、公益服务等。",
+      "recommendation": "你的优势是共情、沟通和连接。接下来可以补强边界感、结构化表达和问题分析能力，这会让你在“会理解人”之外，也更能把支持真正转化成有效行动。",
+      "career_teaser": "你的职业盲盒像一张会发光的关系地图，主线技能是理解人。",
+      "primary_career": {
+        "title": "学校与生涯顾问",
+        "title_en": "School and Career Counselor and Advisor",
+        "fun_tag": "人生路线陪跑员",
+        "why_match": "适合愿意倾听、理解差异，并帮助别人找到方向的人。",
+        "source_url": "https://www.bls.gov/ooh/community-and-social-service/school-and-career-counselors.htm"
+      },
+      "recommended_careers": [
+        {
+          "title": "学校与生涯顾问",
+          "title_en": "School and Career Counselor and Advisor",
+          "fun_tag": "人生路线陪跑员",
+          "why_match": "需要耐心倾听、识别需求、陪伴他人做选择，很符合你的支持型特质。",
+          "source_url": "https://www.bls.gov/ooh/community-and-social-service/school-and-career-counselors.htm"
+        },
+        {
+          "title": "人力资源专员",
+          "title_en": "Human Resources Specialist",
+          "fun_tag": "组织关系连接器",
+          "why_match": "如果你擅长沟通、协调与理解人，这类岗位会让你如鱼得水。",
+          "source_url": "https://www.bls.gov/ooh/business-and-financial/human-resources-specialists.htm"
+        },
+        {
+          "title": "培训与发展专员",
+          "title_en": "Training and Development Specialist",
+          "fun_tag": "成长系统搭建师",
+          "why_match": "帮助别人变强、把支持变成成长路径，是这类工作的核心乐趣。",
+          "source_url": "https://www.bls.gov/ooh/business-and-financial/training-and-development-specialists.htm"
+        },
+        {
+          "title": "社会与社区服务经理",
+          "title_en": "Social and Community Service Manager",
+          "fun_tag": "公共善意放大器",
+          "why_match": "适合愿意为群体福祉和真实需求投入精力的人。",
+          "source_url": "https://www.bls.gov/ooh/management/social-and-community-service-managers.htm"
+        },
+        {
+          "title": "公共关系专员",
+          "title_en": "Public Relations Specialist",
+          "fun_tag": "关系氛围调音师",
+          "why_match": "当你能理解人、把话说到位、处理好关系场域时，这类岗位会很有发挥空间。",
+          "source_url": "https://www.bls.gov/ooh/media-and-communication/public-relations-specialists.htm"
+        }
+      ],
+      "image_url": ""
     },
     "p03": {
-      "college": "卷理学院",
-      "title": "知识资产管理学",
-      "college_motto": "知识的尽头是绩点，我们的尽头是图书馆。",
-      "description": "核心课程：《数字笔记软件通论》、《信息检索与高效整理》、《个人知识库（PKM）构建》",
-      "recommendation": "生存指南：别忘了分享是知识增值的最佳途径，带带身边还在信息茧房里的朋友吧！",
-      "image_url": "/images/assessment/real_major/p03.png"
+      "college": "创意表达工作室",
+      "title": "内容创意型方向",
+      "college_motto": "不只是有想法，而是让想法被看见、被记住。",
+      "description": "你在需要创意、表达、审美和内容设计的场景里更容易发光。你通常愿意尝试新点子，也在意风格、感染力和呈现方式，希望把普通内容做得更有记忆点。适合继续探索的方向包括内容策划、品牌传播、设计、新媒体、广告创意、影视编导、文案与产品体验设计等。",
+      "recommendation": "你的优势是灵感和表达感。下一步最重要的是练习把创意变成稳定输出，比如建立作品集、复盘机制和协作习惯。会想是一种天赋，能持续产出则是更稀缺的能力。",
+      "career_teaser": "你的职业盲盒像一支彩色马克笔，重点不是安静存在，而是留下风格。",
+      "primary_career": {
+        "title": "平面设计师",
+        "title_en": "Graphic Designer",
+        "fun_tag": "审美表达发动机",
+        "why_match": "适合愿意把想法变成可见风格、让信息更有吸引力的人。",
+        "source_url": "https://www.bls.gov/ooh/arts-and-design/graphic-designers.htm"
+      },
+      "recommended_careers": [
+        {
+          "title": "平面设计师",
+          "title_en": "Graphic Designer",
+          "fun_tag": "审美表达发动机",
+          "why_match": "如果你喜欢把抽象想法变成好看的表达，这会是很自然的方向。",
+          "source_url": "https://www.bls.gov/ooh/arts-and-design/graphic-designers.htm"
+        },
+        {
+          "title": "作家与作者",
+          "title_en": "Writer and Author",
+          "fun_tag": "文字镜头掌控者",
+          "why_match": "适合愿意用语言塑造画面、观点和情绪的人。",
+          "source_url": "https://www.bls.gov/ooh/media-and-communication/writers-and-authors.htm"
+        },
+        {
+          "title": "编辑",
+          "title_en": "Editor",
+          "fun_tag": "内容精修师",
+          "why_match": "如果你既有表达欲，也会在意内容完成度和节奏感，编辑岗会很对味。",
+          "source_url": "https://www.bls.gov/ooh/media-and-communication/editors.htm"
+        },
+        {
+          "title": "美术指导",
+          "title_en": "Art Director",
+          "fun_tag": "风格总控台",
+          "why_match": "适合对整体视觉氛围、创意方向和作品调性有强感知的人。",
+          "source_url": "https://www.bls.gov/ooh/arts-and-design/art-directors.htm"
+        },
+        {
+          "title": "特效艺术家与动画师",
+          "title_en": "Special Effects Artist and Animator",
+          "fun_tag": "灵感动态化选手",
+          "why_match": "如果你希望创意不仅被看到，还能动起来、讲故事，这类职业会很有魅力。",
+          "source_url": "https://www.bls.gov/ooh/arts-and-design/multimedia-artists-and-animators.htm"
+        }
+      ],
+      "image_url": ""
     },
     "p04": {
-      "college": "寝室生命科学学院",
-      "title": "寝室软装工程学",
-      "college_motto": "宇宙的中心是我的床。",
-      "description": "核心课程：《宿舍美学与空间利用》、《LED灯带应用与光污染防治》、《消费主义与种草拔草》",
-      "recommendation": "生存指南：在改造寝室时，请务必先征得室友和宿管阿姨的同意。",
-      "image_url": "/images/assessment/real_major/p04.png"
-    },
-    "p05": {
-      "college": "寝室生命科学学院",
-      "title": "人类睡眠学",
-      "college_motto": "宇宙的中心是我的床。",
-      "description": "核心课程：《睡眠与梦境解析》、《生物钟调节导论》、《枕头与床垫的选购艺术》",
-      "recommendation": "生存指南：你的生物钟可能和太阳不太同步，记得备好眼罩和耳塞。",
-      "image_url": "/images/assessment/real_major/p05.png"
-    },
-    "p06": {
-      "college": "寝室生命科学学院",
-      "title": "床域生态系统学",
-      "college_motto": "宇宙的中心是我的床。",
-      "description": "核心课程：《床上运动力学》、《懒人经济学原理》、《零食仓储与伸手可及的艺术》",
-      "recommendation": "生存指南：偶尔清理一下“床域”环境，可能会有惊奇的考古发现。",
-      "image_url": "/images/assessment/real_major/p06.png"
-    },
-    "p07": {
-      "college": "危机管理与精准决策学院",
-      "title": "DDL应急学",
-      "college_motto": "DDL是第一生产力，六十分是最高性价比。",
-      "description": "核心课程：《拖延心理学与自我和解》、《24小时极限任务规划》、《咖啡因与护肝片的应用》",
-      "recommendation": "生存指南：常备护肝片和咖啡因，它们是你最忠实的战友。",
-      "image_url": "/images/assessment/real_major/p07.png"
-    },
-    "p08": {
-      "college": "危机管理与精准决策学院",
-      "title": "及格科学与工程",
-      "college_motto": "DDL是第一生产力，六十分是最高性价比。",
-      "description": "核心课程：《考纲重点剖析》、《最小努力原则》、《风险评估与成绩预测》",
-      "recommendation": "生存指南：请小心老师突然划重点或改变评分规则，那将是对你整个体系的降维打击。",
-      "image_url": "/images/assessment/real_major/p08.png"
-    },
-    "p09": {
-      "college": "危机管理与精准决策学院",
-      "title": "命理学",
-      "college_motto": "DDL是第一生产力，六十分是最高性价比。",
-      "description": "核心课程：《摆烂哲学》、《玄学与自我安慰》、《好运锦鲤的转发技巧》",
-      "recommendation": "生存指南：转发锦鲤确实能带来好心情，但作业和考试还是得自己面对哦。",
-      "image_url": "/images/assessment/real_major/p09.png"
-    },
-    "p10": {
-      "college": "互联网与计算机科学学院",
-      "title": "时间黑洞学",
-      "college_motto": "现实Offline，赛博Online。",
-      "description": "核心课程：《短视频沉浸式体验》、《信息茧房的构建与突破》、《“再刷五分钟”心理学》",
-      "recommendation": "生存指南：试试“番茄工作法”，也许能帮你从黑洞的引力中短暂逃逸。",
-      "image_url": "/images/assessment/real_major/p10.png"
-    },
-    "p11": {
-      "college": "互联网与计算机科学学院",
-      "title": "虚拟环境栖息学",
-      "college_motto": "现实Offline，赛博Online。",
-      "description": "核心课程：《游戏世界观与文化研究》、《团队协作与战术指挥》、《多巴胺奖赏机制概论》",
-      "recommendation": "生存指南：在虚拟世界拯救艾泽拉斯的同时，别忘了现实世界的DDL也需要拯救。",
-      "image_url": "/images/assessment/real_major/p11.png"
-    },
-    "p12": {
-      "college": "互联网与计算机科学学院",
-      "title": "舆情传播学",
-      "college_motto": "现实Offline，赛博Online。",
-      "description": "核心课程：《吃瓜的正确姿势》、《网络热点追踪技术》、《表情包符号学》",
-      "recommendation": "生存指南：吃瓜不信瓜，传谣需谨慎。保持独立思考，做个有态度的吃瓜群众。",
-      "image_url": "/images/assessment/real_major/p12.png"
+      "college": "洞察分析中心",
+      "title": "研究分析型方向",
+      "college_motto": "先看清世界，再决定怎么行动。",
+      "description": "你更适合那些需要研究、分析、判断和抽丝剥茧的职业方向。你通常更愿意先收集信息、辨别逻辑、找到规律，再形成结论。你在复杂问题、模糊任务和系统性思考里往往更有耐心。适合继续探索的方向包括数据分析、商业分析、研究咨询、产品分析、政策研究、学术研究、战略规划等。",
+      "recommendation": "你的优势是思考深、看得准。接下来可以继续训练表达结论和影响他人的能力，让你的洞察不只停留在“我看懂了”，还能够变成“别人也愿意据此行动”。",
+      "career_teaser": "你的职业盲盒像一张放大镜卡，快乐通常来自“我终于看懂了”。",
+      "primary_career": {
+        "title": "数据科学家",
+        "title_en": "Data Scientist",
+        "fun_tag": "规律捕手",
+        "why_match": "适合喜欢从数据、现象和复杂变量里找模式的人。",
+        "source_url": "https://www.bls.gov/ooh/math/data-scientists.htm"
+      },
+      "recommended_careers": [
+        {
+          "title": "数据科学家",
+          "title_en": "Data Scientist",
+          "fun_tag": "规律捕手",
+          "why_match": "如果你喜欢用数据和模型把世界解释清楚，这会是高适配方向。",
+          "source_url": "https://www.bls.gov/ooh/math/data-scientists.htm"
+        },
+        {
+          "title": "运筹分析师",
+          "title_en": "Operations Research Analyst",
+          "fun_tag": "复杂问题拆解者",
+          "why_match": "适合喜欢在多约束、多变量里寻找最优解的人。",
+          "source_url": "https://www.bls.gov/ooh/math/operations-research-analysts.htm"
+        },
+        {
+          "title": "管理分析师",
+          "title_en": "Management Analyst",
+          "fun_tag": "效率诊断医生",
+          "why_match": "如果你经常一眼看出流程哪里低效、策略哪里不顺，这类岗位会很适合。",
+          "source_url": "https://www.bls.gov/ooh/business-and-financial/management-analysts.htm"
+        },
+        {
+          "title": "市场研究分析师",
+          "title_en": "Market Research Analyst",
+          "fun_tag": "用户与市场雷达",
+          "why_match": "你如果既想理解人，又更偏爱用证据和趋势做判断，这条线很合适。",
+          "source_url": "https://www.bls.gov/ooh/business-and-financial/market-research-analysts.htm"
+        },
+        {
+          "title": "统计学相关岗位",
+          "title_en": "Mathematician and Statistician",
+          "fun_tag": "数据秩序建立者",
+          "why_match": "适合乐于和数据、模型、推断长期相处，并愿意把结论讲清楚的人。",
+          "source_url": "https://www.bls.gov/ooh/math/mathematicians-and-statisticians.htm"
+        }
+      ],
+      "image_url": ""
     }
   }
 }

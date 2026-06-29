@@ -287,6 +287,368 @@ page {
   font-style: italic;
 }
 
+.career-teaser {
+  margin-top: 24rpx;
+  font-size: 28rpx;
+  line-height: 1.7;
+  color: #8b5e3c;
+}
+
+.talent-hero-card {
+  background: linear-gradient(180deg, rgba(255, 248, 238, 0.98) 0%, rgba(255, 239, 219, 0.95) 100%);
+  border: 1rpx solid rgba(245, 180, 112, 0.52);
+}
+
+.talent-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  background: rgba(249, 115, 22, 0.12);
+  color: #ea580c;
+  font-size: 22rpx;
+  font-weight: 600;
+  margin-bottom: 18rpx;
+}
+
+.talent-hero-title {
+  font-size: 48rpx;
+  line-height: 1.25;
+  font-weight: 700;
+  color: #2f241d;
+}
+
+.talent-hero-tagline {
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  line-height: 1.7;
+  color: #a16207;
+}
+
+.talent-hero-text {
+  margin-top: 18rpx;
+  font-size: 28rpx;
+  line-height: 1.8;
+  color: #5f4a3a;
+}
+
+.dual-talent-card {
+  padding: 28rpx;
+}
+
+.dual-talent-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.dual-talent-panel {
+  padding: 28rpx 26rpx;
+  border-radius: 22rpx;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1rpx solid rgba(245, 221, 196, 0.95);
+}
+
+.dual-talent-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background: rgba(249, 115, 22, 0.1);
+  color: #ea580c;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.latent-badge {
+  background: rgba(99, 102, 241, 0.1);
+  color: #4f46e5;
+}
+
+.dual-talent-title {
+  margin-top: 18rpx;
+  font-size: 36rpx;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #2f241d;
+}
+
+.dual-talent-tagline {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: #8b5e3c;
+}
+
+.dual-talent-text {
+  margin-top: 16rpx;
+  font-size: 27rpx;
+  line-height: 1.8;
+  color: #5f4a3a;
+}
+
+.fortune-hero-card {
+  overflow: hidden;
+  min-height: 430rpx;
+  padding: 48rpx 42rpx;
+  background:
+    radial-gradient(circle at 84% 10%, rgba(255, 255, 255, 0.9) 0, rgba(255, 255, 255, 0.08) 32%),
+    linear-gradient(145deg, rgba(255, 246, 229, 0.98) 0%, rgba(255, 226, 211, 0.96) 48%, rgba(230, 246, 241, 0.94) 100%);
+  border: 1rpx solid rgba(246, 183, 142, 0.58);
+}
+
+.fortune-orbit {
+  position: absolute;
+  right: -84rpx;
+  top: -70rpx;
+  width: 260rpx;
+  height: 260rpx;
+  border-radius: 50%;
+  border: 2rpx solid rgba(255, 163, 102, 0.34);
+  transform: rotate(-18deg);
+}
+
+.fortune-orbit-inner {
+  position: absolute;
+  left: 48rpx;
+  top: 48rpx;
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.52);
+  box-shadow: inset 0 0 0 2rpx rgba(255, 178, 128, 0.22);
+}
+
+.fortune-kicker {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.76);
+  color: #b45309;
+  font-size: 23rpx;
+  font-weight: 700;
+}
+
+.fortune-title {
+  position: relative;
+  z-index: 2;
+  margin-top: 28rpx;
+  max-width: 520rpx;
+  font-size: 56rpx;
+  line-height: 1.18;
+  font-weight: 800;
+  color: #2f241d;
+}
+
+.fortune-keyword {
+  position: relative;
+  z-index: 2;
+  margin-top: 22rpx;
+  display: inline-flex;
+  padding: 12rpx 18rpx;
+  border-radius: 18rpx;
+  background: rgba(255, 255, 255, 0.72);
+  color: #0f766e;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.fortune-anchor {
+  position: relative;
+  z-index: 2;
+  margin-top: 28rpx;
+  max-width: 600rpx;
+  font-size: 30rpx;
+  line-height: 1.75;
+  color: #5f4a3a;
+}
+
+.fortune-note-card {
+  background: rgba(255, 253, 248, 0.94);
+}
+
+.fortune-note-title {
+  font-size: 34rpx;
+  line-height: 1.3;
+  font-weight: 800;
+  color: #2f241d;
+  margin-bottom: 18rpx;
+}
+
+.fortune-note-text {
+  font-size: 29rpx;
+  line-height: 1.85;
+  color: #5f4a3a;
+}
+
+.fortune-grid-card {
+  padding: 28rpx;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.fortune-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18rpx;
+}
+
+.fortune-grid-item {
+  padding: 24rpx;
+  border-radius: 18rpx;
+  background: linear-gradient(135deg, rgba(255, 247, 237, 0.94), rgba(240, 253, 250, 0.82));
+  border: 1rpx solid rgba(246, 213, 183, 0.86);
+}
+
+.fortune-grid-label {
+  font-size: 22rpx;
+  line-height: 1.4;
+  font-weight: 700;
+  color: #c2410c;
+}
+
+.fortune-grid-value {
+  margin-top: 10rpx;
+  font-size: 28rpx;
+  line-height: 1.65;
+  color: #44372e;
+}
+
+.career-hero-card {
+  background: linear-gradient(180deg, rgba(255, 250, 244, 0.95) 0%, rgba(255, 241, 225, 0.95) 100%);
+  border: 1rpx solid rgba(245, 180, 112, 0.45);
+}
+
+.career-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  background: rgba(249, 115, 22, 0.12);
+  color: #ea580c;
+  font-size: 22rpx;
+  font-weight: 600;
+  margin-bottom: 18rpx;
+}
+
+.career-hero-title {
+  font-size: 46rpx;
+  line-height: 1.2;
+  font-weight: 700;
+  color: #2f241d;
+}
+
+.career-hero-en {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #9a7d66;
+}
+
+.career-hero-tag {
+  display: inline-flex;
+  margin-top: 20rpx;
+  padding: 10rpx 18rpx;
+  border-radius: 18rpx;
+  background: rgba(255, 255, 255, 0.8);
+  color: #7c4a23;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.career-hero-text {
+  margin-top: 22rpx;
+  font-size: 28rpx;
+  line-height: 1.8;
+  color: #5f4a3a;
+}
+
+.career-list-card {
+  padding-bottom: 20rpx;
+}
+
+.sub-profile-card {
+  background: rgba(255, 253, 248, 0.92);
+  border: 1rpx solid rgba(240, 213, 182, 0.85);
+}
+
+.sub-profile-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background: rgba(140, 102, 255, 0.08);
+  color: #8b5cf6;
+  font-size: 22rpx;
+  font-weight: 600;
+  margin-bottom: 18rpx;
+}
+
+.sub-profile-title {
+  font-size: 38rpx;
+  line-height: 1.25;
+  font-weight: 700;
+  color: #2f241d;
+}
+
+.sub-profile-text {
+  margin-top: 18rpx;
+  font-size: 28rpx;
+  line-height: 1.8;
+  color: #5f4a3a;
+}
+
+.career-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22rpx;
+}
+
+.career-item {
+  padding: 24rpx 24rpx 22rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1rpx solid rgba(246, 213, 183, 0.9);
+}
+
+.career-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.career-item-title {
+  flex: 1;
+  font-size: 32rpx;
+  line-height: 1.4;
+  font-weight: 700;
+  color: #2f241d;
+}
+
+.career-item-tag {
+  flex-shrink: 0;
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  background: rgba(249, 115, 22, 0.1);
+  color: #dd6b20;
+  font-size: 20rpx;
+}
+
+.career-item-en {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #9a7d66;
+}
+
+.career-item-text {
+  margin-top: 14rpx;
+  font-size: 26rpx;
+  line-height: 1.7;
+  color: #5f4a3a;
+}
+
 /* --- 3. 通用详情卡片 --- */
 .detail-card {
   padding: 30rpx 40rpx;

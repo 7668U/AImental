@@ -1,131 +1,361 @@
 {
   "scale_info": {
-    "name": "性格类型测试",
+    "name": "潜意识测试",
     "short_name": "TPS",
-    "description": "本测试通过一系列情景选择题，帮助您探索和了解自己性格中隐藏或最真实的一面，揭示您内在的渴望、动机和与人互动的模式。",
-    "instructions": "请阅读下面的每个情景，并从四个选项中选择一个最符合您第一反应或最倾向于去做的决定。请凭直觉快速作答。",
+    "description": "这是一份偏意象联想的潜意识测试。你会通过24个画面化选择，看到自己在安全感、边界感、探索欲、情绪表达、关系连接和内在驱动力上的潜在倾向。它不是诊断工具，更像一面有趣但相对有逻辑的小镜子。",
+    "instructions": "请不要分析太久，看到题目后按第一反应作答。每题只选一个最贴近你内心画面的答案。",
     "category": "趣味测试",
     "assessment_type": "categorical"
   },
   "questions": [
     {
       "order": 1,
-      "text": "假如你面前有一座山，你觉得山顶上会有什么？",
+      "text": "你走进一片陌生风景，最先吸引你的是？",
       "options": [
-        { "id": "A", "text": "一座寺庙", "target_personality_id": "p01" },
-        { "id": "B", "text": "一片森林", "target_personality_id": "p02" },
-        { "id": "C", "text": "一片废墟", "target_personality_id": "p03" },
-        { "id": "D", "text": "一片云海", "target_personality_id": "p04" }
+        { "id": "A", "text": "很远但发亮的天空边缘", "target_personality_id": "p01" },
+        { "id": "B", "text": "脚下清楚又安稳的小路", "target_personality_id": "p02" },
+        { "id": "C", "text": "树叶缝隙里的流动光影", "target_personality_id": "p03" },
+        { "id": "D", "text": "一条看起来没人走过的岔路", "target_personality_id": "p04" }
       ]
     },
     {
       "order": 2,
-      "text": "下山的时候，你刚好看见一道彩虹，你觉得它是什么颜色的？",
+      "text": "风景里有一座房子，你最在意它的哪一点？",
       "options": [
-        { "id": "A", "text": "紫色", "target_personality_id": "p01" },
-        { "id": "B", "text": "蓝色", "target_personality_id": "p02" },
-        { "id": "C", "text": "黄色", "target_personality_id": "p03" },
-        { "id": "D", "text": "红色", "target_personality_id": "p04" }
+        { "id": "A", "text": "窗户是不是亮着灯", "target_personality_id": "p05" },
+        { "id": "B", "text": "门锁看起来安不安全", "target_personality_id": "p06" },
+        { "id": "C", "text": "外墙有没有特别的颜色和风格", "target_personality_id": "p07" },
+        { "id": "D", "text": "它为什么会独自出现在这里", "target_personality_id": "p08" }
       ]
     },
     {
       "order": 3,
-      "text": "这时候，你面前出现了一个人，你觉得这个人是谁？",
+      "text": "你推门进去时，希望先看到什么？",
       "options": [
-        { "id": "A", "text": "一个小孩", "target_personality_id": "p01" },
-        { "id": "B", "text": "一个老人", "target_personality_id": "p02" },
-        { "id": "C", "text": "你的爱人", "target_personality_id": "p03" },
-        { "id": "D", "text": "一个陌生人", "target_personality_id": "p04" }
+        { "id": "A", "text": "一张写着欢迎的纸条", "target_personality_id": "p09" },
+        { "id": "B", "text": "整齐摆放好的物品和秩序", "target_personality_id": "p10" },
+        { "id": "C", "text": "柔软舒适、让人想坐下来的角落", "target_personality_id": "p11" },
+        { "id": "D", "text": "一件神秘得让人想继续追问的旧物", "target_personality_id": "p12" }
       ]
     },
     {
       "order": 4,
-      "text": "你继续往前走，你看到了一幢房子，这幢房子是？",
+      "text": "房间里有一面镜子，你会？",
       "options": [
-        { "id": "A", "text": "茅草屋", "target_personality_id": "p01" },
-        { "id": "B", "text": "城堡", "target_personality_id": "p02" },
-        { "id": "C", "text": "普通民居", "target_personality_id": "p03" },
-        { "id": "D", "text": "别墅", "target_personality_id": "p04" }
+        { "id": "A", "text": "先靠近，看看里面会不会有惊喜", "target_personality_id": "p01" },
+        { "id": "B", "text": "先观察镜子周围，再决定要不要靠近", "target_personality_id": "p06" },
+        { "id": "C", "text": "停下来整理一下自己", "target_personality_id": "p10" },
+        { "id": "D", "text": "有点好奇，但更想知道镜子背后的故事", "target_personality_id": "p08" }
       ]
     },
     {
       "order": 5,
-      "text": "房子里很黑，你推开门，你觉得会看到什么？",
+      "text": "你听到房间外有声音，你更直觉地觉得那是？",
       "options": [
-        { "id": "A", "text": "一片漆黑", "target_personality_id": "p01" },
-        { "id": "B", "text": "一个怪物", "target_personality_id": "p02" },
-        { "id": "C", "text": "房子的主人", "target_personality_id": "p03" },
-        { "id": "D", "text": "一个金库", "target_personality_id": "p04" }
+        { "id": "A", "text": "有人在靠近，也许会带来新消息", "target_personality_id": "p09" },
+        { "id": "B", "text": "风吹过树叶，问题不大", "target_personality_id": "p11" },
+        { "id": "C", "text": "某种未知提醒你提高警觉", "target_personality_id": "p12" },
+        { "id": "D", "text": "外面还有更大的世界在等你", "target_personality_id": "p04" }
       ]
     },
     {
       "order": 6,
-      "text": "你没有进去，而是选择绕着房子走，你看到一个信箱，信箱是开着还是关着的？",
+      "text": "你走出房子，看到一条河，河水给你的感觉是？",
       "options": [
-        { "id": "A", "text": "开着的", "target_personality_id": "p01" },
-        { "id": "B", "text": "关着的", "target_personality_id": "p02" }
+        { "id": "A", "text": "流得很快，很有生命力", "target_personality_id": "p03" },
+        { "id": "B", "text": "平稳清楚，让人安心", "target_personality_id": "p02" },
+        { "id": "C", "text": "安静但很深，不太容易看透", "target_personality_id": "p12" },
+        { "id": "D", "text": "在阳光下很好看，像一段旅程的邀请", "target_personality_id": "p07" }
       ]
     },
     {
       "order": 7,
-      "text": "你继续往前走，你看到一口井，井里有水吗？",
+      "text": "如果必须过河，你最可能怎么做？",
       "options": [
-        { "id": "A", "text": "有水", "target_personality_id": "p01" },
-        { "id": "B", "text": "没水", "target_personality_id": "p02" }
+        { "id": "A", "text": "先试试，边走边判断", "target_personality_id": "p01" },
+        { "id": "B", "text": "先找最稳的方式再过", "target_personality_id": "p02" },
+        { "id": "C", "text": "如果有人同行会更好", "target_personality_id": "p05" },
+        { "id": "D", "text": "先看看河里有没有隐藏风险", "target_personality_id": "p06" }
       ]
     },
     {
       "order": 8,
-      "text": "在井的旁边，你看到一个箱子，这个箱子有多大？",
+      "text": "河对岸有一个盒子，你最希望盒子里装着什么？",
       "options": [
-        { "id": "A", "text": "小箱子", "target_personality_id": "p01" },
-        { "id": "B", "text": "中箱子", "target_personality_id": "p02" },
-        { "id": "C", "text": "大箱子", "target_personality_id": "p03" }
+        { "id": "A", "text": "一张未知地图", "target_personality_id": "p04" },
+        { "id": "B", "text": "一把能打开新房间的钥匙", "target_personality_id": "p10" },
+        { "id": "C", "text": "一封写给未来的信", "target_personality_id": "p11" },
+        { "id": "D", "text": "一件无法立刻解释的旧物", "target_personality_id": "p08" }
       ]
     },
     {
       "order": 9,
-      "text": "这时候，你看到一匹马，你觉得这匹马是什么颜色的？",
+      "text": "夜色降下来时，最让你安心的光是？",
       "options": [
-        { "id": "A", "text": "白马", "target_personality_id": "p01" },
-        { "id": "B", "text": "黑马", "target_personality_id": "p02" },
-        { "id": "C", "text": "棕色的马", "target_personality_id": "p03" }
+        { "id": "A", "text": "远处很亮的灯塔", "target_personality_id": "p03" },
+        { "id": "B", "text": "脚边稳定的小灯", "target_personality_id": "p02" },
+        { "id": "C", "text": "窗边柔和温暖的灯", "target_personality_id": "p05" },
+        { "id": "D", "text": "忽明忽暗、让人想靠近的光", "target_personality_id": "p07" }
       ]
     },
     {
       "order": 10,
-      "text": "最后，你看到一条河，你用什么方法过河？",
+      "text": "如果路边出现一只动物，你更想让它是？",
       "options": [
-        { "id": "A", "text": "游泳过河", "target_personality_id": "p01" },
-        { "id": "B", "text": "找一条船", "target_personality_id": "p02" },
-        { "id": "C", "text": "不管它，直接趟过去", "target_personality_id": "p03" },
-        { "id": "D", "text": "等河水退了再过去", "target_personality_id": "p04" }
+        { "id": "A", "text": "轻快灵活的鸟", "target_personality_id": "p01" },
+        { "id": "B", "text": "安静稳重的鹿", "target_personality_id": "p11" },
+        { "id": "C", "text": "警觉敏锐的猫", "target_personality_id": "p06" },
+        { "id": "D", "text": "会自己认路的狐狸", "target_personality_id": "p12" }
+      ]
+    },
+    {
+      "order": 11,
+      "text": "你在路边发现一本旧书，最想翻到哪一页？",
+      "options": [
+        { "id": "A", "text": "记着远方和冒险的那几页", "target_personality_id": "p04" },
+        { "id": "B", "text": "写满批注和计划的那几页", "target_personality_id": "p10" },
+        { "id": "C", "text": "藏着情绪和回忆的那几页", "target_personality_id": "p09" },
+        { "id": "D", "text": "最难懂、最有谜团的那几页", "target_personality_id": "p08" }
+      ]
+    },
+    {
+      "order": 12,
+      "text": "如果这段旅程最后会送你一句话，你最想听见？",
+      "options": [
+        { "id": "A", "text": "继续走，你的世界还会更大", "target_personality_id": "p04" },
+        { "id": "B", "text": "你已经比自己想象中更稳", "target_personality_id": "p02" },
+        { "id": "C", "text": "你值得被理解，也值得相信自己", "target_personality_id": "p09" },
+        { "id": "D", "text": "你真正想找的答案，一直在更深处", "target_personality_id": "p12" }
+      ]
+    },
+    {
+      "order": 13,
+      "text": "你来到一座旧车站，最想先看哪里？",
+      "options": [
+        { "id": "A", "text": "下一班车什么时候出发", "target_personality_id": "p01" },
+        { "id": "B", "text": "站台边有没有清楚的指示牌", "target_personality_id": "p02" },
+        { "id": "C", "text": "站台海报上很有故事感的画面", "target_personality_id": "p07" },
+        { "id": "D", "text": "候车室里有没有能坐下休息的位置", "target_personality_id": "p11" }
+      ]
+    },
+    {
+      "order": 14,
+      "text": "站台上有一个陌生人递给你一张卡片，你更希望上面写着？",
+      "options": [
+        { "id": "A", "text": "一条能点亮心情的小提示", "target_personality_id": "p03" },
+        { "id": "B", "text": "一句像拥抱一样温柔的话", "target_personality_id": "p05" },
+        { "id": "C", "text": "一个需要细想才懂的谜面", "target_personality_id": "p08" },
+        { "id": "D", "text": "一段你似曾相识的旧回忆", "target_personality_id": "p09" }
+      ]
+    },
+    {
+      "order": 15,
+      "text": "车厢里有四个空座位，你会坐在哪里？",
+      "options": [
+        { "id": "A", "text": "靠窗、能看见风景变化的位置", "target_personality_id": "p07" },
+        { "id": "B", "text": "靠近出口、方便观察周围的位置", "target_personality_id": "p06" },
+        { "id": "C", "text": "桌面平整、方便整理东西的位置", "target_personality_id": "p10" },
+        { "id": "D", "text": "稍微安静一点、不容易被打扰的位置", "target_personality_id": "p12" }
+      ]
+    },
+    {
+      "order": 16,
+      "text": "列车穿过一片雾，你第一反应是？",
+      "options": [
+        { "id": "A", "text": "雾后面也许会出现很美的景色", "target_personality_id": "p03" },
+        { "id": "B", "text": "想确认列车是否仍在原定路线", "target_personality_id": "p02" },
+        { "id": "C", "text": "这段模糊感本身很有故事", "target_personality_id": "p07" },
+        { "id": "D", "text": "雾里可能藏着需要留意的东西", "target_personality_id": "p06" }
+      ]
+    },
+    {
+      "order": 17,
+      "text": "你在车窗上看到自己的倒影，最想做什么？",
+      "options": [
+        { "id": "A", "text": "对自己笑一下，像是重新出发", "target_personality_id": "p01" },
+        { "id": "B", "text": "想起某个曾经影响过你的人", "target_personality_id": "p09" },
+        { "id": "C", "text": "把这一刻画面记下来", "target_personality_id": "p07" },
+        { "id": "D", "text": "想知道倒影里的自己真正想说什么", "target_personality_id": "p08" }
+      ]
+    },
+    {
+      "order": 18,
+      "text": "列车临时停靠在一个小镇，你最想走进哪里？",
+      "options": [
+        { "id": "A", "text": "人声温暖的小餐馆", "target_personality_id": "p05" },
+        { "id": "B", "text": "摆满地图和工具的小店", "target_personality_id": "p10" },
+        { "id": "C", "text": "通向山坡的窄路", "target_personality_id": "p04" },
+        { "id": "D", "text": "安静、有柔软椅子的书屋", "target_personality_id": "p11" }
+      ]
+    },
+    {
+      "order": 19,
+      "text": "小镇广场中央有一口井，你更在意？",
+      "options": [
+        { "id": "A", "text": "井水里映出的光点", "target_personality_id": "p03" },
+        { "id": "B", "text": "井沿是否结实安全", "target_personality_id": "p06" },
+        { "id": "C", "text": "井底会不会藏着某个答案", "target_personality_id": "p12" },
+        { "id": "D", "text": "关于这口井的来历", "target_personality_id": "p08" }
+      ]
+    },
+    {
+      "order": 20,
+      "text": "如果你要把一件东西留在小镇，你会留下？",
+      "options": [
+        { "id": "A", "text": "一张写给后来者的鼓励纸条", "target_personality_id": "p03" },
+        { "id": "B", "text": "一盏能让人安心的小灯", "target_personality_id": "p05" },
+        { "id": "C", "text": "一份标注清楚的路线图", "target_personality_id": "p10" },
+        { "id": "D", "text": "一个能让人慢下来的垫子", "target_personality_id": "p11" }
+      ]
+    },
+    {
+      "order": 21,
+      "text": "回到列车前，你发现时间不多了，你会？",
+      "options": [
+        { "id": "A", "text": "马上行动，先赶上车再说", "target_personality_id": "p01" },
+        { "id": "B", "text": "快速确认最稳妥的返回路线", "target_personality_id": "p02" },
+        { "id": "C", "text": "记住这个地方，期待下次再来", "target_personality_id": "p04" },
+        { "id": "D", "text": "确认没有遗漏重要物品", "target_personality_id": "p10" }
+      ]
+    },
+    {
+      "order": 22,
+      "text": "夜晚列车继续前行，你更容易被什么打动？",
+      "options": [
+        { "id": "A", "text": "车厢里彼此照应的微小动作", "target_personality_id": "p05" },
+        { "id": "B", "text": "窗外像梦一样掠过的灯影", "target_personality_id": "p07" },
+        { "id": "C", "text": "某句突然让你想起过去的话", "target_personality_id": "p09" },
+        { "id": "D", "text": "夜色深处那种说不清的重量", "target_personality_id": "p12" }
+      ]
+    },
+    {
+      "order": 23,
+      "text": "列车广播说前方有未知岔路，你更想听到哪种说明？",
+      "options": [
+        { "id": "A", "text": "别担心，我们会先确认安全", "target_personality_id": "p06" },
+        { "id": "B", "text": "这条路可能通向新的风景", "target_personality_id": "p04" },
+        { "id": "C", "text": "你可以选择自己想去的方向", "target_personality_id": "p01" },
+        { "id": "D", "text": "答案不会立刻出现，但线索会越来越清楚", "target_personality_id": "p08" }
+      ]
+    },
+    {
+      "order": 24,
+      "text": "旅程结束时，你最想带走哪种感觉？",
+      "options": [
+        { "id": "A", "text": "心里重新亮起来的感觉", "target_personality_id": "p03" },
+        { "id": "B", "text": "被温柔接住过的感觉", "target_personality_id": "p05" },
+        { "id": "C", "text": "知道自己可以停靠的感觉", "target_personality_id": "p11" },
+        { "id": "D", "text": "被某句话轻轻理解的感觉", "target_personality_id": "p09" }
       ]
     }
   ],
   "interpretations": {
     "p01": {
-      "title": "红色性格",
-      "description": "你是一个充满激情和活力的人，热爱生活，乐于接受挑战。你天生就是一个领导者，有很强的决策能力和行动力。你对朋友非常讲义气，愿意为他们两肋插刀。然而，你的情绪波动较大，容易冲动行事，有时会显得比较固执。",
-      "recommendation": "你的热情很有感染力，但也要学会控制自己的脾气。在做决定前，多听取他人的意见，三思而后行，这样能帮助你更好地实现目标。",
+      "title": "火花型潜意识",
+      "description": "这类潜意识通常意味着你内在有很强的启动能量。你容易被新鲜感、速度感和“先试试看”的可能性吸引。比起长期停留在原地，你更习惯用行动确认自己的真实感受。它背后的含义不是冲动，而是你的心理系统更相信体验本身能带来答案。",
+      "recommendation": "你的潜意识在提醒你：行动是你的优势，但节奏感会决定你走得多远。保留热情，同时给自己一点复盘空间，会让你的能量更稳定。",
+      "in_relationships": "在关系里，你通常更喜欢有回应、有流动感和一起向前的感觉。太沉闷或太停滞的互动，容易让你失去投入感。",
+      "under_stress": "压力大时，你可能会更想立刻行动、立刻突破，或者用忙碌感让自己重新掌握主动。",
+      "facing_change": "面对变化时，你往往比很多人更快动起来。你未必完全不怕未知，而是更愿意边走边适应。",
       "image_url": ""
     },
     "p02": {
-      "title": "蓝色性格",
-      "description": "你是一个性格沉稳、内敛且富有智慧的人。你心思缜密，考虑问题全面周到，是一个天生的思考者和规划者。你追求完美，对自己和他人都有较高的要求。你为人可靠，值得信赖，但有时会因为过于谨慎而显得犹豫不决。",
-      "recommendation": "你的细致和严谨是很大的优点，但也应适当放松对细节的掌控，学会更加包容和灵活。尝试多一些行动力，不要让过度的思考束缚了你的脚步。",
+      "title": "锚点型潜意识",
+      "description": "这类潜意识通常意味着你深层里很重视稳定、可预测性和心理安全边界。你更容易在清楚的路径、明确的秩序和可掌控的安排里放松下来。它背后反映的是一种对确定性的需要，而不是保守本身。",
+      "recommendation": "你内在的稳定感很珍贵。可以继续相信自己的判断力，同时试着容纳一点点不确定，你会发现自己其实比想象中更能适应变化。",
+      "in_relationships": "在关系里，你更在意可靠、清楚和不反复横跳的相处方式。你会因为稳定而慢慢建立深信任。",
+      "under_stress": "压力上来时，你会本能地想把事情重新排整齐，或者先找到一个明确的处理顺序。",
+      "facing_change": "面对变化时，你通常需要一点缓冲和确认感。不是不能变，而是更希望变化是可理解、可预期的。",
       "image_url": ""
     },
     "p03": {
-      "title": "黄色性格",
-      "description": "你是一个积极乐观、善于交际的人。你性格开朗，充满正能量，是朋友中的开心果。你富有创造力，喜欢新鲜事物，对未来充满希望。你的人际关系很好，但有时可能会因为过于追求和谐而忽略自己的真实感受。",
-      "recommendation": "你的乐观能给周围的人带来阳光，这是非常宝贵的品质。在关心他人的同时，也别忘了关照自己的内心需求，勇敢地表达自己的想法。",
+      "title": "追光型潜意识",
+      "description": "这类潜意识通常意味着你会自然被生命力、希望感和向上的信号吸引。你很容易对“更亮一点、更远一点、更有活力一点”的东西产生回应。它背后常常指向乐观驱动、自我扩展欲和面向未来的心理倾向。",
+      "recommendation": "你对未来和可能性有天然感应，这会带给你很强的恢复力。别忘了，追光并不意味着一直发光，允许自己偶尔停下来，也是在积蓄下一段亮度。",
+      "in_relationships": "在关系里，你喜欢有鼓舞感、成长感和彼此点亮的互动。能看见希望的人，更容易让你靠近。",
+      "under_stress": "压力大时，你会本能地去寻找一点亮处，哪怕只是一个新的目标、一点希望或一个可期待的出口。",
+      "facing_change": "面对变化时，你通常能比较快看见其中的可能性，因此也更容易恢复和重新出发。",
       "image_url": ""
     },
     "p04": {
-      "title": "绿色性格",
-      "description": "你是一个性格温和、善良且有耐心的人。你追求和平与安宁，不喜欢与人发生冲突。你是一个很好的倾听者，有很强的同理心，总能给朋友带来安慰和支持。你随遇而安，但有时可能会缺乏主见和目标感。",
-      "recommendation": "你的温柔和耐心让你成为一个很好的伙伴。可以尝试为自己设定一些清晰的目标，并更主动地去追求自己想要的生活，你会发现自己内在的巨大潜力。",
+      "title": "远行型潜意识",
+      "description": "这类潜意识通常意味着你心里有明显的远方意识。你会被未知、变化、可能性和更大世界吸引，不太满足于只待在熟悉的边界里。它背后反映的是一种探索需求和心理扩展冲动。",
+      "recommendation": "你的内在不喜欢被固定得太早。与其逼自己迅速定型，不如允许自己在移动中认识自己。你的答案，很多时候是在路上长出来的。",
+      "in_relationships": "在关系里，你需要呼吸感和空间感。真正适合你的连接，通常既亲近，又不窒息。",
+      "under_stress": "压力大时，你可能会特别想逃离当下环境，或者通过远望、切换和移动来重新找回自己。",
+      "facing_change": "面对变化时，你往往比别人更容易接受“先走出去再说”。未知对你来说不只是风险，也是一种召唤。",
+      "image_url": ""
+    },
+    "p05": {
+      "title": "拥抱型潜意识",
+      "description": "这类潜意识通常意味着你深层里很在意关系温度、陪伴感和被接住的体验。你容易被欢迎、温柔、光亮和安全连接所打动。它背后常常意味着：你的内心把“关系中的安心感”视作很重要的心理资源。",
+      "recommendation": "你对情感氛围的感知力很强，这是一种礼物。也请记得，你不只值得被拥抱，也值得拥有自己的边界和主动选择。",
+      "in_relationships": "在关系里，你很重视被回应、被接纳和彼此之间那种温暖而真实的靠近感。",
+      "under_stress": "压力大时，你会更需要情绪上的陪伴、理解或一个能让你安心的人或空间。",
+      "facing_change": "面对变化时，如果身边有支持系统，你通常会稳定很多。连接感会增强你的适应力。",
+      "image_url": ""
+    },
+    "p06": {
+      "title": "守门型潜意识",
+      "description": "这类潜意识通常意味着你对风险、界限和隐藏变量特别敏感。你不是悲观，而是更早感知到“不确定里可能藏着什么”。它背后反映的是一种保护机制较强的心理倾向，让你在很多场景里更谨慎、更警觉。",
+      "recommendation": "你的敏锐能帮你避开很多问题，但别让它变成持续紧绷。学会区分“真实危险”和“想象危险”，会让你的洞察更轻盈，也更有力量。",
+      "in_relationships": "在关系里，你不会太快放下戒备。你更需要时间确认这个人是否安全、稳定、值得信任。",
+      "under_stress": "压力大时，你会更快进入扫描模式，留意风险、漏洞和他人可能忽略的细节。",
+      "facing_change": "面对变化时，你通常先看代价和风险，再决定要不要动。这种谨慎有价值，但也别让它困住自己。",
+      "image_url": ""
+    },
+    "p07": {
+      "title": "绮梦型潜意识",
+      "description": "这类潜意识通常意味着你对美感、氛围、想象和感官线索有天然反应。你容易被那些带一点惊艳、迷人和故事感的事物吸引。它背后常常对应一种审美驱动和情绪联想力较强的内在结构。",
+      "recommendation": "你的潜意识很会捕捉世界里的“有感觉”。这份感受力不是矫情，而是创造和表达的重要来源。继续保护它，同时也给它一些落地出口。",
+      "in_relationships": "在关系里，你很容易对氛围、感觉和那些难以言说的细节产生深反应。有没有“感觉”，对你很重要。",
+      "under_stress": "压力大时，你可能会更依赖审美、想象、音乐、画面或某种氛围感来安顿自己。",
+      "facing_change": "面对变化时，你会先感受“这件事有没有吸引力、有没有故事感”，然后才决定要不要投入。",
+      "image_url": ""
+    },
+    "p08": {
+      "title": "解谜型潜意识",
+      "description": "这类潜意识通常意味着你深层里很容易被复杂、暧昧、难解释的事物吸引。你不太满足于表面答案，更习惯追问背后逻辑、来历和真正原因。它背后的含义通常是：你的心理系统更偏向深挖和理解，而不是快速定论。",
+      "recommendation": "你擅长看见表层之下的东西，这是很珍贵的思考力。只是别永远停留在“继续想”，有时候把看见的东西说出来、用出来，才是让深度真正发生作用。",
+      "in_relationships": "在关系里，你会不自觉地想读懂更多层意思。你通常不满足于“表面相处得还行”这种答案。",
+      "under_stress": "压力大时，你可能会反复追问原因，试图把事情彻底想明白，直到心里有一个说得通的结构。",
+      "facing_change": "面对变化时，你常常先问“背后的逻辑是什么”。理解感，会决定你愿不愿意真正接受变化。",
+      "image_url": ""
+    },
+    "p09": {
+      "title": "回声型潜意识",
+      "description": "这类潜意识通常意味着你的内在会反复回应情绪、记忆和被理解的需要。你对人与人之间的情感流动很敏感，也更容易被某些话、某段关系或某种熟悉感触动。它背后常常对应一种高情绪回响能力。",
+      "recommendation": "你的心很会记住重要的东西，这会让你很有共情力。也别忘了把注意力带回自己，学会分辨哪些回声该珍惜，哪些回声已经可以放下。",
+      "in_relationships": "在关系里，你很看重情绪是否被回应、感受是否被理解，以及一些别人可能忽略的细微回响。",
+      "under_stress": "压力大时，你可能会被旧情绪、旧场景、旧关系再次牵动，心里的回声会变得更大。",
+      "facing_change": "面对变化时，你往往不是先看事实，而是先感受这件事在自己心里激起了什么。",
+      "image_url": ""
+    },
+    "p10": {
+      "title": "构筑型潜意识",
+      "description": "这类潜意识通常意味着你内心深处很重视建立结构、形成系统、让东西各归其位。你会自然被钥匙、计划、整理、秩序和能带来掌控感的事物吸引。它背后的含义，是一种很强的内在组织能力。",
+      "recommendation": "你擅长让混乱慢慢成形，这是非常可靠的能力。试着偶尔允许“不完美先存在”，你会发现自己不是失控，而是在拥有更大的弹性。",
+      "in_relationships": "在关系里，你更安心于清楚、稳定和有边界的互动，不太喜欢反复拉扯和模糊不定。",
+      "under_stress": "压力大时，你很可能会靠整理、计划、重建秩序来找回掌控感。",
+      "facing_change": "面对变化时，你会自然想先搭框架、找方法、定步骤。结构感会让你更快稳定下来。",
+      "image_url": ""
+    },
+    "p11": {
+      "title": "栖心型潜意识",
+      "description": "这类潜意识通常意味着你内在更看重安顿感、舒适度和可以停靠的地方。你会自然寻找柔软、熟悉、稳定和能让自己慢下来的线索。它背后通常不是逃避，而是一种对恢复、滋养和心理落点的深层需要。",
+      "recommendation": "你知道什么能真正让自己安静下来，这是很难得的自我感知。继续珍惜这种能力，同时也别忘了：安全感不只来自外部环境，也可以慢慢从自己心里长出来。",
+      "in_relationships": "在关系里，你会很重视能不能安心做自己，能不能在对方面前慢下来、放下来。",
+      "under_stress": "压力大时，你通常会更需要安静、熟悉和柔软的环境，让自己先恢复再处理问题。",
+      "facing_change": "面对变化时，你需要先找到一个心理落脚点。只要心能安住，你其实比想象中更能适应。",
+      "image_url": ""
+    },
+    "p12": {
+      "title": "深潮型潜意识",
+      "description": "这类潜意识通常意味着你内心有明显的深度感和层次感。你容易被表面平静之下更复杂、更难说清的东西吸引，也常常不是第一时间把感受外露的人。它背后对应的，往往是一种深层观察、深层情绪和深层判断并存的结构。",
+      "recommendation": "你的深度让你能看见许多人忽略的东西。别急着把自己解释清楚，也别总独自消化。适时说出来、写出来、表达出来，会让这股深潮不只是卷向自己。",
+      "in_relationships": "在关系里，你往往更看重深度和真实，而不是热闹和表面互动。你不轻易靠近，但一旦靠近会很深。",
+      "under_stress": "压力大时，你可能会把很多感受往内收，表面平静，内里其实潮水很大。",
+      "facing_change": "面对变化时，你会先感受深层影响，再决定是否行动。你不一定慢，只是不会轻易草率地表态。",
       "image_url": ""
     }
   }

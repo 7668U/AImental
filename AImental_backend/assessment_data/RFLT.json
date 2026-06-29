@@ -1,0 +1,266 @@
+{
+  "scale_info": {
+    "name": "近期运势预测",
+    "short_name": "RFLT",
+    "description": "这是一份抽一张近期好运签的趣味问卷。你会通过一些贴近日常的小选择，看到自己最近更容易在哪个方向被生活轻轻托一把。它不是严肃预测，更像一次把注意力转向好运的温柔自我探索。",
+    "instructions": "请按第一反应作答，不用想太久。选择当下最有感觉的那一项，结果会更贴近你的近期状态。",
+    "category": "趣味测试",
+    "assessment_type": "categorical"
+  },
+  "questions": [
+    {
+      "order": 1,
+      "text": "如果这个周末突然空出半天，你最想把它留给什么？",
+      "options": [
+        { "id": "A", "text": "和一个让你放松的人慢慢聊一会儿", "target_personality_id": "p01" },
+        { "id": "B", "text": "去没去过的小店或街区走走", "target_personality_id": "p02" },
+        { "id": "C", "text": "把一直挂在心上的事推进一点点", "target_personality_id": "p03" },
+        { "id": "D", "text": "睡到自然醒，再做一件照顾自己的小事", "target_personality_id": "p04" },
+        { "id": "E", "text": "整理衣柜、账单或收藏夹，捡回一点小确幸", "target_personality_id": "p05" },
+        { "id": "F", "text": "鼓起劲去做一件之前只敢想的事", "target_personality_id": "p06" }
+      ]
+    },
+    {
+      "order": 2,
+      "text": "下面哪句话最像你最近想收到的提醒？",
+      "options": [
+        { "id": "A", "text": "你会被温柔回应，也会被认真看见", "target_personality_id": "p01" },
+        { "id": "B", "text": "新的风景正在拐角处等你", "target_personality_id": "p02" },
+        { "id": "C", "text": "你已经离完成更近了，不要急着否定自己", "target_personality_id": "p03" },
+        { "id": "D", "text": "先把自己养回来，好运会跟着回温", "target_personality_id": "p04" },
+        { "id": "E", "text": "小小的收获也值得被认真接住", "target_personality_id": "p05" },
+        { "id": "F", "text": "这一次，可以允许自己更勇敢一点", "target_personality_id": "p06" }
+      ]
+    },
+    {
+      "order": 3,
+      "text": "走在路上时，哪一种画面最容易让你停下来？",
+      "options": [
+        { "id": "A", "text": "有人隔着人群对你笑了一下", "target_personality_id": "p01" },
+        { "id": "B", "text": "一条被夕阳照亮、以前没走过的小路", "target_personality_id": "p02" },
+        { "id": "C", "text": "一张写着“今天也有进展”的便签", "target_personality_id": "p03" },
+        { "id": "D", "text": "一扇透出暖光、让人想休息的窗", "target_personality_id": "p04" },
+        { "id": "E", "text": "刚好出现的限时折扣或小礼物", "target_personality_id": "p05" },
+        { "id": "F", "text": "一首让你忽然想重新出发的歌", "target_personality_id": "p06" }
+      ]
+    },
+    {
+      "order": 4,
+      "text": "如果好运先从一个小变化开始，你更希望它是？",
+      "options": [
+        { "id": "A", "text": "一段关系变得更自然、更好说话", "target_personality_id": "p01" },
+        { "id": "B", "text": "一个新机会突然出现在你眼前", "target_personality_id": "p02" },
+        { "id": "C", "text": "卡住的流程忽然顺起来", "target_personality_id": "p03" },
+        { "id": "D", "text": "醒来时发现自己轻松了很多", "target_personality_id": "p04" },
+        { "id": "E", "text": "省下一笔钱，或收到一点意外回馈", "target_personality_id": "p05" },
+        { "id": "F", "text": "你开口争取后，结果比想象中友好", "target_personality_id": "p06" }
+      ]
+    },
+    {
+      "order": 5,
+      "text": "最近的你，更像在等哪一种风吹过来？",
+      "options": [
+        { "id": "A", "text": "把真心的人吹近一点的风", "target_personality_id": "p01" },
+        { "id": "B", "text": "把你带到新场景里的风", "target_personality_id": "p02" },
+        { "id": "C", "text": "让计划慢慢落地的风", "target_personality_id": "p03" },
+        { "id": "D", "text": "把疲惫吹散一点的风", "target_personality_id": "p04" },
+        { "id": "E", "text": "带来红包、优惠或好消息的风", "target_personality_id": "p05" },
+        { "id": "F", "text": "推你迈出第一步的风", "target_personality_id": "p06" }
+      ]
+    },
+    {
+      "order": 6,
+      "text": "如果近期好运变成一件随身小物，你最想拿到？",
+      "options": [
+        { "id": "A", "text": "一张写着“我懂你”的小卡片", "target_personality_id": "p01" },
+        { "id": "B", "text": "一张去往未知地点的车票", "target_personality_id": "p02" },
+        { "id": "C", "text": "一支能把待办划掉的金色笔", "target_personality_id": "p03" },
+        { "id": "D", "text": "一颗慢慢补充能量的糖", "target_personality_id": "p04" },
+        { "id": "E", "text": "一张忽然可用的礼品卡", "target_personality_id": "p05" },
+        { "id": "F", "text": "一个写着“现在就去”的小按钮", "target_personality_id": "p06" }
+      ]
+    },
+    {
+      "order": 7,
+      "text": "朋友临时约你做点新鲜事，你第一反应更像？",
+      "options": [
+        { "id": "A", "text": "如果是舒服的人，我会很想去", "target_personality_id": "p01" },
+        { "id": "B", "text": "好呀，说不定会遇到惊喜", "target_personality_id": "p02" },
+        { "id": "C", "text": "先看会不会影响我正在推进的事", "target_personality_id": "p03" },
+        { "id": "D", "text": "看今天的能量够不够", "target_personality_id": "p04" },
+        { "id": "E", "text": "如果性价比不错，我会心动", "target_personality_id": "p05" },
+        { "id": "F", "text": "有点紧张，但也想试试", "target_personality_id": "p06" }
+      ]
+    },
+    {
+      "order": 8,
+      "text": "你更相信哪一种好事发生方式？",
+      "options": [
+        { "id": "A", "text": "来自真诚的人际回馈", "target_personality_id": "p01" },
+        { "id": "B", "text": "来自偶然拐弯后的新发现", "target_personality_id": "p02" },
+        { "id": "C", "text": "来自前期努力终于开始显效", "target_personality_id": "p03" },
+        { "id": "D", "text": "来自好好照顾自己之后的回升", "target_personality_id": "p04" },
+        { "id": "E", "text": "来自日常细节里被你抓住的小机会", "target_personality_id": "p05" },
+        { "id": "F", "text": "来自某个突然变勇敢的瞬间", "target_personality_id": "p06" }
+      ]
+    },
+    {
+      "order": 9,
+      "text": "如果要给最近的自己换一个幸运滤镜，你会选？",
+      "options": [
+        { "id": "A", "text": "被喜欢的人和事轻轻包围", "target_personality_id": "p01" },
+        { "id": "B", "text": "生活多一点新鲜感和漂亮巧合", "target_personality_id": "p02" },
+        { "id": "C", "text": "事情一件一件被稳稳完成", "target_personality_id": "p03" },
+        { "id": "D", "text": "整个人慢慢舒展开来", "target_personality_id": "p04" },
+        { "id": "E", "text": "花出去的钱都有更舒服的回响", "target_personality_id": "p05" },
+        { "id": "F", "text": "心里那团小火重新亮起来", "target_personality_id": "p06" }
+      ]
+    },
+    {
+      "order": 10,
+      "text": "下面哪个画面最像你希望最近发生的事？",
+      "options": [
+        { "id": "A", "text": "一场原本冷掉的聊天重新变暖", "target_personality_id": "p01" },
+        { "id": "B", "text": "一扇没注意到的门突然打开", "target_personality_id": "p02" },
+        { "id": "C", "text": "一个拖了很久的勾终于被打上", "target_personality_id": "p03" },
+        { "id": "D", "text": "某天醒来，觉得自己终于缓过来了", "target_personality_id": "p04" },
+        { "id": "E", "text": "付款前刚好刷到一个可用优惠", "target_personality_id": "p05" },
+        { "id": "F", "text": "你试着向前一步，事情居然变顺了", "target_personality_id": "p06" }
+      ]
+    },
+    {
+      "order": 11,
+      "text": "如果你的近期好运有一种颜色，它更像？",
+      "options": [
+        { "id": "A", "text": "温柔又有光泽的玫瑰粉", "target_personality_id": "p01" },
+        { "id": "B", "text": "清透、带一点风感的湖蓝", "target_personality_id": "p02" },
+        { "id": "C", "text": "稳稳发光的琥珀金", "target_personality_id": "p03" },
+        { "id": "D", "text": "让人安静下来的鼠尾草绿", "target_personality_id": "p04" },
+        { "id": "E", "text": "甜甜的小蜜橘色", "target_personality_id": "p05" },
+        { "id": "F", "text": "明亮、有冲劲的樱桃红", "target_personality_id": "p06" }
+      ]
+    },
+    {
+      "order": 12,
+      "text": "做完这份小测试后，你最想带走哪句话？",
+      "options": [
+        { "id": "A", "text": "有人正在靠近你，也有人已经在支持你", "target_personality_id": "p01" },
+        { "id": "B", "text": "你适合去新地方，遇到新的可能", "target_personality_id": "p02" },
+        { "id": "C", "text": "你会迎来推进感，也会看见自己的成果", "target_personality_id": "p03" },
+        { "id": "D", "text": "你会先恢复，再慢慢变旺", "target_personality_id": "p04" },
+        { "id": "E", "text": "小财运和小惊喜正在向你靠近", "target_personality_id": "p05" },
+        { "id": "F", "text": "你一行动，局面就会开始松动", "target_personality_id": "p06" }
+      ]
+    }
+  ],
+  "interpretations": {
+    "p01": {
+      "title": "贵人靠近运",
+      "description": "你近期最容易变旺的，是被理解、被回应、被轻轻托住的好运。它可能不是热闹的大场面，而是某个人忽然愿意听你说完，某段关系慢慢回暖，或者有人在关键时刻站到你这边。你最近的磁场很适合修复连接，也适合让真诚的人重新靠近。",
+      "recommendation": "给重要的人多一点回应，也给自己多一点表达。你不需要把所有话都憋到最完美，真实一点，反而更容易接住这波人缘运。",
+      "in_relationships": "关系里，你会因为被认真看见而重新放松下来。",
+      "under_stress": "压力上来时，可信任的人会成为你近期很重要的缓冲垫。",
+      "facing_change": "变化发生时，适度求助会让路变得更顺。",
+      "college": "近期好运签",
+      "college_motto": "把温柔的回应收进心里，别急着怀疑它。",
+      "career_teaser": "你的近期好运关键词：被看见。",
+      "fortune_keyword": "被看见",
+      "fortune_window": "未来 7-14 天，适合主动修复关系、发出邀约、把真实想法说清楚。",
+      "lucky_color": "玫瑰粉",
+      "lucky_action": "给一个想念的人发一句轻松的问候。",
+      "lucky_phrase": "我值得被温柔对待，也值得被认真回应。",
+      "emotional_anchor": "当你愿意把心门开一条缝，好运会从很小的回应里先走进来。",
+      "image_url": ""
+    },
+    "p02": {
+      "title": "转机探索运",
+      "description": "你近期的好运像一阵会带你拐弯的风。它不一定从原计划里出现，更可能藏在新路线、新体验、新认识的人，或者一次临时起意的小出门里。你最近适合给生活一点松动感，别把所有未知都看成麻烦，有些惊喜就是从“去看看吧”开始的。",
+      "recommendation": "如果某个机会让你有一点好奇，就先别急着拒绝。近期多走出去一点，换个路线、换个场景，你会更容易撞见转机。",
+      "in_relationships": "关系里，你更容易被轻松、有新鲜感、能打开视野的人吸引。",
+      "under_stress": "压力大时，换环境比原地硬撑更能帮你恢复灵感。",
+      "facing_change": "变化对你来说不只是风险，也可能是新的入口。",
+      "college": "近期好运签",
+      "college_motto": "新鲜的风一吹，心里的窗也会亮一点。",
+      "career_teaser": "你的近期好运关键词：新入口。",
+      "fortune_keyword": "新入口",
+      "fortune_window": "未来两周，适合尝试新路线、新活动、新社交或一个小小的新计划。",
+      "lucky_color": "湖蓝色",
+      "lucky_action": "去一家没去过的小店，或者把通勤路线换一次。",
+      "lucky_phrase": "我允许生活把新的可能带到我面前。",
+      "emotional_anchor": "你越愿意靠近一点未知，越容易发现生活悄悄留给你的门。",
+      "image_url": ""
+    },
+    "p03": {
+      "title": "推进成事运",
+      "description": "你近期最旺的好运，是事情终于开始往前走。它不是凭空掉下来的幸运，而是你之前的认真、耐心、坚持，开始慢慢显出效果。原本模糊的目标可能会变清晰，拖着的事会出现推进点，你也会更容易从“我是不是不行”转向“我真的做到了”。",
+      "recommendation": "近期不要把精力撒太散，先盯住一两件最重要的事。小步推进就很好，你的好运正在通过完成感一点点回到你身上。",
+      "in_relationships": "关系里，稳定、靠谱和持续回应会让你更容易被信任。",
+      "under_stress": "压力来时，先排顺序，你会很快找回掌控感。",
+      "facing_change": "变化越多，你越需要把它整理成下一步。",
+      "college": "近期好运签",
+      "college_motto": "你不是没有进展，只是好运正在路上排队。",
+      "career_teaser": "你的近期好运关键词：有结果。",
+      "fortune_keyword": "有结果",
+      "fortune_window": "未来 10 天，适合收尾、提交、复盘，把一个小成果真正落袋。",
+      "lucky_color": "琥珀金",
+      "lucky_action": "今天先完成一件 20 分钟内能做完的小事。",
+      "lucky_phrase": "我允许自己一步一步变得更确定。",
+      "emotional_anchor": "当你把一件小事完成，接下来会有更多秩序感慢慢回来。",
+      "image_url": ""
+    },
+    "p04": {
+      "title": "状态回温运",
+      "description": "你近期的好运，会先从自己身上回暖。它可能不是立刻出现的大惊喜，而是睡得更踏实一点，心情没那么紧，身体慢慢有力气，整个人重新变得柔软。你不是落后了，只是需要一点时间把能量养回来。等状态回温，很多事会自然顺起来。",
+      "recommendation": "这段时间别用冲刺要求自己。早点休息、好好吃饭、少一点内耗，就是在给好运铺路。你越愿意照顾自己，生活越容易重新对你温柔。",
+      "in_relationships": "关系里，你更需要低消耗、让你安心的相处。",
+      "under_stress": "压力大时，先恢复体力和睡眠，会比强撑更有效。",
+      "facing_change": "只要内在稳定下来，你其实很能适应变化。",
+      "college": "近期好运签",
+      "college_motto": "慢慢来，回温本身就是一种好运。",
+      "career_teaser": "你的近期好运关键词：回到自己。",
+      "fortune_keyword": "回到自己",
+      "fortune_window": "未来一周，适合补眠、整理空间、减少过度社交和不必要的消耗。",
+      "lucky_color": "鼠尾草绿",
+      "lucky_action": "给自己安排一个无负担的夜晚，洗澡、护肤、早睡。",
+      "lucky_phrase": "我先照顾好自己，好运会慢慢长回来。",
+      "emotional_anchor": "你不需要一直发光，先让自己暖起来，也很漂亮。",
+      "image_url": ""
+    },
+    "p05": {
+      "title": "小财小喜运",
+      "description": "你近期容易收到的是实用又可爱的好运：省下一笔钱、遇到好价、收到小礼物、得到一点资源，或者刚好有人给你一个有用信息。它不是一夜暴富型，而是日常里一颗一颗冒出来的小糖。你越愿意留意细节，越容易把这些小惊喜接住。",
+      "recommendation": "近期对优惠、资源、信息和礼物保持敏感。不要嫌好运太小，很多顺心的感觉，本来就是从一个小小的“刚刚好”开始的。",
+      "in_relationships": "关系里，具体的照顾和有来有往会特别打动你。",
+      "under_stress": "压力上来时，先接住眼前的小收益，会帮你稳定心态。",
+      "facing_change": "你擅长从细节里发现可用资源。",
+      "college": "近期好运签",
+      "college_motto": "小喜事也是喜事，别忘了认真开心一下。",
+      "career_teaser": "你的近期好运关键词：刚刚好。",
+      "fortune_keyword": "刚刚好",
+      "fortune_window": "未来 7 天，适合整理账单、领取权益、比价、处理闲置或关注实用机会。",
+      "lucky_color": "蜜橘色",
+      "lucky_action": "清理一次收藏夹、卡包或购物车，可能会发现被忘记的小福利。",
+      "lucky_phrase": "我看见小小的收获，也允许自己开心。",
+      "emotional_anchor": "近期的好运不会总是大张旗鼓，但它会用很实际的方式靠近你。",
+      "image_url": ""
+    },
+    "p06": {
+      "title": "破局行动运",
+      "description": "你近期最强的好运，藏在一次行动之后。也许是你终于开口、终于拒绝、终于争取，或者终于迈出一直犹豫的那一步。你不需要等到完全准备好才开始。很多局面会在你动起来之后变松，答案也会在路上慢慢出现。",
+      "recommendation": "近期给自己一个小小的行动窗口。先发出消息、先提交申请、先说出需求、先去试一次。你越行动，越容易把好运从想象里拉到现实里。",
+      "in_relationships": "关系里，你主动一点，很多转机会更快出现。",
+      "under_stress": "压力大时，你越拖越累；开始行动后，反而会轻很多。",
+      "facing_change": "面对变化，你的好运来自先做一个决定。",
+      "college": "近期好运签",
+      "college_motto": "你往前一步，风也会往你这边吹。",
+      "career_teaser": "你的近期好运关键词：先行动。",
+      "fortune_keyword": "先行动",
+      "fortune_window": "未来 72 小时，适合做一个很小但明确的决定。",
+      "lucky_color": "樱桃红",
+      "lucky_action": "把一直犹豫的一句话发出去，或把第一步写进日程。",
+      "lucky_phrase": "我可以边走边确认，不必等到完美才开始。",
+      "emotional_anchor": "你的勇气不需要很大，只要够让今天比昨天多前进一步。",
+      "image_url": ""
+    }
+  }
+}
