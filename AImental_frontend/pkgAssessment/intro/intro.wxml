@@ -43,7 +43,7 @@
   <view class="bottom-action">
     <button class="start-test-button" bindtap="startTest">
       <text class="button-sparkle">✦</text>
-      <text>开始测试</text>
+      <text>{{scale.short_name === 'AGLT' ? '开启天赋扫描' : (scale.short_name === 'RFLT' ? '抽取好运签' : '开始测试')}}</text>
       <text class="button-sparkle right">✦</text>
     </button>
   </view>

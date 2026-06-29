@@ -60,8 +60,8 @@ class UserSettingsRequest(BaseModel):
 # API Endpoints (已更新)
 # ---------------------------------------------------
 
-APP_ID = os.getenv("WECHAT_APP_ID", "wx87018ae3626d4acb")
-APP_SECRET = os.getenv("WECHAT_APP_SECRET", "b79008d89825b2065ad3c7bc305133ed")
+APP_ID = os.getenv("WECHAT_APP_ID", "wx3a565bb4664b579a")
+APP_SECRET = os.getenv("WECHAT_APP_SECRET", "576ed8e8194c8cf5629d127487b6a10d")
 
 
 def create_test_login_token(user_id_for_test: str = "local-dev-user"):

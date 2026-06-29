@@ -9,7 +9,7 @@
     <view class="nav-back" bindtap="goBack">
       <text class="nav-back-icon">‹</text>
     </view>
-    <view class="nav-title">心理测评</view>
+    <view class="nav-title">{{scaleData.short_name === 'AGLT' ? '天赋雷达' : '心理测评'}}</view>
   </view>
 
   <view class="loading-container" wx:if="{{!scaleData}}">

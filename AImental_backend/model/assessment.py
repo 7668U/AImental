@@ -34,6 +34,7 @@ ASSESSMENT_DISPLAY_GROUPS = {
     "ICI": ("趣味探索", 4, 2),
     "REAL-MAJOR-V1": ("趣味探索", 4, 3),
     "AGLT": ("趣味探索", 4, 4),
+    "RFLT": ("趣味探索", 4, 5),
 }
 
 BDI_DIMENSIONS = {
@@ -650,6 +651,220 @@ class AssessmentTables:
         result_data["ai_analysis"] = ai_analysis
         return result_data
 
+    def _calculate_aglt_talent_radar_result(self, request_answers: Dict[str, str], scale_data: Dict) -> Dict:
+        rules = scale_data.get('scale_info', {}).get('scoring_rules', {})
+        sections = rules.get('sections', {})
+        dimension_labels = rules.get('dimensions', {})
+        questions = {str(q['order']): q for q in scale_data.get('questions', [])}
+        interpretations = scale_data.get('interpretations', {})
+
+        explicit_set = {str(order) for order in sections.get('explicit', [])}
+        latent_set = {str(order) for order in sections.get('latent', [])}
+        stress_set = {str(order) for order in sections.get('stress', [])}
+
+        all_dimension_ids = list(dimension_labels.keys())
+        explicit_scores = {dimension_id: 0 for dimension_id in all_dimension_ids}
+        latent_scores = {dimension_id: 0 for dimension_id in all_dimension_ids}
+        stress_scores = {dimension_id: 0 for dimension_id in all_dimension_ids}
+        total_scores = {dimension_id: 0 for dimension_id in all_dimension_ids}
+
+        for q_order, option_id in request_answers.items():
+            question = questions.get(str(q_order))
+            if not question:
+                continue
+
+            selected_option = next((opt for opt in question.get('options', []) if str(opt.get('id')) == str(option_id)), None)
+            if not selected_option:
+                continue
+
+            dimension_id = selected_option.get('target_personality_id')
+            if dimension_id not in total_scores:
+                continue
+
+            total_scores[dimension_id] += 1
+            if str(q_order) in explicit_set:
+                explicit_scores[dimension_id] += 1
+            elif str(q_order) in latent_set:
+                latent_scores[dimension_id] += 1
+            elif str(q_order) in stress_set:
+                stress_scores[dimension_id] += 1
+
+        if not any(total_scores.values()):
+            return {"result_level": "无法确定", "result_interpretation": "您的答案无法匹配到有效结果，请重试。"}
+
+        def sort_dimension_scores(score_map: Dict[str, int]) -> List[Tuple[str, int]]:
+            return sorted(score_map.items(), key=lambda item: (-item[1], item[0]))
+
+        total_sorted = sort_dimension_scores(total_scores)
+        explicit_sorted = sort_dimension_scores(explicit_scores)
+        latent_sorted = sort_dimension_scores(latent_scores)
+        stress_sorted = sort_dimension_scores(stress_scores)
+
+        primary_id = total_sorted[0][0]
+        support_id = total_sorted[1][0] if len(total_sorted) > 1 else primary_id
+        latent_id = latent_sorted[0][0] if latent_sorted and latent_sorted[0][1] > 0 else support_id
+        stress_id = stress_sorted[0][0] if stress_sorted and stress_sorted[0][1] > 0 else primary_id
+
+        primary_profile = interpretations.get(primary_id, {})
+        support_profile = interpretations.get(support_id, {})
+        latent_profile = interpretations.get(latent_id, {})
+        stress_profile = interpretations.get(stress_id, {})
+
+        total_question_count = sum(total_scores.values()) or 1
+        breakdown = []
+        for dimension_id, score in total_sorted:
+            profile = interpretations.get(dimension_id, {})
+            breakdown.append({
+                "id": dimension_id,
+                "title": profile.get("title", dimension_labels.get(dimension_id, dimension_id)),
+                "count": score,
+                "ratio": round(score / total_question_count, 3),
+                "explicit_score": explicit_scores.get(dimension_id, 0),
+                "latent_score": latent_scores.get(dimension_id, 0),
+                "stress_score": stress_scores.get(dimension_id, 0)
+            })
+
+        primary_total = total_scores.get(primary_id, 0)
+        support_total = total_scores.get(support_id, 0)
+        latent_total = latent_scores.get(latent_id, 0)
+        stress_total = stress_scores.get(stress_id, 0)
+        primary_label = primary_profile.get("title", dimension_labels.get(primary_id, primary_id))
+        support_label = support_profile.get("title", dimension_labels.get(support_id, support_id))
+        latent_label = latent_profile.get("title", dimension_labels.get(latent_id, latent_id))
+        stress_label = stress_profile.get("title", dimension_labels.get(stress_id, stress_id))
+
+        gap = primary_total - support_total
+        if gap <= 1 and support_id != primary_id:
+            radar_title = f"{primary_label} × {support_label}"
+            radar_summary = f"你的显性天赋呈现出明显的双核特征：{primary_label}和{support_label}都很活跃。"
+        else:
+            radar_title = primary_label
+            radar_summary = f"你的显性天赋更集中在“{primary_label}”。这是你最常自然启动、也最容易被别人感受到的优势。"
+
+        if latent_total <= 0:
+            latent_summary = "你的潜伏潜能暂时没有明显偏向，说明你目前更多是在依靠已经成型的强项做事。"
+        elif latent_id == primary_id:
+            latent_summary = f"你的潜伏潜能和显性天赋方向一致，说明这项能力不只是你会用，它也正是你心里最想继续放大的部分。"
+        else:
+            latent_summary = f"你的潜伏潜能更偏向“{latent_label}”。这说明你心里其实很向往这一类能力，只是现实里还没有被充分使用。"
+
+        stress_summary = f"在压力或变化出现时，你更容易本能依赖“{stress_label}”来稳住自己。"
+
+        pair_copy_map = {
+            ("creative", "expression"): "你的主线像一台会发光的灵感扩音器。你不只是会想，也很擅长把想法讲出去、变得有感染力。",
+            ("creative", "aesthetics"): "你很容易把点子和感觉揉在一起，做出既新鲜又有辨识度的东西。",
+            ("creative", "exploration"): "你对新可能特别敏锐，常常不是沿着现成答案走，而是边试边找到自己的路。",
+            ("creative", "craft"): "你的创意不太甘心只停在脑内，你更适合把灵感一点点做成可见的作品。",
+            ("insight", "execution"): "你兼具判断和推进的能力，既能看懂问题，也能把解决方案真正往前带。",
+            ("insight", "creative"): "你不是那种只会分析的人，你很擅长在看清结构之后，继续提出新角度。",
+            ("insight", "empathy"): "你既会看逻辑，也会看人。你擅长把复杂问题解释成别人能接受、也愿意合作的样子。",
+            ("insight", "expression"): "你容易把深的东西说清楚，这是很稀缺的能力。很多时候，你的洞察会因为表达而变得更有影响。",
+            ("execution", "empathy"): "你不仅能把事推进，还会顾到人在过程里的感受，所以你常常是团队里又稳又让人放心的存在。",
+            ("execution", "craft"): "你对“做成”这件事很有感觉，适合把计划、流程和实际产出连成一条线。",
+            ("execution", "exploration"): "你并不是只会守成。你能一边开新局，一边把局面拉回可执行状态。",
+            ("execution", "expression"): "你擅长把方向、节奏和重点说清楚，因此不仅能自己做，也能带着别人一起做。",
+            ("empathy", "expression"): "你有一种温柔而有力量的说服感。你不是硬推观点，而是让人愿意听、愿意靠近、愿意一起动起来。",
+            ("empathy", "aesthetics"): "你不仅能感受人的情绪，也能感受场域的氛围，所以很适合做有温度的体验设计和陪伴型创造。",
+            ("empathy", "insight"): "你对人和问题都不只是停在表面，这让你很适合做深度理解、支持和判断并存的角色。",
+            ("empathy", "execution"): "你不是只有感受力，你还会帮事情往前走，这让你的共情很容易转成真正的支持。",
+            ("expression", "exploration"): "你像一个自带麦克风的探路者，既敢往外走，也敢把一路上的发现带回来讲给别人听。",
+            ("expression", "creative"): "你对想法和表达都有天然兴奋点，适合去做那些需要风格、观点和感染力的事。",
+            ("expression", "execution"): "你不仅会说，也会带动行动，所以你的影响力往往不是停在氛围，而是能推动结果。",
+            ("expression", "aesthetics"): "你天生对表达的呈现感比较敏锐，很适合把内容、画面和氛围一起做完整。",
+            ("exploration", "craft"): "你适合边试边做，在陌生场景里靠行动把方向一点点摸出来。",
+            ("exploration", "creative"): "你对新鲜感和新可能都很敏锐，容易在变化中比别人更早看见机会。",
+            ("exploration", "insight"): "你不是盲目冲，你会一边试、一边判断，所以很适合去开那些需要脑子和胆子的局。",
+            ("exploration", "expression"): "你很适合把见闻、尝试和发现转成故事，让你的探索不仅属于自己，也能感染别人。",
+            ("aesthetics", "creative"): "你很容易把“感觉”变成“新东西”，作品里常常同时有审美和想法。",
+            ("aesthetics", "empathy"): "你对氛围和人的感受都很敏锐，所以很适合去创造让人觉得舒服、被照顾、被理解的体验。",
+            ("aesthetics", "expression"): "你不只是会表达内容，也会表达气质。你的优势在于把东西呈现得有记忆点。",
+            ("aesthetics", "craft"): "你不是停在审美判断上，你更容易把“我觉得这样更好”做成一个真正更好的版本。",
+            ("craft", "execution"): "你很适合那种一边做、一边推进的任务。你会让抽象计划变成真正能运行的成果。",
+            ("craft", "creative"): "你擅长把点子落成原型，所以很多别人停留在想法层面的东西，在你这里更容易长出实体。",
+            ("craft", "aesthetics"): "你做出来的东西不只是能用，还常常会带着自己的质感和完成度。",
+            ("craft", "insight"): "你不是只靠手感，你也会判断结构和可行性，所以很适合做需要脑和手一起上的工作。"
+        }
+
+        latent_copy_map = {
+            ("creative", "execution"): "你心里想点亮的，其实是“把灵感变成稳定产出”的那部分能力。",
+            ("insight", "expression"): "你潜意识里很想把自己的思考说出去，不只是想明白，还想被更多人听懂。",
+            ("execution", "creative"): "你内在并不满足于只是把事做完，你其实也在渴望更大的新鲜感和创造空间。",
+            ("empathy", "expression"): "你隐藏着一种想把理解力变成影响力的愿望，也许你并不只想默默支持别人。",
+            ("expression", "insight"): "你潜在想长出来的，不只是更会说，而是更有自己的判断和观点深度。",
+            ("exploration", "execution"): "你心里那部分还没完全亮起的能力，和“把试出来的路走成一条稳定路径”有关。",
+            ("aesthetics", "craft"): "你不只是想有感觉，你其实也很想把那种感觉稳稳做成一个作品。",
+            ("craft", "expression"): "你潜伏着一种把作品、过程和经验讲出来的能力，它会让你的成果被更多人看见。"
+        }
+
+        def compose_pair_copy(primary_dimension: str, support_dimension: str) -> str:
+            if primary_dimension == support_dimension:
+                return ""
+            return pair_copy_map.get((primary_dimension, support_dimension)) or pair_copy_map.get((support_dimension, primary_dimension)) or ""
+
+        def compose_latent_bridge(primary_dimension: str, latent_dimension: str) -> str:
+            if primary_dimension == latent_dimension:
+                return "你的潜伏潜能和显性主线同方向，说明你不只是已经擅长它，你也真心想继续放大它。"
+            return latent_copy_map.get((primary_dimension, latent_dimension)) or f"如果给自己多一点空间，你很可能会逐渐点亮“{latent_label}”这条能力线。"
+
+        pair_summary = compose_pair_copy(primary_id, support_id)
+        latent_bridge = compose_latent_bridge(primary_id, latent_id)
+
+        result_interpretation = " ".join([
+            radar_summary,
+            primary_profile.get("description", ""),
+            pair_summary or (support_profile.get("description", "") if support_id != primary_id and support_total > 0 else "")
+        ]).strip()
+
+        result_recommendation = " ".join(filter(None, [
+            primary_profile.get("growth_focus", ""),
+            latent_profile.get("growth_focus", "") if latent_id != primary_id else "",
+            f"最近可以有意识地给“{latent_label}”安排一点练习场景，看看它会不会被进一步点亮。" if latent_total > 0 else ""
+        ])).strip()
+
+        return {
+            "raw_score": None,
+            "final_score": None,
+            "result_level": radar_title,
+            "result_interpretation": result_interpretation,
+            "result_recommendation": result_recommendation,
+            "result_details": {
+                "primary_id": primary_id,
+                "secondary_id": support_id,
+                "latent_id": latent_id,
+                "stress_id": stress_id,
+                "college": "天赋雷达",
+                "college_motto": "看见你最常用的力量，也看见那部分还没被完全点亮的自己。",
+                "career_teaser": "这次不是职业盲盒，而是一张关于你如何发光的雷达图。",
+                "primary_title": primary_label,
+                "primary_summary": primary_profile.get("description", ""),
+                "primary_tagline": primary_profile.get("tagline", ""),
+                "primary_best_scene": primary_profile.get("best_scene", ""),
+                "primary_growth_focus": primary_profile.get("growth_focus", ""),
+                "secondary_title": support_label,
+                "secondary_description": support_profile.get("description", ""),
+                "secondary_recommendation": support_profile.get("growth_focus", ""),
+                "secondary_tagline": support_profile.get("tagline", ""),
+                "latent_title": latent_label,
+                "latent_description": latent_profile.get("description", ""),
+                "latent_recommendation": latent_profile.get("growth_focus", ""),
+                "latent_tagline": latent_profile.get("tagline", ""),
+                "stress_title": stress_label,
+                "stress_description": stress_summary,
+                "stress_recommendation": stress_profile.get("growth_focus", ""),
+                "radar_summary": radar_summary,
+                "pair_summary": pair_summary,
+                "latent_summary": latent_summary,
+                "latent_bridge": latent_bridge,
+                "stress_summary": stress_summary,
+                "tendency_breakdown": breakdown,
+                "explicit_scores": explicit_scores,
+                "latent_scores": latent_scores,
+                "stress_scores": stress_scores,
+                "dimension_scores": total_scores,
+                "image_url": primary_profile.get("image_url", "")
+            }
+        }
+
 
     def _calculate_categorical_result(self, request_answers: Dict[str, str], scale_data: Dict) -> Dict:
         """【最终完善版】处理分类测试的计分逻辑，支持多种计分模型"""
@@ -657,6 +872,9 @@ class AssessmentTables:
         rules = scale_data.get('scale_info', {}).get('scoring_rules', {})
         scoring_type = rules.get('type')
         interpretations = scale_data.get('interpretations', [])
+
+        if scoring_type == 'talent_radar_dual_axis':
+            return self._calculate_aglt_talent_radar_result(request_answers, scale_data)
 
         # ==============================================================================
         # 规则 1: 处理 ECR 问卷的 "subscale_average_2d" (二维度平均分)
@@ -771,8 +989,24 @@ class AssessmentTables:
             if not personality_counts:
                 return {"result_level": "无法确定", "result_interpretation": "您的答案无法匹配到任何结果，请重试。"}
 
-            final_personality_id = max(personality_counts, key=personality_counts.get)
+            sorted_personalities = sorted(
+                personality_counts.items(),
+                key=lambda item: (-item[1], item[0])
+            )
+            final_personality_id = sorted_personalities[0][0]
             final_result = interpretations_obj.get(final_personality_id, {})
+            secondary_personality_id = sorted_personalities[1][0] if len(sorted_personalities) > 1 else None
+            secondary_result = interpretations_obj.get(secondary_personality_id, {}) if secondary_personality_id else {}
+            total_votes = sum(personality_counts.values()) or 1
+            tendency_breakdown = [
+                {
+                    "id": personality_id,
+                    "title": interpretations_obj.get(personality_id, {}).get("title", personality_id),
+                    "count": count,
+                    "ratio": round(count / total_votes, 3)
+                }
+                for personality_id, count in sorted_personalities[:4]
+            ]
             
             return {
                 "raw_score": None, "final_score": None,
@@ -782,7 +1016,28 @@ class AssessmentTables:
                 "result_details": {
                     "college": final_result.get('college'),
                     "college_motto": final_result.get('college_motto'),
-                    "image_url": final_result.get('image_url') 
+                    "career_teaser": final_result.get('career_teaser'),
+                    "primary_career": final_result.get('primary_career'),
+                    "recommended_careers": final_result.get('recommended_careers', []),
+                    "primary_id": final_personality_id,
+                    "secondary_id": secondary_personality_id,
+                    "secondary_title": secondary_result.get('title'),
+                    "secondary_description": secondary_result.get('description'),
+                    "secondary_recommendation": secondary_result.get('recommendation'),
+                    "in_relationships": final_result.get('in_relationships'),
+                    "under_stress": final_result.get('under_stress'),
+                    "facing_change": final_result.get('facing_change'),
+                    "secondary_in_relationships": secondary_result.get('in_relationships'),
+                    "secondary_under_stress": secondary_result.get('under_stress'),
+                    "secondary_facing_change": secondary_result.get('facing_change'),
+                    "fortune_keyword": final_result.get('fortune_keyword'),
+                    "fortune_window": final_result.get('fortune_window'),
+                    "lucky_color": final_result.get('lucky_color'),
+                    "lucky_action": final_result.get('lucky_action'),
+                    "lucky_phrase": final_result.get('lucky_phrase'),
+                    "emotional_anchor": final_result.get('emotional_anchor'),
+                    "tendency_breakdown": tendency_breakdown,
+                    "image_url": final_result.get('image_url')
                 }
             }
                 

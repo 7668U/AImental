@@ -54,8 +54,8 @@
 
   <view wx:if="{{groupMeta.key === 'interest' && scaleList.length > 0}}" class="interest-tip">
     <view>
-      <text class="tip-line">人生就像开盲盒，</text>
-      <text class="tip-line">每一次探索都是惊喜！</text>
+      <text class="tip-line">有些天赋一直在发光，</text>
+      <text class="tip-line">有些潜能正在等你点亮。</text>
     </view>
     <image class="tip-icon" src="/images/assessment/home/group-health.png" mode="aspectFit" />
   </view>

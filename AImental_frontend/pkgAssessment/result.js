@@ -18,6 +18,11 @@ Page({
     aiAnalysisSections: [],
     analysisTitle: 'AI 分析',
     analysisIsFallback: false,
+    primaryCareer: null,
+    recommendedCareers: [],
+    secondaryProfile: null,
+    talentRadarReport: null,
+    fortuneReport: null,
   },
 
   onLoad(options) {
@@ -68,12 +73,37 @@ Page({
     const aiAnalysis = this.normalizeAiAnalysis(resultData);
     const aiSections = this.buildAiAnalysisSections(aiAnalysis);
     const fallbackSections = aiSections.length > 0 ? [] : this.buildFallbackAnalysisSections(normalizedResult);
+    const primaryCareer = normalizedResult?.result_details?.primary_career || null;
+    const recommendedCareers = Array.isArray(normalizedResult?.result_details?.recommended_careers)
+      ? normalizedResult.result_details.recommended_careers
+      : [];
+    const secondaryProfile = normalizedResult?.result_details?.secondary_title
+      ? {
+          title: normalizedResult.result_details.secondary_title,
+          description: normalizedResult.result_details.secondary_description || '',
+          recommendation: normalizedResult.result_details.secondary_recommendation || '',
+          inRelationships: normalizedResult.result_details.secondary_in_relationships || '',
+          underStress: normalizedResult.result_details.secondary_under_stress || '',
+          facingChange: normalizedResult.result_details.secondary_facing_change || '',
+        }
+      : null;
+    const talentRadarReport = normalizedResult?.scale_details?.short_name === 'AGLT'
+      ? this.buildTalentRadarReport(normalizedResult)
+      : null;
+    const fortuneReport = normalizedResult?.scale_details?.short_name === 'RFLT'
+      ? this.buildFortuneReport(normalizedResult)
+      : null;
     this.setData({
       result: normalizedResult,
       aiAnalysis: aiAnalysis,
       aiAnalysisSections: aiSections.length > 0 ? aiSections : fallbackSections,
       analysisTitle: aiSections.length > 0 ? 'AI 分析' : '结果分析',
-      analysisIsFallback: aiSections.length === 0
+      analysisIsFallback: aiSections.length === 0,
+      primaryCareer,
+      recommendedCareers,
+      secondaryProfile,
+      talentRadarReport,
+      fortuneReport
     });
     
     const type = normalizedResult?.scale_details?.assessment_type;
@@ -283,17 +313,6 @@ const scoreSegments = interpretations.map(interp => {
     const recommendation = typeof resultData.result_recommendation === 'string'
       ? resultData.result_recommendation.trim()
       : '';
-    const detailItems = this.buildResultDetailItems(resultData.result_details);
-
-    if (detailItems.length > 0) {
-      sections.push({
-        key: 'details',
-        title: '维度得分',
-        type: 'details',
-        bgIcon: '/images/assessment/result/section-ai.png',
-        detailItems: detailItems
-      });
-    }
 
     if (interpretation) {
       sections.push({
@@ -332,46 +351,53 @@ const scoreSegments = interpretations.map(interp => {
     return sections;
   },
 
-  buildResultDetailItems(resultDetails) {
-    if (!resultDetails || Array.isArray(resultDetails) || typeof resultDetails !== 'object') {
-      return [];
-    }
+  buildTalentRadarReport(resultData) {
+    const details = resultData?.result_details || {};
+    const breakdown = Array.isArray(details.tendency_breakdown) ? details.tendency_breakdown : [];
+    const scoreItems = breakdown.slice(0, 8).map(item => ({
+      label: item.title,
+      value: item.count,
+      ratio: Math.round((item.ratio || 0) * 100)
+    }));
 
-    const hiddenKeys = {
-      ai_analysis: true,
-      image_url: true,
-      college: true,
-      college_motto: true,
-      title: true,
-      type_code: true,
-      condition: true
+    return {
+      primaryTitle: details.primary_title || resultData.result_level || '',
+      primaryTagline: details.primary_tagline || '',
+      primarySummary: details.primary_summary || '',
+      primaryBestScene: details.primary_best_scene || '',
+      primaryGrowthFocus: details.primary_growth_focus || '',
+      pairSummary: details.pair_summary || '',
+      secondaryTitle: details.secondary_title || '',
+      secondaryDescription: details.secondary_description || '',
+      secondaryTagline: details.secondary_tagline || '',
+      latentTitle: details.latent_title || '',
+      latentDescription: details.latent_description || '',
+      latentTagline: details.latent_tagline || '',
+      latentBridge: details.latent_bridge || '',
+      stressTitle: details.stress_title || '',
+      stressSummary: details.stress_summary || details.stress_description || '',
+      radarSummary: details.radar_summary || '',
+      latentSummary: details.latent_summary || '',
+      scoreItems
     };
-    const labelMap = {
-      anxiety_score: '焦虑得分',
-      avoidance_score: '回避得分'
+  },
+
+  buildFortuneReport(resultData) {
+    const details = resultData?.result_details || {};
+    return {
+      title: resultData.result_level || '',
+      keyword: details.fortune_keyword || '',
+      window: details.fortune_window || '',
+      luckyColor: details.lucky_color || '',
+      luckyAction: details.lucky_action || '',
+      luckyPhrase: details.lucky_phrase || '',
+      emotionalAnchor: details.emotional_anchor || '',
+      interpretation: resultData.result_interpretation || '',
+      recommendation: resultData.result_recommendation || '',
+      relationship: details.in_relationships || '',
+      stress: details.under_stress || '',
+      change: details.facing_change || ''
     };
-
-    return Object.keys(resultDetails)
-      .filter(key => !hiddenKeys[key])
-      .map(key => {
-        const value = resultDetails[key];
-        if (value === null || value === undefined || typeof value === 'object') {
-          return null;
-        }
-
-        const displayValue = typeof value === 'number'
-          ? String(Math.round(value * 100) / 100)
-          : String(value).trim();
-
-        if (!displayValue) return null;
-
-        return {
-          label: labelMap[key] || key,
-          value: displayValue
-        };
-      })
-      .filter(Boolean)
-      .slice(0, 6);
   },
 
   handleConfirm() {

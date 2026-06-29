@@ -1,108 +1,456 @@
 {
   "scale_info": {
-    "name": "天赋潜能小测验",
+    "name": "天赋雷达：天赋与潜能测试",
     "short_name": "AGLT",
-    "description": "本测试通过一系列有趣的生活情景选择，趣味性地预测您在今年可能会在哪个人生领域收获意想不到的好运气。",
-    "instructions": "请放松心情，阅读以下问题，并从选项中选择一个最符合你当下想法的答案。",
+    "description": "有些擅长你已经很熟悉，有些潜能只是还没被叫醒。用几个轻松情境，看看你的天赋雷达会亮在哪。",
+    "instructions": "别想太久，选那个更像你平时会做、也更让你心里一动的答案。",
     "category": "趣味测试",
-    "assessment_type": "categorical"
+    "assessment_type": "categorical",
+    "scoring_rules": {
+      "type": "talent_radar_dual_axis",
+      "sections": {
+        "explicit": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 29, 30, 31, 32],
+        "latent": [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+        "stress": [25, 26, 27, 28, 33, 34, 35, 36]
+      },
+      "dimensions": {
+        "creative": "创意生成潜能",
+        "insight": "逻辑洞察潜能",
+        "execution": "推进执行潜能",
+        "empathy": "共情连接潜能",
+        "expression": "表达影响潜能",
+        "exploration": "探索开拓潜能",
+        "aesthetics": "审美感知潜能",
+        "craft": "实作建构潜能"
+      }
+    }
   },
   "questions": [
     {
       "order": 1,
-      "text": "如果让你选一种超能力，你会选择？",
+      "text": "接到一个全新任务时，你第一反应更像是：",
       "options": [
-        { "id": "A", "text": "隐身术", "target_personality_id": "p02" },
-        { "id": "B", "text": "瞬间移动", "target_personality_id": "p03" },
-        { "id": "C", "text": "与动物对话", "target_personality_id": "p01" },
-        { "id": "D", "text": "预知未来", "target_personality_id": "p04" }
+        { "id": "A", "text": "先想想能不能做得更特别一点。", "target_personality_id": "creative" },
+        { "id": "B", "text": "先弄清楚问题到底是什么。", "target_personality_id": "insight" },
+        { "id": "C", "text": "先列步骤和节奏，别让它失控。", "target_personality_id": "execution" },
+        { "id": "D", "text": "先看看涉及的人在意什么。", "target_personality_id": "empathy" }
       ]
     },
     {
       "order": 2,
-      "text": "你更喜欢哪种天气？",
+      "text": "如果你加入一场闯关活动，你最想担任：",
       "options": [
-        { "id": "A", "text": "阳光明媚的晴天", "target_personality_id": "p01" },
-        { "id": "B", "text": "细雨蒙蒙的雨天", "target_personality_id": "p03" },
-        { "id": "C", "text": "白雪皑皑的冬天", "target_personality_id": "p04" },
-        { "id": "D", "text": "凉风习习的秋天", "target_personality_id": "p02" }
+        { "id": "A", "text": "负责讲解和带气氛的人。", "target_personality_id": "expression" },
+        { "id": "B", "text": "负责试新路线的人。", "target_personality_id": "exploration" },
+        { "id": "C", "text": "负责观察布景和线索质感的人。", "target_personality_id": "aesthetics" },
+        { "id": "D", "text": "负责搭机关和动手修东西的人。", "target_personality_id": "craft" }
       ]
     },
     {
       "order": 3,
-      "text": "如果必须参加一个比赛，你会选择？",
+      "text": "看到一个做得很差的产品，你最容易先想到：",
       "options": [
-        { "id": "A", "text": "智力问答", "target_personality_id": "p04" },
-        { "id": "B", "text": "厨艺大赛", "target_personality_id": "p02" },
-        { "id": "C", "text": "演讲比赛", "target_personality_id": "p03" },
-        { "id": "D", "text": "马拉松", "target_personality_id": "p01" }
+        { "id": "A", "text": "它完全可以换种更有意思的玩法。", "target_personality_id": "creative" },
+        { "id": "B", "text": "我想先知道问题数据和真实原因。", "target_personality_id": "insight" },
+        { "id": "C", "text": "流程太乱了，我想把它重新排顺。", "target_personality_id": "execution" },
+        { "id": "D", "text": "用户用起来肯定很烦，我想听听他们怎么说。", "target_personality_id": "empathy" }
       ]
     },
     {
       "order": 4,
-      "text": "你捡到了一个神秘的漂流瓶，你希望里面装着？",
+      "text": "别人夸你时，哪句话最容易让你开心：",
       "options": [
-        { "id": "A", "text": "一张藏宝图", "target_personality_id": "p04" },
-        { "id": "B", "text": "一封感人的情书", "target_personality_id": "p01" },
-        { "id": "C", "text": "一个能实现愿望的精灵", "target_personality_id": "p02" },
-        { "id": "D", "text": "一段不为人知的历史秘密", "target_personality_id": "p03" }
+        { "id": "A", "text": "你一开口，大家就愿意继续听。", "target_personality_id": "expression" },
+        { "id": "B", "text": "你总敢去别人没试过的地方。", "target_personality_id": "exploration" },
+        { "id": "C", "text": "你对细节和感觉真的很敏锐。", "target_personality_id": "aesthetics" },
+        { "id": "D", "text": "你动手一做，东西就真的成形了。", "target_personality_id": "craft" }
       ]
     },
     {
       "order": 5,
-      "text": "你最想去哪里旅行？",
+      "text": "团队讨论发散太久时，你更可能：",
       "options": [
-        { "id": "A", "text": "繁华的国际大都市", "target_personality_id": "p03" },
-        { "id": "B", "text": "宁静的海边小镇", "target_personality_id": "p01" },
-        { "id": "C", "text": "神秘的古老遗迹", "target_personality_id": "p04" },
-        { "id": "D", "text": "壮丽的自然风光区", "target_personality_id": "p02" }
+        { "id": "A", "text": "提出一个更跳脱的新方案。", "target_personality_id": "creative" },
+        { "id": "B", "text": "把争议点和关键逻辑总结出来。", "target_personality_id": "insight" },
+        { "id": "C", "text": "把讨论收束成下一步行动。", "target_personality_id": "execution" },
+        { "id": "D", "text": "先处理气氛，让大家重新对齐。", "target_personality_id": "empathy" }
       ]
     },
     {
       "order": 6,
-      "text": "如果用一种饮品来形容你自己，你会是？",
+      "text": "如果让你经营一个账号，你最想优先做好：",
       "options": [
-        { "id": "A", "text": "香醇的咖啡", "target_personality_id": "p03" },
-        { "id": "B", "text": "甜甜的奶茶", "target_personality_id": "p01" },
-        { "id": "C", "text": "清新的柠檬水", "target_personality_id": "p02" },
-        { "id": "D", "text": "浓郁的红酒", "target_personality_id": "p04" }
+        { "id": "A", "text": "表达节奏和讲述方式。", "target_personality_id": "expression" },
+        { "id": "B", "text": "持续试新题材和新栏目。", "target_personality_id": "exploration" },
+        { "id": "C", "text": "整体风格和氛围统一感。", "target_personality_id": "aesthetics" },
+        { "id": "D", "text": "拍摄、剪辑、排版这些实际产出环节。", "target_personality_id": "craft" }
       ]
     },
     {
       "order": 7,
-      "text": "你房间里不可或缺的东西是？",
+      "text": "学一项新技能时，你更习惯：",
       "options": [
-        { "id": "A", "text": "柔软舒适的床", "target_personality_id": "p01" },
-        { "id": "B", "text": "一整面墙的书柜", "target_personality_id": "p04" },
-        { "id": "C", "text": "高速的电脑和网络", "target_personality_id": "p03" },
-        { "id": "D", "text": "可爱的绿植或宠物", "target_personality_id": "p02" }
+        { "id": "A", "text": "边试边改，靠联想找到感觉。", "target_personality_id": "creative" },
+        { "id": "B", "text": "先懂原理，不然心里不踏实。", "target_personality_id": "insight" },
+        { "id": "C", "text": "先找清楚方法和练习计划。", "target_personality_id": "execution" },
+        { "id": "D", "text": "先问问有经验的人怎么走弯路更少。", "target_personality_id": "empathy" }
+      ]
+    },
+    {
+      "order": 8,
+      "text": "如果要组织一次线下活动，你最自然会被哪部分吸引：",
+      "options": [
+        { "id": "A", "text": "主持、介绍、把现场带热。", "target_personality_id": "expression" },
+        { "id": "B", "text": "外联、找资源、把活动拉到更大舞台。", "target_personality_id": "exploration" },
+        { "id": "C", "text": "主题视觉、空间氛围和小巧思。", "target_personality_id": "aesthetics" },
+        { "id": "D", "text": "搭台、布置、做出可用的物料和装置。", "target_personality_id": "craft" }
+      ]
+    },
+    {
+      "order": 9,
+      "text": "以下哪种任务，最不容易让你拖延：",
+      "options": [
+        { "id": "A", "text": "起概念、想标题、做脑洞。", "target_personality_id": "creative" },
+        { "id": "B", "text": "查资料、比方案、做判断。", "target_personality_id": "insight" },
+        { "id": "C", "text": "把一堆混乱事情整理成方案。", "target_personality_id": "execution" },
+        { "id": "D", "text": "沟通、访谈、弄清大家真实想法。", "target_personality_id": "empathy" }
+      ]
+    },
+    {
+      "order": 10,
+      "text": "你理想中的工作角落更像：",
+      "options": [
+        { "id": "A", "text": "一个能随时开麦表达想法的舞台。", "target_personality_id": "expression" },
+        { "id": "B", "text": "一个能随时出发尝试新东西的前哨站。", "target_personality_id": "exploration" },
+        { "id": "C", "text": "一个看上去就让人很有感觉的小宇宙。", "target_personality_id": "aesthetics" },
+        { "id": "D", "text": "一个工具齐全、能立刻动手的工坊。", "target_personality_id": "craft" }
+      ]
+    },
+    {
+      "order": 11,
+      "text": "哪种“累但值了”的感觉最打动你：",
+      "options": [
+        { "id": "A", "text": "我做出了一个别人没想到的好点子。", "target_personality_id": "creative" },
+        { "id": "B", "text": "我终于把一个复杂问题看明白了。", "target_personality_id": "insight" },
+        { "id": "C", "text": "我把一件原本混乱的事做成了。", "target_personality_id": "execution" },
+        { "id": "D", "text": "我真的让一个人轻松和舒服了一点。", "target_personality_id": "empathy" }
+      ]
+    },
+    {
+      "order": 12,
+      "text": "如果你要做一个小项目，你最在意先发光的是：",
+      "options": [
+        { "id": "A", "text": "它有没有讲清楚、讲动人。", "target_personality_id": "expression" },
+        { "id": "B", "text": "它有没有走到新的领域或新机会。", "target_personality_id": "exploration" },
+        { "id": "C", "text": "它有没有自己的风格和质感。", "target_personality_id": "aesthetics" },
+        { "id": "D", "text": "它能不能真的做出来、跑起来。", "target_personality_id": "craft" }
+      ]
+    },
+    {
+      "order": 13,
+      "text": "如果没有人打分，也没有人催你，你最愿意花半年做什么：",
+      "options": [
+        { "id": "A", "text": "做一个脑洞很大的系列作品或内容。", "target_personality_id": "creative" },
+        { "id": "B", "text": "研究一个你一直很好奇的问题。", "target_personality_id": "insight" },
+        { "id": "C", "text": "搭一个系统，把生活或项目整理得更顺。", "target_personality_id": "execution" },
+        { "id": "D", "text": "做一个真正能帮到人的陪伴或支持项目。", "target_personality_id": "empathy" }
+      ]
+    },
+    {
+      "order": 14,
+      "text": "小时候最容易让你忘记时间的是：",
+      "options": [
+        { "id": "A", "text": "假装演讲、表演、讲故事给别人听。", "target_personality_id": "expression" },
+        { "id": "B", "text": "到处探索、翻地图、研究新地方。", "target_personality_id": "exploration" },
+        { "id": "C", "text": "拼颜色、摆布置、沉迷氛围和搭配。", "target_personality_id": "aesthetics" },
+        { "id": "D", "text": "搭积木、拆东西、做手工。", "target_personality_id": "craft" }
+      ]
+    },
+    {
+      "order": 15,
+      "text": "哪种事情你现在做得不算多，但一做就特别来劲：",
+      "options": [
+        { "id": "A", "text": "把普通想法扭出一个新角度。", "target_personality_id": "creative" },
+        { "id": "B", "text": "把乱七八糟的信息理成逻辑。", "target_personality_id": "insight" },
+        { "id": "C", "text": "把计划拉回正轨。", "target_personality_id": "execution" },
+        { "id": "D", "text": "把一个人的真正需求听出来。", "target_personality_id": "empathy" }
+      ]
+    },
+    {
+      "order": 16,
+      "text": "如果未来一年必须偷偷练一项能力，你最想练：",
+      "options": [
+        { "id": "A", "text": "更有感染力地表达自己。", "target_personality_id": "expression" },
+        { "id": "B", "text": "更大胆地试路和开新局。", "target_personality_id": "exploration" },
+        { "id": "C", "text": "更稳定地做出有质感的东西。", "target_personality_id": "aesthetics" },
+        { "id": "D", "text": "更熟练地把想法做成具体作品。", "target_personality_id": "craft" }
+      ]
+    },
+    {
+      "order": 17,
+      "text": "如果你突然拥有一笔自由预算，你最想先做的是：",
+      "options": [
+        { "id": "A", "text": "启动一个以前只敢想的创意项目。", "target_personality_id": "creative" },
+        { "id": "B", "text": "买资料、课程或工具，把一个问题研究透。", "target_personality_id": "insight" },
+        { "id": "C", "text": "搭好流程、团队或环境，让事情能长期跑。", "target_personality_id": "execution" },
+        { "id": "D", "text": "做一个能真正帮助某群人的服务或活动。", "target_personality_id": "empathy" }
+      ]
+    },
+    {
+      "order": 18,
+      "text": "看到很厉害的人时，你最容易被哪类人点燃：",
+      "options": [
+        { "id": "A", "text": "一开口就能吸引全场的人。", "target_personality_id": "expression" },
+        { "id": "B", "text": "总能发现新方向和新机会的人。", "target_personality_id": "exploration" },
+        { "id": "C", "text": "作品很有风格、很有审美完成度的人。", "target_personality_id": "aesthetics" },
+        { "id": "D", "text": "能把想法稳稳做成成果的人。", "target_personality_id": "craft" }
+      ]
+    },
+    {
+      "order": 19,
+      "text": "如果世界安静下来，没有竞争和比较，你最想创造的是：",
+      "options": [
+        { "id": "A", "text": "一个前所未有、好玩又有想象力的东西。", "target_personality_id": "creative" },
+        { "id": "B", "text": "一套能解释复杂世界的模型或观点。", "target_personality_id": "insight" },
+        { "id": "C", "text": "一个真的能持续运转、帮助很多人的项目。", "target_personality_id": "execution" },
+        { "id": "D", "text": "一个让人觉得被理解和被安放的空间。", "target_personality_id": "empathy" }
+      ]
+    },
+    {
+      "order": 20,
+      "text": "朋友眼里的你，和你心里真正想成为的你，差别最大的是：",
+      "options": [
+        { "id": "A", "text": "我其实想更敢说、更会表达。", "target_personality_id": "expression" },
+        { "id": "B", "text": "我其实想更敢闯、更敢开新路。", "target_personality_id": "exploration" },
+        { "id": "C", "text": "我其实想更有自己的风格和作品感。", "target_personality_id": "aesthetics" },
+        { "id": "D", "text": "我其实想更会动手把东西做出来。", "target_personality_id": "craft" }
+      ]
+    },
+    {
+      "order": 21,
+      "text": "如果有一天你决定转向一个全新方向，最能说服你的会是：",
+      "options": [
+        { "id": "A", "text": "它能让我不断想新东西。", "target_personality_id": "creative" },
+        { "id": "B", "text": "它里面有很多值得深挖和看透的规律。", "target_personality_id": "insight" },
+        { "id": "C", "text": "它能让我搭起一套长期有效的做事方式。", "target_personality_id": "execution" },
+        { "id": "D", "text": "它能让我对人产生真实而温暖的影响。", "target_personality_id": "empathy" }
+      ]
+    },
+    {
+      "order": 22,
+      "text": "如果未来工作像一部连续剧，你更想演：",
+      "options": [
+        { "id": "A", "text": "一出现就能抓住注意力的主角。", "target_personality_id": "expression" },
+        { "id": "B", "text": "总在边界地带开新地图的主角。", "target_personality_id": "exploration" },
+        { "id": "C", "text": "让世界变得更有风格和温度的主角。", "target_personality_id": "aesthetics" },
+        { "id": "D", "text": "把脑中想法一点点做成现实的主角。", "target_personality_id": "craft" }
+      ]
+    },
+    {
+      "order": 23,
+      "text": "哪种失败最让你不甘心，因为你觉得“我本来可以更好”：",
+      "options": [
+        { "id": "A", "text": "本来有机会做得更有创意，但没放开。", "target_personality_id": "creative" },
+        { "id": "B", "text": "本来可以想得更清楚，但判断还不够深。", "target_personality_id": "insight" },
+        { "id": "C", "text": "本来能做成，但执行节奏掉了。", "target_personality_id": "execution" },
+        { "id": "D", "text": "本来能照顾得更周到，但没真正听见人。", "target_personality_id": "empathy" }
+      ]
+    },
+    {
+      "order": 24,
+      "text": "哪种任务你虽然经验不多，但总有“我好像学得会”的感觉：",
+      "options": [
+        { "id": "A", "text": "在别人面前表达观点、带动场面。", "target_personality_id": "expression" },
+        { "id": "B", "text": "到新环境里摸路、找机会、开局。", "target_personality_id": "exploration" },
+        { "id": "C", "text": "把作品或空间做得更有感觉。", "target_personality_id": "aesthetics" },
+        { "id": "D", "text": "动手搭、改、修、做出一个实物或原型。", "target_personality_id": "craft" }
+      ]
+    },
+    {
+      "order": 25,
+      "text": "当局面突然很乱、时间很紧时，你最本能依赖的是：",
+      "options": [
+        { "id": "A", "text": "临场想新办法，先破局。", "target_personality_id": "creative" },
+        { "id": "B", "text": "快速判断关键变量和真正的问题。", "target_personality_id": "insight" },
+        { "id": "C", "text": "马上排优先级，先稳住进度。", "target_personality_id": "execution" },
+        { "id": "D", "text": "先稳住人心，让合作别散。", "target_personality_id": "empathy" }
+      ]
+    },
+    {
+      "order": 26,
+      "text": "如果你临时被推到台前，你更容易本能启动：",
+      "options": [
+        { "id": "A", "text": "把话说清楚、说顺、说得有人愿意听。", "target_personality_id": "expression" },
+        { "id": "B", "text": "边说边找新的切入和出路。", "target_personality_id": "exploration" },
+        { "id": "C", "text": "快速调整整体画面和呈现质感。", "target_personality_id": "aesthetics" },
+        { "id": "D", "text": "立刻补动作、补材料、补可执行的东西。", "target_personality_id": "craft" }
+      ]
+    },
+    {
+      "order": 27,
+      "text": "被否定或卡住时，你更容易用哪种方式救回自己：",
+      "options": [
+        { "id": "A", "text": "换角度，重新想一条路。", "target_personality_id": "creative" },
+        { "id": "B", "text": "回头拆清楚，到底问题在哪。", "target_personality_id": "insight" },
+        { "id": "C", "text": "把事情拆小，先做下一步。", "target_personality_id": "execution" },
+        { "id": "D", "text": "找能理解你的人聊一聊，重新校准。", "target_personality_id": "empathy" }
+      ]
+    },
+    {
+      "order": 28,
+      "text": "如果现场出状况，你更容易优先关注：",
+      "options": [
+        { "id": "A", "text": "大家还能不能继续跟上你的表达。", "target_personality_id": "expression" },
+        { "id": "B", "text": "有没有机会顺势转成新的方案。", "target_personality_id": "exploration" },
+        { "id": "C", "text": "画面、环境、细节会不会瞬间失衡。", "target_personality_id": "aesthetics" },
+        { "id": "D", "text": "有哪些东西要马上补上或修好。", "target_personality_id": "craft" }
+      ]
+    },
+    {
+      "order": 29,
+      "text": "当你进入一个陌生环境，最先吸引你的通常是：",
+      "options": [
+        { "id": "A", "text": "这里有没有新的玩法和新点子。", "target_personality_id": "creative" },
+        { "id": "B", "text": "这里运行的规则和结构是什么。", "target_personality_id": "insight" },
+        { "id": "C", "text": "这里的人和事怎么高效配合。", "target_personality_id": "execution" },
+        { "id": "D", "text": "这里的人际氛围舒不舒服。", "target_personality_id": "empathy" }
+      ]
+    },
+    {
+      "order": 30,
+      "text": "如果你要快速介绍自己，你最想让别人先感受到：",
+      "options": [
+        { "id": "A", "text": "我表达起来很有感染力。", "target_personality_id": "expression" },
+        { "id": "B", "text": "我对未知很有兴趣，也敢去试。", "target_personality_id": "exploration" },
+        { "id": "C", "text": "我很有感觉，也很在意细节和风格。", "target_personality_id": "aesthetics" },
+        { "id": "D", "text": "我能把抽象的东西做成真的。", "target_personality_id": "craft" }
+      ]
+    },
+    {
+      "order": 31,
+      "text": "你最容易进入心流的瞬间是：",
+      "options": [
+        { "id": "A", "text": "灵感一下子串起来的时候。", "target_personality_id": "creative" },
+        { "id": "B", "text": "逻辑突然打通的时候。", "target_personality_id": "insight" },
+        { "id": "C", "text": "进度条稳定往前推的时候。", "target_personality_id": "execution" },
+        { "id": "D", "text": "对方真的被理解的时候。", "target_personality_id": "empathy" }
+      ]
+    },
+    {
+      "order": 32,
+      "text": "如果你有机会做一次公开展示，你最想让人记住的是：",
+      "options": [
+        { "id": "A", "text": "我讲出来的内容很有带动力。", "target_personality_id": "expression" },
+        { "id": "B", "text": "我敢去讲别人没看过的可能性。", "target_personality_id": "exploration" },
+        { "id": "C", "text": "我的呈现很有美感和辨识度。", "target_personality_id": "aesthetics" },
+        { "id": "D", "text": "我不仅讲了，还真的做出来了。", "target_personality_id": "craft" }
+      ]
+    },
+    {
+      "order": 33,
+      "text": "当外界期待很高时，你最稳的底牌通常是：",
+      "options": [
+        { "id": "A", "text": "我还能想出不一样的解法。", "target_personality_id": "creative" },
+        { "id": "B", "text": "我能把事情看清楚再下判断。", "target_personality_id": "insight" },
+        { "id": "C", "text": "我能把节奏拉回可控。", "target_personality_id": "execution" },
+        { "id": "D", "text": "我能先稳住关系和合作。", "target_personality_id": "empathy" }
+      ]
+    },
+    {
+      "order": 34,
+      "text": "如果资源突然变少，你更容易保住哪种能力：",
+      "options": [
+        { "id": "A", "text": "把现有东西说清楚、说有力量。", "target_personality_id": "expression" },
+        { "id": "B", "text": "从有限条件里找到新的路。", "target_personality_id": "exploration" },
+        { "id": "C", "text": "让东西依旧保持风格和质感。", "target_personality_id": "aesthetics" },
+        { "id": "D", "text": "用手头材料做出一个能用的版本。", "target_personality_id": "craft" }
+      ]
+    },
+    {
+      "order": 35,
+      "text": "如果今天必须扛下一件难事，你最相信自己的是：",
+      "options": [
+        { "id": "A", "text": "我能在混乱里想出突破口。", "target_personality_id": "creative" },
+        { "id": "B", "text": "我能抓到真正关键的问题。", "target_personality_id": "insight" },
+        { "id": "C", "text": "我能先做出一步，再一步。", "target_personality_id": "execution" },
+        { "id": "D", "text": "我能让相关的人愿意继续一起扛。", "target_personality_id": "empathy" }
+      ]
+    },
+    {
+      "order": 36,
+      "text": "如果未来忽然拐了一个大弯，你最可能靠什么重新站稳：",
+      "options": [
+        { "id": "A", "text": "用表达重新建立存在感和连接。", "target_personality_id": "expression" },
+        { "id": "B", "text": "去新地方、试新路，重新打开局面。", "target_personality_id": "exploration" },
+        { "id": "C", "text": "先抓住能让自己恢复感觉和秩序的细节。", "target_personality_id": "aesthetics" },
+        { "id": "D", "text": "从能做、能修、能搭的具体事情开始。", "target_personality_id": "craft" }
       ]
     }
   ],
   "interpretations": {
-    "p01": {
-      "title": "桃花运",
-      "description": "恭喜！今年你的丘比特已经悄悄上班啦，你将会在爱情方面收获满满的好运气。对于单身的你来说，今年会遇到许多优质的潜在对象，你的个人魅力会大大提升，很容易吸引到他人的目光，脱单几率极高！对于有伴侣的你来说，你们的感情会持续升温，关系更加稳固和甜蜜，可能会有订婚、结婚等好消息哦。总之，准备好迎接浪漫的一年吧！",
-      "recommendation": "大胆去爱，敞开心扉，你的正缘正在路上！",
-      "image_url": ""
+    "creative": {
+      "title": "创意生成潜能",
+      "description": "你很容易在“换个角度试试看”这件事上发光。你擅长联想、重组、提出新点子，也更容易在开放、允许试错的环境里被点亮。你的强项不只是有想法，而是能把沉闷的问题撬开一道口子。",
+      "recommendation": "继续保留你的想象力，但也别只停在灵感上。为你的点子建立一个简单的记录和筛选机制，会让你的创意更容易变成真正的作品。",
+      "tagline": "脑洞不是跑题，而是你寻找可能性的方式。",
+      "best_scene": "适合内容策划、创意发想、产品概念、品牌活动、创新项目等需要打破惯性的场景。",
+      "growth_focus": "把灵感整理成可执行提案，让别人更容易接住你的好想法。"
     },
-    "p02": {
-      "title": "健康运",
-      "description": "今年你的好运气主要体現在健康方面。你会感觉到自己精力充沛，活力满满，身体状态会调整到最佳。之前的一些小毛病或亚健康状态，今年都会得到很好的改善。你的心态也会变得更加积极乐观，强大的免疫力让你远离疾病的困扰。这是一个非常适合培养运动习惯、调整作息、关注身心平衡的好时机。健康的身体是革命的本钱，有了它，你才能更好地迎接其他挑战！",
-      "recommendation": "坚持良好的生活习惯，将好状态保持下去，活力每一天！",
-      "image_url": ""
+    "insight": {
+      "title": "逻辑洞察潜能",
+      "description": "你擅长在信息很多、局面很杂的时候抓到关键。你会本能地想弄清楚“为什么会这样”，也更容易在分析、判断、研究、归纳中建立安全感。很多人看到的是表面，你更容易看到结构。",
+      "recommendation": "继续训练你的分析深度，但别把自己锁在“想明白再行动”里。适度增加小步验证，会让你的洞察更快变成影响力。",
+      "tagline": "你不是在纠结，你是在追关键。",
+      "best_scene": "适合研究、分析、策略、数据判断、用户洞察、咨询、学习规划等需要看清结构的场景。",
+      "growth_focus": "尝试把你的判断说给别人听，让洞察从脑内优势变成外部价值。"
     },
-    "p03": {
-      "title": "事业运",
-      "description": "你的好运气将在事业或学业上大放异彩！今年你在工作和学习上会感到前所未有的顺遂，你的努力和才华将被上司、同事或老师看到并认可。可能会有升职加薪、项目成功、考试通过等好机会降临。你会变得更有创造力和执行力，能够轻松应对各种挑战，并在自己的专业领域取得突破。请抓住机会，勇敢地展示自己吧！",
-      "recommendation": "积极把握每一个机会，你的努力终将获得回报，前程似锦！",
-      "image_url": ""
+    "execution": {
+      "title": "推进执行潜能",
+      "description": "你最大的稳定感，来自把事情真正往前推。你擅长排步骤、定优先级、稳节奏，也能在复杂局面里帮别人找到“先做什么”。你不一定最吵，但很多事没有你就很难落地。",
+      "recommendation": "你的优势是能做成，但别只做“救火的人”。继续练习统筹、授权和节奏设计，会让你从可靠执行者成长为真正的推进核心。",
+      "tagline": "你不是只是会做事，你是让事情发生的人。",
+      "best_scene": "适合项目管理、运营推进、活动统筹、流程优化、执行策划、组织协调等需要持续落地的场景。",
+      "growth_focus": "学会把你的推进方式复制给团队，而不只是自己扛住。"
     },
-    "p04": {
-      "title": "财富运",
-      "description": "财神爷今年对你格外偏爱！你的财富运势非常旺盛。除了稳定的正财收入可能会有所增长外，你的偏财运也相当不错。可能会有意外的奖金、投资获利、中奖，甚至是收到意想不到的红包或礼物。你对金钱的嗅觉会变得更加敏锐，能够发现并抓住不错的赚钱机会。不过，在收获财富的同时，也要记得合理规划，让钱生钱哦！",
-      "recommendation": "眼光独到，果断出手，但也要记得稳健理财，让财富滚雪球！",
-      "image_url": ""
+    "empathy": {
+      "title": "共情连接潜能",
+      "description": "你对人的状态、关系变化和真实需求更敏感。你往往不只是在听话，而是在听背后的情绪和难处。很多时候，你的价值并不是“说了什么”，而是“让别人愿意说下去”。",
+      "recommendation": "你的理解力很珍贵，但也要给自己留边界。练习把共情和判断结合起来，会让你既温柔又有力量。",
+      "tagline": "你擅长让人感到自己被真正看见。",
+      "best_scene": "适合教育支持、用户访谈、HR、咨询、社群运营、客户成功、服务设计等需要理解人与建立信任的场景。",
+      "growth_focus": "把你的感受力转成更清晰的表达和支持方法。"
+    },
+    "expression": {
+      "title": "表达影响潜能",
+      "description": "你天然有把想法讲清楚、讲得有人愿意听的潜力。你可能喜欢分享、讲故事、组织语言，也容易在公开表达、说服、引导注意力时被激活。你的影响力，常常从一句话开始。",
+      "recommendation": "继续锻炼你的表达节奏和结构，不只是讲得热闹，还要讲得让人记住、愿意行动。表达，是你放大其他潜能的放大器。",
+      "tagline": "你的语言，本身就带着推动力。",
+      "best_scene": "适合演讲、内容表达、主持、传播、教学、品牌沟通、公众说明等需要影响他人的场景。",
+      "growth_focus": "多做输出，多复盘别人最容易被你哪种表达方式打动。"
+    },
+    "exploration": {
+      "title": "探索开拓潜能",
+      "description": "你对未知、新环境、新机会有天然的好奇，也愿意往边界地带走一走。你不太满足于原地打转，更容易在变化、试验和拓荒中找到活力。很多时候，你的价值来自第一个迈出去。",
+      "recommendation": "继续保留你的新鲜感，也要慢慢练习筛选和收束。不是每条路都要走到底，但你很适合成为找到新路的那个人。",
+      "tagline": "你擅长在还没人命名的地方，先看见路。",
+      "best_scene": "适合市场拓展、商务开拓、跨界尝试、新项目启动、内容选题探索、旅行研究等需要试路的场景。",
+      "growth_focus": "为你的探索建立判断标准，让开拓感和方向感一起长出来。"
+    },
+    "aesthetics": {
+      "title": "审美感知潜能",
+      "description": "你对氛围、细节、风格、节奏感比很多人更敏锐。你会本能地感受到“顺不顺”“美不美”“像不像自己”。这不是挑剔，而是一种能把体验变得更完整的能力。",
+      "recommendation": "别低估你的感受力，它不是虚的。试着把审美判断转成更具体的表达标准，你会更容易做出有辨识度的作品和空间。",
+      "tagline": "你不是只在看好不好看，你在感受是否成立。",
+      "best_scene": "适合视觉设计、内容包装、空间布置、品牌风格、体验优化、摄影剪辑等需要质感判断的场景。",
+      "growth_focus": "把“我感觉不对”进一步说成“哪里不对、怎么更对”。"
+    },
+    "craft": {
+      "title": "实作建构潜能",
+      "description": "你喜欢动手、喜欢搭建、喜欢把抽象的想法变成一个能看见、能用、能运行的东西。你对“做出来”有天然偏好，也更容易在实作和修正中建立掌控感。",
+      "recommendation": "你的优势很适合通过作品说话。继续累积原型、样品、实物和可展示成果，会让别人更快看见你的能力。",
+      "tagline": "你不满足于想明白，你更想把它做出来。",
+      "best_scene": "适合手工制作、原型搭建、技术实现、活动落地、视频制作、模型搭建、产品实现等需要实作的场景。",
+      "growth_focus": "把动手能力和表达能力连起来，让作品也替你发声。"
     }
   }
 }
