@@ -1,5 +1,5 @@
 <view class="history-page">
-  <image class="page-bg" src="/images/profile/profile-info-bg.png" mode="aspectFill"></image>
+  <image class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgProfile/images/profile/profile-info-bg.png" mode="aspectFill"></image>
 
   <view class="custom-nav-wrapper" style="padding-top: {{navTop}}px;">
     <view class="custom-nav" style="height: {{navHeight}}px;">
@@ -20,7 +20,7 @@
 
     <block wx:else>
       <view wx:if="{{groupedHistory.length === 0}}" class="empty-container">
-        <image class="empty-icon" src="/images/icons/icon-no-data.png" mode="aspectFit"></image>
+        <image class="empty-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-no-data.png" mode="aspectFit"></image>
         <text class="empty-text">暂无测试记录</text>
         <text class="empty-subtext">去完成一次测试，回顾自己的心灵足迹吧</text>
       </view>
@@ -34,12 +34,6 @@
           <view class="card-actions">
             <text class="test-count-number">{{group.count}}次</text>
 
-            <block wx:if="{{group.assessment_type === 'scoring'}}">
-              <view class="analysis-btn-container" catchtap="goToAnalysis" data-scale="{{group}}">
-                <text wx:if="{{group.count >= 5}}" class="analysis-text">去分析</text>
-                <text wx:else class="analysis-disabled-tip">(5次后可分析)</text>
-              </view>
-            </block>
 
             <view class="expand-trigger" catchtap="toggleExpand" data-index="{{groupIndex}}">
               <view class="header-arrow {{group.is_expanded ? 'expanded' : ''}}"></view>

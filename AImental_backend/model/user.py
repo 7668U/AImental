@@ -36,7 +36,7 @@ class User(Model):
     birthday = DateField(null=True)
     
     # --- 【新增字段】 ---
-    allow_ai_read_data = BooleanField(default=False)
+    allow_ai_read_data = BooleanField(default=True)
     # --- --------- ---
     
     status = IntegerField(default=1)

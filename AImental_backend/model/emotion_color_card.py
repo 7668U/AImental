@@ -417,12 +417,12 @@ class EmotionColorCardCacheTable:
         self.db = db_connection
         self.db.create_tables([EmotionColorCardCache], safe=True)
 
-    def get_or_generate(self, checkins: list[dict[str, Any]]) -> dict[str, Any]:
+    def get_or_generate(self, checkins: list[dict[str, Any]], *, force_refresh: bool = False) -> dict[str, Any]:
         palette = _build_palette(checkins)
         cached = EmotionColorCardCache.get_or_none(
             EmotionColorCardCache.palette_key == palette["palette_key"]
         )
-        if cached and _cache_file_is_available(cached):
+        if cached and not force_refresh and _cache_file_is_available(cached):
             return _record_to_payload(cached, cached=True)
 
         mixed_color = palette["mixed_color"]

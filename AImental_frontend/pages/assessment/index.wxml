@@ -1,7 +1,7 @@
 <block wx:if="{{isLoggedIn}}">
   <view class="assessment-page" style="padding-top: {{statusBarHeight}}px;">
     <view class="hero-section">
-      <image class="hero-art" src="/images/assessment/home/hero-journey.png" mode="aspectFit" />
+      <image class="hero-art" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/assessment/home/hero-journey.png" mode="aspectFit" />
       <view class="hero-copy">
         <view class="hero-title">你好，</view>
         <view class="hero-title">探索内心的旅程</view>
@@ -25,7 +25,22 @@
           </view>
           <text class="group-desc">{{item.description}}</text>
         </view>
-        <image class="group-action" src="/images/assessment/common/go-test-button.png" mode="aspectFit" />
+        <image class="group-action" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/assessment/common/go-test-button.png" mode="aspectFit" />
+      </view>
+    </view>
+  </view>
+
+  <view class="assessment-disclaimer-modal" wx:if="{{isDisclaimerVisible}}">
+    <view class="assessment-disclaimer-content">
+      <image class="assessment-disclaimer-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/assessment/home/group-health.png" mode="aspectFit"></image>
+      <view class="assessment-disclaimer-body">
+        <view class="assessment-disclaimer-title">温馨提示</view>
+        <view class="assessment-disclaimer-text">
+          <view class="assessment-disclaimer-paragraph">心理测评模块提供的是一些常见量表和自我探索工具，帮助你从不同角度观察自己的状态。</view>
+          <view class="assessment-disclaimer-paragraph">测评结果仅供日常参考与自我理解，不代表正式诊断、专业心理咨询意见或医疗建议，也不能替代心理咨询师、医生、精神科等专业人士的评估。</view>
+          <view class="assessment-disclaimer-paragraph">如果你正在经历明显或持续的心理困扰，请优先寻求专业人士帮助；如有紧急风险，请及时联系当地急救或危机干预资源。</view>
+        </view>
+        <view class="assessment-disclaimer-button" bindtap="handleConfirmDisclaimer">我知道了</view>
       </view>
     </view>
   </view>

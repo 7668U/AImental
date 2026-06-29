@@ -2,8 +2,7 @@
 
 const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 const ASSESSMENTS_API_URL = `${SERVER_BASE_URL}/api/v1/assessments`;
-const ANALYSIS_API_URL = `${SERVER_BASE_URL}/api/v1/history-analysis`;
-const { getScaleDisplayName } = require('../utils/assessment-display.js');
+const { getScaleDisplayName } = require('./utils/assessment-display.js');
 
 const DELETE_BTN_WIDTH = 80;
 const REQUEST_TIMEOUT = 8000;
@@ -45,62 +44,6 @@ Page({
 
   navigateBack() {
     wx.navigateBack({ delta: 1 });
-  },
-
-  goToAnalysis(e) {
-    const { records } = e.currentTarget.dataset.scale;
-    // 此处的判断在WXML中已经处理，但为保险起见，JS中也可以保留
-    if (records.length < 5) {
-      wx.showToast({ title: '测试次数不足5次，暂时无法分析', icon: 'none' });
-      return;
-    }
-
-    const history_ids = records.map(r => r.id);
-
-    wx.showLoading({
-      title: '正在生成报告...',
-      mask: true
-    });
-
-    wx.request({
-      url: `${ANALYSIS_API_URL}/synthesize`,
-      method: 'POST',
-      header: {
-        'Authorization': 'Bearer ' + wx.getStorageSync('token'),
-        'Content-Type': 'application/json'
-      },
-      data: {
-        history_ids: history_ids
-      },
-      timeout: REQUEST_TIMEOUT,
-      success: (res) => {
-        if (res.statusCode === 200) {
-          const analysisReport = res.data;
-          
-          wx.navigateTo({
-            url: `/pkgProfile/history_analysis`,
-            success: (navRes) => {
-              navRes.eventChannel.emit('acceptDataFromHistoryPage', { 
-                groupData: e.currentTarget.dataset.scale,
-                reportData: analysisReport
-              });
-            }
-          });
-
-        } else {
-          wx.showToast({
-            title: (res.data && res.data.detail) || '报告生成失败，请稍后重试',
-            icon: 'none'
-          });
-        }
-      },
-      fail: () => {
-        wx.showToast({ title: '网络请求失败', icon: 'none' });
-      },
-      complete: () => {
-        wx.hideLoading();
-      }
-    });
   },
 
   fetchHistory() {

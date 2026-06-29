@@ -112,21 +112,21 @@ Page({
 
   // --- 使用 async/await 和新的 request 函数重构登录逻辑 ---
   async handleLogin() {
-    wx.showLoading({ title: '???...' });
+    wx.showLoading({ title: '登录中...' });
     try {
       const tokenRes = await loginWithBackend(SERVER_URL + '/api/v1');
       if (tokenRes.access_token) {
         wx.setStorageSync('token', tokenRes.access_token);
         wx.hideLoading();
-        wx.showToast({ title: '????', icon: 'success' });
+        wx.showToast({ title: '登录成功', icon: 'success' });
         this.checkLoginStatus();
       } else {
-        throw new Error('???????token');
+        throw new Error('登录接口未返回 token');
       }
     } catch (error) {
       wx.hideLoading();
-      wx.showToast({ title: '??????????', icon: 'none' });
-      console.error('??????: ' , error);
+      wx.showToast({ title: '登录失败，请重试', icon: 'none' });
+      console.error('登录失败: ' , error);
     }
   },
 

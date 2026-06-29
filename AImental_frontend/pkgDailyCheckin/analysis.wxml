@@ -3,7 +3,7 @@
 <view class="custom-nav-wrapper" style="padding-top: {{navTop}}px;">
   <view class="custom-nav" style="height: {{navHeight}}px;">
     <view class="nav-left" bindtap="navigateBack">
-      <image class="nav-back-icon" src="/images/left.png"></image>
+      <image class="nav-back-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/left.png"></image>
     </view>
     <view class="nav-center">
       <text class="nav-title"></text>
@@ -38,28 +38,28 @@
     </view>
     <view class="analysis-grid">
       <view class="analysis-btn {{selectedAnalysis === 'mood_distribution' ? 'active' : ''}}" bind:tap="selectAnalysis" data-type="mood_distribution">
-        <image class="btn-icon" src="/images/daily-checkin/analysis/report-mood-distribution.png" mode="aspectFit"></image>
+        <image class="btn-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-mood-distribution.png" mode="aspectFit"></image>
         <view class="analysis-copy">
           <text class="btn-text">情绪分布</text>
           <text class="btn-desc">了解情绪占比</text>
         </view>
       </view>
       <view class="analysis-btn {{selectedAnalysis === 'tag_correlation' ? 'active' : ''}}" bind:tap="selectAnalysis" data-type="tag_correlation">
-        <image class="btn-icon" src="/images/daily-checkin/analysis/report-status-correlation.png" mode="aspectFit"></image>
+        <image class="btn-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-status-correlation.png" mode="aspectFit"></image>
         <view class="analysis-copy">
           <text class="btn-text">状态关联</text>
           <text class="btn-desc">发现状态关系</text>
         </view>
       </view>
       <view class="analysis-btn {{selectedAnalysis === 'word_cloud' ? 'active' : ''}}" bind:tap="selectAnalysis" data-type="word_cloud">
-        <image class="btn-icon" src="/images/daily-checkin/analysis/report-text-analysis.png" mode="aspectFit"></image>
+        <image class="btn-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-text-analysis.png" mode="aspectFit"></image>
         <view class="analysis-copy">
           <text class="btn-text">文字分析</text>
           <text class="btn-desc">解析心情记录</text>
         </view>
       </view>
       <view class="analysis-btn {{selectedAnalysis === 'color_palette' ? 'active' : ''}}" bind:tap="selectAnalysis" data-type="color_palette">
-        <image class="btn-icon" src="/images/daily-checkin/analysis/report-color-card.png" mode="aspectFit"></image>
+        <image class="btn-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-color-card.png" mode="aspectFit"></image>
         <view class="analysis-copy">
           <text class="btn-text">情绪色卡</text>
           <text class="btn-desc">探索情绪色彩</text>
@@ -76,13 +76,13 @@
       <view class="chart-container">
         <view class="chart-header">
           <view class="chart-title-wrap">
-            <image class="leaf-mark" src="/images/daily-checkin/analysis/report-leaf.png" mode="aspectFit"></image>
+            <image class="leaf-mark" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-leaf.png" mode="aspectFit"></image>
             <text wx:if="{{selectedAnalysis === 'mood_distribution'}}" class="chart-title">情绪分布总览</text>
             <text wx:elif="{{selectedAnalysis === 'tag_correlation'}}" class="chart-title">状态关联总览</text>
             <text wx:elif="{{selectedAnalysis === 'word_cloud'}}" class="chart-title">文字分析总览</text>
             <text wx:elif="{{selectedAnalysis === 'color_palette'}}" class="chart-title">情绪色卡总览</text>
           </view>
-          <image class="chart-star" src="/images/daily-checkin/analysis/report-star.png" mode="aspectFit"></image>
+          <image class="chart-star" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-star.png" mode="aspectFit"></image>
         </view>
         <view class="chart-canvas-wrap">
           <ec-canvas id="analysis-chart" canvas-id="mychart" ec="{{ ec }}"></ec-canvas>
@@ -102,18 +102,18 @@
         <view wx:elif="{{colorCardError}}" class="color-card-error">{{colorCardError}}</view>
       </view>
       <view class="result-card interpretation-card">
-        <image class="interpretation-deco" src="/images/daily-checkin/analysis/report-sun-cloud.png" mode="aspectFit"></image>
+        <image class="interpretation-deco" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-sun-cloud.png" mode="aspectFit"></image>
         <view class="card-title">
-          <image class="heart-mark" src="/images/daily-checkin/analysis/report-heart.png" mode="aspectFit"></image>
+          <image class="heart-mark" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-heart.png" mode="aspectFit"></image>
           <text>心情解读</text>
         </view>
         <view class="card-divider"></view>
         <text class="card-content" user-select="{{true}}">{{ analysisResult.interpretation }}</text>
       </view>
       <view class="result-card ai-card">
-        <image class="ai-deco" src="/images/daily-checkin/analysis/report-ai-deco.png" mode="aspectFit"></image>
+        <image class="ai-deco" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-ai-deco.png" mode="aspectFit"></image>
         <view class="card-title">
-          <image class="ai-icon" src="/images/daily-checkin/analysis/robot.png" mode="aspectFit"></image>
+          <image class="ai-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/robot.png" mode="aspectFit"></image>
           <text>AI 分析报告</text>
         </view>
         <text class="card-content" user-select="{{true}}">{{ analysisResult.aiReport }}</text>

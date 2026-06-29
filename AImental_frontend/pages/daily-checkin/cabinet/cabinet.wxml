@@ -20,7 +20,7 @@
 
             <image class="notebook-cover" src="{{item.cover_image}}" mode="aspectFill" />
             <image class="more-icon"
-                   src="/images/icons/more.png"
+                   src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/more.png"
                    catchtap="showActionMenu"
                    data-id="{{item.id}}"
                    data-name="{{item.name}}"
@@ -40,7 +40,7 @@
       <view class="notebook-item add-new-notebook" bindtap="showCreateModal">
         <view class="notebook-frame">
           <view class="add-box-area">
-            <image class="add-icon" src="/images/icons/plus.png" />
+            <image class="add-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/plus.png" />
           </view>
         </view>
         <text class="notebook-name"></text>

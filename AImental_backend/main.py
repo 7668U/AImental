@@ -243,6 +243,15 @@ def on_startup():
             print(f"❌ 创建表 '{model._meta.table_name}' 时发生错误: {e}")
     print("✨ [Startup]: 所有数据库表创建完成！")
 
+    try:
+        updated_rows = (User
+                        .update({User.allow_ai_read_data: True})
+                        .where(User.allow_ai_read_data == False)
+                        .execute())
+        print(f"✅ [Startup]: 已将 {updated_rows} 个用户的个性化陪伴权限默认开启。")
+    except Exception as e:
+        print(f"❌ 初始化个性化陪伴权限时发生错误: {e}")
+
     print("🚀 [Startup]: 开始执行数据播种和日程检查...")
     paper_airplane_table.add_default_airplanes_if_needed()
     if ENABLE_COMMUNITY_BACKEND:

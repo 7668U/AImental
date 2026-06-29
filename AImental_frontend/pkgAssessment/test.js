@@ -3,6 +3,10 @@ const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 
 const API_BASE_URL = 'http://127.0.0.1:8000';
 
+function hasAnswerValue(value) {
+  return value !== '' && value !== null && value !== undefined;
+}
+
 function isScorePlaceholder(text) {
   return /^\s*-?\d+分选项\s*$/.test(String(text || ''));
 }
@@ -73,6 +77,8 @@ Page({
     answeredCount: 0,
     statusBarHeight: 0,
     navBarHeight: 56,
+    isAnswerCardOpen: false,
+    answerCardItems: [],
   },
 
   onLoad(options) {
@@ -131,7 +137,7 @@ Page({
             questions: questions,
             totalQuestions: questions.length,
           });
-          this.updateProgress();
+          this.syncAnswerState();
           
         } else {
           wx.showToast({ title: `加载失败: ${res.statusCode}`, icon: 'error' });
@@ -162,77 +168,163 @@ Page({
 
     this.setData({
       [`answers.${questionOrder}`]: selectedValue
+    }, () => {
+      this.syncAnswerState();
+
+      setTimeout(() => {
+        if (this.data.currentIndex < this.data.totalQuestions - 1) {
+          this.navigateToQuestion(this.data.currentIndex + 1, {
+            showBlockedToast: true
+          });
+        }
+      }, 200);
     });
-
-    this.updateProgress();
-
-    setTimeout(() => {
-      if (this.data.currentIndex < this.data.totalQuestions - 1) {
-        this.setData({ currentIndex: this.data.currentIndex + 1 });
-      }
-    }, 200);
   },
   
-  updateProgress() {
-    // 修正：确保答案不为空值时才计数
-    const answeredCount = Object.values(this.data.answers).filter(v => v !== '' && v !== null && v !== undefined).length;
+  isQuestionAnswered(order) {
+    return hasAnswerValue(this.data.answers[order]);
+  },
+
+  findFirstUnansweredIndexBefore(targetIndex) {
+    const maxIndex = Math.min(Math.max(targetIndex, 0), this.data.questions.length);
+
+    for (let index = 0; index < maxIndex; index += 1) {
+      const question = this.data.questions[index];
+      if (question && !this.isQuestionAnswered(question.order)) {
+        return index;
+      }
+    }
+
+    return -1;
+  },
+
+  showUnansweredQuestionToast(index) {
+    const question = this.data.questions[index];
+    const questionLabel = question ? `第${question.order}题` : '当前题目';
+    wx.showToast({
+      title: `请先回答${questionLabel}`,
+      icon: 'none'
+    });
+  },
+
+  syncAnswerState(extraData = {}) {
+    const currentIndex = Object.prototype.hasOwnProperty.call(extraData, 'currentIndex')
+      ? extraData.currentIndex
+      : this.data.currentIndex;
+    const answeredCount = Object.values(this.data.answers).filter(value => hasAnswerValue(value)).length;
     const progress = this.data.totalQuestions > 0 ? (answeredCount / this.data.totalQuestions) * 100 : 0;
-    this.setData({ 
-      progress: progress,
-      answeredCount: answeredCount
+    const answerCardItems = this.data.questions.map((question, index) => ({
+      order: question.order,
+      index,
+      answered: this.isQuestionAnswered(question.order),
+      current: index === currentIndex,
+    }));
+
+    this.setData({
+      progress,
+      answeredCount,
+      answerCardItems,
+      ...extraData,
+    });
+  },
+
+  navigateToQuestion(targetIndex, options = {}) {
+    const {
+      closeAnswerCard = false,
+      showBlockedToast = true,
+    } = options;
+
+    if (!this.data.totalQuestions) {
+      return;
+    }
+
+    const safeIndex = Math.max(0, Math.min(targetIndex, this.data.totalQuestions - 1));
+    let nextIndex = safeIndex;
+
+    if (safeIndex > this.data.currentIndex) {
+      const blockedIndex = this.findFirstUnansweredIndexBefore(safeIndex);
+      if (blockedIndex !== -1) {
+        nextIndex = blockedIndex;
+        if (showBlockedToast) {
+          this.showUnansweredQuestionToast(blockedIndex);
+        }
+      }
+    }
+
+    this.syncAnswerState({
+      currentIndex: nextIndex,
+      ...(closeAnswerCard ? { isAnswerCardOpen: false } : {}),
     });
   },
 
   onSwiperChange(e) {
     if (e.detail.source === 'touch') {
       const newIndex = e.detail.current;
-      const oldIndex = this.data.currentIndex;
-
-      if (newIndex > oldIndex) {
-        const currentQuestionOrder = this.data.questions[oldIndex].order;
-        if (!this.data.answers.hasOwnProperty(currentQuestionOrder) || this.data.answers[currentQuestionOrder] === '') {
-          wx.showToast({
-            title: '请先回答当前题目',
-            icon: 'none'
-          });
-          this.setData({ currentIndex: oldIndex });
-          return;
-        }
+      if (newIndex !== this.data.currentIndex) {
+        this.navigateToQuestion(newIndex, {
+          showBlockedToast: true
+        });
       }
-      this.setData({ currentIndex: newIndex });
     }
   },
 
   prevQuestion() {
     if (this.data.currentIndex > 0) {
-      this.setData({ currentIndex: this.data.currentIndex - 1 });
+      this.navigateToQuestion(this.data.currentIndex - 1, {
+        showBlockedToast: false
+      });
     }
   },
 
   nextQuestion() {
     const currentQuestionOrder = this.data.questions[this.data.currentIndex].order;
-    if (this.data.answers.hasOwnProperty(currentQuestionOrder) && this.data.answers[currentQuestionOrder] !== '') {
+    if (this.isQuestionAnswered(currentQuestionOrder)) {
       if (this.data.currentIndex < this.data.totalQuestions - 1) {
-        this.setData({ currentIndex: this.data.currentIndex + 1 });
+        this.navigateToQuestion(this.data.currentIndex + 1, {
+          showBlockedToast: true
+        });
       } else {
         this.submitAssessment();
       }
     } else {
-      wx.showToast({
-        title: '请先回答当前题目',
-        icon: 'none'
-      });
+      this.showUnansweredQuestionToast(this.data.currentIndex);
     }
+  },
+
+  toggleAnswerCard() {
+    this.setData({
+      isAnswerCardOpen: !this.data.isAnswerCardOpen
+    });
+  },
+
+  goToQuestionFromCard(e) {
+    const targetIndex = Number(e.currentTarget.dataset.index);
+    if (Number.isNaN(targetIndex)) {
+      return;
+    }
+
+    this.navigateToQuestion(targetIndex, {
+      closeAnswerCard: true,
+      showBlockedToast: true
+    });
   },
 
   submitAssessment() {
     if (this.data.isSubmitting) return;
 
     if (this.data.answeredCount < this.data.totalQuestions) {
-      wx.showToast({
-        title: '您还有题目未完成',
-        icon: 'none'
-      });
+      const firstUnansweredIndex = this.findFirstUnansweredIndexBefore(this.data.totalQuestions);
+      if (firstUnansweredIndex !== -1) {
+        this.syncAnswerState({
+          currentIndex: firstUnansweredIndex
+        });
+        this.showUnansweredQuestionToast(firstUnansweredIndex);
+      } else {
+        wx.showToast({
+          title: '您还有题目未完成',
+          icon: 'none'
+        });
+      }
       return;
     }
     

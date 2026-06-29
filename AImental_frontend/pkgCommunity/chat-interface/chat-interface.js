@@ -50,7 +50,7 @@ Page({
       aiId,
       aiName: decodeURIComponent(name),
       aiAvatar: decodeURIComponent(avatar),
-      userAvatar: userInfo ? userInfo.avatar_url : '/images/default-avatar.png',
+      userAvatar: userInfo ? userInfo.avatar_url : 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png',
       statusBarHeight: app.globalData.statusBarHeight || 20
     });
     

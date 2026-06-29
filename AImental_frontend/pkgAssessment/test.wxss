@@ -355,12 +355,17 @@ page {
   transform: translateY(-50%);
 }
 
-.footer-card {
+.footer-shell {
+  position: relative;
   flex-shrink: 0;
+  margin-top: 40rpx;
+}
+
+.footer-card {
   border-radius: 34rpx;
-  padding: 28rpx 28rpx 30rpx;
+  padding: 52rpx 28rpx 30rpx;
   box-sizing: border-box;
-  margin-top: 26rpx;
+  overflow: visible;
 }
 
 .progress-row {
@@ -415,6 +420,87 @@ page {
   line-height: 1;
   font-weight: 800;
   text-align: right;
+}
+
+.answer-card-toggle {
+  position: absolute;
+  left: 50%;
+  top: -25rpx;
+  transform: translate(-50%, -50%);
+  width: 124rpx;
+  height: 54rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(180deg, rgba(255, 250, 244, 1), rgba(255, 239, 221, 0.98));
+  border: 1rpx solid rgba(245, 192, 151, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10rpx 24rpx rgba(201, 130, 82, 0.12);
+  z-index: 5;
+  transition: transform 0.22s ease;
+}
+
+.answer-card-toggle-icon {
+  width: 34rpx;
+  height: 34rpx;
+  opacity: 1;
+}
+
+.answer-card-panel {
+  border-radius: 30rpx;
+  border: 1rpx solid rgba(246, 211, 184, 0.86);
+  background: rgba(255, 252, 247, 0.84);
+  padding: 60rpx 22rpx 26rpx;
+  margin-bottom: 18rpx;
+}
+
+.answer-card-scroll {
+  max-height: 320rpx;
+}
+
+.answer-card-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18rpx;
+}
+
+.answer-card-item {
+  height: 72rpx;
+  border-radius: 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1rpx solid rgba(244, 208, 181, 0.9);
+  background: rgba(255, 247, 239, 0.92);
+  box-sizing: border-box;
+}
+
+.answer-card-item.answered {
+  background: linear-gradient(180deg, rgba(255, 246, 236, 1), rgba(255, 232, 208, 0.98));
+  border-color: rgba(255, 176, 112, 0.92);
+}
+
+.answer-card-item.unanswered {
+  background: rgba(255, 251, 246, 0.96);
+  border-style: dashed;
+}
+
+.answer-card-item.current {
+  border-width: 3rpx;
+  border-color: #ff9347;
+  box-shadow: 0 8rpx 20rpx rgba(255, 148, 71, 0.16);
+}
+
+.answer-card-number {
+  color: #a37b61;
+  font-size: 28rpx;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.answer-card-item.answered .answer-card-number,
+.answer-card-item.current .answer-card-number {
+  color: #bf5b22;
 }
 
 .action-buttons {

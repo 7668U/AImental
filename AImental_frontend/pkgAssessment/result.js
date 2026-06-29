@@ -194,7 +194,7 @@ const scoreSegments = interpretations.map(interp => {
         key: 'state',
         title: '当前状态',
         type: 'text',
-        bgIcon: '/images/assessment/result/section-sun.png',
+        bgIcon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/section-sun.png',
         text: aiAnalysis.state_summary
       });
     }
@@ -204,7 +204,7 @@ const scoreSegments = interpretations.map(interp => {
         key: 'dimensions',
         title: '主要影响维度',
         type: 'dimensions',
-        bgIcon: '/images/assessment/result/section-ai.png',
+        bgIcon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/section-ai.png',
         dimensions: aiAnalysis.dimensions.map(item => ({
           ...item,
           evidenceText: Array.isArray(item.evidence) ? item.evidence.join('、') : ''
@@ -217,7 +217,7 @@ const scoreSegments = interpretations.map(interp => {
         key: 'causes',
         title: '可能相关原因',
         type: 'list',
-        bgIcon: '/images/assessment/result/section-ai.png',
+        bgIcon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/section-ai.png',
         list: aiAnalysis.possible_causes
       });
     }
@@ -227,7 +227,7 @@ const scoreSegments = interpretations.map(interp => {
         key: 'actions',
         title: '可以先试试',
         type: 'list',
-        bgIcon: '/images/assessment/result/section-sun.png',
+        bgIcon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/section-sun.png',
         list: aiAnalysis.small_actions
       });
     }
@@ -238,7 +238,7 @@ const scoreSegments = interpretations.map(interp => {
         key: 'support',
         title: '专业支持',
         type: 'support',
-        bgIcon: '/images/assessment/result/section-ai.png',
+        bgIcon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/section-ai.png',
         recommended: !!support.recommended,
         urgency: support.urgency || '',
         text: support.text
@@ -251,7 +251,7 @@ const scoreSegments = interpretations.map(interp => {
         key: 'recording',
         title: '持续记录',
         type: 'recording',
-        bgIcon: '/images/assessment/result/section-sun.png',
+        bgIcon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/section-sun.png',
         recommended: !!recording.recommended,
         focusText: Array.isArray(recording.focus) ? recording.focus.join('、') : '',
         text: recording.text
@@ -290,7 +290,7 @@ const scoreSegments = interpretations.map(interp => {
         key: 'details',
         title: '维度得分',
         type: 'details',
-        bgIcon: '/images/assessment/result/section-ai.png',
+        bgIcon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/section-ai.png',
         detailItems: detailItems
       });
     }
@@ -300,7 +300,7 @@ const scoreSegments = interpretations.map(interp => {
         key: 'interpretation',
         title: '当前状态',
         type: 'text',
-        bgIcon: '/images/assessment/result/section-ai.png',
+        bgIcon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/section-ai.png',
         text: interpretation
       });
     }
@@ -310,7 +310,7 @@ const scoreSegments = interpretations.map(interp => {
         key: 'recommendation',
         title: '可以先试试',
         type: 'text',
-        bgIcon: '/images/assessment/result/section-sun.png',
+        bgIcon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/section-sun.png',
         text: recommendation
       });
     }
@@ -322,7 +322,7 @@ const scoreSegments = interpretations.map(interp => {
         key: 'generated',
         title: '结果说明',
         type: 'text',
-        bgIcon: '/images/assessment/result/section-sun.png',
+        bgIcon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/section-sun.png',
         text: level && level !== '结果待确认'
           ? `本次结果为“${level}”。你可以先把它作为一次自我观察，结合最近的真实状态继续留意变化。`
           : `本次结果已生成，得分为 ${score ?? '当前分数'}。暂未匹配到完整解读，请稍后从历史测评中再次查看。`

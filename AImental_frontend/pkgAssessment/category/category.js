@@ -1,37 +1,37 @@
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
-const { getScaleDisplayMeta, getScaleDisplayName, getScaleIconName } = require('../../utils/assessment-display.js');
+const { getScaleDisplayMeta, getScaleDisplayName, getScaleIconName } = require('../utils/assessment-display.js');
 
 const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 const DEFAULT_GROUP = '心理健康';
-const DEFAULT_ICON_PATH = '/images/assessment/default.png';
+const DEFAULT_ICON_PATH = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/assessment/default.png';
 
 const GROUPS = {
   '心理健康': {
     key: 'health',
     title: '心理健康',
     subtitle: '关注情绪状态，关爱内心健康',
-    hero: '/images/assessment/category/health-hero.png',
+    hero: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/category/health-hero.png',
     order: ['SDS', 'BDI-II', 'SAS', 'BRMS', 'SAD', 'IAS', 'Lonely']
   },
   '自我人格': {
     key: 'personality',
     title: '自我人格',
     subtitle: '探索性格特质，认识独特的自己',
-    hero: '/images/assessment/category/personality-hero.png',
+    hero: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/category/personality-hero.png',
     order: ['SES', 'APS', 'CLT', 'mbti-93']
   },
   '亲密关系': {
     key: 'relationship',
     title: '亲密关系',
     subtitle: '理解人际关系，建立深度联结',
-    hero: '/images/assessment/category/relationship-hero.png',
+    hero: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/category/relationship-hero.png',
     order: ['AAS', 'ECR', 'LAMT', 'LDCT']
   },
   '趣味探索': {
     key: 'interest',
     title: '趣味探索',
     subtitle: '轻松有趣，发现更多可能的自己',
-    hero: '/images/assessment/category/interest-hero.png',
+    hero: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/category/interest-hero.png',
     order: ['TPS', 'ICI', 'REAL-MAJOR-V1', 'AGLT']
   }
 };
@@ -156,7 +156,7 @@ Page({
   },
 
   getScaleIconPath(shortName) {
-    return `/images/assessment/scale-icons/${getScaleIconName(shortName)}.png`;
+    return `https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/scale-icons/${getScaleIconName(shortName)}.png`;
   },
 
   goBack() {

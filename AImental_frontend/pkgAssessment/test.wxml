@@ -3,7 +3,7 @@
   <view class="warm-bg warm-bg-bottom"></view>
   <view class="bg-dot bg-dot-one"></view>
   <view class="bg-dot bg-dot-two"></view>
-  <image class="sparkle-img bg-sparkle-one" src="/images/assessment/test/sparkle.png" mode="aspectFit"></image>
+  <image class="sparkle-img bg-sparkle-one" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
 
   <view class="test-nav" style="padding-top: {{statusBarHeight}}px; height: {{navBarHeight}}px;">
     <view class="nav-back" bindtap="goBack">
@@ -28,8 +28,8 @@
                   <view class="question-index">第 {{item.order}} 题</view>
                   <view class="index-line"></view>
                 </view>
-                <image class="sparkle-img question-sparkle-one" src="/images/assessment/test/sparkle.png" mode="aspectFit"></image>
-                <image class="sparkle-img question-sparkle-two" src="/images/assessment/test/sparkle.png" mode="aspectFit"></image>
+                <image class="sparkle-img question-sparkle-one" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
+                <image class="sparkle-img question-sparkle-two" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
                 <view class="question-text">{{item.order}}. {{item.text}}</view>
               </view>
 
@@ -39,7 +39,7 @@
                     <label class="option-row {{answers[item.order] == option.score ? 'selected' : ''}}" wx:for="{{item.choices}}" wx:key="score" wx:for-item="option">
                       <view class="option-dot {{answers[item.order] == option.score ? 'selected' : ''}}"></view>
                       <view class="option-text">{{option.text}}</view>
-                      <image class="sparkle-img option-sparkle" src="/images/assessment/test/sparkle.png" mode="aspectFit"></image>
+                      <image class="sparkle-img option-sparkle" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
                       <radio class="option-radio-hidden" value="{{option.score}}" checked="{{answers[item.order] == option.score}}"></radio>
                     </label>
                   </block>
@@ -48,7 +48,7 @@
                     <label class="option-row {{answers[item.order] == option.id ? 'selected' : ''}}" wx:for="{{item.choices}}" wx:key="id" wx:for-item="option">
                       <view class="option-dot {{answers[item.order] == option.id ? 'selected' : ''}}"></view>
                       <view class="option-text">{{option.text}}</view>
-                      <image class="sparkle-img option-sparkle" src="/images/assessment/test/sparkle.png" mode="aspectFit"></image>
+                      <image class="sparkle-img option-sparkle" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
                       <radio class="option-radio-hidden" value="{{option.id}}" checked="{{answers[item.order] == option.id}}"></radio>
                     </label>
                   </block>
@@ -60,27 +60,53 @@
       </block>
     </swiper>
 
-    <view class="footer-card">
-      <view class="progress-row">
-        <view class="progress-track-wrap">
-          <view class="progress-track">
-            <view class="progress-fill" style="width: {{progress}}%;"></view>
-          </view>
-          <image class="runner-icon" src="/images/assessment/test/runner.png" style="left: {{progress}}%;"></image>
-        </view>
-        <view class="progress-text">{{answeredCount}}/{{totalQuestions}}</view>
+    <view class="footer-shell">
+      <view class="answer-card-toggle" bindtap="toggleAnswerCard">
+        <image
+          class="answer-card-toggle-icon"
+          src="{{isAnswerCardOpen ? 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-arrow-down.png' : 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-arrow-up.png'}}"
+          mode="aspectFit"
+        ></image>
       </view>
 
-      <view class="action-buttons">
-        <view class="prev-btn {{currentIndex === 0 ? 'disabled' : ''}}" bindtap="prevQuestion">
-          <text class="btn-chevron">‹</text>
-          <text>上一题</text>
+      <view class="answer-card-panel" wx:if="{{isAnswerCardOpen}}">
+        <scroll-view class="answer-card-scroll" scroll-y="true">
+          <view class="answer-card-grid">
+            <view
+              class="answer-card-item {{item.answered ? 'answered' : 'unanswered'}} {{item.current ? 'current' : ''}}"
+              wx:for="{{answerCardItems}}"
+              wx:key="order"
+              data-index="{{item.index}}"
+              bindtap="goToQuestionFromCard"
+            >
+              <text class="answer-card-number">{{item.order}}</text>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+
+      <view class="footer-card">
+        <view class="progress-row">
+          <view class="progress-track-wrap">
+            <view class="progress-track">
+              <view class="progress-fill" style="width: {{progress}}%;"></view>
+            </view>
+            <image class="runner-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/test/runner.png" style="left: {{progress}}%;"></image>
+          </view>
+          <view class="progress-text">{{answeredCount}}/{{totalQuestions}}</view>
         </view>
-        <view class="next-btn {{isSubmitting ? 'disabled' : ''}}" bindtap="nextQuestion">
-          <image class="sparkle-img btn-sparkle-one" src="/images/assessment/test/sparkle.png" mode="aspectFit"></image>
-          <text>{{currentIndex === totalQuestions - 1 ? '查看结果' : '下一题'}}</text>
-          <text class="btn-chevron">›</text>
-          <image class="sparkle-img btn-sparkle-two" src="/images/assessment/test/sparkle.png" mode="aspectFit"></image>
+
+        <view class="action-buttons">
+          <view class="prev-btn {{currentIndex === 0 ? 'disabled' : ''}}" bindtap="prevQuestion">
+            <text class="btn-chevron">‹</text>
+            <text>上一题</text>
+          </view>
+          <view class="next-btn {{isSubmitting ? 'disabled' : ''}}" bindtap="nextQuestion">
+            <image class="sparkle-img btn-sparkle-one" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
+            <text>{{currentIndex === totalQuestions - 1 ? '查看结果' : '下一题'}}</text>
+            <text class="btn-chevron">›</text>
+            <image class="sparkle-img btn-sparkle-two" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
+          </view>
         </view>
       </view>
     </view>

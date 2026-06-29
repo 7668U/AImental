@@ -77,11 +77,29 @@ class ChatTable:
         
         return [{'id': chat.id, 'title': chat.title} for chat in query]
 
+    def get_latest_empty_chat_for_user(self, user_id: str) -> Optional[Chat]:
+        """
+        Returns the latest empty chat session for the user, if one exists.
+        """
+        return (Chat
+                .select()
+                .where((Chat.user_id == user_id) & (Chat.message == '[]'))
+                .order_by(Chat.timestamp.desc())
+                .first())
+
     # 【第4步】: 修改 create_new_chat 函数签名，使其可以接收 with_context 参数
     def create_new_chat(self, user_id: str, with_context: bool = True) -> Chat:
         """
         Creates a new chat session for a given user with a title.
         """
+        existing_empty_chat = self.get_latest_empty_chat_for_user(user_id)
+        if existing_empty_chat:
+            if existing_empty_chat.with_context != with_context:
+                existing_empty_chat.with_context = with_context
+                existing_empty_chat.timestamp = int(time.time())
+                existing_empty_chat.save()
+            return existing_empty_chat
+
         new_chat = Chat.create(
             id=str(uuid.uuid4()),
             user_id=user_id,

@@ -82,22 +82,22 @@ Page({
    * 新增：处理登录逻辑的函数，由 login-prompt 组件触发
    */
   handleLogin() {
-    wx.showLoading({ title: '???' });
+    wx.showLoading({ title: '登录中...' });
     loginWithBackend('http://127.0.0.1:8000/api/v1')
       .then((tokenRes) => {
         if (tokenRes.access_token) {
           wx.hideLoading();
           wx.setStorageSync('token', tokenRes.access_token);
-          wx.showToast({ title: '????', icon: 'success' });
+          wx.showToast({ title: '登录成功', icon: 'success' });
           this.setData({ isLoggedIn: true });
           this.fetchCheckinData();
         } else {
-          throw new Error('???????token');
+          throw new Error('登录接口未返回 token');
         }
       })
       .catch(() => {
         wx.hideLoading();
-        wx.showToast({ title: '??????????', icon: 'none' });
+        wx.showToast({ title: '登录失败，请重试', icon: 'none' });
       });
   },
 

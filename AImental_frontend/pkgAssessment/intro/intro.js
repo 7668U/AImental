@@ -1,5 +1,5 @@
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
-const { getScaleDisplayName, getScaleIconName } = require('../../utils/assessment-display.js');
+const { getScaleDisplayName, getScaleIconName } = require('../utils/assessment-display.js');
 
 function request(options) {
   return new Promise((resolve, reject) => {
@@ -25,7 +25,7 @@ function request(options) {
   });
 }
 
-const DEFAULT_ICON_PATH = '/images/assessment/default.png';
+const DEFAULT_ICON_PATH = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/assessment/default.png';
 
 const SCALE_INTRO_COPY = {
   SDS: {
@@ -142,7 +142,7 @@ Page({
       const displayName = this.data.passedDisplayTitle || getScaleDisplayName(scaleData.short_name, scaleData.name);
       scaleData.name = displayName;
       scaleData.displayName = displayName;
-      scaleData.iconPath = `/images/assessment/scale-icons/${getScaleIconName(scaleData.short_name)}.png`;
+      scaleData.iconPath = `https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/scale-icons/${getScaleIconName(scaleData.short_name)}.png`;
       scaleData.coverSummary = shortCopy.summary;
       scaleData.coverInstruction = shortCopy.instruction;
 

@@ -13,13 +13,13 @@
           <view class="hero-title">{{isLocked ? '回看那天心情' : '记录今日心情'}}</view>
           <view class="hero-subtitle">看看这些记录，能想起那是怎样的一天吗？</view>
         </view>
-        <image class="hero-art" src="/images/daily-checkin/record/banner-art-sun.png" mode="aspectFit"></image>
+        <image class="hero-art" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/banner-art-sun.png" mode="aspectFit"></image>
       </view>
 
       <view class="section-card mood-section">
         <view class="section-header mood-header">
           <view class="section-title-wrap">
-            <image class="section-icon" src="/images/daily-checkin/record/section/mood.png" mode="aspectFit"></image>
+            <image class="section-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/section/mood.png" mode="aspectFit"></image>
             <view class="section-title">心情</view>
           </view>
         </view>
@@ -32,7 +32,7 @@
             bindtap="handleMoodSelect"
             data-id="{{item.id}}"
           >
-            <image class="mood-card-icon" src="/images/daily-checkin/record/mood24/{{item.icon}}.png" mode="aspectFit"></image>
+            <image class="mood-card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/mood24/{{item.icon}}.png" mode="aspectFit"></image>
             <view class="mood-card-name">{{item.name}}</view>
             <view wx:if="{{item.selected}}" class="selected-check mood-check">✓</view>
           </view>
@@ -42,7 +42,7 @@
       <view class="section-card status-section">
         <view class="section-header status-header">
           <view class="section-title-wrap">
-            <image class="section-icon" src="/images/daily-checkin/record/section/status.png" mode="aspectFit"></image>
+            <image class="section-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/section/status.png" mode="aspectFit"></image>
             <view class="section-title">状态</view>
           </view>
         </view>
@@ -55,7 +55,7 @@
             data-type="statuses"
             data-index="{{index}}"
           >
-            <image class="status-card-icon" src="/images/daily-checkin/record/status24/{{item.icon}}.png" mode="aspectFit"></image>
+            <image class="status-card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/status24/{{item.icon}}.png" mode="aspectFit"></image>
             <view class="status-card-name">{{item.name}}</view>
             <view wx:if="{{item.selected}}" class="selected-check status-check">✓</view>
           </view>
@@ -64,7 +64,7 @@
 
       <view class="section-card color-section">
         <view class="section-header">
-          <image class="section-icon" src="/images/daily-checkin/record/section/color.png" mode="aspectFit"></image>
+          <image class="section-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/section/color.png" mode="aspectFit"></image>
           <view class="section-title">颜色</view>
         </view>
         <view class="color-grid">
@@ -88,7 +88,7 @@
       <view class="section-card journal-card">
         <view class="journal-header">
           <view class="section-header journal-title-wrap">
-            <image class="section-icon" src="/images/daily-checkin/record/section/note.png" mode="aspectFit"></image>
+            <image class="section-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/section/note.png" mode="aspectFit"></image>
             <view class="section-title">写下今天的小记忆</view>
           </view>
           <view class="meta-row">

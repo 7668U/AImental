@@ -3,7 +3,7 @@
 </page-meta>
 
 <view class="custom-back-btn" style="top: {{statusBarHeight}}px;" bindtap="goBack">
-  <image class="back-icon" src="/images/left.png"></image>
+  <image class="back-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/left.png"></image>
 </view>
 
 <view class="note-container">
@@ -12,11 +12,11 @@
     <view class="card">
       <view class="card-header">
         <view class="card-header-left">
-          <image class="card-icon" src="/images/icons/icon-todo.svg" />
+          <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-todo.svg" />
           <text class="card-title">待办清单</text>
           <text class="card-counter">{{uncompletedTodoCount}}</text>
         </view>
-        <image class="add-item-icon" src="/images/icons/new_item.png" bindtap="showAddTodoModal" />
+        <image class="add-item-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/new_item.png" bindtap="showAddTodoModal" />
       </view>
       <view class="card-content-wrapper expanded">
         <view class="card-content">
@@ -24,11 +24,11 @@
             <block wx:for="{{todos}}" wx:key="id">
               <view class="todo-item {{item.is_completed ? 'completed' : ''}}">
                 <image class="checkbox-icon" 
-                       src="/images/icons/icon-todo-{{item.is_completed ? 'checked' : 'unchecked'}}.png" 
+                       src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-todo-{{item.is_completed ? 'checked' : 'unchecked'}}.png" 
                        bindtap="onTodoToggle" 
                        data-id="{{item.id}}" />
                 <text class="todo-text" bindtap="showEditTodoModal" data-id="{{item.id}}">{{item.content}}</text>
-                <image class="delete-icon" src="/images/assessment/delete.png" bindtap="onDeleteTodo" data-id="{{item.id}}"></image>
+                <image class="delete-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/assessment/delete.png" bindtap="onDeleteTodo" data-id="{{item.id}}"></image>
               </view>
             </block>
           </block>
@@ -40,10 +40,10 @@
     <view class="card">
       <view class="card-header">
         <view class="card-header-left">
-          <image class="card-icon" src="/images/icons/icon-note.svg" />
+          <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-note.svg" />
           <text class="card-title">我的笔记</text>
         </view>
-        <image class="add-item-icon" src="/images/icons/new_item.png" bindtap="showAddNoteModal"/>
+        <image class="add-item-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/new_item.png" bindtap="showAddNoteModal"/>
       </view>
       <view class="card-content-wrapper expanded">
         <view class="card-content">
@@ -51,7 +51,7 @@
               <block wx:for="{{notes}}" wx:key="id">
                   <view class="note-item" bindtap="showEditNoteModal" data-id="{{item.id}}">
                       <text class="note-title">{{item.title}}</text>
-                      <image class="arrow-right-icon" src="/images/right.png"></image>
+                      <image class="arrow-right-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/right.png"></image>
                   </view>
               </block>
           </block>
@@ -90,7 +90,7 @@
       <image 
         wx:if="{{isEditing}}" 
         class="modal-delete-icon" 
-        src="/images/assessment/delete.png" 
+        src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/assessment/delete.png" 
         bindtap="onDeleteNote" 
       />
     </view>

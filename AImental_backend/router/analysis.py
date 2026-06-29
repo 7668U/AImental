@@ -1,6 +1,7 @@
 # routers/analysis.py
 
 import json
+import hashlib
 import jieba # 导入jieba
 from fastapi import APIRouter, Depends, HTTPException, Path
 from typing import Any, Dict, List, Tuple
@@ -178,8 +179,6 @@ def get_chart_data(
     - analysis_type: 'mood', 'tag-mood', 'word-cloud', 'color'
     """
     start_ts, end_ts, period_name = _get_period_info(period_type, year, value)
-    period_key = f"{ANALYSIS_SCHEMA_VERSION}-{year}-{value}-{period_type}-{analysis_type}-chart"
-
     checkins = checkin_table.get_checkins_by_period(current_user_id, start_ts, end_ts)
     if not checkins:
         raise HTTPException(status_code=404, detail="该时间段内无打卡记录。")
@@ -188,6 +187,8 @@ def get_chart_data(
             status_code=400,
             detail=f"{period_name} 的打卡数据不大于 5 天，无法进行分析。",
         )
+    data_signature = _build_checkin_cache_signature(checkins)
+    period_key = f"{ANALYSIS_SCHEMA_VERSION}-{year}-{value}-{period_type}-{analysis_type}-{data_signature}-chart"
     
     # 1. 检查缓存
     if not force_refresh:
@@ -233,7 +234,6 @@ def get_ai_detailed_report(
         raise HTTPException(status_code=400, detail="无效的分析模块类型。")
 
     start_ts, end_ts, period_name = _get_period_info(period_type, year, value)
-    period_key = f"{AI_REPORT_SCHEMA_VERSION}-{year}-{value}-{period_type}-{analysis_type}-ai"
     cache_type_key = f"{AI_REPORT_SCHEMA_VERSION}_ai_report_{analysis_type}"
 
     checkins = checkin_table.get_checkins_by_period(current_user_id, start_ts, end_ts)
@@ -244,6 +244,8 @@ def get_ai_detailed_report(
             status_code=400,
             detail=f"{period_name} 的打卡数据不大于 5 天，无法进行分析。",
         )
+    data_signature = _build_checkin_cache_signature(checkins)
+    period_key = f"{AI_REPORT_SCHEMA_VERSION}-{year}-{value}-{period_type}-{analysis_type}-{data_signature}-ai"
     
     # 1. 检查缓存
     if not force_refresh:
@@ -290,6 +292,7 @@ def get_color_card_background(
     year: int = Path(..., description="年份"),
     value: int = Path(..., description="月份(1-12) 或 季度(1-4)"),
     current_user_id: str = Depends(get_current_user_id),
+    force_refresh: bool = False,
 ):
     start_ts, end_ts, period_name = _get_period_info(period_type, year, value)
     checkins = checkin_table.get_checkins_by_period(current_user_id, start_ts, end_ts)
@@ -302,7 +305,7 @@ def get_color_card_background(
         )
 
     try:
-        return emotion_color_card_cache_table.get_or_generate(checkins)
+        return emotion_color_card_cache_table.get_or_generate(checkins, force_refresh=force_refresh)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc))
 
@@ -350,6 +353,37 @@ def _split_tag_labels(tags: str | None) -> List[str]:
     if not tags:
         return []
     return [tag.strip() for tag in tags.split(",") if tag.strip()]
+
+
+def _build_checkin_cache_signature(checkins: List[Dict]) -> str:
+    """Return a short signature for the current check-in contents."""
+    signature_payload = []
+    tracked_fields = [
+        "id",
+        "timestamp",
+        "updated_at",
+        "mood",
+        "mood_id",
+        "mood_family",
+        "mood_valence",
+        "mood_energy",
+        "tags",
+        "status_ids",
+        "status_families",
+        "text_content",
+        "color",
+        "color_id",
+        "color_label",
+        "color_group",
+        "color_tone",
+    ]
+    for record in sorted(checkins, key=lambda item: (item.get("timestamp") or 0, item.get("id") or "")):
+        signature_payload.append({
+            field: record.get(field)
+            for field in tracked_fields
+        })
+    raw = json.dumps(signature_payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:12]
 
 
 def _build_ai_focus_summary(checkins: List[Dict], analysis_type: str) -> str:

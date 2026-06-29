@@ -3,7 +3,7 @@
 // --- 配置 ---
 const SERVER_BASE_URL = 'http://127.0.0.1:8000'; 
 const API_BASE_URL = `${SERVER_BASE_URL}/api/v1/users`; 
-const defaultAvatarUrl = '/images/default-avatar.png';
+const defaultAvatarUrl = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png';
 
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 const { loginWithBackend } = require('../../utils/auth.js');
@@ -64,7 +64,7 @@ Page({
   },
 
   login: function() {
-    wx.showLoading({ title: '???...' });
+    wx.showLoading({ title: '登录中...' });
     loginWithBackend(SERVER_BASE_URL + '/api/v1')
       .then((apiRes) => {
         wx.hideLoading();
@@ -72,16 +72,16 @@ Page({
           const token = apiRes.access_token;
           wx.setStorageSync('token', token);
           this.fetchUserProfile(token);
-          wx.showToast({ title: '????', icon: 'success' });
+          wx.showToast({ title: '登录成功', icon: 'success' });
         } else {
-          console.error('??API????:', apiRes);
-          wx.showToast({ title: apiRes.detail || '????', icon: 'none' });
+          console.error('登录 API 返回异常:', apiRes);
+          wx.showToast({ title: apiRes.detail || '登录失败', icon: 'none' });
         }
       })
       .catch((err) => {
         wx.hideLoading();
-        console.error('??????????:', err);
-        wx.showToast({ title: '???????', icon: 'none' });
+        console.error('登录请求失败:', err);
+        wx.showToast({ title: '登录失败，请重试', icon: 'none' });
       });
   },
   fetchUserProfile: function(token) {

@@ -1,6 +1,6 @@
 <view class="page">
   <view class="history-btn" bindtap="goToHistory">
-    <image class="history-btn__icon" src="/images/request-history.png" mode="aspectFit" />
+    <image class="history-btn__icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/request-history.png" mode="aspectFit" />
     <view class="history-btn__text">历史申请</view>
   </view>
   
@@ -47,12 +47,12 @@
             
             <block wx:else>
               <view class="locked-card">
-                <image class="locked-card__icon" src="/images/lock-icon.png" mode="aspectFit" />
+                <image class="locked-card__icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/lock-icon.png" mode="aspectFit" />
                 <view class="locked-card__title">发现新伙伴</view>
                 <view class="locked-card__text">分享给一位微信好友</view>
                 <view class="locked-card__text">即可解锁全部新角色</view>
                 <button class="locked-card__btn" open-type="share">
-                  <image class="locked-card__btn-icon" src="/images/wechat-share-icon.png" mode="aspectFit" />
+                  <image class="locked-card__btn-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/wechat-share-icon.png" mode="aspectFit" />
                   <text>分享解锁</text>
                 </button>
               </view>

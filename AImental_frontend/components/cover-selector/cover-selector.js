@@ -9,9 +9,9 @@ Component({
   data: {
     // 可用的封面列表
     covers: [
-      '/images/covers/cover-forest.png',
-      '/images/covers/cover-starry-sky.png',
-      '/images/covers/cover-ocean.png'
+      'https://assets.feelyourself.cn/miniprogram/assets/v1/images/background.png',
+      'https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/background.png',
+      'https://assets.feelyourself.cn/miniprogram/assets/v1/images/ai-therapist/chat-bg-window.png'
     ]
   },
   methods: {

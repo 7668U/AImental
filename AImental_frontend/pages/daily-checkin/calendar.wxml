@@ -3,9 +3,9 @@
   <view class="calendar-container">
 
     <view class="calendar-header">
-      <image class="nav-arrow" src="/images/left.png" bind:tap="handleMonthChange" data-direction="{{-1}}"></image>
+      <image class="nav-arrow" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/left.png" bind:tap="handleMonthChange" data-direction="{{-1}}"></image>
       <view class="current-date">{{currentYear}}年 {{currentMonth}}月</view>
-      <image class="nav-arrow" src="/images/right.png" bind:tap="handleMonthChange" data-direction="{{1}}"></image>
+      <image class="nav-arrow" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/right.png" bind:tap="handleMonthChange" data-direction="{{1}}"></image>
     </view>
 
     <block wx:if="{{hasCheckinsThisMonth}}">
@@ -28,9 +28,9 @@
             <image 
               wx:if="{{item.checkin}}" 
               class="mood-icon" 
-              src="/images/daily-checkin/record/mood24/{{item.checkin.mood_icon || item.checkin.mood_id || item.checkin.mood}}.png"
+              src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/mood24/{{item.checkin.mood_icon || item.checkin.mood_id || item.checkin.mood}}.png"
             ></image>
-            <text class="day-number">{{item.day > 0 ? item.day : ''}}</text>
+            <text wx:if="{{!item.checkin}}" class="day-number">{{item.day > 0 ? item.day : ''}}</text>
           </view>
         </view>
       </view>
@@ -38,7 +38,7 @@
 
     <block wx:else>
       <view class="empty-state">
-          <image class="empty-icon" src="/images/daily-checkin/blank.png" mode="aspectFit"></image>
+          <image class="empty-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/daily-checkin/blank.png" mode="aspectFit"></image>
           <view class="empty-text">这个月还没有记录哦</view>
       </view>
     </block>

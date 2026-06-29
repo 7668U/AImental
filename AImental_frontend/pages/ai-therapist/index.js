@@ -4,8 +4,9 @@ const { loginWithBackend } = require('../../utils/auth.js');
 
 // --- 全局配置与网络请求封装 ---
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
-const WELCOME_MESSAGE = '你好呀，我是你的AI伙伴 😊\n今天想聊些什么呢？';
-const DEFAULT_HISTORY_PREVIEW = '继续这段对话，和AI伙伴慢慢聊。';
+const WELCOME_MESSAGE = '你好呀，我是 Polaris 😊\n今天想聊些什么呢？';
+const DEFAULT_HISTORY_PREVIEW = '继续这段对话，和 Polaris 慢慢聊。';
+const THERAPIST_DISCLAIMER_STORAGE_KEY = 'hasShownMoodTreeholeDisclaimerV2';
 
 function request(options) {
   return new Promise((resolve, reject) => {
@@ -53,12 +54,15 @@ Page({
     navBarHeight: 0,
     totalNavBarHeight: 0,
     isSettingsVisible: false,
-    allowAiReadData: false,
+    allowAiReadData: true,
     isEmojiPanelVisible: false,
     emojiOptions: ['😊', '🙂', '😌', '🥰', '🤗', '😢', '😭', '😔', '😴', '😮', '😤', '✨', '🌙', '☀️', '🍀', '💛', '🧡', '👍'],
     // 【新增】控制温馨提示弹窗的显示/隐藏
     isDisclaimerVisible: false,
   },
+
+  _isInitializingChat: false,
+  _hasInitializedChat: false,
   
   // =================================================================
   // 核心生命周期函数
@@ -66,6 +70,7 @@ Page({
 
   onLoad(options) {
     this.checkLoginStatus();
+    this.checkDisclaimer();
     const windowInfo = wx.getWindowInfo();
     const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
     const statusBarHeight = windowInfo.statusBarHeight;
@@ -86,6 +91,7 @@ Page({
     const token = wx.getStorageSync('token');
     if (token) {
       if (!this.data.isLoggedIn) {
+        this._hasInitializedChat = false;
         this.setData({ isLoggedIn: true });
         this.initializeChat();
         // 登录后，获取用户设置
@@ -93,6 +99,8 @@ Page({
       }
     } else {
       if (this.data.isLoggedIn) {
+        this._isInitializingChat = false;
+        this._hasInitializedChat = false;
         this.setData({
           isLoggedIn: false, messages: [], chatHistory: [],
           activeChatId: null, isSidebarVisible: false, inputValue: '',
@@ -103,29 +111,42 @@ Page({
   },
 
   handleLogin() {
-    wx.showLoading({ title: '???' });
+    wx.showLoading({ title: '登录中...' });
     loginWithBackend(API_BASE_URL)
       .then(tokenRes => {
         wx.hideLoading();
+        if (!tokenRes.access_token) {
+          throw new Error('登录接口未返回 token');
+        }
         wx.setStorageSync('token', tokenRes.access_token);
         this.checkLoginStatus();
-        wx.showToast({ title: '????', icon: 'success' });
+        wx.showToast({ title: '登录成功', icon: 'success' });
         this.checkDisclaimer();
       })
       .catch(err => {
         wx.hideLoading();
-        console.error('????????', err);
-        wx.showToast({ title: '????', icon: 'none' });
+        console.error('登录失败', err);
+        wx.showToast({ title: '登录失败，请重试', icon: 'none' });
       });
   },
 
   async initializeChat() {
+    if (this._isInitializingChat || this._hasInitializedChat) {
+      return;
+    }
+
+    this._isInitializingChat = true;
     await this.loadChatHistory();
-    if (this.data.chatHistory && this.data.chatHistory.length > 0) {
-      const latestChatId = this.data.chatHistory[0].id;
-      this.switchChat({ currentTarget: { dataset: { id: latestChatId } } });
-    } else {
-      this.startNewChat();
+    try {
+      if (this.data.chatHistory && this.data.chatHistory.length > 0) {
+        const latestChatId = this.data.chatHistory[0].id;
+        await this.loadChat(latestChatId);
+      } else {
+        await this.startNewChat();
+      }
+      this._hasInitializedChat = true;
+    } finally {
+      this._isInitializingChat = false;
     }
   },
 
@@ -265,9 +286,11 @@ Page({
         isSidebarVisible: false, isEmojiPanelVisible: false, chatHistory: currentHistory
       });
       this.addMessage('ai', WELCOME_MESSAGE);
+      return newChat;
     } catch (error) {
       console.error("创建新聊天失败", error);
       wx.showToast({ title: '创建失败', icon: 'none' });
+      throw error;
     } finally {
       wx.hideLoading();
     }
@@ -573,7 +596,7 @@ Page({
   // 【新增】温馨提示弹窗相关方法
   // =================================================================
   checkDisclaimer() {
-    const hasShown = wx.getStorageSync('hasShownDisclaimer');
+    const hasShown = wx.getStorageSync(THERAPIST_DISCLAIMER_STORAGE_KEY);
     if (!hasShown) {
       this.setData({ isDisclaimerVisible: true });
     }
@@ -581,7 +604,7 @@ Page({
 
   handleConfirmDisclaimer() {
     this.setData({ isDisclaimerVisible: false });
-    wx.setStorageSync('hasShownDisclaimer', true);
+    wx.setStorageSync(THERAPIST_DISCLAIMER_STORAGE_KEY, true);
   },
 
   onShareAppMessage: function () {

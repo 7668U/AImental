@@ -1,5 +1,5 @@
 <view class="container">
-  <image class="result-bg" src="/images/assessment/result/result-bg.png" mode="aspectFill"></image>
+  <image class="result-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/result-bg.png" mode="aspectFill"></image>
   <view class="result-bg-soften"></view>
 
   <view wx:if="{{isLoading}}" class="loading-container">
@@ -64,7 +64,7 @@
 
     <view class="result-card ai-card" wx:if="{{aiAnalysisSections.length > 0}}">
       <view class="card-title">
-        <image class="card-icon" src="/images/icons/icon-report.png"></image>
+        <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
         <text>{{analysisTitle}}</text>
       </view>
 
@@ -112,9 +112,9 @@
     </view>
 
     <view class="result-card ai-empty-card" wx:else>
-      <image class="empty-bg-icon" src="/images/assessment/result/section-ai.png" mode="aspectFit"></image>
+      <image class="empty-bg-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/section-ai.png" mode="aspectFit"></image>
       <view class="card-title">
-        <image class="card-icon" src="/images/icons/icon-report.png"></image>
+        <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
         <text>分析结果</text>
       </view>
       <view class="card-content">本次结果已生成，暂未获得可展示的分析内容。请稍后从历史测评中再次查看。</view>

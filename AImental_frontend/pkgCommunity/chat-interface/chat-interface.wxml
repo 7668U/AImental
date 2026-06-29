@@ -1,7 +1,7 @@
 <view class="chat-page" style="padding-top: calc({{statusBarHeight}}px + 70rpx);">
 
 <view class="custom-nav-bar">
-  <image class="back-icon" src="/images/left.png" bindtap="navigateBack"></image>
+  <image class="back-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/left.png" bindtap="navigateBack"></image>
   <view class="nav-title-container">
     <view class="nav-title">{{aiName}}</view>
     <view class="nav-status" wx:if="{{isAiTyping}}">对方正在输入...</view>
@@ -29,15 +29,15 @@
     <view class="message-row user" wx:if="{{item.role === 'user'}}">
       <view class="message-status">
         <view class="status-unit" wx:if="{{item.status === 'sent'}}">
-          <image class="sent-icon" src="/images/send_successful.png"></image>
+          <image class="sent-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/send_successful.png"></image>
           <text class="status-text">送达</text>
         </view>
         <view class="status-unit" wx:if="{{item.status === 'read'}}">
-          <image class="read-icon" src="/images/read.png"></image>
+          <image class="read-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/read.png"></image>
           <text class="status-text">已读</text>
         </view>
-        <image wx:if="{{item.status === 'sending'}}" class="sending-icon" src="/images/loading.gif"></image>
-        <image wx:if="{{item.status === 'failed'}}" class="failed-icon" src="/images/failed.png"></image>
+        <image wx:if="{{item.status === 'sending'}}" class="sending-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/loading.gif"></image>
+        <image wx:if="{{item.status === 'failed'}}" class="failed-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/empty-state-dark.png"></image>
       </view>
       <view class="bubble-wrapper">
         <view class="bubble">{{item.content}}</view>

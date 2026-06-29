@@ -1,14 +1,18 @@
 <view class="page-container">
-  <image class="page-bg" src="/images/ai-therapist/chat-bg-window.png" mode="aspectFill"></image>
+  <image class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/ai-therapist/chat-bg-window.png" mode="aspectFill"></image>
 
   <view class="disclaimer-modal" wx:if="{{isDisclaimerVisible}}">
-    <view class="disclaimer-content">
-      <view class="disclaimer-title">温馨提示</view>
-      <view class="disclaimer-text">
-        AI心理伙伴旨在为您提供便捷的心理疏导与支持。但请注意，它的建议不能替代专业的心理医生、精神科医生或任何持牌医疗人员的诊断和治疗。
-        <view class="disclaimer-text-paragraph">如果您正在经历严重的心理困扰，请务必寻求真人专业人士的帮助。</view>
+    <view class="disclaimer-content" catchtap="preventClose">
+      <image class="disclaimer-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/ai-therapist/plant-buddy.png" mode="aspectFit"></image>
+      <view class="disclaimer-body">
+        <view class="disclaimer-title">温馨提示</view>
+        <view class="disclaimer-text">
+          <view class="disclaimer-text-paragraph">心情树洞的核心是情感陪伴，帮助你更温柔地记录、表达和理解自己的情绪。</view>
+          <view class="disclaimer-text-paragraph">这里的聊天内容仅用于日常陪伴与自我觉察引导，不构成医学诊断、治疗方案，也不能替代专业心理咨询、精神科或其他医疗服务。</view>
+          <view class="disclaimer-text-paragraph">如果你正经历持续或强烈的心理困扰，或出现伤害自己、伤害他人的想法，请及时联系专业心理咨询师、医生、精神科或当地紧急援助资源。</view>
+        </view>
+        <view class="disclaimer-button" bindtap="handleConfirmDisclaimer">我知道了</view>
       </view>
-      <view class="disclaimer-button" bindtap="handleConfirmDisclaimer">我已知晓</view>
     </view>
   </view>
 
@@ -33,7 +37,7 @@
           <text>新建</text>
         </view>
         <view class="history-setting-button" catchtap="toggleSettings">
-          <image class="history-setting-icon" src="/images/icons/setting.png"></image>
+          <image class="history-setting-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/setting.png"></image>
         </view>
       </view>
       <view class="sidebar-rule"></view>
@@ -94,10 +98,10 @@
       >
         <view id="chatTopAnchor" class="chat-top-anchor"></view>
         <view class="intro-row">
-          <image class="intro-plant" src="/images/ai-therapist/plant-buddy.png" mode="aspectFit"></image>
+          <image class="intro-plant" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/ai-therapist/plant-buddy.png" mode="aspectFit"></image>
           <view class="intro-pill">
             <text class="intro-spark">✦</text>
-            <text class="intro-text">我是你的AI伙伴，随时在这里陪伴你</text>
+            <text class="intro-text">和Polaris聊天，尝试感受自己的情绪吧！</text>
             <text class="intro-heart">♥</text>
           </view>
         </view>
@@ -123,7 +127,7 @@
           <image
             wx:if="{{item.sender === 'user'}}"
             class="message-plane"
-            src="/images/ai-therapist/paper-plane.png"
+            src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/ai-therapist/paper-plane.png"
             mode="aspectFit"
           ></image>
         </view>

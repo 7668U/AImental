@@ -8,7 +8,7 @@
 
   <view class="profile-hero">
     <view class="avatar-ring">
-      <image class="avatar" src="{{userInfo.avatar_url || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+      <image class="avatar" src="{{userInfo.avatar_url || 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png'}}" mode="aspectFill"></image>
     </view>
     <view class="nickname">{{userInfo.nickname || '访客'}}</view>
     <view class="profile-slogan">愿你被温柔以待，也能温柔待人</view>
@@ -18,7 +18,7 @@
   <view class="menu-card">
     <view class="menu-item" bindtap="goToUserInfo">
       <view class="menu-icon-wrap">
-        <image class="menu-icon" src="/images/icons/icon-user.png" mode="aspectFit"></image>
+        <image class="menu-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-user.png" mode="aspectFit"></image>
       </view>
       <view class="menu-copy">
         <view class="menu-title">个人信息</view>
@@ -29,7 +29,7 @@
 
     <view class="menu-item" bindtap="goToReports">
       <view class="menu-icon-wrap">
-        <image class="menu-icon" src="/images/icons/icon-report.png" mode="aspectFit"></image>
+        <image class="menu-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png" mode="aspectFit"></image>
       </view>
       <view class="menu-copy">
         <view class="menu-title">测试历史</view>
@@ -40,7 +40,7 @@
 
     <view class="menu-item" bindtap="goToFeedback">
       <view class="menu-icon-wrap">
-        <image class="menu-icon" src="/images/icons/icon-feedback.png" mode="aspectFit"></image>
+        <image class="menu-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-feedback.png" mode="aspectFit"></image>
       </view>
       <view class="menu-copy">
         <view class="menu-title">意见反馈</view>
@@ -51,7 +51,7 @@
 
     <view class="menu-item" bindtap="goToAboutUs">
       <view class="menu-icon-wrap">
-        <image class="menu-icon" src="/images/icons/icon-about.png" mode="aspectFit"></image>
+        <image class="menu-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-about.png" mode="aspectFit"></image>
       </view>
       <view class="menu-copy">
         <view class="menu-title">关于我们</view>

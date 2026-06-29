@@ -28,7 +28,176 @@
   "compileType": "miniprogram",
   "simulatorPluginLibVersion": {},
   "packOptions": {
-    "ignore": [],
+    "ignore": [
+      {
+        "type": "folder",
+        "value": "components/components-ecanvas"
+      },
+      {
+        "type": "folder",
+        "value": "images/ai-therapist"
+      },
+      {
+        "type": "folder",
+        "value": "images/assessment"
+      },
+      {
+        "type": "folder",
+        "value": "images/daily-checkin"
+      },
+      {
+        "type": "folder",
+        "value": "images/icons"
+      },
+      {
+        "type": "folder",
+        "value": "images/paper-airplane"
+      },
+      {
+        "type": "file",
+        "value": "images/airplane.png"
+      },
+      {
+        "type": "file",
+        "value": "images/ai_avatar.png"
+      },
+      {
+        "type": "file",
+        "value": "images/background.png"
+      },
+      {
+        "type": "file",
+        "value": "images/bookshelf.png"
+      },
+      {
+        "type": "file",
+        "value": "images/cancle.png"
+      },
+      {
+        "type": "file",
+        "value": "images/cloud.png"
+      },
+      {
+        "type": "file",
+        "value": "images/community.png"
+      },
+      {
+        "type": "file",
+        "value": "images/community_selected.png"
+      },
+      {
+        "type": "file",
+        "value": "images/default-avatar.png"
+      },
+      {
+        "type": "file",
+        "value": "images/empty-state-dark.png"
+      },
+      {
+        "type": "file",
+        "value": "images/left.png"
+      },
+      {
+        "type": "file",
+        "value": "images/loading.gif"
+      },
+      {
+        "type": "file",
+        "value": "images/lock-icon.png"
+      },
+      {
+        "type": "file",
+        "value": "images/logo.png"
+      },
+      {
+        "type": "file",
+        "value": "images/paper_airplane.png"
+      },
+      {
+        "type": "file",
+        "value": "images/read.png"
+      },
+      {
+        "type": "file",
+        "value": "images/request-history.png"
+      },
+      {
+        "type": "file",
+        "value": "images/right.png"
+      },
+      {
+        "type": "file",
+        "value": "images/send_airplane.png"
+      },
+      {
+        "type": "file",
+        "value": "images/send_successful.png"
+      },
+      {
+        "type": "file",
+        "value": "images/share-cover.png"
+      },
+      {
+        "type": "file",
+        "value": "images/user_avatar.png"
+      },
+      {
+        "type": "file",
+        "value": "images/wechat-share-icon.png"
+      },
+      {
+        "type": "folder",
+        "value": "pkgAssessment/images"
+      },
+      {
+        "type": "folder",
+        "value": "pkgDailyCheckin/images"
+      },
+      {
+        "type": "folder",
+        "value": "pkgProfile/images"
+      },
+      {
+        "type": "folder",
+        "value": "pkgDailyCheckin/components-ecanvas/pages"
+      },
+      {
+        "type": "folder",
+        "value": "pkgDailyCheckin/components-ecanvas/img"
+      },
+      {
+        "type": "folder",
+        "value": "pkgProfile/components-ecanvas"
+      },
+      {
+        "type": "file",
+        "value": "utils/assessment-display.js"
+      },
+      {
+        "type": "file",
+        "value": "pkgDailyCheckin/components-ecanvas/README.md"
+      },
+      {
+        "type": "file",
+        "value": "pkgDailyCheckin/components-ecanvas/ISSUE_TEMPLATE.md"
+      },
+      {
+        "type": "file",
+        "value": "pkgProfile/history_analysis.js"
+      },
+      {
+        "type": "file",
+        "value": "pkgProfile/history_analysis.json"
+      },
+      {
+        "type": "file",
+        "value": "pkgProfile/history_analysis.wxml"
+      },
+      {
+        "type": "file",
+        "value": "pkgProfile/history_analysis.wxss"
+      }
+    ],
     "include": []
   },
   "appid": "wx87018ae3626d4acb",
