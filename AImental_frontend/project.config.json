@@ -171,10 +171,6 @@
       },
       {
         "type": "file",
-        "value": "utils/assessment-display.js"
-      },
-      {
-        "type": "file",
         "value": "pkgDailyCheckin/components-ecanvas/README.md"
       },
       {

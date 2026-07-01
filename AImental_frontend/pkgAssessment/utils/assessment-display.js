@@ -41,8 +41,8 @@ const SCALE_DISPLAY_META = {
     tagTone: 'rose'
   },
   APS: {
-    title: '完美主义量表',
-    description: '觉察对标准与成就的期待',
+    title: '拖延倾向测评',
+    description: '理解任务启动阻力与行动节奏',
     tagTone: 'purple'
   },
   CLT: {
