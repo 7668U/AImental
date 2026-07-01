@@ -178,7 +178,7 @@ class PaperAirplaneTable:
         将已捡起的纸飞机收进当前用户的飞机篓。
         """
         airplane = PaperAirplane.get_or_none(PaperAirplane.id == airplane_id)
-        if not airplane or str(airplane.user.id) == str(user_id):
+        if not airplane or str(airplane.user_id) == str(user_id):
             return None
 
         has_picked = UserPickedAirplane.get_or_none(
