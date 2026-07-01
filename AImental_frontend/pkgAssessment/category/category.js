@@ -1,5 +1,5 @@
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
-const { getScaleDisplayMeta, getScaleDisplayName, getScaleIconName } = require('../utils/assessment-display.js');
+const { getScaleDisplayMeta, getScaleDisplayName, getScaleIconName } = require('../../utils/assessment-display.js');
 
 const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 const DEFAULT_GROUP = '心理健康';

@@ -60,8 +60,8 @@ class UserSettingsRequest(BaseModel):
 # API Endpoints (已更新)
 # ---------------------------------------------------
 
-APP_ID = os.getenv("WECHAT_APP_ID", "wx3a565bb4664b579a")
-APP_SECRET = os.getenv("WECHAT_APP_SECRET", "576ed8e8194c8cf5629d127487b6a10d")
+APP_ID = os.getenv("WECHAT_APP_ID", "").strip()
+APP_SECRET = os.getenv("WECHAT_APP_SECRET", "").strip()
 
 
 def create_test_login_token(user_id_for_test: str = "local-dev-user"):
@@ -82,6 +82,12 @@ def create_test_login_token(user_id_for_test: str = "local-dev-user"):
 
 @router.post("/login", response_model=TokenResponse, summary="微信小程序登录")
 def wechat_login(login_data: UserLoginRequest):
+    if not APP_ID or not APP_SECRET:
+        if os.getenv("ALLOW_LOCAL_DEV_LOGIN", "1") == "1":
+            print("WeChat login config is missing, falling back to local test login.")
+            return create_test_login_token()
+        raise HTTPException(status_code=500, detail="WeChat login configuration is missing")
+
     url = f"https://api.weixin.qq.com/sns/jscode2session?appid={APP_ID}&secret={APP_SECRET}&js_code={login_data.code}&grant_type=authorization_code"
     try:
         response = requests.get(url)

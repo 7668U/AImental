@@ -1,5 +1,5 @@
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
-const { getScaleDisplayName, getScaleIconName } = require('../utils/assessment-display.js');
+const { getScaleDisplayName, getScaleIconName } = require('../../utils/assessment-display.js');
 
 function request(options) {
   return new Promise((resolve, reject) => {
@@ -61,8 +61,8 @@ const SCALE_INTRO_COPY = {
     instruction: '请按你通常对自己的看法选择答案。'
   },
   APS: {
-    summary: '观察拖延、行动阻力和任务压力，帮助你理解自己的行动模式。',
-    instruction: '请根据日常学习、工作或生活中的真实习惯作答。'
+    summary: '观察任务启动阻力、压力来源和行动节奏，温和理解拖延背后的原因。',
+    instruction: '请根据日常学习、工作或生活中的真实状态作答，答案只是帮助你看见自己的行动模式。'
   },
   CLT: {
     summary: '了解自己在好奇心、联想力、开放度和创意落地上的整体倾向。',

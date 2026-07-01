@@ -2,7 +2,7 @@
 
 const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 const ASSESSMENTS_API_URL = `${SERVER_BASE_URL}/api/v1/assessments`;
-const { getScaleDisplayName } = require('./utils/assessment-display.js');
+const { getScaleDisplayName } = require('../utils/assessment-display.js');
 
 const DELETE_BTN_WIDTH = 80;
 const REQUEST_TIMEOUT = 8000;
