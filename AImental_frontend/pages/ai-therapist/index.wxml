@@ -150,7 +150,7 @@
       <view class="input-dock">
         <view class="input-shell">
           <view class="input-smile" catchtap="toggleEmojiPanel">
-            <image class="smile-icon" src="/images/icons/smile-orange.png" mode="aspectFit"></image>
+            <image class="smile-icon" src="../../images/icons/smile-orange.png" mode="aspectFit"></image>
           </view>
           <textarea
             class="input-field"

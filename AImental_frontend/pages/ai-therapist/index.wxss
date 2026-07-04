@@ -381,10 +381,12 @@ page {
 .input-smile {
   position: relative;
   flex-shrink: 0;
-  width: 48rpx;
-  height: 48rpx;
+  width: 50rpx;
+  height: 50rpx;
   margin-bottom: 0;
   margin-right: 18rpx;
+  border-radius: 50%;
+  background: rgba(255, 107, 22, 0.08);
 }
 
 .smile-icon {
