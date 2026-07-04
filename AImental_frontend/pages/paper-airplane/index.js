@@ -34,6 +34,17 @@ function request(options) {
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 const { loginWithBackend } = require('../../utils/auth.js');
 
+const ASSET_VERSION = '202607050210';
+const PAPER_AIRPLANE_ASSET_PREFIX = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/';
+
+function withAssetVersion(url) {
+  if (!url || !url.startsWith(PAPER_AIRPLANE_ASSET_PREFIX) || /[?&]v=/.test(url)) {
+    return url;
+  }
+
+  return `${url}${url.includes('?') ? '&' : '?'}v=${ASSET_VERSION}`;
+}
+
 const PAPER_PLANE_ICONS = [
   'paper_plane_01_01.png',
   'paper_plane_01_02.png',
@@ -61,7 +72,7 @@ const PAPER_PLANE_ICONS = [
   'paper_plane_06_04.png',
 ].map((name, index) => ({
   number: `P${String(index + 1).padStart(2, '0')}`,
-  path: `https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/flying/${name}`
+  path: withAssetVersion(`${PAPER_AIRPLANE_ASSET_PREFIX}flying/${name}`)
 }));
 
 const AIRPLANE_SAFE_SLOTS = [
@@ -98,7 +109,7 @@ function getAirplaneAsset(airplane, index = 0) {
   if (airplane && airplane.asset_path) {
     return {
       number: airplane.asset_number || buildFallbackAssetNumber(airplane.id, index),
-      path: airplane.asset_path
+      path: withAssetVersion(airplane.asset_path)
     };
   }
 

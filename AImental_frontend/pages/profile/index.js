@@ -3,7 +3,24 @@
 // --- 配置 ---
 const SERVER_BASE_URL = 'https://api.feelyourself.cn';
 const API_BASE_URL = `${SERVER_BASE_URL}/api/v1/users`; 
-const defaultAvatarUrl = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png';
+const defaultAvatarUrl = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png?v=202607050210';
+
+function normalizeAvatarUrl(avatarUrl) {
+  if (
+    !avatarUrl ||
+    avatarUrl.includes('/paper-airplane/') ||
+    avatarUrl.includes('paper_airplane') ||
+    avatarUrl.endsWith('/static/avatars/default.png')
+  ) {
+    return defaultAvatarUrl;
+  }
+
+  if (avatarUrl.startsWith('http')) {
+    return avatarUrl;
+  }
+
+  return SERVER_BASE_URL + avatarUrl;
+}
 
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 const { loginWithBackend } = require('../../utils/auth.js');
@@ -47,7 +64,12 @@ Page({
         this.fetchUserProfile(token);
         const cachedUserInfo = wx.getStorageSync('userInfo');
         if (cachedUserInfo) {
-          this.setData({ userInfo: cachedUserInfo });
+          this.setData({
+            userInfo: {
+              ...cachedUserInfo,
+              avatar_url: normalizeAvatarUrl(cachedUserInfo.avatar_url)
+            }
+          });
         }
       } else {
         this.setData({
@@ -91,9 +113,7 @@ Page({
       header: { 'Authorization': `Bearer ${token}` },
       success: (res) => {
         if (res.statusCode === 200) {
-          if (res.data.avatar_url && !res.data.avatar_url.startsWith('http')) {
-            res.data.avatar_url = SERVER_BASE_URL + res.data.avatar_url;
-          }
+          res.data.avatar_url = normalizeAvatarUrl(res.data.avatar_url);
           wx.setStorageSync('userInfo', res.data);
           this.setData({
             userInfo: res.data,

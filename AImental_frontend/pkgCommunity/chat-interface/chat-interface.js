@@ -1,7 +1,21 @@
 // pages/ai-community/chat-interface/chat-interface.js
 const API_BASE_URL = 'https://api.feelyourself.cn/api/v1/community';
 const WS_BASE_URL = 'wss://api.feelyourself.cn/api/v1/community';
+const DEFAULT_AVATAR_URL = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png?v=202607050210';
 const app = getApp();
+
+function normalizeAvatarUrl(avatarUrl) {
+  if (
+    !avatarUrl ||
+    avatarUrl.includes('/paper-airplane/') ||
+    avatarUrl.includes('paper_airplane') ||
+    avatarUrl.endsWith('/static/avatars/default.png')
+  ) {
+    return DEFAULT_AVATAR_URL;
+  }
+
+  return avatarUrl;
+}
 
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 Page({
@@ -50,7 +64,7 @@ Page({
       aiId,
       aiName: decodeURIComponent(name),
       aiAvatar: decodeURIComponent(avatar),
-      userAvatar: userInfo ? userInfo.avatar_url : 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png',
+      userAvatar: normalizeAvatarUrl(userInfo && userInfo.avatar_url),
       statusBarHeight: app.globalData.statusBarHeight || 20
     });
     

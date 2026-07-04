@@ -4,6 +4,20 @@ const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 const SERVER_BASE_URL = 'https://api.feelyourself.cn/api/v1';
 const API_BASE_URL = `${SERVER_BASE_URL}/users`;
 const REQUEST_TIMEOUT = 8000;
+const DEFAULT_AVATAR_URL = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png?v=202607050210';
+
+function normalizeAvatarUrl(avatarUrl) {
+  if (
+    !avatarUrl ||
+    avatarUrl.includes('/paper-airplane/') ||
+    avatarUrl.includes('paper_airplane') ||
+    avatarUrl.endsWith('/static/avatars/default.png')
+  ) {
+    return DEFAULT_AVATAR_URL;
+  }
+
+  return avatarUrl;
+}
 
 Page({
   data: {
@@ -67,7 +81,7 @@ Page({
             nickname: data.nickname || '',
             birthday: data.birthday || '请选择您的生日',
             genderIndex: genderIndex,
-            avatar_url: cachedUserInfo.avatar_url || ''
+            avatar_url: normalizeAvatarUrl(cachedUserInfo.avatar_url)
           };
           this.setData({ ...profile, _originalData: profile });
         }
