@@ -386,7 +386,6 @@ page {
   margin-bottom: 0;
   margin-right: 18rpx;
   border-radius: 50%;
-  background: rgba(255, 107, 22, 0.08);
 }
 
 .smile-icon {
