@@ -69,13 +69,15 @@ const LOCAL_ASSESSMENT_GROUPS = {
 function request(options) {
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
+    const header = { ...options.header };
+    if (token) {
+      header.Authorization = `Bearer ${token}`;
+    }
+
     wx.request({
       ...options,
       url: `${SERVER_BASE_URL}/api/v1${options.url}`,
-      header: {
-        ...options.header,
-        'Authorization': `Bearer ${token}`
-      },
+      header,
       success(res) {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve(res.data);

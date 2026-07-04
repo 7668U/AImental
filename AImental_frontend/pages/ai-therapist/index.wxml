@@ -1,5 +1,5 @@
 <view class="page-container">
-  <image wx:if="{{isLoggedIn}}" class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/ai-therapist/chat-bg-window.png" mode="aspectFill"></image>
+  <image class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/ai-therapist/chat-bg-window.png" mode="aspectFill"></image>
 
   <view class="disclaimer-modal" wx:if="{{isDisclaimerVisible}}">
     <view class="disclaimer-content" catchtap="preventClose">
@@ -80,7 +80,6 @@
   </view>
 
   <view class="main-content {{isSidebarVisible ? 'main-content-pushed' : ''}}" bindtap="closeSidebar">
-    <block wx:if="{{isLoggedIn}}">
       <view class="top-bar" style="padding-top: {{statusBarHeight}}px;">
         <view class="nav-bar-content" style="height: {{navBarHeight}}px;">
           <view class="project-button" catchtap="toggleSidebar">
@@ -168,16 +167,5 @@
           <text>发送</text>
         </view>
       </view>
-    </block>
-
-    <block wx:else>
-      <view class="auth-shell">
-        <login-prompt
-          title="欢迎来到心情树洞"
-          subtitle="请先登录，开启你的心灵对话之旅"
-          bind:loginevent="handleLogin"
-        />
-      </view>
-    </block>
   </view>
 </view>

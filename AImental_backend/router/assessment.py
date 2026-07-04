@@ -121,13 +121,11 @@ def _build_assessment_response(record, include_scale_json: bool = False) -> Dict
     
     
 @router.get(
-    "/", 
-    response_model=List[ScaleInfoResponse], 
+    "/",
+    response_model=List[ScaleInfoResponse],
     summary="获取所有可用的测评量表列表"
 )
-def get_all_available_scales(
-    current_user_id: str = Depends(get_current_user_id)
-):
+def get_all_available_scales():
     scales = assessment_tables.get_all_scales()
     return [_build_scale_info(scale) for scale in scales]
 

@@ -1,6 +1,4 @@
 {
-  "usingComponents": {
-    "login-prompt": "/components/login-prompt/login-prompt"
-  },
-  "navigationStyle": "custom" 
+  "usingComponents": {},
+  "navigationStyle": "custom"
 }

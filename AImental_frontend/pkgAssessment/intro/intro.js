@@ -7,13 +7,15 @@ const API_BASE_URL = `${SERVER_BASE_URL}/api/v1`;
 function request(options) {
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
+    const header = { ...options.header };
+    if (token) {
+      header.Authorization = `Bearer ${token}`;
+    }
+
     wx.request({
       ...options,
       url: `${API_BASE_URL}${options.url}`,
-      header: {
-        ...options.header,
-        'Authorization': `Bearer ${token}`
-      },
+      header,
       success(res) {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve(res.data);

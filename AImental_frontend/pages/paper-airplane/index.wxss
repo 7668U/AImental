@@ -201,7 +201,7 @@ page {
   max-width: 360rpx;
   min-height: 100%;
   padding-top: 48rpx;
-  margin-left: 34rpx;
+  margin-left: 72rpx;
   box-sizing: border-box;
   overflow: hidden;
 }

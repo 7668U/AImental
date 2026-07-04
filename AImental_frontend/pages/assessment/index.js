@@ -45,6 +45,7 @@ Page({
 
   onShow() {
     this.checkLoginStatus();
+    this.checkDisclaimer();
     const systemInfo = wx.getSystemInfoSync();
     this.setData({
       statusBarHeight: systemInfo.statusBarHeight
@@ -55,7 +56,6 @@ Page({
     const token = wx.getStorageSync('token');
     if (token) {
       this.setData({ isLoggedIn: true });
-      this.checkDisclaimer();
     } else {
       this.setData({ isLoggedIn: false });
     }

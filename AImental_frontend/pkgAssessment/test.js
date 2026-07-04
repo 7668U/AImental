@@ -1,4 +1,5 @@
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
+const { loginWithBackend } = require('../utils/auth.js');
 // pages/assessment/test.js (兼容版)
 
 const API_BASE_URL = 'https://api.feelyourself.cn';
@@ -110,12 +111,16 @@ Page({
 
   fetchScaleData(scaleId) {
     wx.showLoading({ title: '加载中...' });
+    const token = wx.getStorageSync('token');
+    const header = {};
+    if (token) {
+      header.Authorization = `Bearer ${token}`;
+    }
+
     wx.request({
       url: `${API_BASE_URL}/api/v1/assessments/${scaleId}`,
       method: 'GET',
-      header: {
-        'Authorization': `Bearer ${wx.getStorageSync('token')}`
-      },
+      header,
       success: (res) => {
         console.log('API 原始响应:', res); 
         
@@ -309,6 +314,40 @@ Page({
     });
   },
 
+  promptLoginForResult() {
+    wx.showModal({
+      title: '登录后查看结果',
+      content: '测评可以先体验，登录后就能生成并保存你的个人结果。',
+      confirmText: '去登录',
+      cancelText: '先逛逛',
+      confirmColor: '#ff6b16',
+      success: (res) => {
+        if (res.confirm) {
+          this.loginAndSubmitAssessment();
+        }
+      }
+    });
+  },
+
+  async loginAndSubmitAssessment() {
+    wx.showLoading({ title: '登录中...' });
+    try {
+      const tokenRes = await loginWithBackend(`${API_BASE_URL}/api/v1`);
+      if (!tokenRes || !tokenRes.access_token) {
+        throw new Error('登录接口未返回 token');
+      }
+
+      wx.setStorageSync('token', tokenRes.access_token);
+      wx.hideLoading();
+      wx.showToast({ title: '登录成功', icon: 'success' });
+      this.submitAssessment();
+    } catch (error) {
+      wx.hideLoading();
+      console.error('测评提交前登录失败:', error);
+      wx.showToast({ title: '登录失败，请重试', icon: 'none' });
+    }
+  },
+
   submitAssessment() {
     if (this.data.isSubmitting) return;
 
@@ -328,14 +367,13 @@ Page({
       return;
     }
     
-    this.setData({ isSubmitting: true });
-    
     const token = wx.getStorageSync('token');
     if (!token) {
-      wx.showToast({ title: '请先登录', icon: 'none' });
-      this.setData({ isSubmitting: false });
+      this.promptLoginForResult();
       return;
     }
+
+    this.setData({ isSubmitting: true });
 
     const requestData = {
       scale_id: this.data.scaleId,

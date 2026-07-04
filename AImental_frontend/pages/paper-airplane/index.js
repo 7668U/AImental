@@ -88,6 +88,27 @@ const AIRPLANE_SAFE_SLOTS = [
   { top: 1026, left: 338, rotate: 16, size: 74 },
 ];
 
+const GUEST_AIRPLANES = [
+  {
+    id: 'guest-1',
+    message: '有些心事可以先放在风里。等你准备好了，再慢慢说出来。',
+    asset_number: 'P03',
+    isGuestDemo: true
+  },
+  {
+    id: 'guest-2',
+    message: '今天辛苦啦。哪怕只是一点点松口气，也值得被认真接住。',
+    asset_number: 'P11',
+    isGuestDemo: true
+  },
+  {
+    id: 'guest-3',
+    message: '如果暂时没有答案，也没关系。先陪自己待一会儿。',
+    asset_number: 'P18',
+    isGuestDemo: true
+  }
+];
+
 function buildPositionedAirplane(airplane, index) {
   const slot = AIRPLANE_SAFE_SLOTS[index % AIRPLANE_SAFE_SLOTS.length];
   const asset = getAirplaneAsset(airplane, index);
@@ -172,6 +193,10 @@ function normalizeCollectedAirplane(airplane, index) {
   };
 }
 
+function buildGuestAirplanes() {
+  return GUEST_AIRPLANES.map(buildPositionedAirplane);
+}
+
 function formatReadMessage(message) {
   const text = String(message || '').trim();
   if (!text) {
@@ -194,6 +219,7 @@ Page({
     openedAirplaneId: null,
     openedAirplaneCollected: false,
     openedFromBasket: false,
+    openedIsGuestDemo: false,
     openedAirplaneAssetNumber: '',
     openedAirplaneAssetPath: '',
     airplanes: [],
@@ -214,24 +240,37 @@ Page({
     if (!token) {
       this.setData({
         isLoggedIn: false,
-        showWriteModal: false,
-        showReadModal: false,
         showBasketModal: false,
-        airplanes: [],
+        airplanes: buildGuestAirplanes(),
         collectedAirplanes: [],
       });
       return;
     }
 
     this.setData({ isLoggedIn: true });
-    if (this.data.airplanes.length === 0) {
+    if (this.data.airplanes.length === 0 || this.data.airplanes.some(item => item.isGuestDemo)) {
       this.fetchAirplanes();
     }
   },
 
+  promptLogin(content = '登录后可以继续使用这个功能。') {
+    wx.showModal({
+      title: '登录后继续',
+      content,
+      confirmText: '去登录',
+      cancelText: '先逛逛',
+      confirmColor: '#ff6b16',
+      success: (res) => {
+        if (res.confirm) {
+          this.handleLogin();
+        }
+      }
+    });
+  },
+
   handleLogin() {
     wx.showLoading({ title: '登录中...' });
-    loginWithBackend(API_BASE_URL)
+    return loginWithBackend(API_BASE_URL)
       .then((tokenRes) => {
         if (!tokenRes || !tokenRes.access_token) {
           throw new Error('登录接口未返回 token');
@@ -289,6 +328,7 @@ Page({
       showWriteModal: false,
       showReadModal: false,
       showBasketModal: false,
+      openedIsGuestDemo: false,
     });
   },
 
@@ -299,6 +339,26 @@ Page({
   async onAirplaneTap(e) {
     const airplaneId = e.currentTarget.dataset.id;
     const currentAirplane = this.data.airplanes.find(ap => String(ap.id) === String(airplaneId));
+
+    if (!this.data.isLoggedIn) {
+      if (currentAirplane && currentAirplane.isGuestDemo) {
+        this.setData({
+          openedMessage: formatReadMessage(currentAirplane.message),
+          openedAirplaneId: null,
+          openedAirplaneCollected: false,
+          openedFromBasket: false,
+          openedIsGuestDemo: true,
+          openedAirplaneAssetNumber: currentAirplane.assetNumber,
+          openedAirplaneAssetPath: currentAirplane.assetPath,
+          showReadModal: true,
+        });
+        return;
+      }
+
+      this.promptLogin('登录后可以捡起真实纸飞机，看看别人悄悄放飞的话。');
+      return;
+    }
+
     wx.showLoading({ title: '正在捡纸飞机...' });
     try {
       const pickedAirplane = await request({
@@ -314,6 +374,7 @@ Page({
         openedAirplaneId: pickedAirplane.id,
         openedAirplaneCollected: false,
         openedFromBasket: false,
+        openedIsGuestDemo: false,
         openedAirplaneAssetNumber: currentAirplane ? currentAirplane.assetNumber : '',
         openedAirplaneAssetPath: currentAirplane ? currentAirplane.assetPath : '',
         showReadModal: true,
@@ -336,6 +397,7 @@ Page({
       openedAirplaneId: null,
       openedAirplaneCollected: false,
       openedFromBasket: false,
+      openedIsGuestDemo: false,
       openedAirplaneAssetNumber: '',
       openedAirplaneAssetPath: '',
     });
@@ -348,6 +410,11 @@ Page({
     const message = this.data.newMessage.trim();
     if (!message) {
       wx.showToast({ title: '内容不能为空哦', icon: 'none' });
+      return;
+    }
+
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后可以把这张纸飞机放飞出去。');
       return;
     }
 
@@ -369,6 +436,11 @@ Page({
   },
 
   async collectOpenedAirplane() {
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后可以把喜欢的纸飞机收进飞机篓。');
+      return;
+    }
+
     if (!this.data.openedAirplaneId || this.data.openedAirplaneCollected) {
       this.hideModals();
       return;
@@ -390,6 +462,7 @@ Page({
         openedAirplaneCollected: true,
         openedAirplaneId: null,
         openedFromBasket: false,
+        openedIsGuestDemo: false,
         openedAirplaneAssetNumber: '',
         openedAirplaneAssetPath: '',
         showReadModal: false,
@@ -402,6 +475,11 @@ Page({
   },
 
   async openBasket() {
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后可以查看你的飞机篓。');
+      return;
+    }
+
     this.setData({ showBasketModal: true });
     wx.showLoading({ title: '打开飞机篓...' });
     try {
@@ -431,6 +509,7 @@ Page({
       openedAirplaneId: selectedAirplane.id,
       openedAirplaneCollected: true,
       openedFromBasket: true,
+      openedIsGuestDemo: false,
       openedAirplaneAssetNumber: selectedAirplane.assetNumber,
       openedAirplaneAssetPath: selectedAirplane.assetPath
     });
@@ -452,12 +531,18 @@ Page({
       openedAirplaneId: null,
       openedAirplaneCollected: false,
       openedFromBasket: false,
+      openedIsGuestDemo: false,
       openedAirplaneAssetNumber: '',
       openedAirplaneAssetPath: '',
     });
   },
 
   async discardCollectedAirplane() {
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后可以整理你的飞机篓。');
+      return;
+    }
+
     if (!this.data.openedAirplaneId) {
       this.returnOpenedAirplaneToBasket();
       return;

@@ -74,16 +74,35 @@ Page({
       // 如果已登录，才去获取打卡状态
       this.fetchCheckinData();
     } else {
-      this.setData({ isLoggedIn: false });
+      this.setData({
+        isLoggedIn: false,
+        hasCheckedInToday: false,
+        showCalendar: false
+      });
     }
   },
 
+  promptLogin(content = '登录后可以继续使用这个功能。') {
+    wx.showModal({
+      title: '登录后继续',
+      content,
+      confirmText: '去登录',
+      cancelText: '先逛逛',
+      confirmColor: '#ff6b16',
+      success: (res) => {
+        if (res.confirm) {
+          this.handleLogin();
+        }
+      }
+    });
+  },
+
   /**
-   * 新增：处理登录逻辑的函数，由 login-prompt 组件触发
+   * 新增：处理登录逻辑的函数，由需要账号的操作触发
    */
   handleLogin() {
     wx.showLoading({ title: '登录中...' });
-    loginWithBackend('https://api.feelyourself.cn/api/v1')
+    return loginWithBackend('https://api.feelyourself.cn/api/v1')
       .then((tokenRes) => {
         if (tokenRes.access_token) {
           wx.hideLoading();
@@ -123,6 +142,11 @@ Page({
    * 以下是原有的页面业务逻辑函数，保持不变
    */
   goToRecord() {
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后可以记录和保存你的今日心情。');
+      return;
+    }
+
     let url = '/pkgDailyCheckin/record';
     if (this.data.hasCheckedInToday) {
       url = '/pkgDailyCheckin/record?mode=edit';
@@ -131,6 +155,11 @@ Page({
   },
   
   openCalendar() {
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后可以查看你的心情日历。');
+      return;
+    }
+
     this.setData({ showCalendar: true });
   },
 
@@ -139,6 +168,11 @@ Page({
   },
 
   onDayTap(e) {
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后可以查看和补记心情。');
+      return;
+    }
+
     const { date, hasCheckin } = e.detail;
     
     if (hasCheckin) {
@@ -171,6 +205,11 @@ Page({
   },
 
   goToStatistics() {
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后可以查看你的心情分析。');
+      return;
+    }
+
     wx.navigateTo({
       url: '/pkgDailyCheckin/analysis'
     });
