@@ -60,8 +60,10 @@
     <view class="modal-mask" wx:if="{{showReadModal}}" bindtap="closeReadModal"></view>
     <view class="letter-modal" wx:if="{{showReadModal}}">
       <image class="letter-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/letter-paper-bg-clean.png?v=202607050210" mode="aspectFit"></image>
-      <scroll-view scroll-y="true" class="letter-message-scroll">
-        <view class="letter-message">{{openedMessage}}</view>
+      <scroll-view scroll-y="true" scroll-x="false" class="letter-message-scroll">
+        <view class="letter-message-box">
+          <text class="letter-message">{{openedMessage}}</text>
+        </view>
       </scroll-view>
       <view wx:if="{{!openedFromBasket}}" class="letter-actions">
         <button wx:if="{{openedAirplaneId}}" class="letter-action letter-action-plain" bindtap="collectOpenedAirplane">

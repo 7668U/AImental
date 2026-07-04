@@ -175,11 +175,11 @@ page {
 
 .letter-message-scroll {
   position: absolute;
-  left: 130rpx;
-  right: 130rpx;
+  left: 118rpx;
+  right: 118rpx;
   top: 336rpx;
   height: 356rpx;
-  padding: 50rpx 44rpx 42rpx;
+  padding: 0;
   z-index: 2;
   box-sizing: border-box;
   overflow: hidden;
@@ -196,14 +196,23 @@ page {
   pointer-events: none;
 }
 
+.letter-message-box {
+  width: 336rpx;
+  max-width: 336rpx;
+  min-height: 100%;
+  padding-top: 50rpx;
+  margin: 0 auto;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
 .letter-message {
   display: block;
-  width: 100%;
-  max-width: 100%;
-  min-height: 100%;
+  width: 336rpx;
+  max-width: 336rpx;
   color: #7a4b28;
-  font-size: 30rpx;
-  line-height: 1.78;
+  font-size: 28rpx;
+  line-height: 1.82;
   font-family: 'STKaiti', 'KaiTi', 'FangSong', 'PingFang SC', serif;
   font-weight: 500;
   letter-spacing: 0;
