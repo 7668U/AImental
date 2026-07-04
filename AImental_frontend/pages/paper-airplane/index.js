@@ -180,24 +180,7 @@ function formatReadMessage(message) {
 
   return text
     .replace(/\r\n/g, '\n')
-    .replace(/\r/g, '\n')
-    .split('\n')
-    .map(paragraph => {
-      const lines = [];
-      let line = '';
-      paragraph.split('').forEach(char => {
-        line += char;
-        if (line.length >= 10 || /[，。！？；、,.!?;]/.test(char)) {
-          lines.push(line);
-          line = '';
-        }
-      });
-      if (line) {
-        lines.push(line);
-      }
-      return lines.join('\n');
-    })
-    .join('\n');
+    .replace(/\r/g, '\n');
 }
 
 Page({

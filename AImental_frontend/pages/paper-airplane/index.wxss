@@ -175,11 +175,11 @@ page {
 
 .letter-message-scroll {
   position: absolute;
-  left: 178rpx;
-  right: 184rpx;
+  left: 142rpx;
+  right: 142rpx;
   top: 336rpx;
   height: 356rpx;
-  padding: 52rpx 18rpx 42rpx 34rpx;
+  padding: 48rpx 26rpx 42rpx 30rpx;
   z-index: 2;
   box-sizing: border-box;
   overflow: hidden;
@@ -202,14 +202,14 @@ page {
   max-width: 100%;
   min-height: 100%;
   color: #7a4b28;
-  font-size: 32rpx;
-  line-height: 1.82;
+  font-size: 30rpx;
+  line-height: 1.78;
   font-family: 'STKaiti', 'KaiTi', 'FangSong', 'PingFang SC', serif;
   font-weight: 500;
   letter-spacing: 0;
   text-align: left;
   white-space: pre-wrap;
-  word-break: break-all;
+  word-break: normal;
   overflow-wrap: break-word;
   box-sizing: border-box;
 }

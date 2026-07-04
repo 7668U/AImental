@@ -150,20 +150,19 @@
       <view class="input-dock">
         <view class="input-shell">
           <view class="input-smile" catchtap="toggleEmojiPanel">
-            <view class="smile-eye smile-eye-left"></view>
-            <view class="smile-eye smile-eye-right"></view>
-            <view class="smile-mouth"></view>
+            <image class="smile-icon" src="/images/icons/smile-orange.png" mode="aspectFit"></image>
           </view>
-          <input
+          <textarea
             class="input-field"
-            type="text"
             value="{{inputValue}}"
             bindinput="onInput"
             placeholder="输入你想说的话..."
             placeholder-class="input-placeholder"
-            confirm-type="send"
-            bindconfirm="onSend"
-          />
+            auto-height="{{true}}"
+            maxlength="1000"
+            show-confirm-bar="{{false}}"
+            cursor-spacing="22"
+          ></textarea>
         </view>
         <view class="send-button {{inputValue ? 'active' : ''}}" bindtap="onSend">
           <text>发送</text>
