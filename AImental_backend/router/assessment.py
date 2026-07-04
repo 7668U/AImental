@@ -23,9 +23,13 @@ from model.assessment import (
 # 部署时请务必替换为您的实际公网域名和端口
 # 例如: "https://www.your-domain.com"
 SERVER_BASE_URL = "http://127.0.0.1:8000"
+CDN_ASSET_BASE_URL = "https://assets.feelyourself.cn/miniprogram/assets/v1"
+MBTI_ASSET_VERSION = "202607050230"
 
 
 def _normalize_asset_url(url: Optional[str]) -> Optional[str]:
+    if url and url.startswith("/images/mbti/"):
+        return f"{CDN_ASSET_BASE_URL}{url}?v={MBTI_ASSET_VERSION}"
     if url and not url.startswith("http"):
         return f"{SERVER_BASE_URL}{url}"
     return url
