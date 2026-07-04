@@ -175,11 +175,11 @@ page {
 
 .letter-message-scroll {
   position: absolute;
-  left: 142rpx;
-  right: 142rpx;
+  left: 130rpx;
+  right: 130rpx;
   top: 336rpx;
   height: 356rpx;
-  padding: 48rpx 26rpx 42rpx 30rpx;
+  padding: 50rpx 44rpx 42rpx;
   z-index: 2;
   box-sizing: border-box;
   overflow: hidden;
@@ -209,8 +209,10 @@ page {
   letter-spacing: 0;
   text-align: left;
   white-space: pre-wrap;
-  word-break: normal;
+  word-break: break-all;
   overflow-wrap: break-word;
+  word-wrap: break-word;
+  overflow: hidden;
   box-sizing: border-box;
 }
 
