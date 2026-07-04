@@ -1,18 +1,16 @@
 <view class="profile-page">
-  <view class="ambient ambient-left"></view>
-  <view class="ambient ambient-right"></view>
-  <view class="spark spark-one">✦</view>
-  <view class="spark spark-two">✦</view>
+  <image class="profile-bg" src="/images/profile/profile-bg.jpg" mode="aspectFill"></image>
 
   <view class="top-safe" style="height: {{topSafeHeight}}px;"></view>
 
   <view class="profile-hero">
     <view class="avatar-ring">
+      <view class="avatar-orbit"></view>
       <image class="avatar" src="{{userInfo.avatar_url || 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png'}}" mode="aspectFill"></image>
+      <view class="avatar-heart">♥</view>
     </view>
     <view class="nickname">{{userInfo.nickname || '访客'}}</view>
-    <view class="profile-slogan">愿你被温柔以待，也能温柔待人</view>
-    <view class="heart-mark">♥</view>
+    <view class="profile-slogan"><text>⌁</text> 爱世界 爱自己 <text>⌁</text></view>
   </view>
 
   <view class="menu-card">

@@ -1,9 +1,9 @@
-// pages/ai-therapist/index.js
+﻿// pages/ai-therapist/index.js
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 const { loginWithBackend } = require('../../utils/auth.js');
 
 // --- 全局配置与网络请求封装 ---
-const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
+const API_BASE_URL = 'https://feelyourself.cn/api/v1';
 const WELCOME_MESSAGE = '你好呀，我是 Polaris 😊\n今天想聊些什么呢？';
 const DEFAULT_HISTORY_PREVIEW = '继续这段对话，和 Polaris 慢慢聊。';
 const THERAPIST_DISCLAIMER_STORAGE_KEY = 'hasShownMoodTreeholeDisclaimerV2';

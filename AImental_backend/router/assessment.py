@@ -24,6 +24,12 @@ from model.assessment import (
 # 例如: "https://www.your-domain.com"
 SERVER_BASE_URL = "http://127.0.0.1:8000"
 
+
+def _normalize_asset_url(url: Optional[str]) -> Optional[str]:
+    if url and not url.startswith("http"):
+        return f"{SERVER_BASE_URL}{url}"
+    return url
+
 # ---------------------------------------------------
 # Router 设置
 # ---------------------------------------------------
@@ -46,17 +52,25 @@ def _build_scale_info(scale_obj, include_json_data: bool = False) -> Optional[Di
     if not scale_obj:
         return None
 
+    try:
+        raw_scale_data = json.loads(scale_obj.json_data or "{}")
+    except (TypeError, ValueError, json.JSONDecodeError):
+        raw_scale_data = {}
+    raw_scale_info = raw_scale_data.get("scale_info") if isinstance(raw_scale_data, dict) else {}
+    cover_image_url = raw_scale_info.get("cover_image_url") if isinstance(raw_scale_info, dict) else None
+
     scale_info = {
         "id": scale_obj.id,
         "short_name": scale_obj.short_name,
         "name": scale_obj.name,
         "description": scale_obj.description,
+        "cover_image_url": _normalize_asset_url(cover_image_url),
         "category": scale_obj.category or "专业测试",
         "assessment_type": scale_obj.assessment_type or "scoring",
         **get_assessment_display_meta(scale_obj.short_name),
     }
     if include_json_data:
-        scale_info["json_data"] = json.loads(scale_obj.json_data)
+        scale_info["json_data"] = raw_scale_data
     return scale_info
 
 
@@ -65,8 +79,11 @@ def _normalize_result_details(result_details: Optional[Dict[str, Any]]) -> Optio
         return result_details
 
     image_url = result_details.get("image_url")
-    if image_url and not image_url.startswith("http"):
-        result_details["image_url"] = f"{SERVER_BASE_URL}{image_url}"
+    if image_url:
+        result_details["image_url"] = _normalize_asset_url(image_url)
+    result_card_url = result_details.get("result_card_url")
+    if result_card_url:
+        result_details["result_card_url"] = _normalize_asset_url(result_card_url)
     return result_details
 
 
@@ -121,6 +138,8 @@ def get_single_scale_details(scale_id: str):
     
     if not formatted_scale:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scale not found")
+
+    formatted_scale["cover_image_url"] = _normalize_asset_url(formatted_scale.get("cover_image_url"))
         
     # --- 4. 直接返回格式化好的字典 ---
     return formatted_scale

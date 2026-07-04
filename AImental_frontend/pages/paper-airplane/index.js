@@ -1,5 +1,5 @@
-// pages/paper-airplane/index.js
-const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
+﻿// pages/paper-airplane/index.js
+const API_BASE_URL = 'https://feelyourself.cn/api/v1';
 
 function request(options) {
   return new Promise((resolve, reject) => {
@@ -32,6 +32,7 @@ function request(options) {
 }
 
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
+const { loginWithBackend } = require('../../utils/auth.js');
 
 const PAPER_PLANE_ICONS = [
   'paper_plane_01_01.png',
@@ -190,6 +191,7 @@ function formatReadMessage(message) {
 
 Page({
   data: {
+    isLoggedIn: false,
     showWriteModal: false,
     showReadModal: false,
     showBasketModal: false,
@@ -205,13 +207,51 @@ Page({
   },
 
   onLoad() {
-    this.fetchAirplanes();
+    this.checkLoginStatus();
   },
 
   onShow() {
+    this.checkLoginStatus();
+  },
+
+  checkLoginStatus() {
+    const token = wx.getStorageSync('token');
+
+    if (!token) {
+      this.setData({
+        isLoggedIn: false,
+        showWriteModal: false,
+        showReadModal: false,
+        showBasketModal: false,
+        airplanes: [],
+        collectedAirplanes: [],
+      });
+      return;
+    }
+
+    this.setData({ isLoggedIn: true });
     if (this.data.airplanes.length === 0) {
       this.fetchAirplanes();
     }
+  },
+
+  handleLogin() {
+    wx.showLoading({ title: '登录中...' });
+    loginWithBackend(API_BASE_URL)
+      .then((tokenRes) => {
+        if (!tokenRes || !tokenRes.access_token) {
+          throw new Error('登录接口未返回 token');
+        }
+        wx.setStorageSync('token', tokenRes.access_token);
+        wx.hideLoading();
+        wx.showToast({ title: '登录成功', icon: 'success' });
+        this.checkLoginStatus();
+      })
+      .catch((error) => {
+        wx.hideLoading();
+        console.error('纸飞机登录失败:', error);
+        wx.showToast({ title: '登录失败，请重试', icon: 'none' });
+      });
   },
 
   async fetchAirplanes() {

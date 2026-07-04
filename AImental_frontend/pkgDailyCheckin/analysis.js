@@ -1,8 +1,8 @@
-// pages/daily-checkin/analysis.js
+﻿// pages/daily-checkin/analysis.js
 import * as echarts from './components-ecanvas/ec-canvas/echarts';
 
 // --- 全局配置 ---
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'https://feelyourself.cn';
 
 const ANALYSIS_TYPE_MAP = {
   mood_distribution: 'mood',
@@ -149,6 +149,7 @@ navigateBack() {
           analysisResult: {
             chartData: chartRes.data,
             interpretation: aiRes.data.summary_text || chartRes.data.interpretation,
+            colorMixInterpretation: '',
             aiReport: aiRes.data.report_text || ''
           },
           isLoading: false
@@ -224,14 +225,21 @@ navigateBack() {
       .then((res) => {
         const payload = res.data || {};
         const imageResult = payload.image_result || {};
-        this.setData({
+        const colorMixInterpretation = this.buildColorMixInterpretation(payload);
+        const nextData = {
           colorCardResult: {
             ...payload,
             imageUrl: this.normalizeAssetUrl(imageResult.background_image_url),
             isCached: !!imageResult.cached,
           },
           colorCardError: imageResult.background_image_url ? '' : (imageResult.error || 'AI 颜色背景图暂时生成失败')
-        });
+        };
+
+        if (this.data.analysisResult) {
+          nextData['analysisResult.colorMixInterpretation'] = colorMixInterpretation;
+        }
+
+        this.setData(nextData);
       })
       .catch((err) => {
         this.setData({
@@ -242,6 +250,15 @@ navigateBack() {
       .finally(() => {
         this.setData({ isColorCardLoading: false });
       });
+  },
+
+  buildColorMixInterpretation(colorCardPayload) {
+    const namingResult = colorCardPayload.naming_result || {};
+    const mixedColor = colorCardPayload.mixed_color || {};
+    const colorName = namingResult.color_name || mixedColor.hex || '';
+    if (!colorName) return '';
+
+    return `把你这段时间记录下来的颜色混合在一起，得到的总和颜色是「${colorName}」。`;
   },
 
   previewColorCardImage() {

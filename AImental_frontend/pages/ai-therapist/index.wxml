@@ -1,5 +1,5 @@
 <view class="page-container">
-  <image class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/ai-therapist/chat-bg-window.png" mode="aspectFill"></image>
+  <image wx:if="{{isLoggedIn}}" class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/ai-therapist/chat-bg-window.png" mode="aspectFill"></image>
 
   <view class="disclaimer-modal" wx:if="{{isDisclaimerVisible}}">
     <view class="disclaimer-content" catchtap="preventClose">
@@ -174,7 +174,7 @@
     <block wx:else>
       <view class="auth-shell">
         <login-prompt
-          title="欢迎来到AI心理疗愈室"
+          title="欢迎来到心情树洞"
           subtitle="请先登录，开启你的心灵对话之旅"
           bind:loginevent="handleLogin"
         />

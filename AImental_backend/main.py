@@ -23,7 +23,7 @@ from model.analysis import Analysis
 from model.emotion_color_card import EmotionColorCardCache
 from model.history_analysis import HistoryAnalysis
 from model.feedback import Feedback
-from model.promotion import TestRecord
+from model.promotion import TestRecord, SoulDrinkRecord
 from model.airplane import PaperAirplane, paper_airplane_table
 from model.note import note_table, NoteItem
 if ENABLE_COMMUNITY_BACKEND:
@@ -213,6 +213,7 @@ def on_startup():
         Analysis: status_db,
         EmotionColorCardCache: status_db,
         TestRecord: promotion_db,
+        SoulDrinkRecord: promotion_db,
         PaperAirplane: airplane_db,
         NoteItem: note_db,
     }

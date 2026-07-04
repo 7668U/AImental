@@ -1,6 +1,8 @@
-// app.js (全局WebSocket与导航栏计算最终合并版)
+﻿// app.js (全局WebSocket与导航栏计算最终合并版)
 
 
+
+const ENABLE_COMMUNITY_WEBSOCKET = false;
 
 App({
 
@@ -14,9 +16,13 @@ App({
   
   
   
-      // b. 【新增】启动全局WebSocket管理器
+      // b. 心灵社区已下线，默认不启动全局WebSocket
   
-      this.webSocketManager.connect();
+      if (ENABLE_COMMUNITY_WEBSOCKET) {
+
+        this.webSocketManager.connect();
+
+      }
   
     },
   
@@ -139,6 +145,12 @@ App({
       // 连接函数
   
       connect() {
+
+        if (!ENABLE_COMMUNITY_WEBSOCKET) {
+
+          return;
+
+        }
   
         if (this.isSocketOpen) return;
   
@@ -156,7 +168,7 @@ App({
   
         this.socketTask = wx.connectSocket({
   
-          url: 'ws://127.0.0.1:8000/api/v1/community/ws?token=' + token,
+          url: 'wss://feelyourself.cn/api/v1/community/ws?token=' + token,
   
         });
   
@@ -305,6 +317,14 @@ App({
       },
   
       reconnect() {
+
+        if (!ENABLE_COMMUNITY_WEBSOCKET) {
+
+          this.clearReconnectTimer();
+
+          return;
+
+        }
   
         if (this.isReconnecting) return;
   

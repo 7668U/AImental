@@ -520,6 +520,11 @@ page {
   white-space: pre-wrap;
 }
 
+.color-mix-content {
+  display: block;
+  margin-bottom: 14rpx;
+}
+
 /* AI报告卡片的特殊样式 */
 .ai-card {
   overflow: hidden;

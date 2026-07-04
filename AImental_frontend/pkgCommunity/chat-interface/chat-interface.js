@@ -1,6 +1,6 @@
-// pages/ai-community/chat-interface/chat-interface.js
-const API_BASE_URL = 'http://127.0.0.1:8000/api/v1/community';
-const WS_BASE_URL = 'ws://127.0.0.1:8000/api/v1/community';
+﻿// pages/ai-community/chat-interface/chat-interface.js
+const API_BASE_URL = 'https://feelyourself.cn/api/v1/community';
+const WS_BASE_URL = 'wss://feelyourself.cn/api/v1/community';
 const app = getApp();
 
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');

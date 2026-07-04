@@ -3,7 +3,7 @@
 
 .login-prompt-container {
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -15,7 +15,8 @@
    * 我们主要增大了第三个值 (下边距)，把内容从底部顶上去。
    * 您可以调整 150rpx 这个值，值越大，整体上移的距离就越多。
    */
-  padding: 40rpx 40rpx 150rpx;
+  padding: 40rpx 40rpx calc(150rpx + env(safe-area-inset-bottom));
+  background: #fffaf2;
 
   box-sizing: border-box;
 }

@@ -8,7 +8,26 @@
 
   <block wx:else>
 
-    <block wx:if="{{result.scale_details.assessment_type === 'scoring'}}">
+    <block wx:if="{{isSoulDrinkResult}}">
+      <view class="soul-drink-result-shell">
+        <image
+          wx:if="{{soulDrinkResultCardUrl}}"
+          class="soul-drink-result-image"
+          src="{{soulDrinkResultCardUrl}}"
+          mode="widthFix"
+          show-menu-by-longpress="{{true}}"
+        />
+        <view wx:else class="result-card ai-empty-card">
+          <view class="card-title">
+            <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
+            <text>结果图加载失败</text>
+          </view>
+          <view class="card-content">本次结果已生成，但暂时没有找到对应的结果图。</view>
+        </view>
+      </view>
+    </block>
+
+    <block wx:elif="{{result.scale_details.assessment_type === 'scoring'}}">
       <view class="result-card summary-card">
         <view class="score-display">
           <text class="score-value">{{result.final_score}}</text>
@@ -45,7 +64,7 @@
     </block>
 
     <block wx:elif="{{result.scale_details.assessment_type === 'categorical'}}">
-      <view class="result-card personality-card" wx:if="{{!fortuneReport}}">
+      <view class="result-card personality-card" wx:if="{{!talentRadarReport && !fortuneReport}}">
         <view class="personality-image-container" wx:if="{{result.result_details.image_url}}">
           <image class="personality-image" src="{{result.result_details.image_url}}" mode="aspectFit" />
         </view>
@@ -65,6 +84,18 @@
       </view>
 
       <block wx:if="{{talentRadarReport}}">
+        <view class="result-card personality-card talent-summary-card">
+          <view class="personality-major">{{talentRadarReport.summaryTitle}}</view>
+
+          <view class="talent-summary-subtitle" wx:if="{{talentRadarReport.summarySubtitle}}">
+            辅助天赋：{{talentRadarReport.summarySubtitle}}
+          </view>
+
+          <view class="personality-motto" wx:if="{{result.result_details.college_motto}}">
+            “{{result.result_details.college_motto}}”
+          </view>
+        </view>
+
         <view class="result-card talent-hero-card">
           <view class="talent-badge">显性天赋</view>
           <view class="talent-hero-title">{{talentRadarReport.primaryTitle}}</view>
@@ -130,19 +161,6 @@
             <view class="analysis-list-item" wx:if="{{talentRadarReport.stressSummary}}">
               <text class="list-dot"></text>
               <text class="list-text">{{talentRadarReport.stressSummary}}</text>
-            </view>
-          </view>
-        </view>
-
-        <view class="result-card detail-card" wx:if="{{talentRadarReport.scoreItems.length > 0}}">
-          <view class="card-title">
-            <image class="card-icon" src="/images/icons/icon-report.png"></image>
-            <text>八维天赋分布</text>
-          </view>
-          <view class="detail-pair-list">
-            <view class="detail-pair-item" wx:for="{{talentRadarReport.scoreItems}}" wx:key="label">
-              <text class="detail-pair-label">{{item.label}}</text>
-              <text class="detail-pair-value">{{item.value}} 题 · {{item.ratio}}%</text>
             </view>
           </view>
         </view>
@@ -220,7 +238,8 @@
       <view class="result-card detail-card" wx:if="{{!talentRadarReport && !fortuneReport && (result.result_details.in_relationships || result.result_details.under_stress || result.result_details.facing_change)}}">
         <view class="card-title">
           <image class="card-icon" src="/images/icons/icon-report.png"></image>
-          <text>你的潜意识画像</text>
+          <text wx:if="{{result.result_details.profile_title}}">{{result.result_details.profile_title}}</text>
+          <text wx:else>你的潜意识画像</text>
         </view>
         <view class="analysis-list">
           <view class="analysis-list-item" wx:if="{{result.result_details.in_relationships}}">
@@ -285,7 +304,7 @@
       </view>
     </block>
 
-    <view class="result-card ai-card" wx:if="{{aiAnalysisSections.length > 0}}">
+    <view class="result-card ai-card" wx:if="{{!isSoulDrinkResult && aiAnalysisSections.length > 0}}">
       <view class="card-title">
         <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
         <text>{{analysisTitle}}</text>
@@ -317,6 +336,13 @@
             </view>
           </view>
 
+          <view wx:if="{{item.type === 'details' && item.detailItems.length > 0}}" class="detail-pair-list">
+            <view class="detail-pair-item" wx:for="{{item.detailItems}}" wx:for-item="detail" wx:key="label">
+              <text class="detail-pair-label">{{detail.label}}</text>
+              <text class="detail-pair-value">{{detail.value}}</text>
+            </view>
+          </view>
+
           <view wx:if="{{item.type === 'list'}}" class="analysis-list">
             <view class="analysis-list-item" wx:for="{{item.list}}" wx:for-item="line" wx:key="*this">
               <text class="list-dot"></text>
@@ -327,7 +353,7 @@
       </view>
     </view>
 
-    <view class="result-card ai-empty-card" wx:else>
+    <view class="result-card ai-empty-card" wx:elif="{{!isSoulDrinkResult}}">
       <image class="empty-bg-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/section-ai.png" mode="aspectFit"></image>
       <view class="card-title">
         <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>

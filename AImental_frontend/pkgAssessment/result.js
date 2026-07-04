@@ -1,8 +1,19 @@
-const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
+﻿const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 // pages/assessment/result.js (渐变条 + 文字标签最终版)
 
-const SERVER_BASE_URL = 'http://127.0.0.1:8000';
+const SERVER_BASE_URL = 'https://feelyourself.cn';
 const ASSESSMENTS_API_URL = `${SERVER_BASE_URL}/api/v1/assessments`;
+const DRINK_TI_ASSET_BASE = 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti';
+const SOUL_DRINK_RESULT_CARDS = {
+  STJ: `${DRINK_TI_ASSET_BASE}/result-cards/stj-unsweetened-oolong-tea.jpg`,
+  STP: `${DRINK_TI_ASSET_BASE}/result-cards/stp-lime-electrolyte-water.jpg`,
+  SFJ: `${DRINK_TI_ASSET_BASE}/result-cards/sfj-hot-milk-tea.jpg`,
+  SFP: `${DRINK_TI_ASSET_BASE}/result-cards/sfp-peach-sparkling-water.jpg`,
+  NTJ: `${DRINK_TI_ASSET_BASE}/result-cards/ntj-cold-brew-black-coffee.jpg`,
+  NTP: `${DRINK_TI_ASSET_BASE}/result-cards/ntp-special-cocktail.jpg`,
+  NFJ: `${DRINK_TI_ASSET_BASE}/result-cards/nfj-honey-grapefruit-tea.jpg`,
+  NFP: `${DRINK_TI_ASSET_BASE}/result-cards/nfp-colorful-fruit-tea.jpg`,
+};
 
 Page({
   data: {
@@ -23,6 +34,8 @@ Page({
     secondaryProfile: null,
     talentRadarReport: null,
     fortuneReport: null,
+    isSoulDrinkResult: false,
+    soulDrinkResultCardUrl: '',
   },
 
   onLoad(options) {
@@ -70,6 +83,11 @@ Page({
   processAndRender(resultData) {
     console.log("--- 接收到的测评结果数据 (resultData) ---", resultData);
     const normalizedResult = this.normalizeResultData(resultData);
+    const isSoulDrinkResult = normalizedResult?.scale_details?.short_name === 'SOUL-DRINK'
+      || normalizedResult?.scale_info?.short_name === 'SOUL-DRINK';
+    const soulDrinkResultCardUrl = isSoulDrinkResult
+      ? this.getSoulDrinkResultCardUrl(normalizedResult)
+      : '';
     const aiAnalysis = this.normalizeAiAnalysis(resultData);
     const aiSections = this.buildAiAnalysisSections(aiAnalysis);
     const fallbackSections = aiSections.length > 0 ? [] : this.buildFallbackAnalysisSections(normalizedResult);
@@ -103,7 +121,9 @@ Page({
       recommendedCareers,
       secondaryProfile,
       talentRadarReport,
-      fortuneReport
+      fortuneReport,
+      isSoulDrinkResult,
+      soulDrinkResultCardUrl
     });
     
     const type = normalizedResult?.scale_details?.assessment_type;
@@ -209,6 +229,29 @@ const scoreSegments = interpretations.map(interp => {
     return normalized;
   },
 
+  getSoulDrinkResultCardUrl(resultData) {
+    const details = resultData?.result_details || {};
+    const directUrl = details.result_card_url || details.resultCardUrl || details.result_card_image_url;
+    if (directUrl) {
+      return this.resolveAssetUrl(directUrl);
+    }
+
+    const typeCode = details.type_code || details.typeCode || resultData?.result_type || '';
+    const mappedUrl = SOUL_DRINK_RESULT_CARDS[String(typeCode).toUpperCase()];
+    if (mappedUrl) {
+      return this.resolveAssetUrl(mappedUrl);
+    }
+
+    return this.resolveAssetUrl(details.image_url || '');
+  },
+
+  resolveAssetUrl(url) {
+    if (!url) return '';
+    const normalizedUrl = String(url);
+    if (/^https?:\/\//.test(normalizedUrl)) return normalizedUrl;
+    return `${SERVER_BASE_URL}${normalizedUrl.startsWith('/') ? '' : '/'}${normalizedUrl}`;
+  },
+
   normalizeAiAnalysis(resultData) {
     const detailsAnalysis = resultData?.result_details?.ai_analysis;
     return resultData?.ai_analysis || detailsAnalysis || null;
@@ -229,16 +272,33 @@ const scoreSegments = interpretations.map(interp => {
       });
     }
 
-    if (Array.isArray(aiAnalysis.dimensions) && aiAnalysis.dimensions.length > 0) {
+    const dimensions = Array.isArray(aiAnalysis.dimensions)
+      ? aiAnalysis.dimensions
+          .map(item => {
+            if (!item || typeof item !== 'object') return null;
+            const evidenceText = Array.isArray(item.evidence) ? item.evidence.join('、') : '';
+            const label = item.label ? String(item.label).trim() : '';
+            const level = item.level ? String(item.level).trim() : '';
+            const summary = item.summary ? String(item.summary).trim() : '';
+            return {
+              ...item,
+              label,
+              level,
+              summary,
+              evidenceText
+            };
+          })
+          .filter(Boolean)
+          .filter(item => item.label || item.level || item.summary || item.evidenceText)
+      : [];
+
+    if (dimensions.length > 0) {
       sections.push({
         key: 'dimensions',
         title: '主要影响维度',
         type: 'dimensions',
         bgIcon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/section-ai.png',
-        dimensions: aiAnalysis.dimensions.map(item => ({
-          ...item,
-          evidenceText: Array.isArray(item.evidence) ? item.evidence.join('、') : ''
-        }))
+        dimensions
       });
     }
 
@@ -403,13 +463,16 @@ const scoreSegments = interpretations.map(interp => {
       .filter(key => !hiddenKeys[key])
       .map(key => {
         const value = resultDetails[key];
-        if (value === null || value === undefined || typeof value === 'object') {
+        if (value === null || value === undefined || typeof value === 'object' || typeof value === 'boolean') {
           return null;
         }
 
-        const displayValue = typeof value === 'number'
-          ? String(Math.round(value * 100) / 100)
-          : String(value).trim();
+        if (typeof value === 'string' && value.trim() === '') return null;
+
+        const numericValue = Number(value);
+        if (!Number.isFinite(numericValue)) return null;
+
+        const displayValue = String(Math.round(numericValue * 100) / 100);
 
         if (!displayValue) return null;
 
@@ -424,15 +487,14 @@ const scoreSegments = interpretations.map(interp => {
 
   buildTalentRadarReport(resultData) {
     const details = resultData?.result_details || {};
-    const breakdown = Array.isArray(details.tendency_breakdown) ? details.tendency_breakdown : [];
-    const scoreItems = breakdown.slice(0, 8).map(item => ({
-      label: item.title,
-      value: item.count,
-      ratio: Math.round((item.ratio || 0) * 100)
-    }));
+    const levelParts = this.splitTalentResultLevel(resultData?.result_level);
+    const summaryTitle = details.primary_title || levelParts[0] || resultData.result_level || '';
+    const summarySubtitle = details.secondary_title || levelParts[1] || '';
 
     return {
-      primaryTitle: details.primary_title || resultData.result_level || '',
+      summaryTitle,
+      summarySubtitle: summarySubtitle && summarySubtitle !== summaryTitle ? summarySubtitle : '',
+      primaryTitle: details.primary_title || summaryTitle,
       primaryTagline: details.primary_tagline || '',
       primarySummary: details.primary_summary || '',
       primaryBestScene: details.primary_best_scene || '',
@@ -448,9 +510,16 @@ const scoreSegments = interpretations.map(interp => {
       stressTitle: details.stress_title || '',
       stressSummary: details.stress_summary || details.stress_description || '',
       radarSummary: details.radar_summary || '',
-      latentSummary: details.latent_summary || '',
-      scoreItems
+      latentSummary: details.latent_summary || ''
     };
+  },
+
+  splitTalentResultLevel(level) {
+    if (level === null || level === undefined) return [];
+    return String(level)
+      .split('×')
+      .map(part => part.trim())
+      .filter(Boolean);
   },
 
   buildFortuneReport(resultData) {

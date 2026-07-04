@@ -1,8 +1,8 @@
-const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
+﻿const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 const { loginWithBackend } = require('../../utils/auth.js');
 // pages/assessment/index.js
 
-const SERVER_BASE_URL = 'http://127.0.0.1:8000';
+const SERVER_BASE_URL = 'https://feelyourself.cn';
 const ASSESSMENT_DISCLAIMER_STORAGE_KEY = 'hasShownAssessmentDisclaimerV1';
 const ASSESSMENT_GROUPS = [
   {

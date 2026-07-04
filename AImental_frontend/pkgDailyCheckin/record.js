@@ -1,7 +1,7 @@
-// pages/daily-checkin/record.js
+﻿// pages/daily-checkin/record.js
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'https://feelyourself.cn';
 const MAX_PHOTOS = 3;
 
 const MOOD_OPTIONS = [
@@ -226,7 +226,18 @@ Page({
   onLoad(options) {
     this.updateNavMetrics();
 
-    if (options.mode === 'edit' || options.mode === 'view') {
+    if (options.mode === 'create') {
+      const dateStr = options.date || this.getTodayString();
+      const canEdit = this.isWithinRecentDays(dateStr, 3);
+      this.setData({
+        isEditMode: false,
+        isLocked: !canEdit,
+        pageDate: dateStr,
+        dateLabel: this.formatDateLabel(dateStr),
+        navTitle: canEdit ? (dateStr === this.getTodayString() ? '今日心情记录' : '补记心情记录') : '历史心情记录',
+      });
+      wx.setNavigationBarTitle({ title: canEdit ? '补记心情记录' : '查看历史心情' });
+    } else if (options.mode === 'edit' || options.mode === 'view') {
       const dateStr = options.date || this.getTodayString();
       this.setData({
         isEditMode: true,
@@ -317,7 +328,7 @@ Page({
 
     wx.showLoading({ title: '加载中...' });
     wx.request({
-      url: `http://127.0.0.1:8000/api/v1/checkin/date/${dateToFetch}`,
+      url: `https://feelyourself.cn/api/v1/checkin/date/${dateToFetch}`,
       method: 'GET',
       header: { 'Authorization': `Bearer ${token}` },
       success: (res) => {
@@ -526,6 +537,7 @@ Page({
       tags: selectedStatuses.map(item => item.name).join(','),
       color: selectedColor.value,
       text_content: this.data.textContent,
+      record_date: this.data.pageDate || this.getTodayString(),
     };
 
     wx.showLoading({ title: '正在保存...' });
@@ -539,7 +551,7 @@ Page({
 
   createCheckinRecord(data) {
     this.sendRequest({
-      url: 'http://127.0.0.1:8000/api/v1/checkin/',
+      url: 'https://feelyourself.cn/api/v1/checkin/',
       method: 'POST',
       data,
       successCallback: (res) => {
@@ -554,7 +566,7 @@ Page({
 
   updateCheckinRecord(data) {
     this.sendRequest({
-      url: `http://127.0.0.1:8000/api/v1/checkin/${this.data.checkinId}`,
+      url: `https://feelyourself.cn/api/v1/checkin/${this.data.checkinId}`,
       method: 'PUT',
       data,
       successCallback: () => {

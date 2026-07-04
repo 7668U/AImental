@@ -1,6 +1,6 @@
-// pages/profile/history.js
+﻿// pages/profile/history.js
 
-const SERVER_BASE_URL = 'http://127.0.0.1:8000';
+const SERVER_BASE_URL = 'https://feelyourself.cn';
 const ASSESSMENTS_API_URL = `${SERVER_BASE_URL}/api/v1/assessments`;
 const { getScaleDisplayName } = require('../utils/assessment-display.js');
 
@@ -123,8 +123,9 @@ Page({
       }
         
       record.x_offset = 0;
+      record.show_delete = false;
       record.completed_at_formatted = this.formatDateToYYYYMMDD(record.completed_at);
-      record.display_result_level = this.getDisplayResultLevel(record.result_level);
+      record.display_result_level = this.getDisplayResultLevel(record.result_level, record);
       record.display_final_score = this.formatScore(record.final_score);
       
       const scaleId = record.scale_info.id;
@@ -148,11 +149,37 @@ Page({
     return Array.from(historyMap.values());
   },
 
-  getDisplayResultLevel(level) {
+  getDisplayResultLevel(level, record = {}) {
+    if (record.scale_info?.short_name === 'AGLT') {
+      const details = this.parseResultDetails(record.result_details);
+      const primaryTitle = this.getFirstTalentLevel(details.primary_title || level);
+      if (primaryTitle) return primaryTitle;
+    }
+
     if (level === null || level === undefined) return '结果待确认';
     const text = String(level).trim();
     if (!text || text.toLowerCase() === 'null') return '结果待确认';
     return text;
+  },
+
+  parseResultDetails(details) {
+    if (!details) return {};
+    if (typeof details === 'object') return details;
+    if (typeof details !== 'string') return {};
+
+    try {
+      return JSON.parse(details) || {};
+    } catch (error) {
+      console.warn('解析历史结果详情失败:', error);
+      return {};
+    }
+  },
+
+  getFirstTalentLevel(level) {
+    if (level === null || level === undefined) return '';
+    const text = String(level).trim();
+    if (!text || text.toLowerCase() === 'null') return '';
+    return text.split('×').map(part => part.trim()).filter(Boolean)[0] || text;
   },
 
   formatScore(score) {
@@ -173,7 +200,11 @@ Page({
     if (deltaX < 0) {
       const newOffset = Math.max(deltaX, -DELETE_BTN_WIDTH);
       const key = `groupedHistory[${groupIndex}].records[${recordIndex}].x_offset`;
-      this.setData({ [key]: newOffset });
+      const showKey = `groupedHistory[${groupIndex}].records[${recordIndex}].show_delete`;
+      this.setData({
+        [key]: newOffset,
+        [showKey]: true
+      });
     }
   },
 
@@ -184,8 +215,12 @@ Page({
     const threshold = DELETE_BTN_WIDTH / 2;
     const finalOffset = deltaX < -threshold ? -DELETE_BTN_WIDTH : 0;
     const key = `groupedHistory[${groupIndex}].records[${recordIndex}].x_offset`;
+    const showKey = `groupedHistory[${groupIndex}].records[${recordIndex}].show_delete`;
     this.closeOtherSwipedItems(groupIndex, recordIndex);
-    this.setData({ [key]: finalOffset });
+    this.setData({
+      [key]: finalOffset,
+      [showKey]: finalOffset < 0
+    });
   },
 
   closeOtherSwipedItems(currentGroupIndex, currentRecordIndex) {
@@ -194,6 +229,7 @@ Page({
       group.records.forEach((record, rIndex) => {
         if ((gIndex !== currentGroupIndex || rIndex !== currentRecordIndex) && record.x_offset < 0) {
           updates[`groupedHistory[${gIndex}].records[${rIndex}].x_offset`] = 0;
+          updates[`groupedHistory[${gIndex}].records[${rIndex}].show_delete`] = false;
         }
       });
     });
@@ -213,7 +249,11 @@ Page({
           this.deleteRecord(groupIndex, recordIndex, recordId);
         } else {
           const key = `groupedHistory[${groupIndex}].records[${recordIndex}].x_offset`;
-          this.setData({ [key]: 0 });
+          const showKey = `groupedHistory[${groupIndex}].records[${recordIndex}].show_delete`;
+          this.setData({
+            [key]: 0,
+            [showKey]: false
+          });
         }
       }
     });

@@ -1,12 +1,15 @@
-const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
+﻿const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 const { getScaleDisplayName, getScaleIconName } = require('../../utils/assessment-display.js');
+
+const SERVER_BASE_URL = 'https://feelyourself.cn';
+const API_BASE_URL = `${SERVER_BASE_URL}/api/v1`;
 
 function request(options) {
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
     wx.request({
       ...options,
-      url: `http://127.0.0.1:8000/api/v1${options.url}`,
+      url: `${API_BASE_URL}${options.url}`,
       header: {
         ...options.header,
         'Authorization': `Bearer ${token}`
@@ -93,8 +96,8 @@ const SCALE_INTRO_COPY = {
     instruction: '不要分析太久，请按第一反应选择最贴近你内心画面的答案。'
   },
   ICI: {
-    summary: '探索你在人际中的吸引力和闪光点，帮助你看见自己的独特魅力。',
-    instruction: '请凭直觉选择最符合自己的答案。'
+    summary: '从情绪感知、表达、共情倾听和社交自信里，看看你在人际互动中的魅力风格。',
+    instruction: '请凭直觉选择最符合自己的答案，不需要把它当成严肃诊断。'
   },
   'REAL-MAJOR-V1': {
     summary: '通过轻松情境题，看看你更偏爱哪种任务、成就感与工作方式，找到更适合你的职业方向。',
@@ -107,6 +110,10 @@ const SCALE_INTRO_COPY = {
   RFLT: {
     summary: '探索你的近期好运气，看看生活正在悄悄送你什么小惊喜！',
     instruction: '请凭直觉选择最像自己的答案，抽取一张属于你的近期好运签。'
+  },
+  'SOUL-DRINK': {
+    summary: '用 15 道第一反应题，测出你的灵魂饮料是哪一杯。',
+    instruction: '请不要选“我应该怎样”，而是选“我更自然会怎样”。'
   }
 };
 
@@ -147,6 +154,7 @@ Page({
       scaleData.name = displayName;
       scaleData.displayName = displayName;
       scaleData.iconPath = `https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/scale-icons/${getScaleIconName(scaleData.short_name)}.png`;
+      scaleData.coverImagePath = this.resolveAssetUrl(scaleData.cover_image_url);
       scaleData.coverSummary = shortCopy.summary;
       scaleData.coverInstruction = shortCopy.instruction;
 
@@ -173,6 +181,12 @@ Page({
     };
   },
 
+  resolveAssetUrl(url) {
+    if (!url) return '';
+    if (String(url).startsWith('http')) return url;
+    return `${SERVER_BASE_URL}${url}`;
+  },
+
   startTest() {
     const scaleId = this.data.scaleId;
     if (scaleId) {
@@ -190,6 +204,12 @@ Page({
   handleIconError(e) {
     this.setData({
       'scale.iconPath': DEFAULT_ICON_PATH
+    });
+  },
+
+  handleCoverImageError() {
+    this.setData({
+      'scale.coverImagePath': ''
     });
   },
 

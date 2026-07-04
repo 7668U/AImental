@@ -1,6 +1,6 @@
 page {
   min-height: 100%;
-  background: #fff8ed;
+  background: #fff8ee;
   color: #3f3229;
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
 }
@@ -8,56 +8,26 @@ page {
 .profile-page {
   position: relative;
   min-height: 100vh;
-  padding: 0 44rpx calc(190rpx + env(safe-area-inset-bottom));
+  padding: 0 26rpx calc(118rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
   overflow-x: hidden;
-  background:
-    radial-gradient(circle at 18% 22%, rgba(255, 210, 134, 0.38) 0, rgba(255, 210, 134, 0.18) 18%, rgba(255, 210, 134, 0) 34%),
-    radial-gradient(circle at 92% 38%, rgba(255, 255, 255, 0.82) 0, rgba(255, 255, 255, 0.42) 22%, rgba(255, 255, 255, 0) 38%),
-    linear-gradient(180deg, #fff4dd 0%, #fffaf4 45%, #ffffff 100%);
+  background: #fff8ee;
 }
 
-.top-safe {
-  height: 72px;
-}
-
-.ambient {
-  position: absolute;
-  border-radius: 50%;
+.profile-bg {
+  position: fixed;
+  z-index: 0;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100vh;
   pointer-events: none;
 }
 
-.ambient-left {
-  left: -84rpx;
-  top: 210rpx;
-  width: 330rpx;
-  height: 330rpx;
-  background: rgba(255, 220, 150, 0.2);
-}
-
-.ambient-right {
-  right: -140rpx;
-  top: 360rpx;
-  width: 320rpx;
-  height: 320rpx;
-  background: rgba(255, 255, 255, 0.58);
-}
-
-.spark {
-  position: absolute;
-  color: rgba(255, 255, 255, 0.92);
-  font-size: 34rpx;
-  line-height: 1;
-}
-
-.spark-one {
-  left: 252rpx;
-  top: 330rpx;
-}
-
-.spark-two {
-  right: 166rpx;
-  top: 212rpx;
+.top-safe {
+  position: relative;
+  z-index: 2;
+  height: 72px;
 }
 
 .profile-hero {
@@ -66,20 +36,35 @@ page {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 24rpx;
+  padding-top: 34rpx;
 }
 
 .avatar-ring {
-  width: 160rpx;
-  height: 160rpx;
+  position: relative;
+  width: 168rpx;
+  height: 168rpx;
   border-radius: 50%;
-  padding: 10rpx;
+  padding: 12rpx;
   box-sizing: border-box;
   background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 18rpx 36rpx rgba(184, 116, 39, 0.12);
+  box-shadow: 0 18rpx 38rpx rgba(184, 116, 39, 0.12), 0 0 0 14rpx rgba(255, 255, 255, 0.28);
+}
+
+.avatar-orbit {
+  position: absolute;
+  left: -78rpx;
+  top: 56rpx;
+  width: 320rpx;
+  height: 82rpx;
+  border: 4rpx solid rgba(255, 224, 185, 0.78);
+  border-radius: 50%;
+  transform: rotate(-16deg);
+  pointer-events: none;
 }
 
 .avatar {
+  position: relative;
+  z-index: 2;
   width: 100%;
   height: 100%;
   border-radius: 50%;
@@ -87,9 +72,27 @@ page {
   background: #ffe1a8;
 }
 
+.avatar-heart {
+  position: absolute;
+  z-index: 3;
+  right: -14rpx;
+  bottom: 6rpx;
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ff7f1f;
+  font-size: 31rpx;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10rpx 20rpx rgba(255, 139, 49, 0.16);
+}
+
 .nickname {
-  max-width: 620rpx;
-  margin-top: 32rpx;
+  max-width: 660rpx;
+  margin-top: 30rpx;
   font-size: 44rpx;
   line-height: 1.18;
   font-weight: 800;
@@ -102,35 +105,33 @@ page {
 }
 
 .profile-slogan {
-  margin-top: 16rpx;
-  font-size: 27rpx;
+  margin-top: 18rpx;
+  font-size: 28rpx;
   line-height: 1.35;
   color: #aa6c35;
   text-align: center;
   letter-spacing: 0;
 }
 
-.heart-mark {
-  margin-top: 16rpx;
-  color: #ffad71;
-  font-size: 28rpx;
-  line-height: 1;
+.profile-slogan text {
+  color: rgba(218, 149, 73, 0.46);
+  font-size: 25rpx;
 }
 
 .menu-card {
   position: relative;
   z-index: 2;
-  margin-top: 34rpx;
-  padding: 24rpx 40rpx;
-  border-radius: 40rpx;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 18rpx 44rpx rgba(142, 98, 50, 0.09);
+  margin: 28rpx 12rpx 0;
+  padding: 16rpx 38rpx;
+  border-radius: 34rpx;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 20rpx 46rpx rgba(142, 98, 50, 0.08);
   box-sizing: border-box;
 }
 
 .menu-item {
   position: relative;
-  min-height: 124rpx;
+  min-height: 126rpx;
   display: flex;
   align-items: center;
   box-sizing: border-box;
@@ -155,9 +156,9 @@ page {
 }
 
 .menu-icon-wrap {
-  width: 88rpx;
-  height: 88rpx;
-  margin-right: 28rpx;
+  width: 84rpx;
+  height: 84rpx;
+  margin-right: 30rpx;
   border-radius: 50%;
   background: linear-gradient(145deg, rgba(255, 250, 243, 0.96), rgba(255, 238, 216, 0.9));
   box-shadow: inset 0 0 0 1rpx rgba(255, 216, 178, 0.42);
@@ -168,8 +169,8 @@ page {
 }
 
 .menu-icon {
-  width: 52rpx;
-  height: 52rpx;
+  width: 50rpx;
+  height: 50rpx;
 }
 
 .menu-copy {
@@ -178,7 +179,7 @@ page {
 }
 
 .menu-title {
-  font-size: 32rpx;
+  font-size: 33rpx;
   line-height: 1.2;
   font-weight: 800;
   color: #3d332d;
@@ -187,7 +188,7 @@ page {
 
 .menu-desc {
   margin-top: 12rpx;
-  font-size: 24rpx;
+  font-size: 25rpx;
   line-height: 1.32;
   color: #8d8178;
   overflow: hidden;
@@ -210,11 +211,11 @@ page {
 .action-btn-container {
   position: relative;
   z-index: 2;
-  margin: 32rpx 40rpx 0;
+  margin: 28rpx 88rpx 0;
 }
 
 .action-btn {
-  height: 90rpx;
+  height: 88rpx;
   border-radius: 999rpx;
   display: flex;
   align-items: center;
@@ -244,34 +245,52 @@ page {
 
 @media (max-height: 700px) {
   .top-safe {
-    height: 54px;
+    height: 46px;
   }
 
   .profile-hero {
-    padding-top: 8rpx;
+    padding-top: 18rpx;
   }
 
   .avatar-ring {
-    width: 138rpx;
-    height: 138rpx;
+    width: 142rpx;
+    height: 142rpx;
   }
 
   .nickname {
-    margin-top: 22rpx;
+    margin-top: 20rpx;
     font-size: 38rpx;
   }
 
+  .profile-slogan {
+    margin-top: 12rpx;
+  }
+
   .menu-card {
-    margin-top: 24rpx;
-    padding-top: 16rpx;
-    padding-bottom: 16rpx;
+    margin-top: 20rpx;
+    padding-top: 12rpx;
+    padding-bottom: 12rpx;
   }
 
   .menu-item {
-    min-height: 108rpx;
+    min-height: 104rpx;
+  }
+
+  .menu-icon-wrap {
+    width: 74rpx;
+    height: 74rpx;
+  }
+
+  .menu-icon {
+    width: 44rpx;
+    height: 44rpx;
   }
 
   .action-btn-container {
-    margin-top: 24rpx;
+    margin-top: 22rpx;
+  }
+
+  .action-btn {
+    height: 80rpx;
   }
 }

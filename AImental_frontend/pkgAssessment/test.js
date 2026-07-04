@@ -1,7 +1,7 @@
-const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
+﻿const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 // pages/assessment/test.js (兼容版)
 
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'https://feelyourself.cn';
 
 function hasAnswerValue(value) {
   return value !== '' && value !== null && value !== undefined;

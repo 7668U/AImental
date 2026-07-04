@@ -1,4 +1,4 @@
-// pages/daily-checkin/index.js (修改后)
+﻿// pages/daily-checkin/index.js (修改后)
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 const { loginWithBackend } = require('../../utils/auth.js');
 
@@ -8,7 +8,7 @@ function request(options) {
     const token = wx.getStorageSync('token');
     wx.request({
       ...options,
-      url: `http://127.0.0.1:8000/api/v1${options.url}`,
+      url: `https://feelyourself.cn/api/v1${options.url}`,
       header: {
         ...options.header,
         'Authorization': `Bearer ${token}`
@@ -83,7 +83,7 @@ Page({
    */
   handleLogin() {
     wx.showLoading({ title: '登录中...' });
-    loginWithBackend('http://127.0.0.1:8000/api/v1')
+    loginWithBackend('https://feelyourself.cn/api/v1')
       .then((tokenRes) => {
         if (tokenRes.access_token) {
           wx.hideLoading();
@@ -107,16 +107,13 @@ Page({
    */
   async fetchCheckinData() {
     try {
-      // 使用封装的 request 函数，代码更简洁
       const timeRes = await request({ url: '/system/time' });
       const serverDateStr = timeRes.server_date;
-      
-      await request({ url: `/checkin/date/${serverDateStr}` });
-      // 如果上面这个请求成功 (没抛出异常)，说明已打卡
-      this.setData({ hasCheckedInToday: true });
+      const [year, month, day] = serverDateStr.split('-');
+      const monthlyCheckins = await request({ url: `/checkin/month/${year}/${Number(month)}` });
+      this.setData({ hasCheckedInToday: !!monthlyCheckins[Number(day)] });
 
     } catch (error) {
-      // 任何请求失败 (比如404代表未打卡)，都视为未打卡
       this.setData({ hasCheckedInToday: false });
     }
   },
@@ -150,14 +147,13 @@ Page({
         url: `/pkgDailyCheckin/record?mode=${mode}&date=${date}`
       });
     } else {
-      const today = new Date();
-      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-      
-      if (date === todayStr) {
-        wx.navigateTo({ url: '/pkgDailyCheckin/record' });
+      if (this.isWithinRecentDays(date, 3)) {
+        wx.navigateTo({
+          url: `/pkgDailyCheckin/record?mode=create&date=${date}`
+        });
       } else {
         wx.showToast({
-          title: '那天没有记录哦~',
+          title: '只能补记最近3天哦~',
           icon: 'none'
         });
       }

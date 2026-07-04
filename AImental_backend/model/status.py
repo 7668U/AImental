@@ -119,6 +119,7 @@ class CheckinBaseModel(BaseModel):
     """Pydantic model for creating/updating a Checkin."""
     mood: str
     color: str
+    record_date: Optional[str] = None
     tags: Optional[str] = None
     text_content: Optional[str] = None
     image_url: Optional[str] = None
@@ -317,8 +318,13 @@ class CheckinTable:
             "month": target_month,
         }
 
-    def _prepare_checkin_payload(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def _prepare_checkin_payload(self, payload: Dict[str, Any], apply_record_date: bool = False) -> Dict[str, Any]:
+        record_date = payload.pop("record_date", None)
         data = enrich_checkin_payload(payload)
+        if apply_record_date and record_date:
+            record_day = datetime.date.fromisoformat(record_date)
+            record_dt = datetime.datetime.combine(record_day, datetime.time(12, 0))
+            data["timestamp"] = int(record_dt.timestamp())
         if "image_urls" in data or "image_url" in data:
             image_urls = normalize_image_urls(data.get("image_urls"), data.get("image_url"))
             data["image_urls"] = dump_image_urls(image_urls)
@@ -328,7 +334,7 @@ class CheckinTable:
     def create_checkin(self, user_id: str, data: CheckinBaseModel) -> Optional[Checkin]:
         """Creates a new checkin record."""
         try:
-            payload = self._prepare_checkin_payload(data.model_dump(exclude_unset=True))
+            payload = self._prepare_checkin_payload(data.model_dump(exclude_unset=True), apply_record_date=True)
             checkin = Checkin.create(
                 user_id=user_id,
                 **payload
@@ -552,6 +558,7 @@ def model_to_dict(model_instance: Model) -> Dict:
         "location_address": getattr(model_instance, "location_address", None),
         "location_latitude": getattr(model_instance, "location_latitude", None),
         "location_longitude": getattr(model_instance, "location_longitude", None),
+        "record_date": datetime.datetime.fromtimestamp(model_instance.timestamp).strftime('%Y-%m-%d'),
         "timestamp": model_instance.timestamp,
         "updated_at": model_instance.updated_at
     }

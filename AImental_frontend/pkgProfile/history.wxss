@@ -103,7 +103,7 @@ page {
   position: relative;
   margin-top: 110rpx;
   border-radius: 30rpx;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.68);
   box-shadow: 0 18rpx 42rpx rgba(152, 111, 50, 0.1);
   box-sizing: border-box;
   overflow: hidden;
@@ -245,7 +245,7 @@ page {
   position: relative;
   overflow: hidden;
   transform: translateZ(0);
-  background: #fffdf8;
+  background: rgba(255, 253, 248, 0.58);
 }
 
 .history-item + .history-item {
@@ -261,7 +261,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fffdf8;
+  background: rgba(255, 253, 248, 0.58);
   box-sizing: border-box;
   transition: transform 0.2s ease-out;
 }

@@ -108,6 +108,7 @@
           <text>心情解读</text>
         </view>
         <view class="card-divider"></view>
+        <text wx:if="{{analysisResult.colorMixInterpretation}}" class="card-content color-mix-content" user-select="{{true}}">{{ analysisResult.colorMixInterpretation }}</text>
         <text class="card-content" user-select="{{true}}">{{ analysisResult.interpretation }}</text>
       </view>
       <view class="result-card ai-card">

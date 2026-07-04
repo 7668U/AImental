@@ -1,6 +1,6 @@
 {
   "scale_info": {
-    "name": "焦虑量表",
+    "name": "焦虑测试",
     "short_name": "SAS",
     "description": "焦虑自评量表（Self-Rating Anxiety Scale, SAS）由华裔学者 Zung 编制，主要用于评估一个人在最近一段时间内的焦虑感受及其严重程度。它已在全球范围内广泛使用，也有中文版的版本。在这里，我们会结合你的答题情况，帮你更直观地理解自己最近的心理状态。这份结果并不是医学诊断，而是一个让你更了解自己的小工具，希望它能给你一些启发和支持。",
     "instructions": "请仔细阅读每一条，然后根据您【最近一星期】的实际感觉，选择最符合您的选项。",
@@ -8,6 +8,7 @@
     "assessment_type": "scoring",
     "scoring_rules": {
       "type": "total_sum",
+      "reverse_scored_items": [5, 9, 13, 17, 19],
       "multiplier": 1.25,
       "post_action": "to_integer"
     }

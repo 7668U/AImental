@@ -57,10 +57,14 @@ def create_new_checkin(
     current_user_id: str = Depends(get_current_user_id)
 ):
     """为当前用户创建一条新的打卡记录，只包含文本和选择数据。"""
-    today = date.today()
-    today_str = today.strftime('%Y-%m-%d')
-    if checkin_table.get_checkin_by_date(user_id=current_user_id, target_date_str=today_str):
-        raise HTTPException(status_code=409, detail="A check-in for today already exists.")
+    target_date_str = checkin_data.record_date or date.today().strftime('%Y-%m-%d')
+    try:
+        date.fromisoformat(target_date_str)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid record_date. Expected YYYY-MM-DD.")
+
+    if checkin_table.get_checkin_by_date(user_id=current_user_id, target_date_str=target_date_str):
+        raise HTTPException(status_code=409, detail="A check-in for this date already exists.")
     
     new_checkin = checkin_table.create_checkin(user_id=current_user_id, data=checkin_data)
     if not new_checkin:

@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 
 # 1. 从项目其他文件中导入
-from model.promotion import promotion_table, test_data, TestResultResponseModel
+from model.promotion import promotion_table, soul_drink_table, test_data, TestResultResponseModel
 from .auth import get_current_user_id # 用于保护需要登录的接口
 
 # ---------------------------------------------------
@@ -39,6 +39,35 @@ class SubmissionRequest(BaseModel):
 # ✨ 新增：用于“认领”接口的请求体
 class ClaimRequest(BaseModel):
     session_id: str
+
+
+class SoulDrinkSessionRequest(BaseModel):
+    visitor_token: Optional[str] = None
+
+
+class SoulDrinkProgressRequest(BaseModel):
+    visitor_token: str
+    answers: List[Optional[str]] = Field(default_factory=list)
+    current_index: int = 0
+
+
+class SoulDrinkCompleteRequest(BaseModel):
+    visitor_token: str
+    answers: List[str]
+
+
+class SoulDrinkSessionResponse(BaseModel):
+    visitor_token: str
+    status: str
+    current_index: int = 0
+    answers: List[Any] = Field(default_factory=list)
+    scores: Optional[Dict[str, int]] = None
+    result_type: Optional[str] = None
+    result_drink: Optional[str] = None
+    result_card: Optional[str] = None
+    created_at: Optional[Any] = None
+    updated_at: Optional[Any] = None
+    completed_at: Optional[Any] = None
 
 # ---------------------------------------------------
 # API Endpoints
@@ -131,3 +160,54 @@ def get_my_test_result(current_user_id: str = Depends(get_current_user_id)):
         raise HTTPException(status_code=500, detail="结果数据错误，请联系管理员。")
 
     return TestResultResponseModel(**personality_details)
+
+
+@router.post("/soul-drink/session", response_model=SoulDrinkSessionResponse, summary="H5 灵魂饮料 - 获取或创建匿名档案")
+def get_or_create_soul_drink_session(request: SoulDrinkSessionRequest):
+    record = soul_drink_table.get_or_create_session(request.visitor_token)
+    return SoulDrinkSessionResponse(**soul_drink_table.serialize(record))
+
+
+@router.post("/soul-drink/progress", response_model=SoulDrinkSessionResponse, summary="H5 灵魂饮料 - 保存答题进度")
+def save_soul_drink_progress(request: SoulDrinkProgressRequest):
+    if len(request.answers) > 15:
+        raise HTTPException(status_code=400, detail="答案数量超过题目数量")
+
+    record = soul_drink_table.save_progress(
+        visitor_token=request.visitor_token,
+        answers=request.answers,
+        current_index=request.current_index,
+    )
+    if not record:
+        raise HTTPException(status_code=404, detail="匿名档案不存在")
+
+    return SoulDrinkSessionResponse(**soul_drink_table.serialize(record))
+
+
+@router.post("/soul-drink/complete", response_model=SoulDrinkSessionResponse, summary="H5 灵魂饮料 - 保存并返回测试结果")
+def complete_soul_drink_test(request: SoulDrinkCompleteRequest):
+    if len(request.answers) != 15:
+        raise HTTPException(status_code=400, detail="请完成全部 15 题")
+    if any(answer not in {"A", "B"} for answer in request.answers):
+        raise HTTPException(status_code=400, detail="答案格式无效")
+
+    record = soul_drink_table.complete(
+        visitor_token=request.visitor_token,
+        answers=request.answers,
+    )
+    if not record:
+        raise HTTPException(status_code=404, detail="匿名档案不存在")
+
+    return SoulDrinkSessionResponse(**soul_drink_table.serialize(record))
+
+
+@router.post("/soul-drink/restart", response_model=SoulDrinkSessionResponse, summary="H5 灵魂饮料 - 覆盖并重新测试")
+def restart_soul_drink_test(request: SoulDrinkSessionRequest):
+    if not request.visitor_token:
+        raise HTTPException(status_code=400, detail="缺少匿名档案 token")
+
+    record = soul_drink_table.restart(request.visitor_token)
+    if not record:
+        raise HTTPException(status_code=404, detail="匿名档案不存在")
+
+    return SoulDrinkSessionResponse(**soul_drink_table.serialize(record))

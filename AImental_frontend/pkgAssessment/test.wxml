@@ -30,7 +30,7 @@
                 </view>
                 <image class="sparkle-img question-sparkle-one" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
                 <image class="sparkle-img question-sparkle-two" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
-                <view class="question-text">{{item.order}}. {{item.text}}</view>
+                <view class="question-text">{{item.text}}</view>
               </view>
 
               <view class="options-panel">

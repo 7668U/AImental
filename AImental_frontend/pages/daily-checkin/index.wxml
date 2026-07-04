@@ -1,7 +1,7 @@
 <calendar show="{{showCalendar}}" bind:daytap="onDayTap" bind:hide="hideCalendar"></calendar>
 
 <view class="page-container">
-  <image class="diary-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/daily-checkin/layout/mood-diary-bg.jpg" mode="aspectFill"></image>
+  <image wx:if="{{isLoggedIn}}" class="diary-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/daily-checkin/layout/mood-diary-bg.jpg" mode="aspectFill"></image>
 
   <block wx:if="{{isLoggedIn}}">
 
@@ -57,7 +57,7 @@
   <block wx:else>
     <view class="login-wrapper">
       <login-prompt 
-        title="欢迎使用心情日记"
+        title="欢迎来到心情日记"
         subtitle="登录后即可记录和查看你的心情"
         bind:loginevent="handleLogin" 
       />

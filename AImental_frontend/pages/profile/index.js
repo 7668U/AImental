@@ -1,7 +1,7 @@
-// index.js (正确分离的版本)
+﻿// index.js (正确分离的版本)
 
 // --- 配置 ---
-const SERVER_BASE_URL = 'http://127.0.0.1:8000'; 
+const SERVER_BASE_URL = 'https://feelyourself.cn'; 
 const API_BASE_URL = `${SERVER_BASE_URL}/api/v1/users`; 
 const defaultAvatarUrl = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png';
 

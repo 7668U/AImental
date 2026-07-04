@@ -3,7 +3,7 @@
     <view class="hero-section">
       <image class="hero-art" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/assessment/home/hero-journey.png" mode="aspectFit" />
       <view class="hero-copy">
-        <view class="hero-title">你好，</view>
+        <view class="hero-title">通过测评，</view>
         <view class="hero-title">探索内心的旅程</view>
         <view class="hero-subtitle">选择一个测评开始</view>
         <view class="hero-subtitle">也许会看见你还没完全点亮的那部分自己</view>
@@ -25,7 +25,10 @@
           </view>
           <text class="group-desc">{{item.description}}</text>
         </view>
-        <image class="group-action" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/assessment/common/go-test-button.png" mode="aspectFit" />
+        <view class="group-action">
+          <text class="action-label">去测试</text>
+          <view class="action-chevron"></view>
+        </view>
       </view>
     </view>
   </view>

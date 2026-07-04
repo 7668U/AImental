@@ -43,7 +43,7 @@
 
         <view class="history-list {{group.is_expanded ? 'expanded' : ''}}">
           <view class="history-item" wx:for="{{group.records}}" wx:for-item="record" wx:for-index="recordIndex" wx:key="id">
-            <view class="delete-action">
+            <view class="delete-action" wx:if="{{record.show_delete}}">
               <view
                 class="delete-btn"
                 catchtap="handleConfirmDelete"
