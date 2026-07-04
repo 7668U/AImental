@@ -55,7 +55,7 @@ if ENABLE_COMMUNITY_BACKEND:
 app = FastAPI(
     title="AI Psychologist API",
     description="The backend API for the AI Psychologist WeChat Mini Program, now with an AI Community!",
-    version="1.2.0",  # 版本升级！
+    version="3.0.0",
 )
 
 app.add_middleware(

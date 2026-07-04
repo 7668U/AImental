@@ -5,8 +5,8 @@ Page({
   data: {
     navTop: 0,
     navHeight: 0,
-    version: '2.0.0',
-    contactInfo: 'feelyourself12138@163.com'
+    version: '3.0.0',
+    contactInfo: '1751211464@qq.com'
   },
 
   /**
