@@ -1,8 +1,8 @@
-﻿// pages/daily-checkin/analysis.js
+// pages/daily-checkin/analysis.js
 import * as echarts from './components-ecanvas/ec-canvas/echarts';
 
 // --- 全局配置 ---
-const API_BASE_URL = 'https://feelyourself.cn';
+const API_BASE_URL = 'https://api.feelyourself.cn';
 
 const ANALYSIS_TYPE_MAP = {
   mood_distribution: 'mood',

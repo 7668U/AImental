@@ -1,4 +1,4 @@
-﻿// components/calendar/calendar.js
+// components/calendar/calendar.js
 Component({
   properties: {
     show: { // 控制组件显示/隐藏
@@ -64,7 +64,7 @@ Component({
       if (!token) return;
 
       wx.request({
-        url: `https://feelyourself.cn/api/v1/checkin/month/${year}/${month}`,
+        url: `https://api.feelyourself.cn/api/v1/checkin/month/${year}/${month}`,
         method: 'GET',
         header: { 'Authorization': `Bearer ${token}` },
         success: (res) => {

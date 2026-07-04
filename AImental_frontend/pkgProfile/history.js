@@ -1,6 +1,6 @@
-﻿// pages/profile/history.js
+// pages/profile/history.js
 
-const SERVER_BASE_URL = 'https://feelyourself.cn';
+const SERVER_BASE_URL = 'https://api.feelyourself.cn';
 const ASSESSMENTS_API_URL = `${SERVER_BASE_URL}/api/v1/assessments`;
 const { getScaleDisplayName } = require('../utils/assessment-display.js');
 

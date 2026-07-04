@@ -30,7 +30,7 @@
 
     <view class="actions-bar">
       <button class="throw-button-container" bindtap="onThrowClick">
-        <image src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/throw-button.png" class="throw-button-image" mode="aspectFit"></image>
+        <image src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/throw-button.png?v=202607050127" class="throw-button-image" mode="aspectFit"></image>
       </button>
     </view>
 

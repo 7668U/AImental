@@ -1,4 +1,4 @@
-﻿// app.js (全局WebSocket与导航栏计算最终合并版)
+// app.js (全局WebSocket与导航栏计算最终合并版)
 
 
 
@@ -168,7 +168,7 @@ App({
   
         this.socketTask = wx.connectSocket({
   
-          url: 'wss://feelyourself.cn/api/v1/community/ws?token=' + token,
+          url: 'wss://api.feelyourself.cn/api/v1/community/ws?token=' + token,
   
         });
   

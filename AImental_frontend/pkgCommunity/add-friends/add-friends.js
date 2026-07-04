@@ -1,7 +1,7 @@
-﻿// pages/add-friends/js - 最终版
+// pages/add-friends/js - 最终版
 // 接口和服务器地址配置
-const API_BASE_URL = 'https://feelyourself.cn/api/v1';
-const SERVER_URL = 'https://feelyourself.cn';
+const API_BASE_URL = 'https://api.feelyourself.cn/api/v1';
+const SERVER_URL = 'https://api.feelyourself.cn';
 let pageJustPerformedShare = false;
 Page({
   /**

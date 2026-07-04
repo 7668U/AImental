@@ -1,5 +1,5 @@
-﻿// pages/daily-checkin/paper-airplane/index.js
-const API_BASE_URL = 'https://feelyourself.cn/api/v1';
+// pages/daily-checkin/paper-airplane/index.js
+const API_BASE_URL = 'https://api.feelyourself.cn/api/v1';
 
 // 封装的网络请求函数
 function request(options) {

@@ -1,8 +1,8 @@
-﻿// pages/feedback/feedback.js
+// pages/feedback/feedback.js
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 
 //【配置】请确保这里的地址是正确的
-const API_BASE_URL = 'https://feelyourself.cn/api/v1'; // 你的服务器根地址
+const API_BASE_URL = 'https://api.feelyourself.cn/api/v1'; // 你的服务器根地址
 
 Page({
   /**

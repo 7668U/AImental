@@ -1,7 +1,7 @@
-﻿// pages/daily-checkin/record.js
+// pages/daily-checkin/record.js
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 
-const API_BASE_URL = 'https://feelyourself.cn';
+const API_BASE_URL = 'https://api.feelyourself.cn';
 const MAX_PHOTOS = 3;
 
 const MOOD_OPTIONS = [
@@ -328,7 +328,7 @@ Page({
 
     wx.showLoading({ title: '加载中...' });
     wx.request({
-      url: `https://feelyourself.cn/api/v1/checkin/date/${dateToFetch}`,
+      url: `https://api.feelyourself.cn/api/v1/checkin/date/${dateToFetch}`,
       method: 'GET',
       header: { 'Authorization': `Bearer ${token}` },
       success: (res) => {
@@ -551,7 +551,7 @@ Page({
 
   createCheckinRecord(data) {
     this.sendRequest({
-      url: 'https://feelyourself.cn/api/v1/checkin/',
+      url: 'https://api.feelyourself.cn/api/v1/checkin/',
       method: 'POST',
       data,
       successCallback: (res) => {
@@ -566,7 +566,7 @@ Page({
 
   updateCheckinRecord(data) {
     this.sendRequest({
-      url: `https://feelyourself.cn/api/v1/checkin/${this.data.checkinId}`,
+      url: `https://api.feelyourself.cn/api/v1/checkin/${this.data.checkinId}`,
       method: 'PUT',
       data,
       successCallback: () => {

@@ -1,4 +1,4 @@
-﻿// pages/daily-checkin/index.js (修改后)
+// pages/daily-checkin/index.js (修改后)
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 const { loginWithBackend } = require('../../utils/auth.js');
 
@@ -8,7 +8,7 @@ function request(options) {
     const token = wx.getStorageSync('token');
     wx.request({
       ...options,
-      url: `https://feelyourself.cn/api/v1${options.url}`,
+      url: `https://api.feelyourself.cn/api/v1${options.url}`,
       header: {
         ...options.header,
         'Authorization': `Bearer ${token}`
@@ -83,7 +83,7 @@ Page({
    */
   handleLogin() {
     wx.showLoading({ title: '登录中...' });
-    loginWithBackend('https://feelyourself.cn/api/v1')
+    loginWithBackend('https://api.feelyourself.cn/api/v1')
       .then((tokenRes) => {
         if (tokenRes.access_token) {
           wx.hideLoading();

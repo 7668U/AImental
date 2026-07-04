@@ -1,8 +1,8 @@
-﻿// pages/request-history/request-history.js
+// pages/request-history/request-history.js
 
 // 引入公用的API请求配置
-const API_BASE_URL = 'https://feelyourself.cn/api/v1/community';
-const SERVER_URL = 'https://feelyourself.cn';
+const API_BASE_URL = 'https://api.feelyourself.cn/api/v1/community';
+const SERVER_URL = 'https://api.feelyourself.cn';
 
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 Page({

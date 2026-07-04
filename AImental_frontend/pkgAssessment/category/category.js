@@ -1,7 +1,7 @@
-﻿const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
+const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 const { getScaleDisplayMeta, getScaleDisplayName, getScaleIconName } = require('../../utils/assessment-display.js');
 
-const SERVER_BASE_URL = 'https://feelyourself.cn';
+const SERVER_BASE_URL = 'https://api.feelyourself.cn';
 const DRINK_TI_ASSET_BASE = 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti';
 const DEFAULT_GROUP = '心理健康';
 const DEFAULT_ICON_PATH = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/assessment/default.png';

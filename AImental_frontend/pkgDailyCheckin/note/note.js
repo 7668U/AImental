@@ -1,8 +1,8 @@
-﻿// pages/daily-checkin/note/note.js (The final, corrected version for the simplified backend)
+// pages/daily-checkin/note/note.js (The final, corrected version for the simplified backend)
 
 
 
-const BASE_URL = getApp().globalData?.apiBase || 'https://feelyourself.cn/api/v1';
+const BASE_URL = getApp().globalData?.apiBase || 'https://api.feelyourself.cn/api/v1';
 
 
 
