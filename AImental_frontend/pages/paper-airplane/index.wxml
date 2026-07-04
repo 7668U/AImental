@@ -62,7 +62,7 @@
       <image class="letter-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/letter-paper-bg-clean.png?v=202607050210" mode="aspectFit"></image>
       <scroll-view scroll-y="true" scroll-x="false" class="letter-message-scroll">
         <view class="letter-message-box">
-          <text class="letter-message">{{openedMessage}}</text>
+          <view class="letter-message">{{openedMessage}}</view>
         </view>
       </scroll-view>
       <view wx:if="{{!openedFromBasket}}" class="letter-actions">
