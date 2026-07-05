@@ -4,7 +4,7 @@
 const defaultShareInfo = {
   title: '快来FeelYourself，和自己成为朋友！',
   path: '/pages/daily-checkin/index', // 默认分享到首页
-  imageUrl: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/share-cover.png' // 一张默认的分享图
+  imageUrl: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/share-cover.png?v=20260705165959' // 一张默认的分享图
 };
 
 /**
@@ -24,7 +24,7 @@ const defaultTimelineInfo = {
   title: '这个AI社区太好玩了，你也来看看吧！',
   // 注意：这里没有 path！
   query: 'from=timeline', // query 用于传递参数
-  imageUrl: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/share-cover.png' // 强烈建议提供，否则会是很难看的页面截图
+  imageUrl: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/share-cover.png?v=20260705165959' // 强烈建议提供，否则会是很难看的页面截图
 };
 
 // 2. 创建一个生成朋友圈分享信息的函数
