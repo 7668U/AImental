@@ -4,7 +4,6 @@
     "pages/assessment/index",
     "pages/ai-community/chat-list/chat-list",
     "pages/daily-checkin/index",
-    "pages/paper-airplane/index",
     "pages/profile/index",
     "components/login-prompt/login-prompt"
   ],
@@ -14,7 +13,6 @@
       "name": "dailyCheckin",
       "pages": [
         "record",
-        "paper-airplane/index",
         "analysis",
         "note/note"
       ]
@@ -78,12 +76,6 @@
         "text": "心情日记",
         "iconPath": "/images/tabbar/checkin_default.png",
         "selectedIconPath": "/images/tabbar/checkin_selected.png"
-      },
-      {
-        "pagePath": "pages/paper-airplane/index",
-        "text": "纸飞机",
-        "iconPath": "/images/tabbar/paper_airplane_default.png",
-        "selectedIconPath": "/images/tabbar/paper_airplane_selected.png"
       },
       {
         "pagePath": "pages/profile/index",

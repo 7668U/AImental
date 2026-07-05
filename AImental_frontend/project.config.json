@@ -35,6 +35,14 @@
       },
       {
         "type": "folder",
+        "value": "pages/paper-airplane"
+      },
+      {
+        "type": "folder",
+        "value": "pkgDailyCheckin/paper-airplane"
+      },
+      {
+        "type": "folder",
         "value": "images/ai-therapist"
       },
       {
@@ -112,6 +120,14 @@
       {
         "type": "file",
         "value": "images/paper_airplane.png"
+      },
+      {
+        "type": "file",
+        "value": "images/tabbar/paper_airplane_default.png"
+      },
+      {
+        "type": "file",
+        "value": "images/tabbar/paper_airplane_selected.png"
       },
       {
         "type": "file",
