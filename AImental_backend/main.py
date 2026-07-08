@@ -287,6 +287,6 @@ app.include_router(feedback_router.router, prefix=API_PREFIX)
 app.include_router(promotion_router.router, prefix=API_PREFIX)
 app.include_router(airplane_router.router, prefix=API_PREFIX)
 app.include_router(note_router.router, prefix=API_PREFIX)
-# AI社区路由：前端已下线，后端暂时不注册社区接口。
+# AI社区路由：通过 ENABLE_COMMUNITY_BACKEND 控制是否注册社区接口。
 if ENABLE_COMMUNITY_BACKEND:
     app.include_router(ai_community_router.router, prefix=API_PREFIX)

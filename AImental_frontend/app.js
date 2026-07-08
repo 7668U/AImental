@@ -2,6 +2,8 @@
 
 
 
+const ENABLE_COMMUNITY_WEBSOCKET = true;
+
 App({
 
     // --- 1. 小程序启动生命周期函数 ---
@@ -14,9 +16,13 @@ App({
   
   
   
-      // b. 【新增】启动全局WebSocket管理器
+    // b. 心灵社区已恢复，启动全局WebSocket以接收社区消息
   
-      this.webSocketManager.connect();
+      if (ENABLE_COMMUNITY_WEBSOCKET) {
+
+        this.webSocketManager.connect();
+
+      }
   
     },
   
@@ -139,6 +145,12 @@ App({
       // 连接函数
   
       connect() {
+
+        if (!ENABLE_COMMUNITY_WEBSOCKET) {
+
+          return;
+
+        }
   
         if (this.isSocketOpen) return;
   
@@ -156,7 +168,7 @@ App({
   
         this.socketTask = wx.connectSocket({
   
-          url: 'ws://127.0.0.1:8000/api/v1/community/ws?token=' + token,
+          url: 'wss://api.feelyourself.cn/api/v1/community/ws?token=' + token,
   
         });
   
@@ -305,6 +317,14 @@ App({
       },
   
       reconnect() {
+
+        if (!ENABLE_COMMUNITY_WEBSOCKET) {
+
+          this.clearReconnectTimer();
+
+          return;
+
+        }
   
         if (this.isReconnecting) return;
   

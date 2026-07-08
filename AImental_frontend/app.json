@@ -74,16 +74,16 @@
         "selectedIconPath": "/images/tabbar/assessment_selected.png"
       },
       {
+        "pagePath": "pages/ai-community/chat-list/chat-list",
+        "text": "心灵社区",
+        "iconPath": "/images/community.png",
+        "selectedIconPath": "/images/community_selected.png"
+      },
+      {
         "pagePath": "pages/daily-checkin/index",
         "text": "心情日记",
         "iconPath": "/images/tabbar/checkin_default.png",
         "selectedIconPath": "/images/tabbar/checkin_selected.png"
-      },
-      {
-        "pagePath": "pages/paper-airplane/index",
-        "text": "纸飞机",
-        "iconPath": "/images/tabbar/paper_airplane_default.png",
-        "selectedIconPath": "/images/tabbar/paper_airplane_selected.png"
       },
       {
         "pagePath": "pages/profile/index",

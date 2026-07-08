@@ -8,7 +8,7 @@ from typing import Optional, Dict, List, Any
 
 # 1. 导入 Peewee, Pydantic 和数据库连接
 from peewee import (
-    Model, CharField, TextField, DateTimeField, ForeignKeyField
+    Model, CharField, TextField, DateTimeField, ForeignKeyField, IntegerField
 )
 from pydantic import BaseModel, Field
 
@@ -321,6 +321,64 @@ class TestResultResponseModel(BaseModel):
     recommendation: str = Field(..., description="生存指南")
 
 
+SOUL_DRINK_ASSET_BASE = (
+    "https://assets.feelyourself.cn/miniprogram/assets/v1/"
+    "pkgAssessment/images/drink-ti"
+)
+
+SOUL_DRINK_RESULTS = {
+    "STJ": {"drink": "无糖乌龙茶", "result_card": f"{SOUL_DRINK_ASSET_BASE}/result-cards/stj-unsweetened-oolong-tea.jpg"},
+    "STP": {"drink": "青柠电解质水", "result_card": f"{SOUL_DRINK_ASSET_BASE}/result-cards/stp-lime-electrolyte-water.jpg"},
+    "SFJ": {"drink": "热奶茶", "result_card": f"{SOUL_DRINK_ASSET_BASE}/result-cards/sfj-hot-milk-tea.jpg"},
+    "SFP": {"drink": "蜜桃气泡水", "result_card": f"{SOUL_DRINK_ASSET_BASE}/result-cards/sfp-peach-sparkling-water.jpg"},
+    "NTJ": {"drink": "冷萃黑咖啡", "result_card": f"{SOUL_DRINK_ASSET_BASE}/result-cards/ntj-cold-brew-black-coffee.jpg"},
+    "NTP": {"drink": "特调鸡尾酒", "result_card": f"{SOUL_DRINK_ASSET_BASE}/result-cards/ntp-special-cocktail.jpg"},
+    "NFJ": {"drink": "蜂蜜柚子茶", "result_card": f"{SOUL_DRINK_ASSET_BASE}/result-cards/nfj-honey-grapefruit-tea.jpg"},
+    "NFP": {"drink": "缤纷水果茶", "result_card": f"{SOUL_DRINK_ASSET_BASE}/result-cards/nfp-colorful-fruit-tea.jpg"},
+}
+
+SOUL_DRINK_SCORE_MAP = [
+    {"A": {"N": 2}, "B": {"N": 1}, "C": {"S": 1}, "D": {"S": 2}},
+    {"A": {"N": 1}, "B": {"S": 1}},
+    {"A": {"N": 1}, "B": {"S": 1}},
+    {"A": {"S": 1}, "B": {"N": 1}},
+    {"A": {"N": 1}, "B": {"S": 1}},
+    {"A": {"F": 1}, "B": {"T": 1}},
+    {"A": {"T": 1}, "B": {"F": 1}},
+    {"A": {"T": 1}, "B": {"F": 1}},
+    {"A": {"F": 1}, "B": {"T": 1}},
+    {"A": {"F": 1}, "B": {"T": 1}},
+    {"A": {"J": 1}, "B": {"P": 1}},
+    {"A": {"P": 2}, "B": {"P": 1}, "C": {"J": 1}, "D": {"J": 2}},
+    {"A": {"J": 1}, "B": {"P": 1}},
+    {"A": {"P": 1}, "B": {"J": 1}},
+    {"A": {"J": 1}, "B": {"P": 1}},
+]
+
+
+class SoulDrinkRecord(Model):
+    """H5 灵魂饮料测试的匿名记录。"""
+    id = CharField(primary_key=True, max_length=36, default=lambda: str(uuid.uuid4()))
+    visitor_token = CharField(max_length=64, unique=True, index=True, default=lambda: str(uuid.uuid4()))
+    status = CharField(max_length=20, default='IN_PROGRESS')
+    current_index = IntegerField(default=0)
+    answers_json = TextField(null=True)
+    scores_json = TextField(null=True)
+    result_type = CharField(max_length=10, null=True)
+    result_drink = CharField(max_length=50, null=True)
+    created_at = DateTimeField(default=datetime.now)
+    updated_at = DateTimeField(default=datetime.now)
+    completed_at = DateTimeField(null=True)
+
+    def save(self, *args, **kwargs):
+        self.updated_at = datetime.now()
+        return super(SoulDrinkRecord, self).save(*args, **kwargs)
+
+    class Meta:
+        database = promotion_db
+        table_name = 'soul_drink_records'
+
+
 # ---------------------------------------------------
 # 3. Table Access Class (数据库操作封装)
 # ---------------------------------------------------
@@ -390,7 +448,126 @@ class PromotionTable:
         if not test_data.get("personalities"): return None
         return next((p for p in test_data["personalities"] if p.get("id") == personality_id), None)
 
+
+class SoulDrinkTable:
+    """封装灵魂饮料 H5 匿名记录的数据库操作。"""
+
+    def __init__(self, db_connection):
+        self.db = db_connection
+        self.db.create_tables([SoulDrinkRecord])
+
+    def get_or_create_session(self, visitor_token: Optional[str] = None) -> SoulDrinkRecord:
+        if visitor_token:
+            record = SoulDrinkRecord.get_or_none(SoulDrinkRecord.visitor_token == visitor_token)
+            if record:
+                return record
+        return SoulDrinkRecord.create(visitor_token=visitor_token or str(uuid.uuid4()))
+
+    def get_by_token(self, visitor_token: str) -> Optional[SoulDrinkRecord]:
+        return SoulDrinkRecord.get_or_none(SoulDrinkRecord.visitor_token == visitor_token)
+
+    def save_progress(self, visitor_token: str, answers: List[Optional[str]], current_index: int) -> Optional[SoulDrinkRecord]:
+        record = self.get_by_token(visitor_token)
+        if not record:
+            return None
+
+        record.answers_json = json.dumps(answers, ensure_ascii=False)
+        record.current_index = max(0, min(current_index, len(SOUL_DRINK_SCORE_MAP) - 1))
+        if record.status != 'COMPLETED':
+            record.status = 'IN_PROGRESS'
+        record.save()
+        return record
+
+    def complete(self, visitor_token: str, answers: List[str]) -> Optional[SoulDrinkRecord]:
+        record = self.get_by_token(visitor_token)
+        if not record:
+            return None
+
+        calculated = self.calculate_result(answers)
+        result = SOUL_DRINK_RESULTS.get(calculated["type"])
+        if not result:
+            return None
+
+        record.answers_json = json.dumps(answers, ensure_ascii=False)
+        record.scores_json = json.dumps(calculated["scores"], ensure_ascii=False)
+        record.result_type = calculated["type"]
+        record.result_drink = result["drink"]
+        record.current_index = len(SOUL_DRINK_SCORE_MAP) - 1
+        record.status = 'COMPLETED'
+        record.completed_at = datetime.now()
+        record.save()
+        return record
+
+    def restart(self, visitor_token: str) -> Optional[SoulDrinkRecord]:
+        record = self.get_by_token(visitor_token)
+        if not record:
+            return None
+
+        record.status = 'IN_PROGRESS'
+        record.current_index = 0
+        record.answers_json = None
+        record.scores_json = None
+        record.result_type = None
+        record.result_drink = None
+        record.completed_at = None
+        record.save()
+        return record
+
+    def serialize(self, record: SoulDrinkRecord) -> Dict[str, Any]:
+        answers = []
+        scores = None
+        if record.answers_json:
+            try:
+                answers = json.loads(record.answers_json)
+            except json.JSONDecodeError:
+                answers = []
+        if record.scores_json:
+            try:
+                scores = json.loads(record.scores_json)
+            except json.JSONDecodeError:
+                scores = None
+
+        result = SOUL_DRINK_RESULTS.get(record.result_type or "")
+        return {
+            "visitor_token": record.visitor_token,
+            "status": record.status,
+            "current_index": record.current_index,
+            "answers": answers,
+            "scores": scores,
+            "result_type": record.result_type,
+            "result_drink": record.result_drink,
+            "result_card": result["result_card"] if result else None,
+            "created_at": record.created_at,
+            "updated_at": record.updated_at,
+            "completed_at": record.completed_at,
+        }
+
+    @staticmethod
+    def calculate_result(answers: List[str]) -> Dict[str, Any]:
+        scores = {"S": 0, "N": 0, "T": 0, "F": 0, "J": 0, "P": 0}
+        for index, answer in enumerate(answers):
+            if index >= len(SOUL_DRINK_SCORE_MAP):
+                continue
+            option_scores = SOUL_DRINK_SCORE_MAP[index].get(answer)
+            if not option_scores:
+                continue
+            for key, value in option_scores.items():
+                if key not in scores:
+                    continue
+                try:
+                    scores[key] += int(value)
+                except (TypeError, ValueError):
+                    continue
+
+        result_type = (
+            ("S" if scores["S"] > scores["N"] else "N")
+            + ("T" if scores["T"] > scores["F"] else "F")
+            + ("J" if scores["J"] > scores["P"] else "P")
+        )
+        return {"scores": scores, "type": result_type}
+
 # ---------------------------------------------------
 # 4. 实例化 Table Access 对象
 # ---------------------------------------------------
 promotion_table = PromotionTable(promotion_db)
+soul_drink_table = SoulDrinkTable(promotion_db)
