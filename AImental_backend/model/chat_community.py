@@ -74,7 +74,7 @@ class CommunityChat(Model):
     # --- --------------------------- ---
     
     last_message_timestamp = IntegerField(default=lambda: int(time.time()))
-    last_message_snippet = CharField(max_length=100, default="你们还不是好友哦~")
+    last_message_snippet = CharField(max_length=100, default="点击开始聊天")
 
     class Meta:
         database = chat_db
@@ -91,6 +91,73 @@ class CommunityChatTable:
     def __init__(self, db_connection):
         self.db = db_connection
         self.db.create_tables([CommunityChat])
+
+    def build_default_greeting(self, character: AICharacter) -> str:
+        """根据角色档案生成首条固定问候，让新会话在首页就有内容。"""
+        profile = character.profile or {}
+        identity = profile.get("identity_core", {})
+        traits = profile.get("personality_traits", {})
+        dialogue = profile.get("dialogue_style", {})
+
+        character_name = character.name
+        name = identity.get("name") or character_name
+        occupation = identity.get("occupation")
+        philosophy = traits.get("philosophy")
+        keywords = dialogue.get("keywords") or []
+        opener = keywords[0] if keywords else "你好"
+
+        custom_greetings = {
+            "泠月": "嗯…你好呀，我是泠月。刚刚在整理一只旧瓷杯的裂纹，看到你来了，就想先和你打个招呼。( ´ ▽ ` )ﾉ",
+            "刘书沁": "嗯…你好呀，我是刘书沁。刚在本子上记下一句话，正好也想听听你今天过得怎么样。",
+            "凌曜": "哟，来了？我是凌曜。今天光线不错，感觉适合拍点什么，也适合认识一个新朋友。",
+            "张卫国": "你好，我是张卫国。刚泡了杯茶，坐下来歇会儿。你要是愿意，就慢慢跟我聊聊。",
+            "顾明轩": "你好，我是顾明轩。刚处理完一点工作，看到你来了。今天想聊点什么？",
+            "Harrison": "Hi，我是 Harrison。刚从一段旋律里回过神来，正好想问问你，今天的心情是什么颜色？",
+            "夏阳": "嘿，你来啦！我是夏阳。刚运动完还有点兴奋，要不要跟我说说你今天发生了什么？",
+            "韩之昱": "你好，我是韩之昱。刚看完一段资料，脑子还算清醒。你可以从任何地方开始说。",
+            "苏瑾": "你好呀，我是苏瑾。刚把手边的小事收拾好，想安静地听你说会儿话。",
+            "顾屿": "唔...我是顾屿。刚把一个小 bug 修掉，脑子终于空出来一点。你今天怎么样？"
+        }
+        for greeting_key in (character_name, name):
+            if greeting_key in custom_greetings:
+                return custom_greetings[greeting_key]
+
+        if occupation and philosophy:
+            return f"{opener}，我是{name}。平时在做{occupation}，也一直相信“{philosophy}”。很高兴认识你，今天想从哪里聊起？"
+        if occupation:
+            return f"{opener}，我是{name}。平时在做{occupation}。很高兴认识你，今天想从哪里聊起？"
+        return f"{opener}，我是{name}。很高兴认识你，今天想从哪里聊起？"
+
+    def ensure_default_conversation(self, user_id: str, character: AICharacter) -> CommunityChat:
+        """确保用户和角色之间已经有一条默认问候会话。"""
+        conversation, created = CommunityChat.get_or_create(
+            user_id=user_id,
+            character=character.id
+        )
+
+        has_messages = False
+        try:
+            history: List[Dict] = json.loads(conversation.messages_history)
+            has_messages = bool(history)
+        except json.JSONDecodeError:
+            history = []
+
+        if not has_messages:
+            greeting = self.build_default_greeting(character)
+            greeting_message = ChatMessageModel(role="ai", content=greeting)
+            conversation.messages_history = json.dumps([greeting_message.model_dump()], ensure_ascii=False)
+            conversation.last_message_timestamp = greeting_message.timestamp
+            conversation.last_message_snippet = (
+                greeting[:97] + "..."
+                if len(greeting) > 100
+                else greeting
+            )
+            conversation.user_has_peeked = True
+            conversation.conversation_state = "CONTINUOUS"
+            conversation.conversation_resumes_at = None
+            conversation.save()
+
+        return conversation
 
     def add_message(self, user_id: str, character_id: str, role: str, content: str) -> Optional[CommunityChat]:
         """
@@ -158,26 +225,32 @@ class CommunityChatTable:
     # --- 【以下为保持不变的函数】 ---
 
     def get_chat_list_for_user(self, user_id: str) -> List[Dict[str, Any]]:
-        """获取一个用户的所有聊天列表摘要。"""
-        query = (CommunityChat
-                   .select(CommunityChat, AICharacter)
-                   .join(AICharacter, on=(CommunityChat.character == AICharacter.id))
-                   .where(CommunityChat.user_id == user_id)
-                   .order_by(CommunityChat.last_message_timestamp.desc()))
-        
+        """获取用户首页角色列表；没聊过的角色也作为可直接开启的会话返回。"""
         chat_list = []
-        for conv in query:
+        for character in AICharacter.select().order_by(AICharacter.name):
+            conv = self.ensure_default_conversation(user_id, character)
+            last_message_snippet = conv.last_message_snippet or self.build_default_greeting(character)
+            if last_message_snippet == "你们还不是好友哦~":
+                last_message_snippet = self.build_default_greeting(character)
+
             summary_data = {
-                "character_id": conv.character.id,
-                "character_name": conv.character.name,
-                "character_avatar_url": conv.character.avatar_url,
-                "last_message_snippet": conv.last_message_snippet,
-                "last_message_timestamp": conv.last_message_timestamp,
+                "character_id": character.id,
+                "character_name": character.name,
+                "character_avatar_url": character.avatar_url,
+                "last_message_snippet": last_message_snippet,
+                "last_message_timestamp": conv.last_message_timestamp or 0,
                 "favorability": round(conv.favorability, 1),
                 "unread": not conv.user_has_peeked
             }
             chat_list.append(ChatListSummaryModel(**summary_data).model_dump())
-            
+
+        chat_list.sort(
+            key=lambda item: (
+                item["last_message_timestamp"] == 0,
+                -item["last_message_timestamp"],
+                item["character_name"],
+            )
+        )
         return chat_list
 
     def get_conversation_history(self, user_id: str, character_id: str, limit: int = 50) -> Optional[List[Dict]]:
@@ -190,7 +263,7 @@ class CommunityChatTable:
 
     def mark_as_peeked(self, user_id: str, character_id: str) -> bool:
         """将对话标记为“用户已窥视”，用于清除红点。"""
-        logger.info(f"用户({user_id})正在窥视与角色({character_id})的聊天，将'user_has_peeked'置为 True。")
+        logger.debug(f"用户({user_id})正在窥视与角色({character_id})的聊天，将'user_has_peeked'置为 True。")
         query = CommunityChat.update({CommunityChat.user_has_peeked: True}).where(
             (CommunityChat.user_id == user_id) & 
             (CommunityChat.character == character_id)

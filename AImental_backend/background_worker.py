@@ -18,6 +18,8 @@ from typing import Optional
 from apscheduler.schedulers.background import BackgroundScheduler
 import pytz 
 import redis
+from redis.backoff import NoBackoff
+from redis.retry import Retry
 
 # --- 导入我们项目的所有组件 ---
 from db import chat_db, status_db, user_db
@@ -31,11 +33,12 @@ if ENABLE_COMMUNITY_BACKEND:
     from model.ai_task import ai_task_table
     from model.friendship import friendship_table, Friendship
     from model.chat_community import community_chat_table, ChatMessageModel
+    from model.community_memory import community_memory_table
 
     # --- 导入AI能力生成器 ---
     from generate_ai_status import generate_daily_schedule
     # 【重要】从 generate_community_response 导入两个函数
-    from generate_community_response import generate_ai_response, generate_proactive_message
+    from generate_community_response import generate_ai_response, generate_proactive_message, build_night_reply_context
     from generate_friend_response import generate_friend_request_decision
 
 # 定义北京时区
@@ -45,25 +48,66 @@ BEIJING_TZ = pytz.timezone('Asia/Shanghai')
 redis_client_sync = None
 if ENABLE_COMMUNITY_BACKEND:
     try:
-        redis_client_sync = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+        redis_client_sync = redis.Redis(
+            host='127.0.0.1',
+            port=6379,
+            db=0,
+            decode_responses=True,
+            socket_connect_timeout=0.5,
+            socket_timeout=0.5,
+            retry_on_timeout=False,
+            retry=Retry(NoBackoff(), 0),
+            health_check_interval=0
+        )
         redis_client_sync.ping()
         logger.info("✅ 后台工作进程已成功连接到Redis。")
-    except redis.exceptions.ConnectionError as e:
-        logger.error(f"❌ 后台工作进程无法连接到Redis: {e}")
+    except redis.exceptions.RedisError as e:
+        logger.warning(f"后台工作进程未连接到Redis，实时推送能力将跳过: {e}")
 
 # ---------------------------------------------------
 # 核心工作函数 (Jobs for the Scheduler)
 # ---------------------------------------------------
+
+def build_response_status_context(
+    *,
+    current_status,
+    user_id: str,
+    character_id: str,
+    now: datetime,
+) -> dict:
+    """把角色日程转换成回复风格；日程不再阻断回复。"""
+    category = current_status.status_category if current_status else "在线"
+    status_text = current_status.status_text if current_status else "正在看消息"
+    focus_level = current_status.focus_level if current_status else "AVAILABLE"
+
+    is_night = now.hour >= 23 or now.hour < 7
+    looks_like_sleep = "睡" in category or "睡" in status_text or focus_level == "UNINTERRUPTIBLE"
+
+    response_mode = "normal"
+    response_guidance = "正常陪伴式回复。"
+    if is_night or looks_like_sleep:
+        response_mode = "night_soft"
+        response_guidance = build_night_reply_context(user_id, character_id, now)
+    elif focus_level == "HIGH":
+        response_mode = "focused"
+        response_guidance = "你手头原本有事，但已经看到用户消息。回复可以更短、更像从事情里抬头说话，但不能拒绝或暂停。"
+    elif focus_level == "LOW":
+        response_mode = "low_energy"
+        response_guidance = "你状态比较松弛，可以自然接话，不要表现得像客服。"
+
+    return {
+        "status_title": category,
+        "status_description": status_text,
+        "focus_level": focus_level,
+        "response_mode": response_mode,
+        "response_guidance": response_guidance,
+    }
 
 def push_message_to_user_from_worker(user_id: str, character_id: str, message_content: str):
     """
     一个同步函数，负责将AI的回复存入数据库，然后打包一个包含“最新会话摘要”的
     情报包，通过Redis发布出去。(此函数逻辑保持不变)
     """
-    if not redis_client_sync:
-        logger.warning("Redis未连接，无法推送消息。")
-        return
-
     new_msg_record = community_chat_table.add_message(
         user_id=user_id,
         character_id=character_id,
@@ -73,6 +117,10 @@ def push_message_to_user_from_worker(user_id: str, character_id: str, message_co
 
     if not new_msg_record:
         logger.error(f"保存来自角色 {character_id} 的消息失败，无法推送。")
+        return
+
+    if not redis_client_sync:
+        logger.warning("Redis未连接，AI消息已保存到数据库，但无法实时推送。")
         return
 
     chat_summary_data = {
@@ -129,7 +177,8 @@ def schedule_daily_status_generation():
         logger.info("JOB_STATUS_GEN: 心灵社区后端已下线，跳过角色日程生成。")
         return
 
-    target_date = date.today() + timedelta(days=1)
+    today_in_beijing = datetime.now(BEIJING_TZ).date()
+    target_date = today_in_beijing + timedelta(days=1)
     logger.info(f"JOB_STATUS_GEN: 开始为所有角色生成 {target_date} 的日程...")
 
     all_characters = ai_character_table.get_all_characters()
@@ -138,13 +187,14 @@ def schedule_daily_status_generation():
             logger.info(f"-> 正在处理角色: {character.name} ({character.id})")
             # a. 准备历史数据 (未来可扩展)
             recent_history = [
-                {"date": (date.today() - timedelta(days=1)).strftime('%Y-%m-%d'), "summary": "昨天似乎是休息的一天。"}
+                {"date": (today_in_beijing - timedelta(days=1)).strftime('%Y-%m-%d'), "summary": "昨天似乎是休息的一天。"}
             ]
             
             # b. 调用状态生成器
             daily_schedule = generate_daily_schedule(
                 character_profile=character.profile,
-                recent_history=recent_history
+                recent_history=recent_history,
+                target_date=target_date
             )
             
             # c. 将生成的日程写入数据库
@@ -215,9 +265,6 @@ def process_pending_tasks():
         logger.info("JOB_TASK_PROC: 心灵社区后端已下线，跳过任务队列处理。")
         return
 
-    if not redis_client_sync:
-        return
-
     due_tasks = ai_task_table.get_due_tasks(limit=10)
     if not due_tasks:
         return
@@ -235,53 +282,54 @@ def process_pending_tasks():
                     logger.info(f"-> 正在处理任务 {task.id} (类型: {task.task_type})")
 
                     # --- 任务类型分发 ---
-                    if task.task_type == 'reply' or task.task_type == 'proactive_chat':
-                        # 1. 获取上下文
-                        character = ai_character_table.get_character_by_id(task.character_id)
-                        current_status = ai_status_table.get_current_status(task.character_id)
-                        history = community_chat_table.get_conversation_history(task.user_id, task.character_id, limit=30)
-                        # 【核心新增】获取今天的完整日程
-                        today = datetime.now(BEIJING_TZ).date()
-                        full_day_schedule = ai_status_table.get_schedule_for_date(task.character_id, today)
-                    if task.task_type == 'reply':
-                        # --- 【哨兵日志 1】检查上下文获取 ---
+                    if task.task_type in ('reply', 'proactive_chat'):
                         logger.debug(f"任务 {task.id}: 步骤1 - 开始获取上下文...")
+                        now = datetime.now(BEIJING_TZ)
+                        today = now.date()
                         character = ai_character_table.get_character_by_id(task.character_id)
                         current_status = ai_status_table.get_current_status(task.character_id)
-                        history = community_chat_table.get_conversation_history(task.user_id, task.character_id, limit=30)
-                        
-                        # ========================= 【核心调试修改】 =========================
-                        if not all([character, current_status, history is not None]):
-                            # 创建一个详细的错误诊断消息
+                        history = community_chat_table.get_conversation_history(task.user_id, task.character_id, limit=50)
+                        memory_context = community_memory_table.get_prompt_context(task.user_id, task.character_id)
+                        full_day_schedule = ai_status_table.get_schedule_for_date(task.character_id, today)
+
+                        if not character or history is None:
                             error_details = []
                             if not character:
                                 error_details.append(f"角色(character)未找到 (ID: {task.character_id})")
-                            if not current_status:
-                                error_details.append(f"当前状态(current_status)未找到 (角色ID: {task.character_id})，可能是日程未生成或已过期")
                             if history is None:
                                 error_details.append("聊天历史(history)查询失败，可能存在数据库错误")
-                            
-                            # 记录包含了具体原因的警告
                             logger.warning(f"任务 {task.id} 失败: 获取上下文不完整。缺失或错误的部分: {', '.join(error_details)}")
-                            
                             ai_task_table.update_task_status(task.id, 'failed')
                             continue
-                        # =================================================================
 
                         logger.debug(f"任务 {task.id}: 步骤1 - 上下文获取成功。")
-                        
-                        # 2. 调用AI生成回复
-                        status_context = {
-                            "status_description": current_status.status_text,
-                            "focus_level": current_status.focus_level
-                        }
-                        
+
+                        status_context = build_response_status_context(
+                            current_status=current_status,
+                            user_id=task.user_id,
+                            character_id=task.character_id,
+                            now=now,
+                        )
+
+                        if task.task_type == 'proactive_chat' and status_context.get("response_mode") == "night_soft":
+                            logger.info(f"任务 {task.id}: 当前为夜间/睡眠模式，跳过主动消息，避免打扰用户。")
+                            community_chat_table.update_conversation_state(
+                                user_id=task.user_id,
+                                character_id=task.character_id,
+                                state='CONTINUOUS',
+                                resumes_at=None
+                            )
+                            ai_task_table.update_task_status(task.id, 'done')
+                            continue
+
                         if task.task_type == 'reply':
                             structured_response = generate_ai_response(
                                 character_profile=character.profile,
                                 current_ai_status=status_context,
                                 conversation_history=history,
-                                full_day_schedule=full_day_schedule
+                                full_day_schedule=full_day_schedule,
+                                current_beijing_time=now,
+                                memory_context=memory_context,
                             )
                         else: # proactive_chat
                             structured_response = generate_proactive_message(
@@ -300,30 +348,50 @@ def process_pending_tasks():
                             push_message_to_user_from_worker(task.user_id, task.character_id, msg)
                             time.sleep(random.uniform(1.0, 2.5))
 
-                        # 4. 【核心】根据AI指令更新对话微观状态
-                        control = structured_response.control
-                        delay_minutes = control.next_delay_minutes
-                        
-                        # 【硬规则】延迟上限器
-                        if current_status.focus_level == 'HIGH' and delay_minutes > 20:
-                            logger.warning(f"AI为HIGH专注状态请求了过长延迟({delay_minutes}分钟)，系统强制修正为10分钟。")
-                            delay_minutes = 10
-                        
-                        if control.next_state == 'PAUSE_CHAT':
-                            resume_time = datetime.now(BEIJING_TZ) + timedelta(minutes=delay_minutes)
-                            community_chat_table.update_conversation_state(
-                                user_id=task.user_id, character_id=task.character_id,
-                                state='PAUSED', resumes_at=resume_time
+                        # 4. 日程只影响回复风格，不再允许暂停对话。
+                        community_chat_table.update_conversation_state(
+                            user_id=task.user_id,
+                            character_id=task.character_id,
+                            state='CONTINUOUS',
+                            resumes_at=None
+                        )
+
+                        try:
+                            queued = community_memory_table.queue_memory_update_if_needed(
+                                task.user_id,
+                                task.character_id,
+                                ai_task_table,
                             )
-                            logger.info(f"任务 {task.id}: AI决定暂停对话，预计在 {resume_time} 回归。")
-                        else: # CONTINUE_CHAT
-                            community_chat_table.update_conversation_state(
-                                user_id=task.user_id, character_id=task.character_id,
-                                state='CONTINUOUS', resumes_at=None
+                            if queued:
+                                logger.info(f"已为任务 {task.id} 后续排队记忆更新任务。")
+                        except Exception:
+                            logger.error(
+                                f"任务 {task.id} 排队记忆更新任务失败。",
+                                exc_info=True,
                             )
                         
                         ai_task_table.update_task_status(task.id, 'done')
                         logger.info(f"✅ 聊天任务 {task.id} 处理成功。")
+
+                    elif task.task_type == 'memory_update':
+                        character = ai_character_table.get_character_by_id(task.character_id)
+                        if not character:
+                            logger.warning(f"任务 {task.id} 失败: 角色不存在，无法更新记忆。")
+                            ai_task_table.update_task_status(task.id, 'failed')
+                            continue
+
+                        profile_updated, summaries_updated = community_memory_table.update_memory_for_conversation(
+                            user_id=task.user_id,
+                            character_id=task.character_id,
+                            character_profile=character.profile,
+                        )
+                        ai_task_table.update_task_status(task.id, 'done')
+                        logger.info(
+                            "✅ 记忆任务 %s 处理成功。profile=%s summaries=%s",
+                            task.id,
+                            profile_updated,
+                            summaries_updated,
+                        )
 
                     elif task.task_type == 'friend_request_response':
                         # (好友请求处理逻辑保持不变)

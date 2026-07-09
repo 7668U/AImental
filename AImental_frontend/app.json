@@ -33,9 +33,7 @@
       "root": "pkgCommunity",
       "name": "community",
       "pages": [
-        "chat-interface/chat-interface",
-        "add-friends/add-friends",
-        "request-history/request-history"
+        "chat-interface/chat-interface"
       ]
     },
     {

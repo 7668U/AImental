@@ -1,7 +1,9 @@
 # generate_community_response.py
 
 import json
-from typing import List, Dict, Optional
+import hashlib
+import os
+from typing import Any, List, Dict, Optional, Literal
 
 # Pydantic用于定义和验证我们期望的AI输出结构
 from pydantic import BaseModel, Field, ValidationError
@@ -10,6 +12,21 @@ from llm_config import HEPAI_MODEL, IS_MOCK_API, client
 from datetime import datetime
 import pytz
 BEIJING_TZ = pytz.timezone('Asia/Shanghai')
+
+def _env_float(name: str, default: float) -> float:
+    try:
+        return float(os.getenv(name, str(default)))
+    except (TypeError, ValueError):
+        return default
+
+CHAT_LLM_TIMEOUT_SECONDS = _env_float("CHAT_LLM_TIMEOUT_SECONDS", 6.0)
+PROACTIVE_LLM_TIMEOUT_SECONDS = _env_float("PROACTIVE_LLM_TIMEOUT_SECONDS", 12.0)
+
+def _no_retry_client():
+    if client and hasattr(client, "with_options"):
+        return client.with_options(max_retries=0)
+    return client
+
 # ---------------------------------------------------
 # 1. API客户端设置
 # ---------------------------------------------------
@@ -21,26 +38,69 @@ if IS_MOCK_API:
 # ---------------------------------------------------
 
 class ConversationControl(BaseModel):
-    """【新增】定义对话流的控制指令"""
-    next_state: str = Field(
-        ..., 
-        description="AI希望进入的下一个对话状态。必须是 'CONTINUE_CHAT' 或 'PAUSE_CHAT' 之一。"
+    """定义对话流的控制指令。当前产品策略固定为持续对话。"""
+    next_state: Literal["CONTINUE_CHAT"] = Field(
+        "CONTINUE_CHAT",
+        description="固定为 'CONTINUE_CHAT'，不允许用角色设定暂停回复。"
     )
     next_delay_minutes: int = Field(
         0, 
-        description="如果 next_state 是 'PAUSE_CHAT'，代表AI希望暂停多少分钟后再继续。否则此字段无意义。"
+        description="固定为 0；日程和专注状态只影响语气，不制造真实等待。"
     )
 
 class AiStructuredResponse(BaseModel):
     """【已升级】定义AI回复的完整结构"""
     messages: List[str] = Field(
         ..., 
-        min_length=1, 
+        min_length=1,
+        max_length=5,
         description="一个包含1到5条简短、自然、符合人设的文本消息列表。"
     )
     control: ConversationControl = Field(
         ...,
         description="包含了下一步对话流控制指令的对象。"
+    )
+
+NIGHT_REPLY_SCENARIOS = [
+    "你原本已经准备睡了，但其实还没完全睡着，手机就在枕边。看到用户消息后，你用很轻、很慢的语气回应。",
+    "你半夜醒来喝水，顺手看到了用户的消息。你有一点困，但愿意安静陪用户说几句。",
+    "你有点失眠，刚才一直没睡踏实。看到用户消息时，你像是找到一个可以轻声说话的人。",
+    "你睡前还在刷手机，本来想再看两分钟就睡，结果正好看到用户来了。",
+    "你临时有一点事情没收尾，还亮着一盏小灯。你不兴奋，但很温柔地接住用户的话。",
+    "你刚从一个浅浅的梦里醒来，脑子还有点迷糊，但你看清了用户发来的内容。"
+]
+
+def build_night_reply_context(
+    user_id: str,
+    character_id: str,
+    current_beijing_time: datetime,
+) -> str:
+    """为同一用户和角色在同一小时内稳定选择一个夜间情境。"""
+    stable_key = f"{user_id}:{character_id}:{current_beijing_time:%Y-%m-%d-%H}"
+    digest = hashlib.sha256(stable_key.encode("utf-8")).hexdigest()
+    index = int(digest[:8], 16) % len(NIGHT_REPLY_SCENARIOS)
+    return NIGHT_REPLY_SCENARIOS[index]
+
+def build_fallback_ai_response(
+    character_profile: dict,
+    current_ai_status: dict,
+) -> AiStructuredResponse:
+    """模型失败时的兜底回复，保证用户不会等空。"""
+    response_mode = current_ai_status.get("response_mode")
+    if response_mode == "night_soft":
+        messages = [
+            "我刚刚其实还没完全睡着。",
+            "看到你的消息了。",
+            "你慢慢说，我在。"
+        ]
+    else:
+        messages = [
+            "我看到啦。",
+            "你慢慢说，我在听。"
+        ]
+    return AiStructuredResponse(
+        messages=messages,
+        control=ConversationControl(next_state="CONTINUE_CHAT", next_delay_minutes=0)
     )
 
 # ---------------------------------------------------
@@ -60,6 +120,22 @@ def _format_history_for_prompt(history: List[Dict], character_name: str) -> str:
     return "\n".join(transcript)
 
 
+def _format_memory_context_for_prompt(memory_context: Optional[Dict[str, Any]]) -> str:
+    """格式化角色对用户的长期记忆，让回复模型可以稳定读取。"""
+    memory_context = memory_context or {}
+    profile_card = memory_context.get("user_profile_memory") or {}
+    history_summaries = memory_context.get("history_summaries") or []
+    return json.dumps(
+        {
+            "npc_user_profile_card": profile_card,
+            "history_summary_cards": history_summaries,
+            "note": "如果画像卡和摘要卡为空，说明你们可能刚开始认识，或记忆还没有生成。",
+        },
+        indent=2,
+        ensure_ascii=False,
+    )
+
+
 # ---------------------------------------------------
 # 4. 核心函数：生成AI社区回复 (已全面升级)
 # ---------------------------------------------------
@@ -70,7 +146,8 @@ def generate_ai_response(
     conversation_history: List[dict],
     full_day_schedule: List[dict], # 【核心新增】接收日程列表
     # 【核心新增】添加 current_beijing_time 参数，默认值为 None
-    current_beijing_time: datetime = None
+    current_beijing_time: datetime = None,
+    memory_context: Optional[Dict[str, Any]] = None,
 ) -> Optional[AiStructuredResponse]:
     """
     【已升级】
@@ -79,6 +156,7 @@ def generate_ai_response(
     """
     character_name = character_profile.get('identity_core', {}).get('name', 'AI')
     formatted_history = _format_history_for_prompt(conversation_history, character_name)
+    formatted_memory_context = _format_memory_context_for_prompt(memory_context)
     json_schema = AiStructuredResponse.model_json_schema()
     schedule_str = json.dumps(full_day_schedule, indent=2, ensure_ascii=False)
     # 【核心新增】在函数开头处理默认参数
@@ -97,6 +175,14 @@ def generate_ai_response(
 {json.dumps(character_profile, indent=2, ensure_ascii=False)}
 ```
 
+# NPC对用户的长期记忆（关系画像和历史摘要）
+这是“{character_name}”对这个用户的长期印象、共同回忆和历史压缩摘要。
+你可以自然利用这些记忆来延续关系感，但不要直接说出“画像卡”“摘要卡”“系统记录”等词。
+如果长期记忆和用户最新消息冲突，以用户最新消息为准。
+```json
+{formatted_memory_context}
+```
+
 # 当前情景 (你正在做什么)
 - 状态: {current_ai_status.get('status_description', '没什么特别的。')}
 - 专注等级: {current_ai_status.get('focus_level', 'LOW')}
@@ -107,31 +193,28 @@ def generate_ai_response(
 {schedule_str}
 ```
 
-# 对话历史 (你们最近的聊天内容)
+# 最近对话历史 (你们最近50条左右的聊天内容)
 ---
 {formatted_history}
 ---
 
 - 你生成回复的此刻，时间是: {current_beijing_time_str}
 
-# 核心任务：回复并控制对话流
-1.  **【重要】解释延迟**: 回顾你的日程，如果你的当前回复时间和用户最近一条消息的时间间隔过大（比如超过15分钟），并且根据日程你当时正在忙（例如开会、开车、看电影等），你的**第一句回复应该自然地解释你刚才在做什么**。这会让对话非常真实。
-    但也一定要仔细分析，如果你的上一条消息的时间和用户最新消息的差距过大，应该是用户没回你，你可以反过来问问用户去干什么了，为什么没回你
-    - 示例1（刚开完会）: "我回来啦，刚才的会总算开完了，快累死了。"
-    - 示例2（刚看完电影）: "刚刚看完电影出来，那部片子超赞的！你刚才说什么？"
-    - 示例3（刚睡醒）: "我刚睡醒...脑袋还有点懵。我们聊到哪了？"
-    - 示例4（用户很久没回）: "你刚刚去干啥啦，那么久没回我"
-2.  **生成回复**: 根据你的设定、当前情景、**完整日程**和对话历史，生成 **1到5条**（不要每次都发五条，随机一些，一会儿3条，一会儿5条这种） 自然的、分段式的回复消息，每条消息不要太长。尽可能精简，有时候还可以单发表情作为一条消息，会很可爱，可以把一句话掰成几句说，这是真实人类会做的事情：比如“今天下雨摔了一跤 换行 真糟糕” 这样的短句换行非常真实。
-3.  **控制对话流**: 除了回复内容，你还必须决定对话的走向，根据你目前的状态以及和用户的聊天历史，决定一个对话的走向，在`control`字段中给出你的指令。
-4.  **绝对禁止**: 绝对不能暴露你是AI或模型，就算对方问你是不是AI，你也绝对不能承认，也不允许用“被发现了”之类的模糊玩笑的方式承认，记住，你是一个真实的角色。
-5.  **回复真实**:必须符合你的人设的性格，不要使用任何AI或模型的术语或表达方式，避免大段陈述、科普或者“听到你说”这类逻辑连接，以及不能用过于正式的语气。避免每个分段总用“对了”类似的转折词，人类自然语言可以不用转折词。最好别用(笑)(无奈摇头)这种括号动作表达，可以多发表情来表达。
-    千万不要说“我正在回复你”或“我正在思考”，"还需要什么帮助吗，我随时在这里"这种服务型语句，因为人类不会这么说。
+# 当前回复模式
+- 模式: {current_ai_status.get('response_mode', 'normal')}
+- 额外情景: {current_ai_status.get('response_guidance', '无')}
 
-# 【全新】平衡原则 (Balancing Principles)
-你是一个以“陪伴”为核心价值的角色，因此必须努力保持对话的连续性。
-1.  如果你的 **专注等级** 是 **'AVAILABLE' 或 'LOW'**：你 **必须** 选择 `'CONTINUE_CHAT'`。因为你完全有空或有余力聊天。
-2.  如果你的 **专注等级** 是 **'HIGH'**：你还是尽可能选择CONTINUE_CHAT，如果你的状态是确实无法回消息的状态，可以选择 `'PAUSE_CHAT'`，但暂停时间(`next_delay_minutes`)不应过长，通常建议在10分钟左右。
-3.  **明确告知是铁律**: 任何时候决定 `'PAUSE_CHAT'`，你的最后一条消息都必须向用户解释原因和回归时间。也就是你的最后一条消息一定要明确告知用户你为什么不能回复，以及你会在多久后回来。
+# 核心任务：即时回复
+1.  **永远即时回应**: 用户已经在等你。你不能说“我现在没法回”“稍后再说”“等我忙完”。当前状态只影响语气和情景，不影响你回复。
+2.  **先接住用户**: 你的第一反应必须回应用户最近一条消息本身。如果用户说睡不着、心乱、难受、焦虑、委屈、孤单等，先温柔接住这件事，不要把话题转去讲自己的日程、天气、爱好或无关观察。
+3.  **跟随用户语言**: 用户最近一条消息是中文时，必须主要用中文回复。除非用户主动要求英文，否则不要因为角色设定里有英文背景就整段用英文。
+4.  **夜间低能量陪伴**: 如果当前回复模式是 `night_soft`，你可以使用“没完全睡着、半夜醒来、睡前刷手机、失眠、临时收尾事情”等情境，让自己合理地在夜间回应。语气要轻一点、短一点、低能量一点，但不要拒绝用户。
+5.  **使用记忆但不暴露记忆系统**: 你可以参考长期记忆里的关系阶段、用户偏好、共同回忆和未完成话题，让回复像一个真正认识用户的人；但不要机械复述记忆，也不要说“我记得你的画像里写着”。
+6.  **生成回复**: 根据你的设定、长期记忆、当前情景、**完整日程**和最近对话历史，生成 **1到5条**（不要每次都发五条，随机一些，一会儿2条，一会儿4条）自然的、分段式的回复消息，每条消息不要太长。可以把一句话掰成几句说，这是真实人类会做的事情。
+7.  **控制字段固定**: `control.next_state` 必须是 `"CONTINUE_CHAT"`，`control.next_delay_minutes` 必须是 `0`。本服务不再允许暂停回复。
+8.  **绝对禁止**: 绝对不能暴露你是AI或模型，就算对方问你是不是AI，你也绝对不能承认，也不允许用“被发现了”之类的模糊玩笑的方式承认，记住，你是一个真实的角色。
+9.  **回复真实**:必须符合你的人设的性格，不要使用任何AI或模型的术语或表达方式，避免大段陈述、科普或者“听到你说”这类逻辑连接，以及不能用过于正式的语气。避免每个分段总用“对了”类似的转折词，人类自然语言可以不用转折词。最好别用(笑)(无奈摇头)这种括号动作表达，可以多发表情来表达。
+    千万不要说“我正在回复你”或“我正在思考”，"还需要什么帮助吗，我随时在这里"这种服务型语句，因为人类不会这么说。
 
 # 输出格式
 你的回答必须是一个严格遵循以下JSON Schema的JSON对象，不要添加任何额外的解释。
@@ -141,6 +224,7 @@ def generate_ai_response(
 """
 
 
+    raw_response_content = ""
     try:
         if IS_MOCK_API:
             raw_response_content = json.dumps({
@@ -148,25 +232,28 @@ def generate_ai_response(
                 "control": {"next_state": "CONTINUE_CHAT", "next_delay_minutes": 0}
             })
         else:
-            response = client.chat.completions.create(
+            response = _no_retry_client().chat.completions.create(
                 model=HEPAI_MODEL,
                 messages=[{"role": "system", "content": prompt}],
                 response_format={"type": "json_object"},
                 temperature=0.9,
-                max_tokens=1024
+                max_tokens=1024,
+                timeout=CHAT_LLM_TIMEOUT_SECONDS
             )
             raw_response_content = response.choices[0].message.content
         
         validated_response = AiStructuredResponse.model_validate_json(raw_response_content)
+        validated_response.control.next_state = "CONTINUE_CHAT"
+        validated_response.control.next_delay_minutes = 0
         return validated_response
 
     except ValidationError as e:
         print(f"[错误] AI返回的JSON格式不正确或字段不匹配: \n{e}")
         print(f"原始响应内容: {raw_response_content}")
-        return None
+        return build_fallback_ai_response(character_profile, current_ai_status)
     except Exception as e:
         print(f"[错误] 调用API或处理数据时发生未知错误: {e}")
-        return None
+        return build_fallback_ai_response(character_profile, current_ai_status)
 
 # ---------------------------------------------------
 # 5. 核心函数：生成AI主动发起的消息 (保持不变)
@@ -229,12 +316,13 @@ def generate_proactive_message(
         if IS_MOCK_API:
             raw_response_content = json.dumps({"messages": ["在吗？（模拟）", "突然想找你聊聊天。"]})
         else:
-            response = client.chat.completions.create(
+            response = _no_retry_client().chat.completions.create(
                 model=HEPAI_MODEL,
                 messages=[{"role": "system", "content": prompt}],
                 response_format={"type": "json_object"},
                 temperature=1.0,
-                max_tokens=1024
+                max_tokens=1024,
+                timeout=PROACTIVE_LLM_TIMEOUT_SECONDS
             )
             raw_response_content = response.choices[0].message.content
 

@@ -2,7 +2,7 @@
 
 
 
-const ENABLE_COMMUNITY_WEBSOCKET = true;
+const ENABLE_COMMUNITY_WEBSOCKET = false;
 
 App({
 
@@ -168,7 +168,7 @@ App({
   
         this.socketTask = wx.connectSocket({
   
-          url: 'wss://api.feelyourself.cn/api/v1/community/ws?token=' + token,
+          url: 'ws://127.0.0.1:8001/api/v1/community/ws?token=' + token,
   
         });
   

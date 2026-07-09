@@ -3,8 +3,16 @@
 <view class="custom-nav-bar">
   <image class="back-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/left.png" bindtap="navigateBack"></image>
   <view class="nav-title-container">
-    <view class="nav-title">{{aiName}}</view>
-    <view class="nav-status" wx:if="{{isAiTyping}}">对方正在输入...</view>
+    <view class="nav-title-line">
+      <image class="nav-avatar" src="{{aiAvatar}}" mode="aspectFill" bindtap="showProfileCard"></image>
+      <view class="nav-title">{{aiName}}</view>
+    </view>
+    <view class="nav-status typing-status" wx:if="{{isAiTyping}}">
+      <text>对方正在输入</text>
+      <text class="typing-dot dot-1">.</text>
+      <text class="typing-dot dot-2">.</text>
+      <text class="typing-dot dot-3">.</text>
+    </view>
     <view class="nav-status" wx:elif="{{aiCurrentStatus}}">{{aiCurrentStatus}}</view>
   </view>
 </view>
@@ -17,9 +25,9 @@
   enhanced="true" 
   show-scrollbar="false"
 >
-  <view class="message-item" wx:for="{{messageList}}" wx:key="id" id="msg-{{item.id}}">
+    <view class="message-item" wx:for="{{messageList}}" wx:key="id" id="msg-{{item.id}}">
     <view class="message-row ai" wx:if="{{item.role === 'ai'}}">
-      <image class="avatar" src="{{aiAvatar}}"></image>
+      <image class="avatar" src="{{aiAvatar}}" bindtap="showProfileCard"></image>
       <view class="bubble-wrapper">
         <view class="bubble">{{item.content}}</view>
         <view class="message-time-ai">{{item.time}}</view>
@@ -27,18 +35,6 @@
     </view>
     
     <view class="message-row user" wx:if="{{item.role === 'user'}}">
-      <view class="message-status">
-        <view class="status-unit" wx:if="{{item.status === 'sent'}}">
-          <image class="sent-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/send_successful.png"></image>
-          <text class="status-text">送达</text>
-        </view>
-        <view class="status-unit" wx:if="{{item.status === 'read'}}">
-          <image class="read-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/read.png"></image>
-          <text class="status-text">已读</text>
-        </view>
-        <image wx:if="{{item.status === 'sending'}}" class="sending-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/loading.gif"></image>
-        <image wx:if="{{item.status === 'failed'}}" class="failed-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/empty-state-dark.png"></image>
-      </view>
       <view class="bubble-wrapper">
         <view class="bubble">{{item.content}}</view>
         <view class="message-time-user">{{item.time}}</view>
@@ -65,6 +61,31 @@
 </view>
 </view>
 
+<view class="profile-overlay" wx:if="{{isProfileCardVisible}}" bindtap="hideProfileCard">
+  <view class="profile-card" catchtap="noop">
+    <view class="profile-card__header">
+      <image class="profile-card__avatar" src="{{aiAvatar}}" mode="aspectFill"></image>
+      <view class="profile-card__title-group">
+        <view class="profile-card__name">{{aiName}}</view>
+      </view>
+      <view class="profile-card__close" bindtap="hideProfileCard">×</view>
+    </view>
+
+    <view class="profile-card__motto" wx:if="{{profileMotto}}">“{{profileMotto}}”</view>
+
+    <view class="profile-card__tags" wx:if="{{profileTags.length}}">
+      <text class="profile-card__tag" wx:for="{{profileTags}}" wx:key="*this">{{item}}</text>
+    </view>
+
+    <scroll-view class="profile-card__body" scroll-y="true">
+      <view class="profile-card__row" wx:for="{{profileSections}}" wx:key="label">
+        <view class="profile-card__label">{{item.label}}</view>
+        <view class="profile-card__value">{{item.value}}</view>
+      </view>
+    </scroll-view>
+  </view>
+</view>
+
 <custom-modal 
   show="{{showCustomModal}}" 
   title="{{modalTitle}}"
@@ -72,4 +93,4 @@
   bind:confirm="onModalConfirm"
 ></custom-modal>
 
-</view> 
+</view>

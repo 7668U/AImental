@@ -31,6 +31,7 @@ if ENABLE_COMMUNITY_BACKEND:
     from model.ai_status import AiStatus, ai_status_table
     from model.ai_task import AITask
     from model.chat_community import CommunityChat
+    from model.community_memory import CharacterUserMemory, CommunityHistorySummary
     from model.friendship import Friendship
     from generate_ai_status import generate_daily_schedule
 
@@ -157,7 +158,8 @@ def check_and_generate_today_schedules():
                 # 调用生成函数
                 generated_data = generate_daily_schedule(
                     character_profile=character.profile,
-                    recent_history=recent_history
+                    recent_history=recent_history,
+                    target_date=today_in_beijing
                 )
                 
                 # 检查生成结果是否有效（不为None且不为空列表）
@@ -221,6 +223,8 @@ def on_startup():
             # AI社区模型映射
             AICharacter: chat_db,
             CommunityChat: chat_db,
+            CharacterUserMemory: chat_db,
+            CommunityHistorySummary: chat_db,
             AITask: chat_db,
             AiStatus: status_db,
             Friendship: chat_db,

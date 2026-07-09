@@ -12,7 +12,6 @@
     <view class="custom-nav-wrapper" style="padding-top: {{statusBarHeight}}px;">
       <view class="custom-nav" style="height: {{navBarHeight}}px;">
         <view class="nav-left">
-          <image class="action-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/new_item.png" bindtap="addMoreFriends"></image>
         </view>
         <view class="nav-center">
           <text class="nav-title">心灵社区</text>
@@ -47,7 +46,7 @@
       <block wx:else>
         <view class="empty-state">
           <image class="empty-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/empty-chat.png"></image>
-          <text class="empty-text">还没有好友，快点击加号寻找新的伙伴吧</text>
+          <text class="empty-text">暂时还没有可聊天的角色</text>
         </view>
       </block>
     </scroll-view>

@@ -17,7 +17,7 @@ formatter = logging.Formatter(log_format)
 # 4. 创建一个处理器 (handler)，用于将日志输出到控制台
 # StreamHandler 就是用来输出到终端的
 console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setLevel(logging.DEBUG)  # 控制台也显示所有级别的日志
+console_handler.setLevel(logging.INFO)  # 控制台显示关键运行日志，细粒度调试信息保留给临时排查
 console_handler.setFormatter(formatter)
 
 # 5. 创建另一个处理器，用于将日志写入文件（可选，但强烈推荐）

@@ -1,6 +1,6 @@
 // pages/ai-community/chat-list/chat-list.js
 
-const SERVER_URL = 'http://127.0.0.1:8000';
+const SERVER_URL = 'http://127.0.0.1:8001';
 const app = getApp();
 
 // --- 统一网络请求函数 ---
@@ -198,10 +198,6 @@ Page({
   navigateToChat: function(e) {
     const ai = e.currentTarget.dataset.ai;
     wx.navigateTo({ url: `/pkgCommunity/chat-interface/chat-interface?aiId=${ai.id}&name=${encodeURIComponent(ai.name)}&avatar=${encodeURIComponent(ai.avatar)}` });
-  },
-
-  addMoreFriends: function() { 
-    wx.navigateTo({ url: '/pkgCommunity/add-friends/add-friends' });
   },
 
   formatTimestamp: function(timestamp) {

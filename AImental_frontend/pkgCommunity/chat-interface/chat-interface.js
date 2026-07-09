@@ -1,6 +1,6 @@
 // pages/ai-community/chat-interface/chat-interface.js
-const API_BASE_URL = 'http://127.0.0.1:8000/api/v1/community';
-const WS_BASE_URL = 'ws://127.0.0.1:8000/api/v1/community';
+const API_BASE_URL = 'http://127.0.0.1:8001/api/v1/community';
+const WS_BASE_URL = 'ws://127.0.0.1:8001/api/v1/community';
 const app = getApp();
 
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
@@ -33,6 +33,11 @@ Page({
     showCustomModal: false,
     modalTitle: '',
     modalContent: '',
+    isProfileCardVisible: false,
+    aiProfile: null,
+    profileSections: [],
+    profileTags: [],
+    profileMotto: '',
 
     // --- BUG修复 data ---
     isSending: false, 
@@ -78,13 +83,158 @@ Page({
 
   onUnload: function() {
     // 页面被销毁时，注销监听器
+    this.setData({ isLeavingPage: true });
     app.webSocketManager.unregisterListener();
     this.stopPeeking(); // 双重保险
+    this.clearResponsePolling();
+    this.clearTypingTimer();
   },
 
   // ---------------------------------------------------
   // 核心功能函数 (已修复)
   // ---------------------------------------------------
+
+  buildProfileCardData: function(profile = {}) {
+    const identity = profile.identity_core || {};
+    const traits = profile.personality_traits || {};
+    const dialogue = profile.dialogue_style || {};
+    const background = profile.background_story || {};
+    const lifestyle = profile.lifestyle || {};
+    const sections = [];
+
+    const addSection = (label, value) => {
+      if (value === undefined || value === null || value === '') return;
+      const displayValue = Array.isArray(value) ? value.join('、') : String(value);
+      if (displayValue.trim()) {
+        sections.push({ label, value: displayValue });
+      }
+    };
+
+    addSection('年龄', identity.age);
+    addSection('性别', identity.gender);
+    addSection('职业', identity.occupation);
+    addSection('外貌', identity.appearance);
+    addSection('MBTI', traits.mbti);
+    addSection('说话风格', dialogue.style_summary);
+    addSection('家乡', background.hometown);
+    addSection('背景', background.background);
+    addSection('兴趣', lifestyle.hobbies);
+    addSection('不喜欢', lifestyle.dislikes);
+
+    return {
+      profileSections: sections,
+      profileTags: Array.isArray(traits.personality_tags) ? traits.personality_tags : [],
+      profileMotto: traits.philosophy || ''
+    };
+  },
+
+  showProfileCard: function() {
+    this.setData({ isProfileCardVisible: true });
+  },
+
+  showProfileCardOnFirstVisit: function() {
+    if (!this.data.aiId || !this.data.aiProfile) return;
+    const storageKey = `community_profile_seen_${this.data.aiId}`;
+    const hasSeenProfile = wx.getStorageSync(storageKey);
+    if (hasSeenProfile) return;
+
+    wx.setStorageSync(storageKey, true);
+    this.showProfileCard();
+  },
+
+  hideProfileCard: function() {
+    this.setData({ isProfileCardVisible: false });
+  },
+
+  noop: function() {},
+
+  scheduleResponsePollingIfNeeded: function() {
+    const wsManager = app.webSocketManager || {};
+    if (wsManager.isSocketOpen) return;
+
+    this.clearResponsePolling();
+    let attempts = 0;
+    const poll = () => {
+      if (this.data.isLeavingPage) return;
+      attempts += 1;
+      this.loadInitialDataWithFallback();
+      if (attempts < 6) {
+        this.responseRefreshTimer = setTimeout(poll, 5000);
+      }
+    };
+
+    this.responseRefreshTimer = setTimeout(poll, 6000);
+  },
+
+  clearResponsePolling: function() {
+    if (this.responseRefreshTimer) {
+      clearTimeout(this.responseRefreshTimer);
+      this.responseRefreshTimer = null;
+    }
+  },
+
+  clearTypingTimer: function() {
+    if (this.data.typingTimer) {
+      clearTimeout(this.data.typingTimer);
+      this.setData({ typingTimer: null });
+    }
+  },
+
+  finishAiReplyState: function() {
+    this.clearTypingTimer();
+    this.setData({
+      isSending: false,
+      isAiTyping: false,
+      isSendDisabled: !this.data.inputValue.trim() || this.data.isMessageLimitReached
+    });
+  },
+
+  getNextReplyDelay: function(message, index) {
+    const textLength = message && message.content ? String(message.content).length : 0;
+    const baseDelay = index === 0 ? 700 : 820;
+    const readingDelay = Math.min(textLength * 22, 520);
+    return baseDelay + readingDelay;
+  },
+
+  appendAiMessagesSequentially: function(messages, onComplete) {
+    const aiMessages = Array.isArray(messages) ? messages : [];
+    if (!aiMessages.length) {
+      if (onComplete) onComplete();
+      return;
+    }
+
+    let index = 0;
+    const appendNext = () => {
+      if (this.data.isLeavingPage) return;
+      const msg = aiMessages[index];
+      const newMessage = {
+        id: (msg.timestamp || Date.now()) + '_' + Math.random().toString(36).substr(2, 9),
+        role: 'ai',
+        content: msg.content,
+        time: this.formatTimestamp(msg.timestamp || Date.now() / 1000),
+        status: 'received'
+      };
+
+      const updates = {
+        messageList: [...this.data.messageList, newMessage],
+      };
+
+      this.setData(updates);
+      this.scrollToBottom();
+      index += 1;
+
+      if (index < aiMessages.length) {
+        const timer = setTimeout(appendNext, this.getNextReplyDelay(aiMessages[index], index));
+        this.setData({ typingTimer: timer });
+      } else if (onComplete) {
+        const timer = setTimeout(onComplete, 520);
+        this.setData({ typingTimer: timer });
+      }
+    };
+
+    const timer = setTimeout(appendNext, this.getNextReplyDelay(aiMessages[0], 0));
+    this.setData({ typingTimer: timer });
+  },
   
   checkMessageLimit: function() {
     this._request({
@@ -97,7 +247,7 @@ Page({
         dailyMessageCount: res.daily_count,
         messageLimit: res.limit,
         isMessageLimitReached: limitReached,
-        isSendDisabled: !this.data.inputValue.trim() || limitReached || this.data.isSending
+        isSendDisabled: !this.data.inputValue.trim() || limitReached || this.data.isSending || this.data.isAiTyping
       });
     }).catch(err => {
       console.error("获取消息限制状态失败:", err);
@@ -122,13 +272,13 @@ Page({
     const value = e.detail.value;
     this.setData({ 
       inputValue: value,
-      isSendDisabled: !value.trim() || this.data.isMessageLimitReached || this.data.isSending
+      isSendDisabled: !value.trim() || this.data.isMessageLimitReached || this.data.isSending || this.data.isAiTyping
     });
   },
 
   sendMessage: function() {
-    if (this.data.isSending) {
-      console.warn("正在发送中，请勿重复点击...");
+    if (this.data.isSending || this.data.isAiTyping) {
+      wx.showToast({ title: '对方正在回复您哦~稍后再发吧', icon: 'none' });
       return;
     }
 
@@ -149,15 +299,15 @@ Page({
       id: tempId,
       role: 'user',
       content: content,
-      time: this.formatTimestamp(Date.now() / 1000),
-      status: 'sending' 
+      time: this.formatTimestamp(Date.now() / 1000)
     };
 
     this.setData({
       messageList: [...this.data.messageList, userMessage],
       inputValue: '',
       isSendDisabled: true,
-      isSending: true,      
+      isSending: true,
+      isAiTyping: true,
     });
 
     this.scrollToBottom();
@@ -167,16 +317,21 @@ Page({
       method: 'POST',
       data: { content },
       success: (data) => {
-        const newCount = this.data.dailyMessageCount + 1;
+        const returnedCount = typeof data.daily_count === 'number' && data.daily_count >= 0
+          ? data.daily_count
+          : this.data.dailyMessageCount + 1;
+        const newCount = returnedCount;
         const limitReached = newCount >= this.data.messageLimit;
         this.setData({
             dailyMessageCount: newCount,
             isMessageLimitReached: limitReached,
-            isSendDisabled: limitReached,
+            isSendDisabled: true,
         });
         setTimeout(() => {
-          this.updateMessageStatus(tempId, 'sent');
-        }, 1000);
+          this.appendAiMessagesSequentially(data.ai_messages || [], () => {
+            this.finishAiReplyState();
+          });
+        }, 180);
       },
       fail: (err) => {
         console.error("发送失败:", err);
@@ -197,19 +352,22 @@ Page({
               inputValue: '' 
             });
           }
+        } else if (err && err.statusCode === 409) {
+          wx.showToast({ title: err.data.detail || '对方正在回复您哦~稍后再发吧', icon: 'none' });
+          const currentMessageList = this.data.messageList;
+          const messageIndex = currentMessageList.findIndex(msg => msg.id === tempId);
+          if (messageIndex !== -1) {
+            currentMessageList.splice(messageIndex, 1);
+            this.setData({ messageList: currentMessageList });
+          }
         } else {
           this.updateMessageStatus(tempId, 'failed');
         }
+        this.finishAiReplyState();
       }
     })
     .catch(err => {
       console.log("Promise rejection has been handled gracefully.");
-    })
-    .finally(() => {
-      this.setData({ 
-        isSending: false,
-        isSendDisabled: !this.data.inputValue.trim() || this.data.isMessageLimitReached
-      });
     });
   },
   
@@ -257,21 +415,10 @@ Page({
       status: 'received'
     };
     clearTimeout(this.data.typingTimer);
-    let lastUserMsgIndex = -1;
-    for (let i = this.data.messageList.length - 1; i >= 0; i--) {
-      if (this.data.messageList[i].role === 'user' && this.data.messageList[i].status === 'sent') {
-        lastUserMsgIndex = i;
-        break;
-      }
-    }
-    const updatePath = lastUserMsgIndex !== -1 ? `messageList[${lastUserMsgIndex}].status` : '';
     const updates = {
       messageList: [...this.data.messageList, newMessage],
       isAiTyping: true,
     };
-    if (updatePath) {
-      updates[updatePath] = 'read';
-    }
     this.setData(updates);
     this.scrollToBottom();
     const typingTimer = setTimeout(() => {
@@ -284,17 +431,24 @@ Page({
     this._request({
       url: `/chats/${this.data.aiId}/details`,
       success: (data) => {
-        // --- 【核心调试代码】 在这里打印后端返回的完整数据 ---
-        console.log("========== 角色状态调试日志 BEGIN ==========");
-        console.log("当前请求的角色ID (aiId):", this.data.aiId);
-        console.log("后端 /details 接口返回的原始数据 (data):", data);
-        console.log("从数据中提取的角色状态 (data.character_status):", data.character_status);
-        console.log("========== 角色状态调试日志 END ==========");
-        // --- 【调试代码结束】 ---
         const formattedMessages = this.formatMessages(data.history);
+        const character = data.character || {};
+        const profile = character.profile || null;
+        const profileCardData = this.buildProfileCardData(profile || {});
+        const backendBaseUrl = API_BASE_URL.replace('/api/v1/community', '');
+        const avatarUrl = character.avatar_url
+          ? (character.avatar_url.startsWith('http') ? character.avatar_url : backendBaseUrl + character.avatar_url)
+          : this.data.aiAvatar;
+
         this.setData({ 
           messageList: formattedMessages,
-          aiCurrentStatus: data.character_status || '在线'
+          aiCurrentStatus: data.character_status || '在线',
+          aiName: character.name || this.data.aiName,
+          aiAvatar: avatarUrl,
+          aiProfile: profile,
+          ...profileCardData
+        }, () => {
+          this.showProfileCardOnFirstVisit();
         });
         this.scrollToBottom();
 
@@ -375,30 +529,11 @@ Page({
   formatMessages: function(messages) {
       if (!messages || !Array.isArray(messages)) return [];
     
-      const lastMessage = messages[messages.length - 1];
-    
       return messages.map((msg, index) => {
-        let status = 'received'; // AI消息的默认状态
-    
-        if (msg.role === 'user') {
-          // 【核心逻辑】判断用户消息的状态
-          // 默认是 'sent' (送达)
-          status = 'sent'; 
-    
-          // 如果这不是最后一条消息，并且下一条消息是AI发的，
-          // 那么这条用户消息就可以被认为是 'read' (已读)
-          const nextMessage = messages[index + 1];
-          if (nextMessage && nextMessage.role === 'ai') {
-            status = 'read';
-          }
-        }
-    
         return {
           ...msg,
           id: (msg.timestamp || Date.now()) + '_' + Math.random().toString(36).substr(2, 9),
-          time: this.formatTimestamp(msg.timestamp),
-          // 使用我们刚刚计算出的智能状态
-          status: status 
+          time: this.formatTimestamp(msg.timestamp)
         }
       });
     },
