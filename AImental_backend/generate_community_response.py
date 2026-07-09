@@ -3,6 +3,7 @@
 import json
 import hashlib
 import os
+import time
 from typing import Any, List, Dict, Optional, Literal
 
 # Pydantic用于定义和验证我们期望的AI输出结构
@@ -19,8 +20,8 @@ def _env_float(name: str, default: float) -> float:
     except (TypeError, ValueError):
         return default
 
-CHAT_LLM_TIMEOUT_SECONDS = _env_float("CHAT_LLM_TIMEOUT_SECONDS", 6.0)
-PROACTIVE_LLM_TIMEOUT_SECONDS = _env_float("PROACTIVE_LLM_TIMEOUT_SECONDS", 12.0)
+CHAT_LLM_TIMEOUT_SECONDS = _env_float("CHAT_LLM_TIMEOUT_SECONDS", 90.0)
+PROACTIVE_LLM_TIMEOUT_SECONDS = _env_float("PROACTIVE_LLM_TIMEOUT_SECONDS", 45.0)
 
 def _no_retry_client():
     if client and hasattr(client, "with_options"):
@@ -80,28 +81,6 @@ def build_night_reply_context(
     digest = hashlib.sha256(stable_key.encode("utf-8")).hexdigest()
     index = int(digest[:8], 16) % len(NIGHT_REPLY_SCENARIOS)
     return NIGHT_REPLY_SCENARIOS[index]
-
-def build_fallback_ai_response(
-    character_profile: dict,
-    current_ai_status: dict,
-) -> AiStructuredResponse:
-    """模型失败时的兜底回复，保证用户不会等空。"""
-    response_mode = current_ai_status.get("response_mode")
-    if response_mode == "night_soft":
-        messages = [
-            "我刚刚其实还没完全睡着。",
-            "看到你的消息了。",
-            "你慢慢说，我在。"
-        ]
-    else:
-        messages = [
-            "我看到啦。",
-            "你慢慢说，我在听。"
-        ]
-    return AiStructuredResponse(
-        messages=messages,
-        control=ConversationControl(next_state="CONTINUE_CHAT", next_delay_minutes=0)
-    )
 
 # ---------------------------------------------------
 # 3. 辅助函数：格式化聊天历史 (保持不变)
@@ -177,7 +156,7 @@ def generate_ai_response(
 
 # NPC对用户的长期记忆（关系画像和历史摘要）
 这是“{character_name}”对这个用户的长期印象、共同回忆和历史压缩摘要。
-你可以自然利用这些记忆来延续关系感，但不要直接说出“画像卡”“摘要卡”“系统记录”等词。
+你可以自然利用这些记忆来延续关系感，但不要直接说出“好感度”“分数”“画像卡”“摘要卡”“系统记录”等词。
 如果长期记忆和用户最新消息冲突，以用户最新消息为准。
 ```json
 {formatted_memory_context}
@@ -204,12 +183,21 @@ def generate_ai_response(
 - 模式: {current_ai_status.get('response_mode', 'normal')}
 - 额外情景: {current_ai_status.get('response_guidance', '无')}
 
+# 语言优先级（非常重要）
+应用语言策略高于角色人设里的语言习惯。角色设定中如果写了“喜欢英文”“习惯英文回复”“英文背景”等，只能作为少量口头禅或风味，不能覆盖下面规则。
+
+1. 用户最新一条消息主要是中文时，你必须主要用中文回复。
+2. 只有用户明确发出命令或请求，例如“用英文回复我”“接下来请用英文”“English please”“reply in English”，才可以主要用英文。
+3. 用户只是讨论、质疑或纠正语言选择时，不等于要求你切换语言。例如：“你不是说要英文回复吗”“你怎么突然英文了”“不要英文”“为什么用英文”都必须用中文接住，并自然说明你可以按对方舒服的语言来。
+4. 不要说“我习惯英文回复”“系统要求我英文回复”“我的人设是英文回复”这类暴露规则或很生硬的话。可以自然说：“我可以用中文陪你聊，要是你想练英文我也可以切过去。”
+5. 如果用户说“都可以”，默认跟随用户上一条主要语言；如果上一条是中文，就用中文。
+
 # 核心任务：即时回复
 1.  **永远即时回应**: 用户已经在等你。你不能说“我现在没法回”“稍后再说”“等我忙完”。当前状态只影响语气和情景，不影响你回复。
 2.  **先接住用户**: 你的第一反应必须回应用户最近一条消息本身。如果用户说睡不着、心乱、难受、焦虑、委屈、孤单等，先温柔接住这件事，不要把话题转去讲自己的日程、天气、爱好或无关观察。
-3.  **跟随用户语言**: 用户最近一条消息是中文时，必须主要用中文回复。除非用户主动要求英文，否则不要因为角色设定里有英文背景就整段用英文。
+3.  **跟随用户语言**: 严格遵守上面的语言优先级。不要因为用户消息里出现“英文”两个字就自动切英文。
 4.  **夜间低能量陪伴**: 如果当前回复模式是 `night_soft`，你可以使用“没完全睡着、半夜醒来、睡前刷手机、失眠、临时收尾事情”等情境，让自己合理地在夜间回应。语气要轻一点、短一点、低能量一点，但不要拒绝用户。
-5.  **使用记忆但不暴露记忆系统**: 你可以参考长期记忆里的关系阶段、用户偏好、共同回忆和未完成话题，让回复像一个真正认识用户的人；但不要机械复述记忆，也不要说“我记得你的画像里写着”。
+5.  **使用记忆但不暴露记忆系统**: 你可以参考长期记忆里的关系阶段、用户偏好、共同回忆和未完成话题，让回复像一个真正认识用户的人；但不要机械复述记忆，也不要说“我记得你的画像里写着”，更不要提任何好感度数值。
 6.  **生成回复**: 根据你的设定、长期记忆、当前情景、**完整日程**和最近对话历史，生成 **1到5条**（不要每次都发五条，随机一些，一会儿2条，一会儿4条）自然的、分段式的回复消息，每条消息不要太长。可以把一句话掰成几句说，这是真实人类会做的事情。
 7.  **控制字段固定**: `control.next_state` 必须是 `"CONTINUE_CHAT"`，`control.next_delay_minutes` 必须是 `0`。本服务不再允许暂停回复。
 8.  **绝对禁止**: 绝对不能暴露你是AI或模型，就算对方问你是不是AI，你也绝对不能承认，也不允许用“被发现了”之类的模糊玩笑的方式承认，记住，你是一个真实的角色。
@@ -225,6 +213,7 @@ def generate_ai_response(
 
 
     raw_response_content = ""
+    started_at = time.perf_counter()
     try:
         if IS_MOCK_API:
             raw_response_content = json.dumps({
@@ -241,6 +230,13 @@ def generate_ai_response(
                 timeout=CHAT_LLM_TIMEOUT_SECONDS
             )
             raw_response_content = response.choices[0].message.content
+
+        elapsed = time.perf_counter() - started_at
+        print(
+            "[community_reply] LLM response received "
+            f"elapsed={elapsed:.1f}s timeout={CHAT_LLM_TIMEOUT_SECONDS:.1f}s "
+            f"prompt_chars={len(prompt)} history_len={len(conversation_history or [])}"
+        )
         
         validated_response = AiStructuredResponse.model_validate_json(raw_response_content)
         validated_response.control.next_state = "CONTINUE_CHAT"
@@ -248,12 +244,26 @@ def generate_ai_response(
         return validated_response
 
     except ValidationError as e:
-        print(f"[错误] AI返回的JSON格式不正确或字段不匹配: \n{e}")
-        print(f"原始响应内容: {raw_response_content}")
-        return build_fallback_ai_response(character_profile, current_ai_status)
+        elapsed = time.perf_counter() - started_at
+        print(
+            "[错误] 社区主回复LLM返回JSON格式不正确或字段不匹配: "
+            f"elapsed={elapsed:.1f}s timeout={CHAT_LLM_TIMEOUT_SECONDS:.1f}s "
+            f"prompt_chars={len(prompt)} history_len={len(conversation_history or [])}\n{e}"
+        )
+        print(f"原始响应内容前500字符: {str(raw_response_content)[:500]}")
+        return None
     except Exception as e:
-        print(f"[错误] 调用API或处理数据时发生未知错误: {e}")
-        return build_fallback_ai_response(character_profile, current_ai_status)
+        elapsed = time.perf_counter() - started_at
+        error_text = str(e)
+        is_timeout = "timeout" in error_text.lower() or "timed out" in error_text.lower()
+        print(
+            "[错误] 社区主回复LLM调用失败: "
+            f"type={type(e).__name__} timeout_error={is_timeout} "
+            f"elapsed={elapsed:.1f}s configured_timeout={CHAT_LLM_TIMEOUT_SECONDS:.1f}s "
+            f"prompt_chars={len(prompt)} history_len={len(conversation_history or [])} "
+            f"details={error_text}"
+        )
+        return None
 
 # ---------------------------------------------------
 # 5. 核心函数：生成AI主动发起的消息 (保持不变)
@@ -261,7 +271,8 @@ def generate_ai_response(
 def generate_proactive_message(
     character_profile: dict,
     current_ai_status: dict,
-    conversation_history: List[dict]
+    conversation_history: List[dict],
+    memory_context: Optional[Dict[str, Any]] = None,
 ) -> Optional[AiStructuredResponse]:
     """
     调用大模型为AI角色生成一个分段式的、主动发起的对话。
@@ -274,6 +285,7 @@ def generate_proactive_message(
 
     character_name = character_profile.get('identity_core', {}).get('name', 'AI')
     formatted_history = _format_history_for_prompt(conversation_history, character_name)
+    formatted_memory_context = _format_memory_context_for_prompt(memory_context)
 
     prompt = f"""
 # 角色
@@ -287,6 +299,12 @@ def generate_proactive_message(
 # 当前情景 (你正在做什么，这是你发起聊天最直接的灵感来源)
 - 状态: {current_ai_status.get('status_description', '没什么特别的。')}
 
+# 关系记忆与好感氛围
+这是你对用户的长期印象、历史摘要和当前关系温度。你可以用它寻找自然的主动联系理由，但不能说出“好感度”“画像卡”“系统记录”等词。
+```json
+{formatted_memory_context}
+```
+
 # 对话历史 (你们最近的聊天内容，用于寻找共同话题或回忆)
 ---
 {formatted_history}
@@ -295,8 +313,11 @@ def generate_proactive_message(
 # 核心任务：主动发起一段对话
 你现在因为某个原因，突然想起了你的用户朋友，并决定主动联系TA。
 1.  **寻找动机**: 你的开场白必须源于你的“当前情景”或你们的“对话历史”。
-2.  **分段发送**: 同样，你**必须**将你的完整问候拆分成 **1到5条** 简短的、口语化的独立消息。
-3.  **人设与口吻**: 你的语气和内容必须严格符合你的人设。
+2.  **自然接上上下文**: 如果上次有未完成话题、用户压力、睡眠、计划、考试、工作等线索，优先温和地接这个线索；如果没有，就从你当前正在做的事引出轻量问候。
+3.  **避免诡异打断感**: 不要像突然群发问候。语气要像“隔了一段时间后自然想起对方”，不要连续追问，不要要求用户必须立刻回复。
+4.  **分段发送**: 同样，你**必须**将你的完整问候拆分成 **1到5条** 简短的、口语化的独立消息。
+5.  **人设与口吻**: 你的语气和内容必须严格符合你的人设。
+6.  **禁止暴露系统**: 不能提好感度、概率、触发、任务、AI或模型。
 
 # 输出格式与示例
 你的回答必须是一个严格的、不包含任何额外文字的JSON对象。它必须包含一个键 `messages`，其值为一个字符串列表。

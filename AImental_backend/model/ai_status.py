@@ -12,6 +12,9 @@ from db import status_db
 from logger_config import logger # <--- 【新增】导入您的日志记录器
 # 定义北京时区，方便在本文件中统一使用
 BEIJING_TZ = pytz.timezone('Asia/Shanghai')
+OFFLINE_STATUS_CATEGORY = "对方已离线"
+OFFLINE_STATUS_TEXT = "对方暂时离线，可能是连接或回复生成超时。"
+OFFLINE_STATUS_MINUTES = 30
 
 # --- Peewee Model (已升级) ---
 class AiStatus(Model):
@@ -74,6 +77,31 @@ class AiStatusTable:
             focus_level=focus_level # <-- 新增
         )
 
+    def clear_transient_offline_status(self, character_id: str) -> int:
+        """清理当前角色的临时离线覆盖状态。"""
+        query = AiStatus.delete().where(
+            (AiStatus.character == character_id) &
+            (AiStatus.status_category == OFFLINE_STATUS_CATEGORY)
+        )
+        return query.execute()
+
+    def mark_character_offline(self, character_id: str, now: datetime | None = None, minutes: int = OFFLINE_STATUS_MINUTES) -> AiStatus:
+        """当主回复生成失败时，短时间把前端状态覆盖成“对方已离线”。"""
+        now = now or datetime.now(BEIJING_TZ)
+        self.clear_transient_offline_status(character_id)
+        return self.create_status(
+            character_id=character_id,
+            category=OFFLINE_STATUS_CATEGORY,
+            text=OFFLINE_STATUS_TEXT,
+            start_time=now,
+            end_time=now + timedelta(minutes=minutes),
+            reply_delay_minutes=0,
+            focus_level="UNINTERRUPTIBLE",
+        )
+
+    def is_transient_offline_status(self, status: AiStatus | None) -> bool:
+        return bool(status and status.status_category == OFFLINE_STATUS_CATEGORY)
+
     def get_current_status(self, character_id: str) -> AiStatus | None:
         """
         【已增加调试日志】
@@ -118,6 +146,7 @@ class AiStatusTable:
         next_day = start_of_day + timedelta(days=1)
         query = AiStatus.select().where(
             (AiStatus.character == character_id) &
+            (AiStatus.status_category != OFFLINE_STATUS_CATEGORY) &
             (AiStatus.start_time < next_day) &
             (AiStatus.end_time > start_of_day)
         ).exists()
@@ -134,6 +163,7 @@ class AiStatusTable:
                 .select()
                 .where(
                     (AiStatus.character == character_id) &
+                    (AiStatus.status_category != OFFLINE_STATUS_CATEGORY) &
                     (AiStatus.start_time < next_day) &
                     (AiStatus.end_time > start_of_day)
                 )
