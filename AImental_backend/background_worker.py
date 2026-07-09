@@ -12,6 +12,7 @@ import time
 from datetime import datetime, timedelta, date
 import random
 import json
+import re
 from typing import Optional
 
 # 导入 APScheduler
@@ -39,10 +40,17 @@ if ENABLE_COMMUNITY_BACKEND:
     from generate_ai_status import generate_daily_schedule
     # 【重要】从 generate_community_response 导入两个函数
     from generate_community_response import generate_ai_response, generate_proactive_message, build_night_reply_context
+    from generate_community_affinity import assess_community_affinity
     from generate_friend_response import generate_friend_request_decision
 
 # 定义北京时区
 BEIJING_TZ = pytz.timezone('Asia/Shanghai')
+AFFINITY_UPDATE_INTERVAL = 20
+PROACTIVE_AFFINITY_THRESHOLD = 80.0
+PROACTIVE_MIN_MESSAGES = 40
+PROACTIVE_MIN_IDLE_AFTER_USER_MINUTES = 90
+PROACTIVE_MIN_IDLE_AFTER_AI_MINUTES = 360
+PROACTIVE_COOLDOWN_HOURS = 18
 
 # --- Redis 同步客户端 ---
 redis_client_sync = None
@@ -102,6 +110,95 @@ def build_response_status_context(
         "response_mode": response_mode,
         "response_guidance": response_guidance,
     }
+
+
+def extract_mbti(character_profile: dict) -> str:
+    raw = str(
+        (character_profile or {})
+        .get("personality_traits", {})
+        .get("mbti", "")
+    ).upper()
+    match = re.search(r"[IE][NS][FT][JP]", raw)
+    return match.group(0) if match else ""
+
+
+def affinity_speed_modifiers(character_profile: dict) -> dict:
+    """根据 MBTI 给关系升温、降温和主动概率一个温和倍率。"""
+    mbti = extract_mbti(character_profile)
+    warm = 1.0
+    cool = 1.0
+    proactive = 1.0
+
+    if not mbti:
+        return {"mbti": "", "warm": warm, "cool": cool, "proactive": proactive}
+
+    if mbti[0] == "E":
+        warm += 0.12
+        proactive += 0.18
+    else:
+        warm -= 0.06
+        proactive -= 0.14
+
+    if mbti[2] == "F":
+        warm += 0.12
+        cool -= 0.06
+        proactive += 0.08
+    else:
+        warm -= 0.04
+        cool += 0.08
+
+    if mbti[3] == "P":
+        warm += 0.04
+        cool -= 0.03
+        proactive += 0.06
+    else:
+        cool += 0.04
+        proactive -= 0.04
+
+    if mbti[1] == "N":
+        warm += 0.03
+
+    return {
+        "mbti": mbti,
+        "warm": max(0.75, min(1.32, warm)),
+        "cool": max(0.80, min(1.25, cool)),
+        "proactive": max(0.65, min(1.35, proactive)),
+    }
+
+
+def apply_affinity_delta(current_score: float, base_delta: float, character_profile: dict) -> float:
+    modifiers = affinity_speed_modifiers(character_profile)
+    if base_delta > 0:
+        adjusted = base_delta * modifiers["warm"]
+        if current_score >= 90:
+            adjusted *= 0.35
+        elif current_score >= 80:
+            adjusted *= 0.6
+        elif current_score >= 60:
+            adjusted *= 0.85
+        return min(3.0, adjusted)
+
+    if base_delta < 0:
+        adjusted = base_delta * modifiers["cool"]
+        if current_score <= 20:
+            adjusted *= 0.7
+        return max(-8.0, adjusted)
+
+    return 0.0
+
+
+def proactive_probability(score: float, character_profile: dict) -> float:
+    modifiers = affinity_speed_modifiers(character_profile)
+    base = 0.06 + max(0.0, score - PROACTIVE_AFFINITY_THRESHOLD) * 0.006
+    return max(0.03, min(0.22, base * modifiers["proactive"]))
+
+
+def parse_message_history(raw_history: str) -> list:
+    try:
+        history = json.loads(raw_history or "[]")
+        return history if isinstance(history, list) else []
+    except json.JSONDecodeError:
+        return []
 
 def push_message_to_user_from_worker(user_id: str, character_id: str, message_content: str):
     """
@@ -257,6 +354,125 @@ def check_for_resumable_conversations():
         logger.info(f"   已为 AI({chat.character.id}) 创建主动聊天任务以回归对话。")
 
 
+def check_for_high_affinity_proactive_conversations():
+    """高好感关系的主动消息触发器，避免连续对话中突兀插话。"""
+    if not ENABLE_COMMUNITY_BACKEND:
+        logger.info("JOB_PROACTIVE_CHECK: 心灵社区后端已下线，跳过主动消息检查。")
+        return
+
+    now = datetime.now(BEIJING_TZ)
+    if now.hour >= 23 or now.hour < 8:
+        logger.debug("JOB_PROACTIVE_CHECK: 当前为夜间，跳过主动消息检查。")
+        return
+
+    conversations = community_chat_table.get_all_active_conversations()
+    if not conversations:
+        return
+
+    logger.info("JOB_PROACTIVE_CHECK: 开始检查高好感主动消息候选...")
+    cooldown_since = datetime.utcnow() + timedelta(hours=8) - timedelta(hours=PROACTIVE_COOLDOWN_HOURS)
+
+    for conversation in conversations:
+        try:
+            score = float(conversation.favorability or 0.0)
+            if score < PROACTIVE_AFFINITY_THRESHOLD:
+                continue
+
+            history = parse_message_history(conversation.messages_history)
+            if len(history) < PROACTIVE_MIN_MESSAGES:
+                continue
+
+            last_message = history[-1]
+            last_timestamp = int(last_message.get("timestamp") or 0)
+            if last_timestamp <= 0:
+                continue
+
+            idle_minutes = (int(now.timestamp()) - last_timestamp) / 60
+            last_role = last_message.get("role")
+            required_idle = (
+                PROACTIVE_MIN_IDLE_AFTER_USER_MINUTES
+                if last_role == "user"
+                else PROACTIVE_MIN_IDLE_AFTER_AI_MINUTES
+            )
+            if idle_minutes < required_idle:
+                continue
+
+            recent_ai_tail = 0
+            for message in reversed(history[-4:]):
+                if message.get("role") == "ai":
+                    recent_ai_tail += 1
+                else:
+                    break
+            if recent_ai_tail >= 2:
+                continue
+
+            user_id = conversation.user_id
+            character_id = conversation.character.id
+            if ai_task_table.has_pending_task(user_id, character_id, "proactive_chat"):
+                continue
+            if ai_task_table.has_pending_task(user_id, character_id, "reply"):
+                continue
+            if ai_task_table.has_recent_done_task(
+                user_id,
+                character_id,
+                "proactive_chat",
+                cooldown_since,
+            ):
+                continue
+
+            current_status = ai_status_table.get_current_status(character_id)
+            status_context = build_response_status_context(
+                current_status=current_status,
+                user_id=user_id,
+                character_id=character_id,
+                now=now,
+            )
+            if status_context.get("response_mode") == "night_soft":
+                continue
+            if status_context.get("focus_level") in {"HIGH", "UNINTERRUPTIBLE"}:
+                continue
+
+            character = ai_character_table.get_character_by_id(character_id)
+            if not character:
+                continue
+
+            chance = proactive_probability(score, character.profile)
+            roll = random.random()
+            if roll > chance:
+                logger.debug(
+                    "主动消息候选未触发 user=%s character=%s score=%.1f roll=%.3f chance=%.3f",
+                    user_id,
+                    character_id,
+                    score,
+                    roll,
+                    chance,
+                )
+                continue
+
+            execute_at = now + timedelta(minutes=random.randint(2, 10))
+            task = ai_task_table.create_task_if_needed(
+                user_id=user_id,
+                character_id=character_id,
+                task_type="proactive_chat",
+                execute_at=execute_at,
+            )
+            if task:
+                logger.info(
+                    "已创建高好感主动消息任务 user=%s character=%s score=%.1f idle=%.1fmin chance=%.3f",
+                    user_id,
+                    character_id,
+                    score,
+                    idle_minutes,
+                    chance,
+                )
+        except Exception:
+            logger.error(
+                "检查高好感主动消息候选失败 conversation=%s",
+                getattr(conversation, "id", None),
+                exc_info=True,
+            )
+
+
 def process_pending_tasks():
     """
     【已全面升级】处理所有到期任务的核心函数。
@@ -287,6 +503,8 @@ def process_pending_tasks():
                         now = datetime.now(BEIJING_TZ)
                         today = now.date()
                         character = ai_character_table.get_character_by_id(task.character_id)
+                        if task.task_type == 'reply':
+                            ai_status_table.clear_transient_offline_status(task.character_id)
                         current_status = ai_status_table.get_current_status(task.character_id)
                         history = community_chat_table.get_conversation_history(task.user_id, task.character_id, limit=50)
                         memory_context = community_memory_table.get_prompt_context(task.user_id, task.character_id)
@@ -335,11 +553,20 @@ def process_pending_tasks():
                             structured_response = generate_proactive_message(
                                 character_profile=character.profile,
                                 current_ai_status=status_context,
-                                conversation_history=history
+                                conversation_history=history,
+                                memory_context=memory_context,
                             )
 
                         if not (structured_response and structured_response.messages):
                             logger.warning(f"任务 {task.id} 失败: AI模型返回了空内容。")
+                            if task.task_type == 'reply':
+                                try:
+                                    ai_status_table.mark_character_offline(task.character_id, now=now)
+                                except Exception:
+                                    logger.error(
+                                        f"任务 {task.id}: 标记角色 {task.character_id} 为短时离线失败。",
+                                        exc_info=True,
+                                    )
                             ai_task_table.update_task_status(task.id, 'failed')
                             continue
                         
@@ -369,9 +596,92 @@ def process_pending_tasks():
                                 f"任务 {task.id} 排队记忆更新任务失败。",
                                 exc_info=True,
                             )
+
+                        if task.task_type == 'reply':
+                            try:
+                                affinity_queued = community_chat_table.queue_favorability_update_if_needed(
+                                    task.user_id,
+                                    task.character_id,
+                                    ai_task_table,
+                                )
+                                if affinity_queued:
+                                    logger.info(f"已为任务 {task.id} 后续排队好感度更新任务。")
+                            except Exception:
+                                logger.error(
+                                    f"任务 {task.id} 排队好感度更新任务失败。",
+                                    exc_info=True,
+                                )
                         
                         ai_task_table.update_task_status(task.id, 'done')
                         logger.info(f"✅ 聊天任务 {task.id} 处理成功。")
+
+                    elif task.task_type == 'affinity_update':
+                        character = ai_character_table.get_character_by_id(task.character_id)
+                        conversation = community_chat_table.get_conversation(task.user_id, task.character_id)
+                        if not character or not conversation:
+                            logger.warning(f"任务 {task.id} 失败: 缺少角色或会话，无法更新好感度。")
+                            ai_task_table.update_task_status(task.id, 'failed')
+                            continue
+
+                        all_messages = parse_message_history(conversation.messages_history)
+                        message_count = len(all_messages)
+                        last_count = community_chat_table.get_last_favorability_update_message_count(conversation)
+                        if message_count - last_count < AFFINITY_UPDATE_INTERVAL:
+                            logger.info(f"任务 {task.id}: 消息数未满 {AFFINITY_UPDATE_INTERVAL}，跳过好感度更新。")
+                            ai_task_table.update_task_status(task.id, 'done')
+                            continue
+
+                        recent_block = all_messages[last_count:message_count]
+                        if not any(message.get("role") == "user" for message in recent_block):
+                            logger.info(f"任务 {task.id}: 本批消息没有用户消息，跳过好感度更新。")
+                            ai_task_table.update_task_status(task.id, 'done')
+                            continue
+
+                        memory_context = community_memory_table.get_prompt_context(task.user_id, task.character_id)
+                        favorability_history = community_chat_table.get_favorability_history(
+                            task.user_id,
+                            task.character_id,
+                        )
+                        assessment = assess_community_affinity(
+                            character_profile=character.profile,
+                            current_score=float(conversation.favorability or 0.0),
+                            recent_messages=recent_block,
+                            favorability_history=favorability_history,
+                            memory_context=memory_context,
+                        )
+                        delta = apply_affinity_delta(
+                            float(conversation.favorability or 0.0),
+                            assessment.base_delta,
+                            character.profile,
+                        )
+                        new_score = max(0.0, min(100.0, float(conversation.favorability or 0.0) + delta))
+                        modifiers = affinity_speed_modifiers(character.profile)
+                        reason = f"{assessment.reason}（MBTI {modifiers['mbti'] or '未知'} 倍率后变化 {delta:+.1f}）"
+                        community_chat_table.update_favorability(
+                            conversation.id,
+                            new_score,
+                            reason,
+                            delta=delta,
+                            base_delta=assessment.base_delta,
+                            message_count=message_count,
+                            analysis=assessment.analysis,
+                            affinity_note=assessment.affinity_note,
+                            interaction_quality=assessment.interaction_quality,
+                            proactive_hint=assessment.proactive_hint,
+                        )
+                        community_memory_table.update_profile_affinity_note(
+                            task.user_id,
+                            task.character_id,
+                            assessment.affinity_note,
+                        )
+                        ai_task_table.update_task_status(task.id, 'done')
+                        logger.info(
+                            "✅ 好感度任务 %s 处理成功。score %.1f -> %.1f, delta %.1f",
+                            task.id,
+                            conversation.favorability,
+                            new_score,
+                            delta,
+                        )
 
                     elif task.task_type == 'memory_update':
                         character = ai_character_table.get_character_by_id(task.character_id)
@@ -483,6 +793,14 @@ if __name__ == "__main__":
         trigger='interval',
         minutes=1,
         id='resume_conversation_job',
+        replace_existing=True
+    )
+    # 任务4：高好感关系在冷却后有概率主动发起自然问候
+    scheduler.add_job(
+        check_for_high_affinity_proactive_conversations,
+        trigger='interval',
+        minutes=30,
+        id='high_affinity_proactive_job',
         replace_existing=True
     )
     # --- ---------------------------------------------------- ---

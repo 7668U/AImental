@@ -279,6 +279,7 @@ class SendMessageResponse(BaseModel):
     message: str
     daily_count: int = -1
     ai_messages: List[Dict[str, Any]] = Field(default_factory=list)
+    character_status: str = "在线"
 
 @router.post("/chats/{character_id}/messages", summary="用户向AI发送消息")
 async def send_message(
@@ -335,6 +336,7 @@ async def send_message(
         )
 
         now = datetime.now(BEIJING_TZ)
+        ai_status_table.clear_transient_offline_status(character_id)
         current_status = ai_status_table.get_current_status(character_id)
         full_day_schedule = ai_status_table.get_schedule_for_date(character_id, now.date())
         history = community_chat_table.get_conversation_history(current_user_id, character_id, limit=50)
@@ -365,7 +367,23 @@ async def send_message(
             )
 
         if not ai_messages:
-            logger.warning(f"角色 {character_id} 未能生成可保存的AI回复。")
+            logger.warning(f"角色 {character_id} 未能生成可保存的AI回复，改为标记短时离线且不发送兜底消息。")
+            try:
+                ai_status_table.mark_character_offline(character_id, now=now)
+            except Exception:
+                logger.error(f"标记角色 {character_id} 为短时离线失败。", exc_info=True)
+            community_chat_table.update_conversation_state(
+                user_id=current_user_id,
+                character_id=character_id,
+                state="CONTINUOUS",
+                resumes_at=None,
+            )
+            return SendMessageResponse(
+                message="消息已发送，但对方暂时离线",
+                daily_count=final_count,
+                ai_messages=[],
+                character_status="对方已离线",
+            )
 
         community_chat_table.update_conversation_state(
             user_id=current_user_id,
@@ -388,10 +406,25 @@ async def send_message(
                 exc_info=True,
             )
 
+        try:
+            affinity_queued = community_chat_table.queue_favorability_update_if_needed(
+                current_user_id,
+                character_id,
+                ai_task_table,
+            )
+            if affinity_queued:
+                logger.info(f"已为用户 {current_user_id} 与角色 {character_id} 排队好感度更新任务。")
+        except Exception:
+            logger.error(
+                f"为用户 {current_user_id} 与角色 {character_id} 排队好感度更新任务失败。",
+                exc_info=True,
+            )
+
         return SendMessageResponse(
             message="消息已发送",
             daily_count=final_count,
             ai_messages=ai_messages,
+            character_status=status_context.get("status_title", "在线"),
         )
     finally:
         active_reply_sessions.discard(reply_lock_key)
@@ -400,6 +433,7 @@ class ChatDetailsResponse(BaseModel):
     history: List[Dict[str, Any]] = Field(..., description="聊天历史记录列表")
     character_status: str = Field(..., description="AI角色当前的实时状态文本")
     character: AICharacterModel = Field(..., description="AI角色资料卡信息")
+    favorability_context: Dict[str, Any] = Field(default_factory=dict, description="当前关系温度上下文")
 
 @router.get(
     "/chats/{character_id}/details", 
@@ -447,7 +481,8 @@ def get_chat_details(
     return ChatDetailsResponse(
         history=history,
         character_status=character_status_text,
-        character=character
+        character=character,
+        favorability_context=community_chat_table.get_favorability_context(current_user_id, character_id)
     )
 
 # ===================================================

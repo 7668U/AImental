@@ -30,7 +30,7 @@ if ENABLE_COMMUNITY_BACKEND:
     from model.ai_character import AICharacter, ai_character_table
     from model.ai_status import AiStatus, ai_status_table
     from model.ai_task import AITask
-    from model.chat_community import CommunityChat
+    from model.chat_community import CommunityChat, community_chat_table
     from model.community_memory import CharacterUserMemory, CommunityHistorySummary
     from model.friendship import Friendship
     from generate_ai_status import generate_daily_schedule
@@ -255,6 +255,13 @@ def on_startup():
         print(f"✅ [Startup]: 已将 {updated_rows} 个用户的个性化陪伴权限默认开启。")
     except Exception as e:
         print(f"❌ 初始化个性化陪伴权限时发生错误: {e}")
+
+    if ENABLE_COMMUNITY_BACKEND:
+        try:
+            reset_rows = community_chat_table.reset_uninitialized_favorability()
+            print(f"✅ [Startup]: 已将 {reset_rows} 个未初始化社区会话好感度重置为 0。")
+        except Exception as e:
+            print(f"❌ 初始化社区会话好感度时发生错误: {e}")
 
     print("🚀 [Startup]: 开始执行数据播种和日程检查...")
     paper_airplane_table.add_default_airplanes_if_needed()

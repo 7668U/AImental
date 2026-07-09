@@ -38,6 +38,11 @@ Page({
     profileSections: [],
     profileTags: [],
     profileMotto: '',
+    affinityHeartSrc: '/images/community-affinity/affinity-heart-000.png',
+    affinityScoreText: '0',
+    affinityStage: '初识观察',
+    affinityNote: '还在初识阶段，适合保持自然、礼貌和不过度亲密的距离。',
+    hasAffinityContext: false,
 
     // --- BUG修复 data ---
     isSending: false, 
@@ -125,6 +130,32 @@ Page({
       profileSections: sections,
       profileTags: Array.isArray(traits.personality_tags) ? traits.personality_tags : [],
       profileMotto: traits.philosophy || ''
+    };
+  },
+
+  buildAffinityDisplay: function(context = {}) {
+    const rawScore = Number(context.score || 0);
+    const score = Math.max(0, Math.min(100, Number.isFinite(rawScore) ? rawScore : 0));
+    let level = 0;
+    if (score >= 90) {
+      level = 100;
+    } else if (score >= 70) {
+      level = 80;
+    } else if (score >= 50) {
+      level = 60;
+    } else if (score >= 30) {
+      level = 40;
+    } else if (score >= 10) {
+      level = 20;
+    }
+
+    const levelText = String(level).padStart(3, '0');
+    return {
+      affinityHeartSrc: `/images/community-affinity/affinity-heart-${levelText}.png`,
+      affinityScoreText: String(Math.round(score)),
+      affinityStage: context.stage || '初识观察',
+      affinityNote: context.affinity_note || '关系还在慢慢升温，先自然地聊下去就好。',
+      hasAffinityContext: true
     };
   },
 
@@ -315,6 +346,7 @@ Page({
     this._request({
       url: `/chats/${this.data.aiId}/messages`,
       method: 'POST',
+      timeout: 120000,
       data: { content },
       success: (data) => {
         const returnedCount = typeof data.daily_count === 'number' && data.daily_count >= 0
@@ -326,6 +358,7 @@ Page({
             dailyMessageCount: newCount,
             isMessageLimitReached: limitReached,
             isSendDisabled: true,
+            aiCurrentStatus: data.character_status || this.data.aiCurrentStatus,
         });
         setTimeout(() => {
           this.appendAiMessagesSequentially(data.ai_messages || [], () => {
@@ -435,6 +468,7 @@ Page({
         const character = data.character || {};
         const profile = character.profile || null;
         const profileCardData = this.buildProfileCardData(profile || {});
+        const affinityDisplay = this.buildAffinityDisplay(data.favorability_context || {});
         const backendBaseUrl = API_BASE_URL.replace('/api/v1/community', '');
         const avatarUrl = character.avatar_url
           ? (character.avatar_url.startsWith('http') ? character.avatar_url : backendBaseUrl + character.avatar_url)
@@ -446,6 +480,7 @@ Page({
           aiName: character.name || this.data.aiName,
           aiAvatar: avatarUrl,
           aiProfile: profile,
+          ...affinityDisplay,
           ...profileCardData
         }, () => {
           this.showProfileCardOnFirstVisit();
@@ -483,6 +518,7 @@ Page({
         wx.request({
             url: API_BASE_URL + options.url,
             method: options.method || 'GET',
+            timeout: options.timeout || 60000,
             header: { 'Authorization': `Bearer ${token}` },
             data: options.data || {},
             success: (res) => {

@@ -109,7 +109,19 @@ class CommunityMemoryTable:
         return {
             "user_profile_memory": self.get_profile_card(user_id, character_id),
             "history_summaries": self.get_summary_cards(user_id, character_id),
+            "relationship_affinity": community_chat_table.get_favorability_context(user_id, character_id),
         }
+
+    def update_profile_affinity_note(self, user_id: str, character_id: str, affinity_note: str) -> bool:
+        if not affinity_note:
+            return False
+        memory = self.get_or_create_memory(user_id, character_id)
+        profile_card = self._load_json(memory.profile_card_json, build_default_profile_card())
+        profile_card["affinity_note"] = affinity_note
+        memory.profile_card_json = json.dumps(profile_card, ensure_ascii=False)
+        memory.updated_at = datetime.now(BEIJING_TZ)
+        memory.save()
+        return True
 
     def queue_memory_update_if_needed(self, user_id: str, character_id: str, ai_task_table) -> bool:
         history = community_chat_table.get_conversation_history(user_id, character_id, limit=100000)

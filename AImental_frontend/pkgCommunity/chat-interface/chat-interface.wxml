@@ -15,6 +15,10 @@
     </view>
     <view class="nav-status" wx:elif="{{aiCurrentStatus}}">{{aiCurrentStatus}}</view>
   </view>
+  <view class="nav-affinity" wx:if="{{hasAffinityContext}}">
+    <image class="nav-affinity__heart" src="{{affinityHeartSrc}}" mode="aspectFit"></image>
+    <text class="nav-affinity__score">{{affinityScoreText}}</text>
+  </view>
 </view>
 
 <scroll-view 
