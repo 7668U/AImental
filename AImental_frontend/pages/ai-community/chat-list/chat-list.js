@@ -1,6 +1,6 @@
 // pages/ai-community/chat-list/chat-list.js
 
-const SERVER_URL = 'http://127.0.0.1:8001';
+const SERVER_URL = 'http://127.0.0.1:8000';
 const app = getApp();
 
 // --- 统一网络请求函数 ---

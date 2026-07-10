@@ -1,6 +1,6 @@
 // pages/ai-community/chat-interface/chat-interface.js
-const API_BASE_URL = 'http://127.0.0.1:8001/api/v1/community';
-const WS_BASE_URL = 'ws://127.0.0.1:8001/api/v1/community';
+const API_BASE_URL = 'http://127.0.0.1:8000/api/v1/community';
+const WS_BASE_URL = 'ws://127.0.0.1:8000/api/v1/community';
 const app = getApp();
 
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
@@ -107,24 +107,20 @@ Page({
     const lifestyle = profile.lifestyle || {};
     const sections = [];
 
-    const addSection = (label, value) => {
+    const addSection = (label, value, iconKey, iconSrc = '') => {
       if (value === undefined || value === null || value === '') return;
       const displayValue = Array.isArray(value) ? value.join('、') : String(value);
       if (displayValue.trim()) {
-        sections.push({ label, value: displayValue });
+        sections.push({ label, value: displayValue, iconKey, iconSrc });
       }
     };
 
-    addSection('年龄', identity.age);
-    addSection('性别', identity.gender);
-    addSection('职业', identity.occupation);
-    addSection('外貌', identity.appearance);
-    addSection('MBTI', traits.mbti);
-    addSection('说话风格', dialogue.style_summary);
-    addSection('家乡', background.hometown);
-    addSection('背景', background.background);
-    addSection('兴趣', lifestyle.hobbies);
-    addSection('不喜欢', lifestyle.dislikes);
+    addSection('MBTI', traits.mbti, 'mbti', '/images/community-profile/profile-icon-mbti-2x.png');
+    addSection('说话风格', dialogue.style_summary, 'speech');
+    addSection('家乡', background.hometown, 'home');
+    addSection('背景', background.background, 'book');
+    addSection('喜欢', lifestyle.hobbies, 'like');
+    addSection('不喜欢', lifestyle.dislikes, 'dislike');
 
     return {
       profileSections: sections,

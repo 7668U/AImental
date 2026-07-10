@@ -13,30 +13,37 @@
             
             <block wx:if="{{!item.isLocked}}">
               <view class="ai-card {{item.animationClass}}">
-                <view class="ai-card__header">
-                  <view class="ai-card__name">{{item.name}}</view>
-                  <view class="ai-card__info-block">
-                    <view class="info-item">
-                      <text class="info-item__label">年龄</text>
-                      <text class="info-item__value">: {{item.profile.identity_core.age}}</text>
-                    </view>
-                    <view class="info-item">
-                      <text class="info-item__label">职业</text>
-                      <text class="info-item__value">: {{item.profile.identity_core.occupation}}</text>
-                    </view>
-                      <view class="info-item">
-                      <text class="info-item__label">MBTI</text>
-                      <text class="info-item__value">: {{item.profile.personality_traits.mbti}}</text>
-                    </view>
+                <view class="ai-card__hero">
+                  <image class="ai-card__avatar" src="{{serverUrl + item.avatar_url}}" mode="aspectFill" />
+                  <view class="ai-card__intro">
+                    <view class="ai-card__name">{{item.name}}</view>
+                    <view class="ai-card__motto">“{{item.profile.personality_traits.philosophy}}”</view>
                   </view>
                 </view>
+
                 <view class="ai-card__body">
-                  <image class="ai-card__avatar" src="{{serverUrl + item.avatar_url}}" mode="aspectFill" />
-                  <view class="ai-card__motto">"{{item.profile.personality_traits.philosophy}}"</view>
                   <view class="ai-card__tags">
                     <text class="tag" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
                   </view>
+                  <view class="ai-card__info-block">
+                    <view class="info-item">
+                      <image class="info-item__icon-img" src="/images/community-profile/profile-icon-mbti-2x.png" mode="aspectFit"></image>
+                      <text class="info-item__label">MBTI</text>
+                      <text class="info-item__value">{{item.profile.personality_traits.mbti}}</text>
+                    </view>
+                    <view class="info-item">
+                      <view class="info-item__icon info-item__icon--job"></view>
+                      <text class="info-item__label">职业</text>
+                      <text class="info-item__value">{{item.profile.identity_core.occupation}}</text>
+                    </view>
+                    <view class="info-item">
+                      <view class="info-item__icon info-item__icon--home"></view>
+                      <text class="info-item__label">家乡</text>
+                      <text class="info-item__value">{{item.profile.background_story.hometown}}</text>
+                    </view>
+                  </view>
                 </view>
+
                 <view class="ai-card__footer">
                   <view class="add-btn-circular" bindtap="showVerificationModal" data-id="{{item.id}}" data-index="{{index}}" data-name="{{item.name}}">
                     <view class="add-btn__plus"></view>

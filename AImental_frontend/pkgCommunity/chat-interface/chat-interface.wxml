@@ -67,15 +67,14 @@
 
 <view class="profile-overlay" wx:if="{{isProfileCardVisible}}" bindtap="hideProfileCard">
   <view class="profile-card" catchtap="noop">
-    <view class="profile-card__header">
+    <view class="profile-card__hero">
       <image class="profile-card__avatar" src="{{aiAvatar}}" mode="aspectFill"></image>
-      <view class="profile-card__title-group">
+      <view class="profile-card__intro">
         <view class="profile-card__name">{{aiName}}</view>
+        <view class="profile-card__motto" wx:if="{{profileMotto}}">“{{profileMotto}}”</view>
       </view>
       <view class="profile-card__close" bindtap="hideProfileCard">×</view>
     </view>
-
-    <view class="profile-card__motto" wx:if="{{profileMotto}}">“{{profileMotto}}”</view>
 
     <view class="profile-card__tags" wx:if="{{profileTags.length}}">
       <text class="profile-card__tag" wx:for="{{profileTags}}" wx:key="*this">{{item}}</text>
@@ -83,7 +82,11 @@
 
     <scroll-view class="profile-card__body" scroll-y="true">
       <view class="profile-card__row" wx:for="{{profileSections}}" wx:key="label">
-        <view class="profile-card__label">{{item.label}}</view>
+        <view class="profile-card__label-wrap">
+          <image wx:if="{{item.iconSrc}}" class="profile-card__icon-img" src="{{item.iconSrc}}" mode="aspectFit"></image>
+          <view wx:else class="profile-card__icon profile-card__icon--{{item.iconKey}}"></view>
+          <text class="profile-card__label">{{item.label}}</text>
+        </view>
         <view class="profile-card__value">{{item.value}}</view>
       </view>
     </scroll-view>

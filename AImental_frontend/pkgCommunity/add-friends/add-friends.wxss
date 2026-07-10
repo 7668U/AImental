@@ -59,38 +59,179 @@
 .ai-card {
   width: 640rpx;
   height: 980rpx;
-  background-color: #ffffff;
-  border-radius: 40rpx;
-  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.08);
+  background-color: #fffdf9;
+  border-radius: 24rpx;
+  box-shadow: 0 24rpx 76rpx rgba(38, 33, 25, 0.16);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  padding: 40rpx;
+  padding: 38rpx 34rpx 34rpx;
   transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
   opacity: 0;
   transform: scale(0.9);
+  border: 1rpx solid rgba(174, 145, 105, 0.14);
 }
 
 .ai-card.active { opacity: 1; transform: scale(1); }
 .ai-card.inactive { opacity: 0; transform: scale(0.9); pointer-events: none; }
 .ai-card.disappearing { opacity: 0; transform: translateY(50%) scale(0.8); }
 
-.ai-card__header { display: flex; width: 100%; justify-content: space-between; align-items: center; flex-shrink: 0; }
-.ai-card__name { font-size: 60rpx; font-weight: bold; color: #1a1a1a; flex-shrink: 0; padding-right: 20rpx; white-space: nowrap; }
-.ai-card__info-block { text-align: left; }
-.info-item { display: flex; margin-bottom: 10rpx; font-size: 26rpx; }
-.info-item__label { color: #888; width: 90rpx; }
-.info-item__value { color: #333; font-weight: 500; }
-.ai-card__body { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; }
-.ai-card__avatar { width: 280rpx; height: 280rpx; border-radius: 50%; border: 10rpx solid white; box-shadow: 0 10rpx 30rpx rgba(0,0,0,0.1); margin-bottom: 30rpx; }
-.ai-card__motto { font-size: 28rpx; color: #777; font-style: italic; margin-bottom: 30rpx; text-align: center; }
-.ai-card__tags { display: flex; flex-wrap: wrap; justify-content: center; }
-.tag { background-color: #FFF2E6; color: #E89F67; font-size: 24rpx; padding: 10rpx 25rpx; border-radius: 30rpx; margin: 10rpx; }
+.ai-card__hero {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+
+.ai-card__avatar {
+  width: 176rpx;
+  height: 176rpx;
+  border-radius: 20rpx;
+  flex-shrink: 0;
+  background-color: #eee;
+  box-shadow: 0 10rpx 26rpx rgba(65, 54, 42, 0.12);
+}
+
+.ai-card__intro {
+  flex: 1;
+  min-width: 0;
+  margin-left: 28rpx;
+  padding-top: 16rpx;
+}
+
+.ai-card__name {
+  font-family: "STKaiti", "KaiTi", "Songti SC", "SimSun", serif;
+  font-size: 48rpx;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #242424;
+  white-space: nowrap;
+  letter-spacing: 0;
+}
+
+.ai-card__motto {
+  margin-top: 26rpx;
+  color: #4d4d4d;
+  font-family: "Times New Roman", "STKaiti", "KaiTi", "FangSong", "Songti SC", serif;
+  font-size: 30rpx;
+  line-height: 1.72;
+  letter-spacing: 0;
+}
+
+.ai-card__body {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding-top: 32rpx;
+  box-sizing: border-box;
+}
+
+.ai-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx 12rpx;
+}
+
+.tag {
+  min-height: 52rpx;
+  padding: 10rpx 22rpx;
+  border-radius: 14rpx;
+  background-color: #eaf3ff;
+  color: #3e4a55;
+  font-family: "STKaiti", "KaiTi", "PingFang SC", sans-serif;
+  font-size: 28rpx;
+  line-height: 1.15;
+  box-sizing: border-box;
+}
+
+.tag:nth-child(2n) {
+  background-color: #f1e9fb;
+}
+
+.tag:nth-child(3n) {
+  background-color: #fde7e0;
+}
+
+.tag:nth-child(4n) {
+  background-color: #fff1dc;
+}
+
+.tag:nth-child(5n) {
+  background-color: #e7f0df;
+}
+
+.ai-card__info-block {
+  margin-top: 28rpx;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 20rpx 0;
+  border-top: 1rpx solid rgba(99, 80, 56, 0.12);
+}
+
+.info-item__icon {
+  position: relative;
+  width: 44rpx;
+  height: 44rpx;
+  margin-right: 18rpx;
+  color: #a98e67;
+  font-family: "Times New Roman", "Songti SC", serif;
+  line-height: 1;
+  text-align: center;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-item__icon-img {
+  width: 54rpx;
+  height: 54rpx;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+}
+
+.info-item__icon::before {
+  display: block;
+}
+
+.info-item__icon--job::before {
+  content: "✦";
+  font-size: 36rpx;
+}
+
+.info-item__icon--home::before {
+  content: "⌂";
+  font-size: 48rpx;
+  transform: translateY(-4rpx);
+}
+
+.info-item__label {
+  width: 88rpx;
+  flex-shrink: 0;
+  color: #222;
+  font-size: 28rpx;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.info-item__value {
+  flex: 1;
+  min-width: 0;
+  color: #333;
+  font-family: "Times New Roman", "STKaiti", "KaiTi", "FangSong", "Songti SC", serif;
+  font-size: 28rpx;
+  line-height: 1.58;
+  word-break: break-word;
+}
 
 .ai-card__footer { width: 100%; display: flex; justify-content: center; flex-shrink: 0; }
 
 /* 温暖的橙色渐变按钮 */
-.add-btn-circular { width: 130rpx; height: 130rpx; border-radius: 50%; display: flex; justify-content: center; align-items: center; background-image: linear-gradient(45deg, #FFD1A4, #FF8C00); box-shadow: 0 10rpx 20rpx rgba(255, 140, 0, 0.3); transition: all 0.2s ease-in-out; }
+.add-btn-circular { width: 124rpx; height: 124rpx; border-radius: 50%; display: flex; justify-content: center; align-items: center; background-image: linear-gradient(45deg, #f0b269, #e07a2f); box-shadow: 0 12rpx 26rpx rgba(202, 124, 48, 0.28); transition: all 0.2s ease-in-out; }
 .add-btn-circular:active { transform: scale(0.9); box-shadow: 0 5rpx 10rpx rgba(255, 140, 0, 0.4); }
 .add-btn__plus { width: 60rpx; height: 60rpx; position: relative; }
 .add-btn__plus::before, .add-btn__plus::after { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background-color: #FFFFFF; border-radius: 4rpx; }

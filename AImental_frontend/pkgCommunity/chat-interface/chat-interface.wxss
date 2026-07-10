@@ -155,111 +155,225 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40rpx;
-  background-color: rgba(0, 0, 0, 0.36);
+  padding: 32rpx;
+  background-color: rgba(22, 21, 19, 0.54);
+  backdrop-filter: blur(6rpx);
+  -webkit-backdrop-filter: blur(6rpx);
   box-sizing: border-box;
 }
 
 .profile-card {
   width: 100%;
-  max-height: 78vh;
+  max-height: 82vh;
   display: flex;
   flex-direction: column;
-  padding: 32rpx;
-  border-radius: 16rpx;
-  background-color: #fffaf2;
-  box-shadow: 0 24rpx 80rpx rgba(60, 46, 20, 0.22);
+  padding: 44rpx 32rpx 34rpx;
+  border-radius: 22rpx;
+  background: #fffdf9;
+  box-shadow: 0 26rpx 90rpx rgba(38, 33, 25, 0.28);
   box-sizing: border-box;
+  border: 1rpx solid rgba(174, 145, 105, 0.12);
 }
 
-.profile-card__header {
+.profile-card__hero {
+  position: relative;
   display: flex;
-  align-items: center;
-  min-height: 112rpx;
+  align-items: flex-start;
+  min-height: 178rpx;
+  padding-right: 56rpx;
 }
 
 .profile-card__avatar {
-  width: 104rpx;
-  height: 104rpx;
-  border-radius: 16rpx;
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 18rpx;
   flex-shrink: 0;
   background-color: #eee;
+  box-shadow: 0 8rpx 22rpx rgba(65, 54, 42, 0.12);
 }
 
-.profile-card__title-group {
+.profile-card__intro {
   flex: 1;
   min-width: 0;
-  margin-left: 24rpx;
+  margin-left: 30rpx;
+  padding-top: 20rpx;
 }
 
 .profile-card__name {
-  font-size: 36rpx;
-  font-weight: 600;
-  color: #2f2415;
+  font-family: "STKaiti", "KaiTi", "Songti SC", "SimSun", serif;
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #242424;
+  line-height: 1.1;
+  letter-spacing: 0;
 }
 
 .profile-card__close {
-  width: 56rpx;
-  height: 56rpx;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 60rpx;
+  height: 60rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: #7a6956;
-  font-size: 42rpx;
+  color: #555;
+  font-size: 54rpx;
+  font-weight: 300;
   line-height: 1;
 }
 
 .profile-card__motto {
   margin-top: 28rpx;
-  padding: 22rpx 24rpx;
-  border-radius: 12rpx;
-  background-color: #f5ecd7;
-  color: #5a4935;
-  font-size: 28rpx;
-  line-height: 1.55;
+  color: #4d4d4d;
+  font-family: "Times New Roman", "STKaiti", "KaiTi", "FangSong", "Songti SC", serif;
+  font-size: 31rpx;
+  line-height: 1.85;
+  letter-spacing: 0;
 }
 
 .profile-card__tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 12rpx;
-  margin-top: 22rpx;
+  gap: 14rpx 12rpx;
+  margin-top: 34rpx;
 }
 
 .profile-card__tag {
-  padding: 8rpx 16rpx;
-  border-radius: 999rpx;
-  background-color: #ffe4b5;
-  color: #7a4f10;
-  font-size: 24rpx;
+  min-height: 52rpx;
+  padding: 10rpx 22rpx;
+  border-radius: 14rpx;
+  background-color: #eaf3ff;
+  color: #3e4a55;
+  font-family: "STKaiti", "KaiTi", "PingFang SC", sans-serif;
+  font-size: 28rpx;
+  line-height: 1.15;
+  box-sizing: border-box;
+}
+
+.profile-card__tag:nth-child(2n) {
+  background-color: #f1e9fb;
+}
+
+.profile-card__tag:nth-child(3n) {
+  background-color: #fde7e0;
+}
+
+.profile-card__tag:nth-child(4n) {
+  background-color: #fff1dc;
+}
+
+.profile-card__tag:nth-child(5n) {
+  background-color: #e7f0df;
 }
 
 .profile-card__body {
   max-height: 48vh;
-  margin-top: 24rpx;
+  margin-top: 30rpx;
 }
 
 .profile-card__row {
   display: flex;
-  padding: 18rpx 0;
-  border-top: 1rpx solid rgba(122, 105, 86, 0.14);
+  padding: 24rpx 0;
+  border-top: 1rpx solid rgba(99, 80, 56, 0.13);
+}
+
+.profile-card__label-wrap {
+  width: 188rpx;
+  display: flex;
+  align-items: flex-start;
+  flex-shrink: 0;
+  padding-right: 22rpx;
+  box-sizing: border-box;
+}
+
+.profile-card__icon {
+  position: relative;
+  width: 46rpx;
+  height: 46rpx;
+  margin-right: 18rpx;
+  color: #a98e67;
+  font-family: "Times New Roman", "Songti SC", serif;
+  line-height: 1;
+  text-align: center;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-card__icon-img {
+  width: 56rpx;
+  height: 56rpx;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+}
+
+.profile-card__icon::before {
+  display: block;
+}
+
+.profile-card__icon--speech::before {
+  content: "";
+  width: 36rpx;
+  height: 28rpx;
+  border: 4rpx solid #a98e67;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+.profile-card__icon--speech::after {
+  content: "";
+  position: absolute;
+  left: 8rpx;
+  bottom: 8rpx;
+  width: 11rpx;
+  height: 11rpx;
+  border-left: 4rpx solid #a98e67;
+  border-bottom: 4rpx solid #a98e67;
+  background-color: #fffdf9;
+  transform: rotate(-18deg);
+  box-sizing: border-box;
+}
+
+.profile-card__icon--home::before {
+  content: "⌂";
+  font-size: 48rpx;
+  transform: translateY(-3rpx);
+}
+
+.profile-card__icon--book::before {
+  content: "☷";
+  font-size: 39rpx;
+}
+
+.profile-card__icon--like::before {
+  content: "♡";
+  font-size: 52rpx;
+  transform: translateY(-4rpx);
+}
+
+.profile-card__icon--dislike::before {
+  content: "⊘";
+  font-size: 42rpx;
 }
 
 .profile-card__label {
-  width: 132rpx;
-  flex-shrink: 0;
-  color: #9b7a4a;
-  font-size: 26rpx;
+  flex: 1;
+  color: #222;
+  font-size: 30rpx;
+  font-weight: 600;
   line-height: 1.5;
 }
 
 .profile-card__value {
   flex: 1;
   min-width: 0;
-  color: #35281b;
-  font-size: 26rpx;
-  line-height: 1.5;
+  color: #333;
+  font-family: "Times New Roman", "STKaiti", "KaiTi", "FangSong", "Songti SC", serif;
+  font-size: 29rpx;
+  line-height: 1.72;
   word-break: break-word;
 }
 
