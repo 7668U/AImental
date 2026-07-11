@@ -1,7 +1,7 @@
 # router/history_analysis.py
 
 import json
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from typing import List, Optional
 from pydantic import BaseModel, Field
 
@@ -13,6 +13,12 @@ from model.history_analysis import (
     HistoryAnalysisCreateRequest
 )
 from LLM import generate_assessment_synthesis_report
+from vip_access import (
+    confirm_reservation,
+    release_reservation,
+    reserve_feature_or_http,
+)
+from vip_catalog import FEATURE_ASSESSMENT_ANALYSIS
 
 
 # ✅ 【修改】将Pydantic模型定义移到Router文件顶部，保持一致性
@@ -44,7 +50,8 @@ router = APIRouter(
 )
 def synthesize_assessment_report(
     request: HistoryAnalysisCreateRequest,
-    current_user_id: str = Depends(get_current_user_id)
+    current_user_id: str = Depends(get_current_user_id),
+    x_request_id: Optional[str] = Header(None, alias="X-Request-ID"),
 ):
     """
     接收历史记录ID列表，优先从数据库查找已有的分析。
@@ -70,33 +77,42 @@ def synthesize_assessment_report(
             from_cache=True # 告知前端这是缓存数据
         )
 
-    # 3. 【缓存未命中】调用LLM生成新报告
-    print(f"❌ Cache miss for signature: {signature[:10]}... Generating new report.")
-    report_dict = generate_assessment_synthesis_report(
+    reservation = reserve_feature_or_http(
         user_id=current_user_id,
-        history_ids=request.history_ids
+        feature=FEATURE_ASSESSMENT_ANALYSIS,
+        supplied_request_id=x_request_id or signature,
     )
-
-    if not report_dict:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to generate AI analysis report. Please try again later."
+    try:
+        print(f"❌ Cache miss for signature: {signature[:10]}... Generating new report.")
+        report_dict = generate_assessment_synthesis_report(
+            user_id=current_user_id,
+            history_ids=request.history_ids
         )
 
-    # 4. 【关键步骤】将新生成的报告存入数据库
-    history_analysis_tables.save_new_analysis(
-        user_id=current_user_id,
-        history_ids=request.history_ids,
-        signature=signature,
-        report_content=report_dict
-    )
+        if not report_dict:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={
+                    "code": "model_generation_failed",
+                    "message": "AI 测评分析生成失败，请稍后重试。",
+                },
+            )
 
-    # 5. 返回新生成的报告
-    return SynthesisReportResponse(
-        overall_assessment=report_dict.get('comprehensive_evaluation', 'AI未能生成评估内容。'),
-        trend_analysis=report_dict.get('trend_analysis', 'AI未能生成趋势分析。'),
-        recommendations=report_dict.get('personalized_recommendations', 'AI未能生成建议。'),
-        from_cache=False # 告知前端这是新数据
-    )
+        history_analysis_tables.save_new_analysis(
+            user_id=current_user_id,
+            history_ids=request.history_ids,
+            signature=signature,
+            report_content=report_dict
+        )
+        confirm_reservation(reservation)
+        return SynthesisReportResponse(
+            overall_assessment=report_dict.get('comprehensive_evaluation', 'AI未能生成评估内容。'),
+            trend_analysis=report_dict.get('trend_analysis', 'AI未能生成趋势分析。'),
+            recommendations=report_dict.get('personalized_recommendations', 'AI未能生成建议。'),
+            from_cache=False
+        )
+    except Exception:
+        release_reservation(reservation)
+        raise
 
 # ... (旧的 /、/{analysis_id}、DELETE 等路由可以保留，如果你还需要通过ID来管理单个报告的话) ...

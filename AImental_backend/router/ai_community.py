@@ -1,10 +1,11 @@
 # routers/ai_community.py
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List, Dict, Any
+from fastapi import APIRouter, Depends, Header, HTTPException, status
+from typing import List, Dict, Any, Optional
 from datetime import date, datetime, timedelta
 import asyncio
 import json
+import os
 from redis.backoff import NoBackoff
 from redis.retry import Retry
 # --- 导入所有需要的组件 ---
@@ -26,6 +27,14 @@ import pytz
 import traceback
 from logger_config import logger
 from generate_community_response import generate_ai_response, build_night_reply_context
+from vip_access import (
+    confirm_reservation,
+    release_reservation,
+    reserve_feature_or_http,
+    validate_ai_input,
+)
+from vip_catalog import FEATURE_COMMUNITY
+from vip_service import vip_service
 # ---------------------------------------------------
 # Router 设置
 # ---------------------------------------------------
@@ -195,11 +204,13 @@ def get_chat_history(
     return history
 
 class MessageForm(BaseModel):
-    content: str
+    content: str = Field(..., min_length=1, max_length=200)
 
 class SendMessageResponse(BaseModel):
     message: str
     daily_count: int = -1
+    limit: int = -1
+    remaining: int = -1
     ai_messages: List[Dict[str, Any]] = Field(default_factory=list)
     character_status: str = "在线"
 
@@ -276,7 +287,8 @@ def rewind_chat_relationship(
 async def send_message(
     character_id: str,
     form: MessageForm,
-    current_user_id: str = Depends(get_current_user_id)
+    current_user_id: str = Depends(get_current_user_id),
+    x_request_id: Optional[str] = Header(None, alias="X-Request-ID"),
 ):
     """
     【最终升级版】
@@ -294,20 +306,34 @@ async def send_message(
             detail="对方正在回复您哦~稍后再发吧"
         )
 
+    content = validate_ai_input(
+        form.content,
+        max_chars=200,
+        max_bytes=800,
+        max_tokens=512,
+    )
+    reservation = None
     active_reply_sessions.add(reply_lock_key)
     try:
-        # --- 【新增校验 1：每日消息数量限制】 ---
+        # Redis 仅保留异常安全阈值，真实可用额度由 VIP 月度权益控制。
         if not redis_client:
-            # Redis 只用于每日计数；不可用时跳过每日计数。
-            logger.warning("Redis client is not available. Skipping daily message limit check.")
+            logger.warning("Redis client is not available. Skipping daily abuse check.")
         else:
             daily_count = await get_today_message_count(current_user_id)
-            if daily_count >= MESSAGE_LIMIT_PER_DAY:
+            if daily_count >= COMMUNITY_DAILY_SAFETY_LIMIT:
                 raise HTTPException(
                     status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    detail=f"您今天发送的总消息条数已经达到{MESSAGE_LIMIT_PER_DAY}条限额啦~明天再来玩吧~"
+                    detail={
+                        "code": "community_daily_safety_limit",
+                        "message": "今日请求频率异常，请稍后再试。",
+                    },
                 )
 
+        reservation = reserve_feature_or_http(
+            user_id=current_user_id,
+            feature=FEATURE_COMMUNITY,
+            supplied_request_id=x_request_id,
+        )
         now = datetime.now(BEIJING_TZ)
         ai_status_table.clear_transient_offline_status(character_id)
         current_status = ai_status_table.get_current_status(character_id)
@@ -317,7 +343,7 @@ async def send_message(
             *history,
             {
                 "role": "user",
-                "content": form.content,
+                "content": content,
                 "timestamp": now.timestamp(),
             },
         ]
@@ -359,7 +385,7 @@ async def send_message(
                     user_id=current_user_id,
                     character_id=character_id,
                     role="user",
-                    content=form.content,
+                    content=content,
                 )
                 if not saved_user_message:
                     raise RuntimeError("Failed to persist user message.")
@@ -394,7 +420,8 @@ async def send_message(
 
                 logger.info(
                     f"User({current_user_id}) sent a message. "
-                    f"Today's count is now: {new_count}/{MESSAGE_LIMIT_PER_DAY}"
+                    f"Today's count is now: {new_count}/"
+                    f"{COMMUNITY_DAILY_SAFETY_LIMIT} safety limit"
                 )
                 final_count = new_count
             except Exception:
@@ -439,12 +466,23 @@ async def send_message(
                 exc_info=True,
             )
 
-        return SendMessageResponse(
+        entitlement = vip_service.get_summary(current_user_id)[
+            "entitlements"
+        ][FEATURE_COMMUNITY]
+        safe_daily_count = max(final_count, 0)
+        response = SendMessageResponse(
             message="消息已发送",
             daily_count=final_count,
+            limit=safe_daily_count + entitlement["remaining"],
+            remaining=entitlement["remaining"],
             ai_messages=ai_messages,
             character_status=status_context.get("status_title", "在线"),
         )
+        confirm_reservation(reservation)
+        return response
+    except Exception:
+        release_reservation(reservation)
+        raise
     finally:
         active_reply_sessions.discard(reply_lock_key)
 # --- 【核心升级点】 ---
@@ -592,9 +630,13 @@ async def user_peek_at_chat(
 
 class ChatStatusResponse(BaseModel):
     daily_count: int = Field(..., description="用户今日已发送消息数")
-    limit: int = Field(..., description="每日消息上限")
+    limit: int = Field(..., description="兼容旧前端的可用额度上界")
+    remaining: int = Field(..., description="当前社区剩余额度")
+    reset_at: Optional[int] = Field(None, description="最早到期或重置时间")
 
-MESSAGE_LIMIT_PER_DAY = 50
+COMMUNITY_DAILY_SAFETY_LIMIT = int(
+    os.getenv("VIP_COMMUNITY_DAILY_SAFETY_LIMIT", "300")
+)
 
 async def get_today_message_count(user_id: str) -> int:
     """【新增】从Redis获取用户今日发送的消息数"""
@@ -612,11 +654,23 @@ async def get_today_message_count(user_id: str) -> int:
 )
 async def get_user_chat_status(current_user_id: str = Depends(get_current_user_id)):
     """
-    返回用户今天的消息发送计数和每日上限。
-    前端可以在进入聊天页时调用此接口来初始化UI状态。
+    返回社区剩余额度，并兼容旧前端的 daily_count/limit 计算方式。
     """
     daily_count = await get_today_message_count(current_user_id)
-    return ChatStatusResponse(daily_count=daily_count, limit=MESSAGE_LIMIT_PER_DAY)
+    entitlement = vip_service.get_summary(current_user_id)[
+        "entitlements"
+    ][FEATURE_COMMUNITY]
+    reset_candidates = [
+        source["expires_at"]
+        for source in entitlement["sources"]
+        if source["remaining"] > 0
+    ]
+    return ChatStatusResponse(
+        daily_count=daily_count,
+        limit=daily_count + entitlement["remaining"],
+        remaining=entitlement["remaining"],
+        reset_at=min(reset_candidates) if reset_candidates else None,
+    )
 
 
 # 确保导入了你的 User 模型

@@ -19,3 +19,4 @@ def env_bool(name: str, default: bool = False) -> bool:
 
 
 ENABLE_COMMUNITY_BACKEND = env_bool("ENABLE_COMMUNITY_BACKEND", False)
+ENABLE_VIP_MOCK_PAYMENT = env_bool("ENABLE_VIP_MOCK_PAYMENT", False)

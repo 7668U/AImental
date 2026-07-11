@@ -12,7 +12,7 @@ load_dotenv()
 from feature_flags import ENABLE_COMMUNITY_BACKEND
 
 # --- 1. 导入数据库连接 (保持不变) ---
-from db import all_dbs, user_db, chat_db, assessment_db, status_db, feedback_db, promotion_db, airplane_db, note_db
+from db import all_dbs, user_db, chat_db, assessment_db, status_db, feedback_db, promotion_db, airplane_db, note_db, vip_db
 
 # --- 2. 导入所有模型 (保持不变) ---
 from model.user import PrivacyConsent, User
@@ -27,6 +27,7 @@ from model.feedback import Feedback
 from model.promotion import TestRecord
 from model.airplane import PaperAirplane, paper_airplane_table
 from model.note import note_table, NoteItem
+from model.vip import VIP_MODELS
 if ENABLE_COMMUNITY_BACKEND:
     from model.ai_character import AICharacter, ai_character_table
     from model.ai_status import AiStatus, ai_status_table
@@ -49,6 +50,7 @@ from router import promotion as promotion_router
 from router import airplane as airplane_router
 from router import note as note_router
 from router import private_media as private_media_router
+from router import vip as vip_router
 if ENABLE_COMMUNITY_BACKEND:
     from router import ai_community as ai_community_router
 
@@ -222,6 +224,7 @@ def on_startup():
         PaperAirplane: airplane_db,
         NoteItem: note_db,
     }
+    model_db_mapping.update({model: vip_db for model in VIP_MODELS})
     if ENABLE_COMMUNITY_BACKEND:
         model_db_mapping.update({
             # AI社区模型映射
@@ -294,6 +297,7 @@ app.include_router(promotion_router.router, prefix=API_PREFIX)
 app.include_router(airplane_router.router, prefix=API_PREFIX)
 app.include_router(note_router.router, prefix=API_PREFIX)
 app.include_router(private_media_router.router, prefix=API_PREFIX)
+app.include_router(vip_router.router, prefix=API_PREFIX)
 # AI社区路由：通过 ENABLE_COMMUNITY_BACKEND 控制是否注册社区接口。
 if ENABLE_COMMUNITY_BACKEND:
     app.include_router(ai_community_router.router, prefix=API_PREFIX)

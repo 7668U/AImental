@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, Header, HTTPException, status
+from pydantic import BaseModel, Field
 from typing import List, Optional
 import json
 
@@ -7,6 +7,13 @@ from .auth import get_current_user_id
 # 【第1步】: 确保导入的是更新后的 ChatModel
 from model.chat import chat_table, Chat, ChatModel
 from LLM import get_ai_response_and_update_history, generate_chat_title
+from vip_access import (
+    confirm_reservation,
+    release_reservation,
+    reserve_feature_or_http,
+    validate_ai_input,
+)
+from vip_catalog import FEATURE_TREE_HOLE
 
 # ---------------------------------------------------
 # 1. 路由设置
@@ -36,7 +43,7 @@ class ChatSummary(BaseModel):
     title: str
 
 class RespondRequest(BaseModel):
-    message: str
+    message: str = Field(..., min_length=1, max_length=500)
 
 class RespondResponse(BaseModel):
     reply: str
@@ -78,26 +85,47 @@ def create_a_new_chat_session(
 def chat_respond(
     chat_id: str,
     request_data: RespondRequest,
-    current_user_id: str = Depends(get_current_user_id)
+    current_user_id: str = Depends(get_current_user_id),
+    x_request_id: Optional[str] = Header(None, alias="X-Request-ID"),
 ):
     chat_session = chat_table.get_chat_history_by_id(chat_id)
     if not chat_session or chat_session.user_id != current_user_id:
         raise HTTPException(status_code=404, detail="Chat not found or permission denied.")
 
+    message = validate_ai_input(
+        request_data.message,
+        max_chars=500,
+        max_bytes=2000,
+        max_tokens=1024,
+    )
     history = json.loads(chat_session.message)
     is_first_user_message = len(history) == 0
+    reservation = reserve_feature_or_http(
+        user_id=current_user_id,
+        feature=FEATURE_TREE_HOLE,
+        supplied_request_id=x_request_id,
+    )
+    try:
+        reply_content = get_ai_response_and_update_history(chat_id, message)
+        if not reply_content:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={
+                    "code": "model_generation_failed",
+                    "message": "回复生成失败，请稍后重试。",
+                },
+            )
 
-    reply_content = get_ai_response_and_update_history(chat_id, request_data.message)
-    if not reply_content:
-        raise HTTPException(status_code=500, detail="Failed to get AI response.")
-
-    new_title = None
-    if is_first_user_message:
-        new_title = generate_chat_title(request_data.message)
-        db_query = Chat.update(title=new_title).where(Chat.id == chat_id)
-        db_query.execute()
-
-    return RespondResponse(reply=reply_content, title=new_title)
+        new_title = None
+        if is_first_user_message:
+            new_title = generate_chat_title(message)
+            db_query = Chat.update(title=new_title).where(Chat.id == chat_id)
+            db_query.execute()
+        confirm_reservation(reservation)
+        return RespondResponse(reply=reply_content, title=new_title)
+    except Exception:
+        release_reservation(reservation)
+        raise
 
 
 @router.get("/", response_model=List[ChatSummary])

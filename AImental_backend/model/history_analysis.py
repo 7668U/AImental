@@ -48,7 +48,7 @@ class HistoryAnalysisContentResponse(BaseModel):
     personalized_recommendations: str
 
 class HistoryAnalysisCreateRequest(BaseModel):
-    history_ids: List[str] = Field(..., min_length=1)
+    history_ids: List[str] = Field(..., min_length=1, max_length=20)
 
 class HistoryAnalysisResponse(BaseModel):
     id: str

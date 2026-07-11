@@ -3,6 +3,7 @@
 // --- 配置 ---
 const SERVER_BASE_URL = 'http://127.0.0.1:8000'; 
 const API_BASE_URL = `${SERVER_BASE_URL}/api/v1/users`; 
+const VIP_API_BASE_URL = `${SERVER_BASE_URL}/api/v1/vip`;
 const defaultAvatarUrl = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png';
 
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
@@ -11,6 +12,10 @@ const { hasCurrentPrivacyConsent } = require('../../utils/privacy.js');
 Page({
   data: {
     isLogin: false,
+    isMember: false,
+    membership: null,
+    vipEntryTitle: '成为会员',
+    vipEntryDesc: '查看会员套餐与专属权益',
     privacyVisible: false,
     topSafeHeight: 72,
     userInfo: {
@@ -47,6 +52,7 @@ Page({
       if (token) {
         this.setData({ isLogin: true });
         this.fetchUserProfile(token);
+        this.fetchVipState(token);
         const cachedUserInfo = wx.getStorageSync('userInfo');
         if (cachedUserInfo) {
           this.setData({ userInfo: cachedUserInfo });
@@ -54,6 +60,10 @@ Page({
       } else {
         this.setData({
           isLogin: false,
+          isMember: false,
+          membership: null,
+          vipEntryTitle: '成为会员',
+          vipEntryDesc: '查看会员套餐与专属权益',
           userInfo: {
             avatar_url: defaultAvatarUrl,
             nickname: '访客'
@@ -132,6 +142,37 @@ Page({
     });
   },
 
+  fetchVipState: function(token) {
+    wx.request({
+      url: `${VIP_API_BASE_URL}/me`,
+      method: 'GET',
+      header: { 'Authorization': `Bearer ${token}` },
+      success: (res) => {
+        if (res.statusCode !== 200) {
+          return;
+        }
+        const membership = res.data && res.data.membership;
+        const isMember = Boolean(
+          res.data
+          && res.data.user_type === 'member'
+          && membership
+          && membership.status === 'active'
+        );
+        this.setData({
+          isMember,
+          membership: isMember ? membership : null,
+          vipEntryTitle: isMember ? '会员权益' : '成为会员',
+          vipEntryDesc: isMember
+            ? `${membership.plan_name || '当前会员'} · 查看当前额度`
+            : '查看会员套餐与专属权益',
+        });
+      },
+      fail: (err) => {
+        console.error('fetchVipState failed:', err);
+      }
+    });
+  },
+
   logout: function() {
     wx.showModal({
       title: '提示',
@@ -165,6 +206,10 @@ Page({
     wx.removeStorageSync('userInfo');
     this.setData({
       isLogin: false,
+      isMember: false,
+      membership: null,
+      vipEntryTitle: '成为会员',
+      vipEntryDesc: '查看会员套餐与专属权益',
       userInfo: {
         avatar_url: defaultAvatarUrl,
         nickname: '访客'
@@ -224,6 +269,12 @@ Page({
     });
   },
   
+  goToVip: function() {
+    wx.navigateTo({
+      url: '/pkgProfile/vip/index'
+    });
+  },
+
   goToUserInfo: function() { if (!this.data.isLogin) { wx.showToast({ title: '请先登录才能查看个人信息哦~', icon: 'none' }); return; } wx.navigateTo({ url: '/pkgProfile/inform' }); },
   goToFeedback: function() {
     // --- 核心改动：在这里添加登录判断 ---

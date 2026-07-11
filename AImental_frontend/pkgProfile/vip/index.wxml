@@ -1,0 +1,109 @@
+<view class="vip-page">
+  <image
+    class="page-background"
+    src="/images/vip/membership-background.jpg"
+    mode="aspectFill"
+  ></image>
+
+  <view class="status-spacer" style="height: {{statusBarHeight}}px;"></view>
+
+  <view class="nav-row">
+    <view class="back-button" bindtap="handleBack" aria-label="返回">
+      <text class="back-icon">‹</text>
+    </view>
+  </view>
+
+  <view class="hero-copy">
+    <view class="page-title">选择适合你的陪伴方式</view>
+    <view class="page-subtitle">每月获得更多树洞、社区与 AI 分析额度</view>
+  </view>
+
+  <view class="plan-list">
+    <view
+      wx:for="{{plans}}"
+      wx:key="code"
+      class="plan-card plan-{{item.plan_code}} {{selectedPlanCode === item.code ? 'selected' : ''}}"
+      data-code="{{item.code}}"
+      bindtap="selectPlan"
+    >
+      <view class="plan-heading">
+        <view class="plan-heading-copy">
+          <view class="plan-name-row">
+            <view class="plan-dot"></view>
+            <text class="plan-name">{{item.name}}</text>
+            <text wx:if="{{item.recommended}}" class="recommended-tag">最受欢迎</text>
+            <text wx:if="{{item.isCurrent}}" class="current-tag">当前</text>
+          </view>
+          <view class="plan-description">{{item.displayDescription}}</view>
+        </view>
+
+        <view class="plan-price-area">
+          <view class="pricing-label">{{item.pricing_label || '首发体验价'}}</view>
+          <view class="plan-price">
+            <text class="currency">¥</text>
+            <text class="price-value">{{item.priceText}}</text>
+            <text class="price-unit">/月</text>
+          </view>
+        </view>
+
+        <view class="select-indicator">
+          <text wx:if="{{selectedPlanCode === item.code}}" class="select-check">✓</text>
+        </view>
+      </view>
+
+      <image class="plan-art" src="{{item.image}}" mode="aspectFit"></image>
+
+      <view class="quota-list">
+        <view wx:for="{{item.quotaItems}}" wx:key="feature" wx:for-item="quota" class="quota-row">
+          <view class="quota-name-wrap">
+            <view class="quota-icon-wrap">
+              <image class="quota-icon" src="{{quota.icon}}" mode="aspectFit"></image>
+            </view>
+            <text class="quota-name">{{quota.name}}</text>
+          </view>
+          <text class="quota-value">{{quota.amount}} 次/月</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="purchase-spacer"></view>
+
+  <view class="purchase-bar">
+    <view class="purchase-main">
+      <view class="selected-plan-thumb">
+        <image src="{{selectedPlan.image}}" mode="aspectFit"></image>
+      </view>
+
+      <view class="selected-plan-summary">
+        <view class="selected-plan-line">
+          <text class="selected-plan-name">{{selectedPlan.name}}</text>
+          <text class="summary-separator">·</text>
+          <text class="selected-price">¥{{selectedPlan.priceText}}</text>
+          <text class="selected-price-unit">/月</text>
+        </view>
+        <view class="purchase-note">单次购买，不自动续费</view>
+      </view>
+
+      <view class="purchase-divider"></view>
+
+      <button
+        class="purchase-button {{purchaseDisabled ? 'disabled' : ''}}"
+        loading="{{purchaseLoading}}"
+        disabled="{{purchaseLoading}}"
+        bindtap="handlePurchase"
+      >
+        {{purchaseButtonText}}
+      </button>
+    </view>
+
+    <view class="agreement-row">
+      <view class="agreement-check {{agreementChecked ? 'checked' : ''}}" bindtap="toggleAgreement">
+        <text wx:if="{{agreementChecked}}">✓</text>
+      </view>
+      <text class="agreement-copy" bindtap="toggleAgreement">我已阅读并同意</text>
+      <text class="agreement-link" catchtap="openAgreement">会员服务协议</text>
+      <text class="agreement-arrow">›</text>
+    </view>
+  </view>
+</view>

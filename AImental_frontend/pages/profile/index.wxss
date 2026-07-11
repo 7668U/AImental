@@ -8,7 +8,7 @@ page {
 .profile-page {
   position: relative;
   min-height: 100vh;
-  padding: 0 44rpx calc(190rpx + env(safe-area-inset-bottom));
+  padding: 0 40rpx calc(190rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
   overflow-x: hidden;
   background:
@@ -66,17 +66,18 @@ page {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 24rpx;
+  padding-top: 18rpx;
 }
 
 .avatar-ring {
-  width: 160rpx;
-  height: 160rpx;
+  position: relative;
+  width: 190rpx;
+  height: 190rpx;
   border-radius: 50%;
-  padding: 10rpx;
+  padding: 8rpx;
   box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 18rpx 36rpx rgba(184, 116, 39, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 18rpx 40rpx rgba(184, 116, 39, 0.13);
 }
 
 .avatar {
@@ -87,10 +88,30 @@ page {
   background: #ffe1a8;
 }
 
+.membership-avatar-badge {
+  position: absolute;
+  right: -10rpx;
+  bottom: -4rpx;
+  width: 66rpx;
+  height: 66rpx;
+  padding: 4rpx;
+  border-radius: 50%;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 8rpx 20rpx rgba(182, 91, 48, 0.2);
+}
+
+.membership-avatar-icon {
+  width: 100%;
+  height: 100%;
+  transform: scale(1.12);
+}
+
 .nickname {
   max-width: 620rpx;
-  margin-top: 32rpx;
-  font-size: 44rpx;
+  margin-top: 30rpx;
+  font-size: 46rpx;
   line-height: 1.18;
   font-weight: 800;
   color: #4b392c;
@@ -102,7 +123,7 @@ page {
 }
 
 .profile-slogan {
-  margin-top: 16rpx;
+  margin-top: 14rpx;
   font-size: 27rpx;
   line-height: 1.35;
   color: #aa6c35;
@@ -111,7 +132,7 @@ page {
 }
 
 .heart-mark {
-  margin-top: 16rpx;
+  margin-top: 14rpx;
   color: #ffad71;
   font-size: 28rpx;
   line-height: 1;
@@ -120,17 +141,17 @@ page {
 .menu-card {
   position: relative;
   z-index: 2;
-  margin-top: 34rpx;
-  padding: 24rpx 40rpx;
-  border-radius: 40rpx;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 18rpx 44rpx rgba(142, 98, 50, 0.09);
+  margin-top: 30rpx;
+  padding: 16rpx 36rpx;
+  border-radius: 38rpx;
+  background: rgba(255, 255, 255, 0.93);
+  box-shadow: 0 20rpx 48rpx rgba(142, 98, 50, 0.1);
   box-sizing: border-box;
 }
 
 .menu-item {
   position: relative;
-  min-height: 124rpx;
+  min-height: 120rpx;
   display: flex;
   align-items: center;
   box-sizing: border-box;
@@ -154,10 +175,14 @@ page {
   opacity: 0.72;
 }
 
+.membership-menu-item .menu-title {
+  color: #36251e;
+}
+
 .menu-icon-wrap {
-  width: 88rpx;
-  height: 88rpx;
-  margin-right: 28rpx;
+  width: 82rpx;
+  height: 82rpx;
+  margin-right: 26rpx;
   border-radius: 50%;
   background: linear-gradient(145deg, rgba(255, 250, 243, 0.96), rgba(255, 238, 216, 0.9));
   box-shadow: inset 0 0 0 1rpx rgba(255, 216, 178, 0.42);
@@ -167,9 +192,20 @@ page {
   flex-shrink: 0;
 }
 
+.membership-icon-wrap {
+  overflow: hidden;
+  background: #fff8ef;
+}
+
+.membership-menu-icon {
+  width: 100%;
+  height: 100%;
+  transform: scale(1.08);
+}
+
 .menu-icon {
-  width: 52rpx;
-  height: 52rpx;
+  width: 50rpx;
+  height: 50rpx;
 }
 
 .menu-icon-privacy {
@@ -183,7 +219,7 @@ page {
 }
 
 .menu-title {
-  font-size: 32rpx;
+  font-size: 31rpx;
   line-height: 1.2;
   font-weight: 800;
   color: #3d332d;
@@ -191,7 +227,7 @@ page {
 }
 
 .menu-desc {
-  margin-top: 12rpx;
+  margin-top: 9rpx;
   font-size: 24rpx;
   line-height: 1.32;
   color: #8d8178;
@@ -215,11 +251,11 @@ page {
 .action-btn-container {
   position: relative;
   z-index: 2;
-  margin: 32rpx 40rpx 0;
+  margin: 30rpx 30rpx 0;
 }
 
 .action-btn {
-  height: 90rpx;
+  height: 94rpx;
   border-radius: 999rpx;
   display: flex;
   align-items: center;
@@ -257,8 +293,13 @@ page {
   }
 
   .avatar-ring {
-    width: 138rpx;
-    height: 138rpx;
+    width: 154rpx;
+    height: 154rpx;
+  }
+
+  .membership-avatar-badge {
+    width: 58rpx;
+    height: 58rpx;
   }
 
   .nickname {
@@ -273,7 +314,12 @@ page {
   }
 
   .menu-item {
-    min-height: 108rpx;
+    min-height: 104rpx;
+  }
+
+  .menu-icon-wrap {
+    width: 74rpx;
+    height: 74rpx;
   }
 
   .action-btn-container {

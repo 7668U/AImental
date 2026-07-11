@@ -2,10 +2,11 @@
 
 import json
 import re
-from typing import Optional, List, Dict
+from typing import Any, Optional, List, Dict
 import datetime
 
 from llm_config import HEPAI_MODEL, client
+from db import chat_db
 
 # --- 模型导入 ---
 # 从你的 chat.py 文件中导入 chat_table 实例和 NewMessageForm 模型
@@ -368,18 +369,14 @@ def get_ai_response_and_update_history(chat_id: str, user_message: str) -> Optio
     处理与AI的单次对话交互。
     【已更新】现在会自动获取用户上下文并注入到Prompt中。
     """
-    # 1. 将用户的新消息添加到数据库
-    user_message_form = NewMessageForm(role="user", content=user_message)
-    chat_table.add_message_to_chat(chat_id, user_message_form)
-
-    # 2. 获取更新后的完整聊天历史
+    # 1. 读取历史，但在模型成功前不写入新消息。
     chat_session = chat_table.get_chat_history_by_id(chat_id)
     if not chat_session:
         print(f"错误：找不到ID为 {chat_id} 的聊天会话。")
         return None
     history = json.loads(chat_session.message)
 
-    # 3. 构造发送给API的 messages 列表
+    # 2. 构造发送给API的 messages 列表
     messages_for_api = [{"role": "system", "content": SYSTEM_PROMPT}]
     
     # b. 获取并注入用户背景信息上下文
@@ -387,26 +384,38 @@ def get_ai_response_and_update_history(chat_id: str, user_message: str) -> Optio
     if user_context_summary:
         messages_for_api.append({"role": "system", "content": user_context_summary})
     
-    # c. 添加历史对话消息
+    # c. 添加历史对话消息和本次用户消息
     messages_for_api.extend(history)
+    messages_for_api.append({"role": "user", "content": user_message})
+    from vip_access import trim_chat_messages
+    messages_for_api = trim_chat_messages(messages_for_api, max_tokens=32000)
 
     try:
-        # 4. 调用大模型 API
+        # 3. 调用大模型 API
         response = client.chat.completions.create(
             model=HEPAI_MODEL,
             messages=messages_for_api,
-            stream=False
+            stream=False,
+            max_tokens=1500,
         )
         ai_response_content = _extract_message_text(response.choices[0].message)
 
-        # 5. 将AI的回复也添加到聊天记录中
-        ai_message_form = NewMessageForm(role="assistant", content=ai_response_content)
-        chat_table.add_message_to_chat(chat_id, ai_message_form)
+        # 4. 模型成功后，再原子保存用户消息和 AI 回复。
+        with chat_db.atomic():
+            user_message_form = NewMessageForm(role="user", content=user_message)
+            ai_message_form = NewMessageForm(
+                role="assistant",
+                content=ai_response_content,
+            )
+            if not chat_table.add_message_to_chat(chat_id, user_message_form):
+                raise RuntimeError("Failed to persist user chat message.")
+            if not chat_table.add_message_to_chat(chat_id, ai_message_form):
+                raise RuntimeError("Failed to persist AI chat message.")
 
         return ai_response_content
     except Exception as e:
         print(f"调用API时发生错误: {e}")
-        return "抱歉，我好像出了一点小问题，稍后再试试吧。"
+        return None
 
 
 # =================================================================================
@@ -474,7 +483,7 @@ def generate_ai_analysis_report(
     period_name: str,
     analysis_type: str = "mood",
     focus_summary: Optional[str] = None
-) -> Dict[str, str]:
+) -> Dict[str, Any]:
     """
     根据用户的打卡数据和指定的Prompt模板，调用大模型生成一份心理分析报告。
     """
@@ -532,7 +541,9 @@ def generate_ai_analysis_report(
     if not data_summary_parts:
         return {
             "summary_text": "这段时间的记录还不够完整，暂时很难提炼出稳定特征。",
-            "report_text": "这段时间的有效打卡数据还比较少，暂时无法形成可靠的分析。你可以继续记录几天，再回来看看变化。"
+            "report_text": "这段时间的有效打卡数据还比较少，暂时无法形成可靠的分析。你可以继续记录几天，再回来看看变化。",
+            "_model_called": False,
+            "_success": True,
         }
     data_summary = "\n".join(data_summary_parts)
     if focus_summary:
@@ -552,7 +563,8 @@ def generate_ai_analysis_report(
             messages=messages_for_api,
             temperature=0.7,
             response_format={"type": "json_object"},
-            stream=False
+            stream=False,
+            max_tokens=1500,
         )
         raw_content = response.choices[0].message.content or ""
         try:
@@ -561,7 +573,9 @@ def generate_ai_analysis_report(
             cleaned = _clean_analysis_text(raw_content)
             return {
                 "summary_text": _compact_summary_text(cleaned.split("\n", 1)[0]) if cleaned else "这段时间有一些值得留意的变化。",
-                "report_text": cleaned or "这段时间有一些值得留意的变化，可以再多记录几天，让趋势更清楚。"
+                "report_text": cleaned or "这段时间有一些值得留意的变化，可以再多记录几天，让趋势更清楚。",
+                "_model_called": True,
+                "_success": True,
             }
 
         summary_text = _compact_summary_text(payload.get("summary_text") or "")
@@ -572,13 +586,17 @@ def generate_ai_analysis_report(
             report_text = summary_text
         return {
             "summary_text": summary_text,
-            "report_text": report_text
+            "report_text": report_text,
+            "_model_called": True,
+            "_success": True,
         }
     except Exception as e:
         print(f"调用AI生成分析报告时发生错误: {e}")
         return {
             "summary_text": "AI 分析暂时没有生成成功，可以稍后再试。",
-            "report_text": "抱歉，AI 分析服务暂时出了一点小问题，请稍后再试。"
+            "report_text": "抱歉，AI 分析服务暂时出了一点小问题，请稍后再试。",
+            "_model_called": True,
+            "_success": False,
         }
 
 
@@ -658,7 +676,8 @@ def generate_assessment_synthesis_report(user_id: str, history_ids: List[str]) -
             model=HEPAI_MODEL,
             messages=messages_for_api,
             temperature=0.6,
-            stream=False
+            stream=False,
+            max_tokens=1800,
         )
         ai_report_text = response.choices[0].message.content
         parts = {}

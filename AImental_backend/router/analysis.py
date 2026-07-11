@@ -3,8 +3,8 @@
 import json
 import hashlib
 import jieba # 导入jieba
-from fastapi import APIRouter, Depends, HTTPException, Path
-from typing import Any, Dict, List, Tuple
+from fastapi import APIRouter, Depends, Header, HTTPException, Path
+from typing import Any, Dict, List, Optional, Tuple
 from collections import Counter
 from itertools import chain
 
@@ -30,6 +30,12 @@ from model.emotion_color_card import emotion_color_card_cache_table
 from .auth import get_current_user_id
 
 from LLM import generate_ai_analysis_report
+from vip_access import (
+    confirm_reservation,
+    release_reservation,
+    reserve_feature_or_http,
+)
+from vip_catalog import FEATURE_MOOD_ANALYSIS
 # 导入Pydantic基础模型
 from pydantic import BaseModel
 import datetime
@@ -227,7 +233,8 @@ def get_ai_detailed_report(
     year: int = Path(..., description="年份"),
     value: int = Path(..., description="月份(1-12) 或 季度(1-4)"),
     current_user_id: str = Depends(get_current_user_id),
-    force_refresh: bool = False
+    force_refresh: bool = False,
+    x_request_id: Optional[str] = Header(None, alias="X-Request-ID"),
 ):
     """为所有分析模块提供标准化的AI报告。"""
     if analysis_type not in AI_DETAILED_PROMPTS:
@@ -257,29 +264,54 @@ def get_ai_detailed_report(
                 "report_text": cached_content.get("report_text", ""),
             }
 
-    # 2. 获取数据
-    # 3. 调用LLM生成报告
-    prompt_template = AI_DETAILED_PROMPTS[analysis_type]
-    focus_summary = _build_ai_focus_summary(checkins, analysis_type)
-    report_payload = generate_ai_analysis_report(
-        checkins,
-        prompt_template,
-        period_name,
-        analysis_type,
-        focus_summary
+    reservation = reserve_feature_or_http(
+        user_id=current_user_id,
+        feature=FEATURE_MOOD_ANALYSIS,
+        supplied_request_id=(
+            x_request_id or (None if force_refresh else period_key)
+        ),
     )
+    try:
+        prompt_template = AI_DETAILED_PROMPTS[analysis_type]
+        focus_summary = _build_ai_focus_summary(checkins, analysis_type)
+        report_payload = generate_ai_analysis_report(
+            checkins,
+            prompt_template,
+            period_name,
+            analysis_type,
+            focus_summary
+        )
+        if not report_payload.get("_success", True):
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "code": "model_generation_failed",
+                    "message": "AI 分析生成失败，请稍后重试。",
+                },
+            )
 
-    # 4. 存入缓存并返回
-    class AIReportContent(BaseModel):
-        summary_text: str
-        report_text: str
-    content_model = AIReportContent(
-        summary_text=report_payload.get("summary_text", ""),
-        report_text=report_payload.get("report_text", "")
-    )
-    analysis_table.save_analysis(current_user_id, period_key, cache_type_key, content_model)
+        class AIReportContent(BaseModel):
+            summary_text: str
+            report_text: str
 
-    return content_model.model_dump()
+        content_model = AIReportContent(
+            summary_text=report_payload.get("summary_text", ""),
+            report_text=report_payload.get("report_text", "")
+        )
+        analysis_table.save_analysis(
+            current_user_id,
+            period_key,
+            cache_type_key,
+            content_model,
+        )
+        if report_payload.get("_model_called", True):
+            confirm_reservation(reservation)
+        else:
+            release_reservation(reservation)
+        return content_model.model_dump()
+    except Exception:
+        release_reservation(reservation)
+        raise
 
 
 @router.get(

@@ -9,6 +9,9 @@
   <view class="profile-hero">
     <view class="avatar-ring">
       <image class="avatar" src="{{userInfo.avatar_url || 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png'}}" mode="aspectFill"></image>
+      <view wx:if="{{isMember}}" class="membership-avatar-badge">
+        <image class="membership-avatar-icon" src="/images/vip/membership-heart-line.png" mode="aspectFit"></image>
+      </view>
     </view>
     <view class="nickname">{{userInfo.nickname || '访客'}}</view>
     <view class="profile-slogan">愿你被温柔以待，也能温柔待人</view>
@@ -16,6 +19,17 @@
   </view>
 
   <view class="menu-card">
+    <view class="menu-item membership-menu-item" bindtap="goToVip">
+      <view class="menu-icon-wrap membership-icon-wrap">
+        <image class="membership-menu-icon" src="/images/vip/membership-heart-line.png" mode="aspectFit"></image>
+      </view>
+      <view class="menu-copy">
+        <view class="menu-title">{{vipEntryTitle}}</view>
+        <view class="menu-desc">{{vipEntryDesc}}</view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+
     <view class="menu-item" bindtap="goToUserInfo">
       <view class="menu-icon-wrap">
         <image class="menu-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-user.png" mode="aspectFit"></image>
