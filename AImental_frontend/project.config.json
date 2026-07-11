@@ -86,6 +86,22 @@
         "value": "images/community_selected.png"
       },
       {
+        "type": "folder",
+        "value": "images/community-affinity"
+      },
+      {
+        "type": "folder",
+        "value": "images/community-premium"
+      },
+      {
+        "type": "folder",
+        "value": "images/community-profile"
+      },
+      {
+        "type": "folder",
+        "value": "images/community-redesign"
+      },
+      {
         "type": "file",
         "value": "images/default-avatar.png"
       },
@@ -194,9 +210,22 @@
         "value": "pkgProfile/history_analysis.wxss"
       }
     ],
-    "include": []
+    "include": [
+      {
+        "type": "folder",
+        "value": "components/privacy-consent"
+      },
+      {
+        "type": "file",
+        "value": "utils/privacy.js"
+      },
+      {
+        "type": "folder",
+        "value": "images/privacy"
+      }
+    ]
   },
-  "appid": "wx3a565bb4664b579a",
+  "appid": "wxd90fc334d65b9a0a",
   "editorSetting": {},
   "libVersion": "3.8.10"
 }

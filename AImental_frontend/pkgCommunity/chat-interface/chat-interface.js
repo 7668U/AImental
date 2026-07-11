@@ -1,26 +1,28 @@
 // pages/ai-community/chat-interface/chat-interface.js
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1/community';
-const WS_BASE_URL = 'ws://127.0.0.1:8000/api/v1/community';
+const SERVER_BASE_URL = API_BASE_URL.replace('/api/v1/community', '');
+const CDN_ASSET_BASE_URL = 'https://assets.feelyourself.cn/miniprogram/assets/v1';
+const DEFAULT_USER_AVATAR = `${CDN_ASSET_BASE_URL}/images/default-avatar.png`;
+const COMMUNITY_PROFILE_MBTI_ICON = `${CDN_ASSET_BASE_URL}/images/community-profile/profile-icon-mbti-2x.png`;
 const app = getApp();
 
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 Page({
   data: {
     // --- 原有 data ---
-    statusBarHeight: 0, 
+    statusBarHeight: 0,
+    navBarHeight: 44,
+    topBarOffset: 64,
     aiId: null,
     aiName: '',
     aiAvatar: '',
     userAvatar: '',
     aiCurrentStatus: '在线',
     messageList: [],
-    scrollToView: '',
+    scrollTop: 0,
+    scrollWithAnimation: false,
     inputValue: '',
     isSendDisabled: true,
-    socketTask: null,
-    isSocketOpen: false,
-    heartbeatTimer: null,
-    reconnectTimer: null,
     isLeavingPage: false,
     isAiTyping: false,
     typingTimer: null,
@@ -29,6 +31,7 @@ Page({
     // --- 功能 data ---
     dailyMessageCount: 0,
     messageLimit: 50,
+    remainingMessageCount: 50,
     isMessageLimitReached: false,
     showCustomModal: false,
     modalTitle: '',
@@ -38,11 +41,18 @@ Page({
     profileSections: [],
     profileTags: [],
     profileMotto: '',
-    affinityHeartSrc: '/images/community-affinity/affinity-heart-000.png',
+    profileIdentityText: '',
+    affinityHeartSrc: `${CDN_ASSET_BASE_URL}/images/community-affinity/affinity-heart-000.png`,
     affinityScoreText: '0',
+    affinityProgress: 4,
     affinityStage: '初识观察',
     affinityNote: '还在初识阶段，适合保持自然、礼貌和不过度亲密的距离。',
     hasAffinityContext: false,
+    isEmojiPanelVisible: false,
+    emojiOptions: ['😊', '🙂', '😌', '🥰', '🤗', '😢', '😭', '😔', '😴', '😮', '😤', '✨', '🌙', '☀️', '🍀', '💛', '🧡', '👍'],
+    isRewinding: false,
+    isHistoryLoading: true,
+    isHistoryLoadFailed: false,
 
     // --- BUG修复 data ---
     isSending: false, 
@@ -52,19 +62,57 @@ Page({
   // 页面生命周期 (已修复)
   // ---------------------------------------------------
 
+  getNavigationMetrics: function() {
+    let statusBarHeight = app.globalData.statusBarHeight || 20;
+    let navBarHeight = app.globalData.compactNavBarHeight || 44;
+    let topBarOffset = statusBarHeight + navBarHeight;
+
+    try {
+      const windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
+      const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+      statusBarHeight = windowInfo.statusBarHeight || statusBarHeight;
+
+      if (menuButtonInfo && menuButtonInfo.height) {
+        const navGap = Math.max(0, menuButtonInfo.top - statusBarHeight);
+        navBarHeight = menuButtonInfo.height + navGap * 2;
+      }
+
+      if (menuButtonInfo && typeof menuButtonInfo.bottom === 'number') {
+        topBarOffset = Math.ceil(menuButtonInfo.bottom + 6);
+      } else {
+        topBarOffset = statusBarHeight + navBarHeight;
+      }
+    } catch (error) {
+      console.warn('获取导航栏安全区失败，使用默认值', error);
+    }
+
+    return {
+      statusBarHeight,
+      navBarHeight,
+      topBarOffset
+    };
+  },
+
+  resolveUserAvatar: function(userInfo = {}) {
+    const avatar = userInfo.avatar_url || userInfo.avatarUrl || userInfo.avatar || '';
+    if (!avatar) return DEFAULT_USER_AVATAR;
+    if (avatar.startsWith('/images/')) return `${CDN_ASSET_BASE_URL}${avatar}`;
+    if (avatar.startsWith('/')) return `${SERVER_BASE_URL}${avatar}`;
+    return avatar;
+  },
+
   onLoad: function (options) {
     // 【最终修复 1】onLoad 只负责一次性的初始化工作
     const { aiId, name, avatar } = options;
     const userInfo = wx.getStorageSync('userInfo');
+    const navigationMetrics = this.getNavigationMetrics();
     this.setData({
       aiId,
       aiName: decodeURIComponent(name),
       aiAvatar: decodeURIComponent(avatar),
-      userAvatar: userInfo ? userInfo.avatar_url : 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png',
-      statusBarHeight: app.globalData.statusBarHeight || 20
+      userAvatar: this.resolveUserAvatar(userInfo || {}),
+      ...navigationMetrics
     });
-    
-    app.webSocketManager.registerListener(this);
     // 初始历史记录只加载一次
     this.loadInitialDataWithFallback();
   },
@@ -84,14 +132,15 @@ Page({
     // 页面隐藏时，停止窥视心跳，节省资源
     console.log("页面隐藏 (onHide)，停止窥视心跳。");
     this.stopPeeking();
+    if (this.data.isEmojiPanelVisible) {
+      this.setData({ isEmojiPanelVisible: false });
+    }
   },
 
   onUnload: function() {
     // 页面被销毁时，注销监听器
     this.setData({ isLeavingPage: true });
-    app.webSocketManager.unregisterListener();
     this.stopPeeking(); // 双重保险
-    this.clearResponsePolling();
     this.clearTypingTimer();
   },
 
@@ -100,9 +149,7 @@ Page({
   // ---------------------------------------------------
 
   buildProfileCardData: function(profile = {}) {
-    const identity = profile.identity_core || {};
     const traits = profile.personality_traits || {};
-    const dialogue = profile.dialogue_style || {};
     const background = profile.background_story || {};
     const lifestyle = profile.lifestyle || {};
     const sections = [];
@@ -115,12 +162,10 @@ Page({
       }
     };
 
-    addSection('MBTI', traits.mbti, 'mbti', '/images/community-profile/profile-icon-mbti-2x.png');
-    addSection('说话风格', dialogue.style_summary, 'speech');
+    addSection('MBTI', traits.mbti, 'mbti', COMMUNITY_PROFILE_MBTI_ICON);
     addSection('家乡', background.hometown, 'home');
     addSection('背景', background.background, 'book');
     addSection('喜欢', lifestyle.hobbies, 'like');
-    addSection('不喜欢', lifestyle.dislikes, 'dislike');
 
     return {
       profileSections: sections,
@@ -147,8 +192,9 @@ Page({
 
     const levelText = String(level).padStart(3, '0');
     return {
-      affinityHeartSrc: `/images/community-affinity/affinity-heart-${levelText}.png`,
+      affinityHeartSrc: `${CDN_ASSET_BASE_URL}/images/community-affinity/affinity-heart-${levelText}.png`,
       affinityScoreText: String(Math.round(score)),
+      affinityProgress: Math.max(4, Math.round(score)),
       affinityStage: context.stage || '初识观察',
       affinityNote: context.affinity_note || '关系还在慢慢升温，先自然地聊下去就好。',
       hasAffinityContext: true
@@ -173,31 +219,108 @@ Page({
     this.setData({ isProfileCardVisible: false });
   },
 
-  noop: function() {},
+  showTimeRewindConfirm: function() {
+    if (this.data.isRewinding) return;
 
-  scheduleResponsePollingIfNeeded: function() {
-    const wsManager = app.webSocketManager || {};
-    if (wsManager.isSocketOpen) return;
+    if (this.data.isSending || this.data.isAiTyping) {
+      wx.showToast({ title: '请等待当前回复完成', icon: 'none' });
+      return;
+    }
 
-    this.clearResponsePolling();
-    let attempts = 0;
-    const poll = () => {
-      if (this.data.isLeavingPage) return;
-      attempts += 1;
-      this.loadInitialDataWithFallback();
-      if (attempts < 6) {
-        this.responseRefreshTimer = setTimeout(poll, 5000);
+    wx.showModal({
+      title: '时间回溯',
+      content: '时间回溯会清空所有聊天历史和好感度，让你们回到初遇时刻，确定要回溯吗？',
+      confirmText: '确定回溯',
+      cancelText: '取消',
+      confirmColor: '#c94f45',
+      success: (result) => {
+        if (result.confirm) {
+          this.rewindConversation();
+        }
       }
-    };
-
-    this.responseRefreshTimer = setTimeout(poll, 6000);
+    });
   },
 
-  clearResponsePolling: function() {
-    if (this.responseRefreshTimer) {
-      clearTimeout(this.responseRefreshTimer);
-      this.responseRefreshTimer = null;
+  rewindConversation: function() {
+    if (!this.data.aiId || this.data.isRewinding) return;
+
+    this.setData({ isRewinding: true });
+    wx.showLoading({ title: '正在回溯...', mask: true });
+
+    this._request({
+      url: `/chats/${this.data.aiId}/rewind`,
+      method: 'POST',
+      timeout: 30000,
+      success: (data) => {
+        const formattedMessages = this.formatMessages(data.history || []);
+        const affinityDisplay = this.buildAffinityDisplay(data.favorability_context || {});
+        this.clearTypingTimer();
+        this.setData({
+          messageList: formattedMessages,
+          inputValue: '',
+          isSendDisabled: true,
+          isSending: false,
+          isAiTyping: false,
+          isProfileCardVisible: false,
+          isRewinding: false,
+          ...affinityDisplay
+        }, () => {
+          this.scrollToBottom({ animate: false });
+        });
+        wx.showToast({ title: '已回到初遇时刻', icon: 'success' });
+      },
+      fail: (err) => {
+        this.setData({ isRewinding: false });
+        wx.showToast({
+          title: (err && err.data && err.data.detail) || '时间回溯失败，请稍后重试',
+          icon: 'none'
+        });
+      },
+      complete: () => {
+        wx.hideLoading();
+      }
+    }).catch(() => {
+      console.log('Time rewind rejection has been handled.');
+    });
+  },
+
+  noop: function() {},
+
+  hashMessageContent: function(content) {
+    const text = String(content || '');
+    let hash = 0;
+    for (let i = 0; i < text.length; i += 1) {
+      hash = ((hash << 5) - hash + text.charCodeAt(i)) >>> 0;
     }
+    return hash.toString(36);
+  },
+
+  buildMessageId: function(message, index = 0) {
+    const role = message && message.role ? message.role : 'msg';
+    const timestamp = message && message.timestamp ? message.timestamp : 0;
+    const hash = this.hashMessageContent(message && message.content);
+    return `${role}-${timestamp}-${index}-${hash}`;
+  },
+
+  normalizeMessage: function(message, index = 0) {
+    const timestamp = Number(message && message.timestamp ? message.timestamp : Date.now() / 1000);
+    return {
+      ...(message || {}),
+      id: (message && message.id) || this.buildMessageId(message || {}, index),
+      timestamp,
+      time: this.formatTimestamp(timestamp),
+      status: (message && message.status) || 'received'
+    };
+  },
+
+  hasMessage: function(targetMessage) {
+    if (!targetMessage) return false;
+    return (this.data.messageList || []).some((message) => {
+      if (message.id && targetMessage.id && message.id === targetMessage.id) return true;
+      return message.role === targetMessage.role
+        && Number(message.timestamp || 0) === Number(targetMessage.timestamp || 0)
+        && String(message.content || '') === String(targetMessage.content || '');
+    });
   },
 
   clearTypingTimer: function() {
@@ -224,43 +347,75 @@ Page({
   },
 
   appendAiMessagesSequentially: function(messages, onComplete) {
-    const aiMessages = Array.isArray(messages) ? messages : [];
+    const aiMessages = Array.isArray(messages)
+      ? messages.filter((message) => message && String(message.content || '').trim())
+      : [];
     if (!aiMessages.length) {
       if (onComplete) onComplete();
       return;
     }
 
-    let index = 0;
-    const appendNext = () => {
+    const appendNext = (index) => {
       if (this.data.isLeavingPage) return;
-      const msg = aiMessages[index];
-      const newMessage = {
-        id: (msg.timestamp || Date.now()) + '_' + Math.random().toString(36).substr(2, 9),
-        role: 'ai',
-        content: msg.content,
-        time: this.formatTimestamp(msg.timestamp || Date.now() / 1000),
-        status: 'received'
-      };
 
-      const updates = {
-        messageList: [...this.data.messageList, newMessage],
-      };
-
-      this.setData(updates);
-      this.scrollToBottom();
-      index += 1;
-
-      if (index < aiMessages.length) {
-        const timer = setTimeout(appendNext, this.getNextReplyDelay(aiMessages[index], index));
-        this.setData({ typingTimer: timer });
-      } else if (onComplete) {
-        const timer = setTimeout(onComplete, 520);
-        this.setData({ typingTimer: timer });
+      if (index >= aiMessages.length) {
+        if (onComplete) onComplete();
+        return;
       }
+
+      const baseIndex = this.data.messageList.length;
+      const msg = aiMessages[index];
+      const nextMessage = this.normalizeMessage(
+        {
+          role: 'ai',
+          content: msg.content,
+          timestamp: msg.timestamp || Date.now() / 1000,
+          appearClass: 'message-item-fade-in'
+        },
+        baseIndex
+      );
+
+      if (!nextMessage.content || this.hasMessage(nextMessage)) {
+        const timer = setTimeout(() => appendNext(index + 1), 120);
+        this.setData({ typingTimer: timer });
+        return;
+      }
+
+      this.setData({
+        messageList: [...this.data.messageList, nextMessage]
+      }, () => {
+        this.scrollToBottom({ animate: true });
+        const delay = index >= aiMessages.length - 1
+          ? 360
+          : this.getNextReplyDelay(aiMessages[index + 1], index + 1);
+        const timer = setTimeout(() => appendNext(index + 1), delay);
+        this.setData({ typingTimer: timer });
+      });
     };
 
-    const timer = setTimeout(appendNext, this.getNextReplyDelay(aiMessages[0], 0));
+    const timer = setTimeout(() => appendNext(0), this.getNextReplyDelay(aiMessages[0], 0));
     this.setData({ typingTimer: timer });
+  },
+
+  normalizeMessageQuota: function(dailyCount, limit) {
+    const currentLimit = Number(this.data.messageLimit);
+    const parsedLimit = Number(limit);
+    const safeLimit = Number.isFinite(parsedLimit) && parsedLimit >= 0
+      ? parsedLimit
+      : (Number.isFinite(currentLimit) && currentLimit >= 0 ? currentLimit : 50);
+
+    const currentCount = Number(this.data.dailyMessageCount);
+    const parsedDailyCount = Number(dailyCount);
+    const safeDailyCount = Number.isFinite(parsedDailyCount) && parsedDailyCount >= 0
+      ? parsedDailyCount
+      : (Number.isFinite(currentCount) && currentCount >= 0 ? currentCount : 0);
+
+    return {
+      dailyMessageCount: safeDailyCount,
+      messageLimit: safeLimit,
+      remainingMessageCount: Math.max(0, safeLimit - safeDailyCount),
+      isMessageLimitReached: safeDailyCount >= safeLimit
+    };
   },
   
   checkMessageLimit: function() {
@@ -269,12 +424,10 @@ Page({
       method: 'GET',
     }).then(res => {
       console.log("获取消息限制状态:", res);
-      const limitReached = res.daily_count >= res.limit;
+      const quotaState = this.normalizeMessageQuota(res && res.daily_count, res && res.limit);
       this.setData({
-        dailyMessageCount: res.daily_count,
-        messageLimit: res.limit,
-        isMessageLimitReached: limitReached,
-        isSendDisabled: !this.data.inputValue.trim() || limitReached || this.data.isSending || this.data.isAiTyping
+        ...quotaState,
+        isSendDisabled: !this.data.inputValue.trim() || quotaState.isMessageLimitReached || this.data.isSending || this.data.isAiTyping
       });
     }).catch(err => {
       console.error("获取消息限制状态失败:", err);
@@ -296,10 +449,42 @@ Page({
   },
 
   onInput: function(e) {
-    const value = e.detail.value;
+    const value = e.detail.value || '';
+    const isSendDisabled = !value.trim() || this.data.isMessageLimitReached || this.data.isSending || this.data.isAiTyping;
+    if (value === this.data.inputValue && isSendDisabled === this.data.isSendDisabled) {
+      return;
+    }
     this.setData({ 
       inputValue: value,
-      isSendDisabled: !value.trim() || this.data.isMessageLimitReached || this.data.isSending || this.data.isAiTyping
+      isSendDisabled
+    });
+  },
+
+  onInputFocus: function() {
+    if (this.data.isEmojiPanelVisible) {
+      this.setData({ isEmojiPanelVisible: false });
+    }
+  },
+
+  onUserAvatarError: function() {
+    if (this.data.userAvatar !== DEFAULT_USER_AVATAR) {
+      this.setData({ userAvatar: DEFAULT_USER_AVATAR });
+    }
+  },
+
+  toggleEmojiPanel: function() {
+    if (this.data.isMessageLimitReached) return;
+    this.setData({ isEmojiPanelVisible: !this.data.isEmojiPanelVisible });
+  },
+
+  selectEmoji: function(e) {
+    const emoji = e.currentTarget.dataset.emoji;
+    if (!emoji || this.data.isMessageLimitReached) return;
+    const inputValue = `${this.data.inputValue}${emoji}`;
+    this.setData({
+      inputValue,
+      isEmojiPanelVisible: false,
+      isSendDisabled: !inputValue.trim() || this.data.isMessageLimitReached || this.data.isSending || this.data.isAiTyping
     });
   },
 
@@ -321,43 +506,61 @@ Page({
         return;
     }
     
-    const tempId = Date.now() + '_user';
+    const nowTimestamp = Date.now() / 1000;
+    const tempId = `${Math.floor(nowTimestamp * 1000)}_user`;
     const userMessage = {
       id: tempId,
       role: 'user',
       content: content,
-      time: this.formatTimestamp(Date.now() / 1000)
+      timestamp: nowTimestamp,
+      time: this.formatTimestamp(nowTimestamp),
+      status: 'sending'
     };
+    const nextMessageList = [...this.data.messageList, userMessage];
 
     this.setData({
-      messageList: [...this.data.messageList, userMessage],
+      messageList: nextMessageList,
       inputValue: '',
       isSendDisabled: true,
       isSending: true,
       isAiTyping: true,
+      isEmojiPanelVisible: false,
+    }, () => {
+      this.scrollToBottom({ animate: true });
     });
 
-    this.scrollToBottom();
+    this.submitMessageRequest(content, tempId);
+  },
 
+  submitMessageRequest: function(content, messageId) {
     this._request({
       url: `/chats/${this.data.aiId}/messages`,
       method: 'POST',
       timeout: 120000,
       data: { content },
       success: (data) => {
-        const returnedCount = typeof data.daily_count === 'number' && data.daily_count >= 0
+        const aiMessages = data.ai_messages || [];
+        if (!aiMessages.length) {
+          this.updateMessageStatus(messageId, 'failed');
+          this.finishAiReplyState();
+          return;
+        }
+
+        this.updateMessageStatus(messageId, 'sent');
+        const returnedCount = data.daily_count !== undefined && data.daily_count !== null
           ? data.daily_count
           : this.data.dailyMessageCount + 1;
-        const newCount = returnedCount;
-        const limitReached = newCount >= this.data.messageLimit;
+        const quotaState = this.normalizeMessageQuota(
+          returnedCount,
+          data.limit !== undefined ? data.limit : this.data.messageLimit
+        );
         this.setData({
-            dailyMessageCount: newCount,
-            isMessageLimitReached: limitReached,
+            ...quotaState,
             isSendDisabled: true,
             aiCurrentStatus: data.character_status || this.data.aiCurrentStatus,
         });
         setTimeout(() => {
-          this.appendAiMessagesSequentially(data.ai_messages || [], () => {
+          this.appendAiMessagesSequentially(aiMessages, () => {
             this.finishAiReplyState();
           });
         }, 180);
@@ -369,28 +572,23 @@ Page({
           this.showLimitModal(err.data.detail || '今日消息已达上限');
           this.setData({
               isMessageLimitReached: true,
+              remainingMessageCount: 0,
               isSendDisabled: true
           });
-          const currentMessageList = this.data.messageList;
-          const messageIndex = currentMessageList.findIndex(msg => msg.id === tempId);
-          if (messageIndex !== -1) {
-            currentMessageList.splice(messageIndex, 1);
-            this.setData({
-              messageList: currentMessageList,
-              // 【最终修复 2】不再把内容放回输入框，而是确保它被清空
-              inputValue: '' 
-            });
-          }
+          this.setData({
+            messageList: this.data.messageList.filter(message => message.id !== messageId),
+            inputValue: ''
+          });
         } else if (err && err.statusCode === 409) {
           wx.showToast({ title: err.data.detail || '对方正在回复您哦~稍后再发吧', icon: 'none' });
-          const currentMessageList = this.data.messageList;
-          const messageIndex = currentMessageList.findIndex(msg => msg.id === tempId);
-          if (messageIndex !== -1) {
-            currentMessageList.splice(messageIndex, 1);
-            this.setData({ messageList: currentMessageList });
-          }
+          this.updateMessageStatus(messageId, 'failed');
         } else {
-          this.updateMessageStatus(tempId, 'failed');
+          this.updateMessageStatus(messageId, 'failed');
+          wx.showToast({
+            title: '发送失败，点击红色感叹号重试',
+            icon: 'none',
+            duration: 2200
+          });
         }
         this.finishAiReplyState();
       }
@@ -399,16 +597,57 @@ Page({
       console.log("Promise rejection has been handled gracefully.");
     });
   },
+
+  showRetryPrompt: function(e) {
+    const messageId = e.currentTarget.dataset.messageId;
+    const message = this.data.messageList.find(item => item.id === messageId);
+    if (!message || message.status !== 'failed') return;
+
+    wx.showModal({
+      title: '消息发送失败',
+      content: '是否重新发送这条消息？',
+      confirmText: '重新发送',
+      cancelText: '取消',
+      success: (result) => {
+        if (result.confirm) {
+          this.retryFailedMessage(messageId);
+        }
+      }
+    });
+  },
+
+  retryFailedMessage: function(messageId) {
+    if (this.data.isSending || this.data.isAiTyping) {
+      wx.showToast({ title: '请等待当前回复完成', icon: 'none' });
+      return;
+    }
+
+    if (this.data.isMessageLimitReached) {
+      this.showLimitModal(`您今天发送的总消息条数已经达到${this.data.messageLimit}条限额啦~明天再来吧~`);
+      return;
+    }
+
+    const messageIndex = this.data.messageList.findIndex(item => item.id === messageId);
+    if (messageIndex === -1) return;
+
+    const content = String(this.data.messageList[messageIndex].content || '').trim();
+    if (!content) return;
+
+    this.setData({
+      [`messageList[${messageIndex}].status`]: 'sending',
+      isSending: true,
+      isAiTyping: true,
+      isSendDisabled: true
+    }, () => {
+      this.scrollToBottom({ animate: true });
+    });
+
+    this.submitMessageRequest(content, messageId);
+  },
   
   // ---------------------------------------------------
   // 其他所有原有函数 (保持不变)
   // ---------------------------------------------------
-
-  onSocketMessage: function(data) {
-    if (data.type === 'new_message' && data.from_character_id === this.data.aiId) {
-      this.handleNewMessage(data.message);
-    }
-  },
 
   startPeeking: function() {
     this.stopPeeking(); 
@@ -435,28 +674,11 @@ Page({
     });
   },
 
-  handleNewMessage: function(message) {
-    const newMessage = {
-      id: (message.timestamp || Date.now()) + '_' + Math.random().toString(36).substr(2, 9),
-      role: 'ai',
-      content: message.content,
-      time: this.formatTimestamp(message.timestamp),
-      status: 'received'
-    };
-    clearTimeout(this.data.typingTimer);
-    const updates = {
-      messageList: [...this.data.messageList, newMessage],
-      isAiTyping: true,
-    };
-    this.setData(updates);
-    this.scrollToBottom();
-    const typingTimer = setTimeout(() => {
-      this.setData({ isAiTyping: false });
-    }, 2500);
-    this.setData({ typingTimer });
-  },
-
   loadInitialDataWithFallback: function() {
+    this.setData({
+      isHistoryLoading: true,
+      isHistoryLoadFailed: false
+    });
     this._request({
       url: `/chats/${this.data.aiId}/details`,
       success: (data) => {
@@ -476,12 +698,14 @@ Page({
           aiName: character.name || this.data.aiName,
           aiAvatar: avatarUrl,
           aiProfile: profile,
+          isHistoryLoading: false,
+          isHistoryLoadFailed: false,
           ...affinityDisplay,
           ...profileCardData
         }, () => {
           this.showProfileCardOnFirstVisit();
+          this.scrollToBottom({ animate: false });
         });
-        this.scrollToBottom();
 
       },
       fail: () => {
@@ -492,14 +716,28 @@ Page({
             const formattedMessages = this.formatMessages(historyData);
             this.setData({ 
               messageList: formattedMessages,
-              aiCurrentStatus: '在线' 
+              aiCurrentStatus: '在线',
+              isHistoryLoading: false,
+              isHistoryLoadFailed: false
+            }, () => {
+              this.scrollToBottom({ animate: false });
             });
-            this.scrollToBottom();
           },
-          fail: () => wx.showToast({ title: '加载历史消息失败', icon: 'none' })
+          fail: () => {
+            this.setData({
+              isHistoryLoading: false,
+              isHistoryLoadFailed: true
+            });
+            wx.showToast({ title: '加载历史消息失败', icon: 'none' });
+          }
         });
       }
     });
+  },
+
+  retryInitialLoad: function() {
+    if (this.data.isHistoryLoading) return;
+    this.loadInitialDataWithFallback();
   },
   
   _request: function(options) {
@@ -508,6 +746,7 @@ Page({
         if (!token) { 
             wx.showToast({ title: '请先登录', icon: 'none' });
             if(options.fail) options.fail({errMsg: 'No Token'});
+            if(options.complete) options.complete();
             reject({errMsg: 'No Token'});
             return; 
         }
@@ -529,6 +768,9 @@ Page({
             fail: (err) => { 
                 if(options.fail) options.fail(err);
                 reject(err);
+            },
+            complete: () => {
+                if(options.complete) options.complete();
             }
         });
     });
@@ -542,12 +784,35 @@ Page({
       });
     }
   },
+
+  copyMessage: function(e) {
+    const content = e && e.currentTarget && e.currentTarget.dataset
+      ? String(e.currentTarget.dataset.content || '').trim()
+      : '';
+    if (!content) return;
+
+    wx.setClipboardData({
+      data: content,
+      success: () => {
+        wx.showToast({ title: '已复制', icon: 'success', duration: 900 });
+      },
+      fail: () => {
+        wx.showToast({ title: '复制失败', icon: 'none' });
+      }
+    });
+  },
   
-  scrollToBottom: function() {
-    if (this.data.messageList.length > 0) {
-      const lastMessage = this.data.messageList[this.data.messageList.length - 1];
-      this.setData({ scrollToView: `msg-${lastMessage.id}` });
-    }
+  scrollToBottom: function(options = {}) {
+    if (!this.data.messageList.length) return;
+
+    const animate = options.animate !== false;
+    wx.nextTick(() => {
+      if (this.data.isLeavingPage) return;
+      this.setData({
+        scrollWithAnimation: animate,
+        scrollTop: this.data.scrollTop + 100000
+      });
+    });
   },
   
   formatTimestamp: function(timestamp) {
@@ -559,16 +824,9 @@ Page({
   },
 
   formatMessages: function(messages) {
-      if (!messages || !Array.isArray(messages)) return [];
-    
-      return messages.map((msg, index) => {
-        return {
-          ...msg,
-          id: (msg.timestamp || Date.now()) + '_' + Math.random().toString(36).substr(2, 9),
-          time: this.formatTimestamp(msg.timestamp)
-        }
-      });
-    },
+    if (!messages || !Array.isArray(messages)) return [];
+    return messages.map((msg, index) => this.normalizeMessage(msg, index));
+  },
 
   navigateBack: function() {
     wx.navigateBack();

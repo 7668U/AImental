@@ -1,55 +1,128 @@
-<block wx:if="{{!isLoggedIn}}">
-  <login-prompt 
-    title="欢迎来到心灵社区"
-    subtitle="请先登录，寻找AI伙伴"
-    bind:loginevent="handleLogin"
-  ></login-prompt>
-</block>
+<view class="community-page">
+  <view class="custom-nav-wrapper" style="padding-top: {{statusBarHeight}}px;">
+    <view class="custom-nav" style="height: {{navBarHeight}}px;"></view>
+  </view>
 
-<block wx:else>
-  <view class="page-container">
-    
-    <view class="custom-nav-wrapper" style="padding-top: {{statusBarHeight}}px;">
-      <view class="custom-nav" style="height: {{navBarHeight}}px;">
-        <view class="nav-left">
+  <scroll-view
+    class="community-scroll"
+    scroll-y="true"
+    enhanced="true"
+    show-scrollbar="false"
+    refresher-enabled="true"
+    refresher-background="#fff8f1"
+    refresher-triggered="{{isRefreshing}}"
+    bindrefresherrefresh="onPullDownRefresh"
+  >
+    <view
+      class="community-hero"
+      style="padding-top: {{totalHeaderHeight}}px;"
+    >
+      <image
+        class="community-hero-bg"
+        src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/community-premium/community-hero-sunroom.jpg"
+        mode="aspectFill"
+      ></image>
+      <image
+        class="hero-leaf-accent"
+        src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/community-premium/leaf-sparkle.png"
+        mode="aspectFit"
+      ></image>
+
+      <view class="hero-copy">
+        <view class="hero-title">心灵社区</view>
+        <view class="hero-subtitle">
+          <text>有人在这里，等你慢慢开口。</text>
+          <text>每一次对话，都可以从一句你好开始。</text>
         </view>
-        <view class="nav-center">
-          <text class="nav-title">心灵社区</text>
-        </view>
-        <view class="nav-right"></view>
       </view>
     </view>
 
-    <scroll-view 
-      class="list-container" 
-      scroll-y="true"
-      style="padding-top: {{totalHeaderHeight }}px;"
-    >
-      <block wx:if="{{chatList.length > 0}}">
-        <view class="chat-item" wx:for="{{chatList}}" wx:key="id" bindtap="navigateToChat" data-ai="{{item}}">
+    <view class="community-body">
+      <view class="guest-note" wx:if="{{!isLoggedIn}}">
+        <view class="guest-note-dot"></view>
+        <text>可以先认识所有伙伴，进入聊天时再登录</text>
+      </view>
+
+      <view class="refresh-notice" wx:if="{{isError && chatList.length}}" bindtap="retryGetChatList">
+        <view class="refresh-notice-dot"></view>
+        <text>刷新没有成功，轻触再试一次</text>
+      </view>
+
+      <block wx:if="{{isLoading && !chatList.length}}">
+        <view class="skeleton-card" wx:for="{{skeletonItems}}" wx:key="*this">
+          <view class="skeleton-avatar skeleton-shimmer"></view>
+          <view class="skeleton-copy">
+            <view class="skeleton-line skeleton-line-title skeleton-shimmer"></view>
+            <view class="skeleton-line skeleton-line-message skeleton-shimmer"></view>
+            <view class="skeleton-line skeleton-line-meta skeleton-shimmer"></view>
+          </view>
+        </view>
+      </block>
+
+      <view class="state-panel state-panel-error" wx:elif="{{isError && !chatList.length}}">
+        <view class="state-icon">!</view>
+        <view class="state-title">社区暂时没有回应</view>
+        <view class="state-description">可能只是网络走神了一会儿，请稍后再试。</view>
+        <view class="state-action" bindtap="retryGetChatList">重新连接</view>
+      </view>
+
+      <block wx:elif="{{chatList.length}}">
+        <view
+          class="character-card {{item.unread ? 'character-card-unread' : ''}}"
+          wx:for="{{chatList}}"
+          wx:key="id"
+          bindtap="navigateToChat"
+          data-ai="{{item}}"
+        >
           <view class="avatar-container">
-            <image class="avatar" src="{{item.avatar}}"></image>
+            <image class="avatar" src="{{item.avatar}}" mode="aspectFill"></image>
             <view class="unread-dot" wx:if="{{item.unread}}"></view>
           </view>
-          <view class="info-container">
-            <view class="info-header">
-              <text class="name">{{item.name}}</text>
-              <text class="time">{{item.time}}</text>
+
+          <view class="character-info">
+            <view class="character-topline">
+              <view class="name-group">
+                <text class="character-name">{{item.name}}</text>
+              </view>
+              <text class="character-time">{{item.time}}</text>
             </view>
-            <view class="last-message">
-              <text>{{item.lastMessage}}</text>
+
+            <view class="last-message">{{item.lastMessage}}</view>
+
+            <view class="character-meta">
+              <view class="presence presence-status">
+                <view class="presence-dot"></view>
+                <text>{{item.presenceLabel}}</text>
+              </view>
+              <view class="affinity-meta">
+                <image
+                  class="affinity-icon"
+                  src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/community-premium/affinity-heart.png"
+                  mode="aspectFit"
+                ></image>
+                <text>{{item.affinityScoreText}}</text>
+              </view>
             </view>
           </view>
         </view>
       </block>
-      
-      <block wx:else>
-        <view class="empty-state">
-          <image class="empty-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/empty-chat.png"></image>
-          <text class="empty-text">暂时还没有可聊天的角色</text>
-        </view>
-      </block>
-    </scroll-view>
 
-  </view>
-</block>
+      <view class="state-panel" wx:else>
+        <image
+          class="state-illustration"
+          src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/community-redesign/community-empty-conversation.png"
+          mode="aspectFit"
+        ></image>
+        <view class="state-title">伙伴们还在来的路上</view>
+        <view class="state-description">下拉刷新看看，也许下一次就会遇见新的故事。</view>
+      </view>
+
+    </view>
+  </scroll-view>
+</view>
+
+<privacy-consent
+  visible="{{privacyVisible}}"
+  bind:confirm="onPrivacyConfirm"
+  bind:reject="onPrivacyReject"
+/>
