@@ -1101,7 +1101,9 @@ page {
   min-height: 0;
   max-height: 48vh;
   margin-top: 30rpx;
+  padding-right: 18rpx;
   font-family: "SimHei", "Heiti SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  box-sizing: border-box;
 }
 
 .profile-card__row {

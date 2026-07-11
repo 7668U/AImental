@@ -1,6 +1,10 @@
 import hashlib
 import math
+import os
+import threading
+import time
 import uuid
+from collections import defaultdict, deque
 from typing import Any, Dict, List, Optional
 
 from fastapi import HTTPException, status
@@ -12,6 +16,75 @@ from vip_service import (
     VipQuotaExceeded,
     vip_service,
 )
+
+
+class FeatureRateLimitExceeded(Exception):
+    def __init__(self, retry_after_seconds: int):
+        super().__init__("feature_rate_limited")
+        self.retry_after_seconds = retry_after_seconds
+
+
+def _env_int(name: str, default: int, *, minimum: int = 0) -> int:
+    try:
+        value = int(os.getenv(name, str(default)))
+    except (TypeError, ValueError):
+        value = default
+    return max(value, minimum)
+
+
+def _parse_feature_rate_limits() -> Dict[str, tuple[int, int]]:
+    defaults: Dict[str, tuple[int, int]] = {
+        "tree_hole": (20, 60),
+        "community": (30, 60),
+        "mood_analysis": (8, 60),
+        "assessment_analysis": (5, 60),
+    }
+    raw = os.getenv("VIP_FEATURE_RATE_LIMITS", "").strip()
+    if not raw:
+        return defaults
+    parsed = defaults.copy()
+    for item in raw.split(","):
+        if "=" not in item or "/" not in item:
+            continue
+        feature, rule = item.split("=", 1)
+        limit_text, window_text = rule.split("/", 1)
+        try:
+            limit = max(int(limit_text.strip()), 1)
+            window = max(int(window_text.strip()), 1)
+        except ValueError:
+            continue
+        parsed[feature.strip()] = (limit, window)
+    return parsed
+
+
+class FeatureRateLimiter:
+    def __init__(self, limits: Dict[str, tuple[int, int]]):
+        self._limits = limits
+        self._events: Dict[tuple[str, str], deque[float]] = defaultdict(deque)
+        self._lock = threading.Lock()
+
+    def check(self, *, user_id: str, feature: str) -> None:
+        limit, window_seconds = self._limits.get(
+            feature,
+            (
+                _env_int("VIP_DEFAULT_FEATURE_RATE_LIMIT", 20, minimum=1),
+                _env_int("VIP_DEFAULT_FEATURE_RATE_WINDOW_SECONDS", 60, minimum=1),
+            ),
+        )
+        now = time.monotonic()
+        cutoff = now - window_seconds
+        key = (user_id, feature)
+        with self._lock:
+            events = self._events[key]
+            while events and events[0] <= cutoff:
+                events.popleft()
+            if len(events) >= limit:
+                retry_after = max(1, int(window_seconds - (now - events[0])) + 1)
+                raise FeatureRateLimitExceeded(retry_after)
+            events.append(now)
+
+
+_FEATURE_RATE_LIMITER = FeatureRateLimiter(_parse_feature_rate_limits())
 
 
 def estimate_text_tokens(text: str) -> int:
@@ -35,6 +108,14 @@ def validate_ai_input(
             detail={
                 "code": "input_empty",
                 "message": "请输入内容后再发送。",
+            },
+        )
+    if any(ord(char) < 32 and char not in "\n\r\t" for char in normalized):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "code": "input_invalid",
+                "message": "Input contains unsupported control characters.",
             },
         )
     chars = len(normalized)
@@ -69,6 +150,8 @@ def build_request_id(
     client_value = (supplied_request_id or "").strip()
     if not client_value:
         client_value = str(uuid.uuid4())
+    elif len(client_value) > 128:
+        client_value = hashlib.sha256(client_value.encode("utf-8")).hexdigest()
     digest = hashlib.sha256(
         f"{user_id}:{feature}:{client_value}".encode("utf-8")
     ).hexdigest()
@@ -86,6 +169,19 @@ def reserve_feature_or_http(
         feature=feature,
         supplied_request_id=supplied_request_id,
     )
+    try:
+        _FEATURE_RATE_LIMITER.check(user_id=user_id, feature=feature)
+    except FeatureRateLimitExceeded as exc:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail={
+                "code": "feature_rate_limited",
+                "message": "Requests are too frequent. Please retry shortly.",
+                "feature": feature,
+                "retry_after_seconds": exc.retry_after_seconds,
+            },
+            headers={"Retry-After": str(exc.retry_after_seconds)},
+        ) from exc
     try:
         return vip_service.reserve(
             user_id=user_id,

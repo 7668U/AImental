@@ -153,7 +153,7 @@
         <text class="profile-card__tag" wx:for="{{profileTags}}" wx:key="*this">{{item}}</text>
       </view>
 
-      <scroll-view class="profile-card__body" scroll-y="true">
+      <scroll-view class="profile-card__body" scroll-y="true" enhanced="true" show-scrollbar="{{false}}">
         <view
           class="profile-card__row {{item.iconKey === 'mbti' ? 'profile-card__row--mbti' : ''}}"
           wx:for="{{profileSections}}"
