@@ -502,13 +502,19 @@ class VipService:
         self,
         user_id: str,
         product_code: str,
+        quantity: int = 1,
         timestamp: Optional[int] = None,
     ) -> VipOrder:
         timestamp = timestamp or now_ts()
         product = get_product(product_code)
         if not product:
             raise VipProductError("商品不存在。")
+        quantity = int(quantity or 1)
+        if quantity < 1 or quantity > 99:
+            raise VipProductError("购买数量必须在 1-99 之间。")
         membership = self.ensure_membership_cycle(user_id, timestamp)
+        if product["product_type"] == "membership" and quantity != 1:
+            raise VipProductError("会员套餐暂不支持一次购买多份。")
         if product["product_type"] == "membership" and membership:
             if membership.plan_code != product["plan_code"]:
                 raise VipProductError(
@@ -535,12 +541,16 @@ class VipService:
         snapshot = {
             **product,
             "price_fen": product["price_fen"],
+            "quantity": quantity,
         }
+        if product["product_type"] == "addon":
+            snapshot["unit_amount"] = int(product["amount"])
+            snapshot["amount"] = int(product["amount"]) * quantity
         return VipOrder.create(
             user_id=user_id,
             product_code=product_code,
             product_type=product["product_type"],
-            amount_fen=product["price_fen"],
+            amount_fen=product["price_fen"] * quantity,
             status="pending",
             product_snapshot_json=json.dumps(snapshot, ensure_ascii=False),
             created_at=timestamp,

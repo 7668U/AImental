@@ -4,19 +4,31 @@ const VIP_API_BASE_URL = `${SERVER_BASE_URL}/api/v1/vip`;
 const FEATURE_PRESENTATION = {
   tree_hole: {
     name: '心情树洞',
+    shortName: '树洞',
     icon: '/images/vip/feature-tree-hole.png',
+    color: '#ff8a24',
+    description: '陪你倾诉，温暖每一次心事',
   },
   community: {
     name: '心灵社区',
+    shortName: '社区',
     icon: '/images/vip/feature-community.png',
+    color: '#6fc3a5',
+    description: '更多陪伴，更多温柔回应',
   },
   mood_analysis: {
-    name: '单项心情分析',
+    name: '心情分析',
+    shortName: '心情分析',
     icon: '/images/vip/feature-mood-analysis.png',
+    color: '#ef7369',
+    description: '看见情绪背后的线索',
   },
   assessment_analysis: {
-    name: 'AI 测评分析',
+    name: '测评分析',
+    shortName: '测评分析',
     icon: '/images/vip/feature-assessment-analysis.png',
+    color: '#77b9e7',
+    description: '解读测评，获得更清晰的自己',
   },
 };
 
@@ -29,62 +41,65 @@ const FEATURE_ORDER = [
 
 const PLAN_PRESENTATION = {
   light: {
-    image: '/images/vip/plan-light.png',
-    displayDescription: '第一次靠近，轻盈陪伴',
+    name: '轻语会员',
+    icon: '/images/vip/plan-light.png',
   },
   knowing: {
-    image: '/images/vip/plan-knowing.png',
-    displayDescription: '理解与回应，综合更均衡',
+    name: '相知会员',
+    icon: '/images/vip/plan-knowing.png',
   },
   companion: {
-    image: '/images/vip/plan-companion.png',
-    displayDescription: '稳定长久，持续陪伴',
+    name: '长伴会员',
+    icon: '/images/vip/plan-companion.png',
   },
 };
 
-const FALLBACK_PRODUCTS = [
+const FALLBACK_MEMBER = {
+  planCode: 'knowing',
+  name: '相知会员',
+  icon: PLAN_PRESENTATION.knowing.icon,
+  expiresText: '会员有效期至 2026-08-11',
+};
+
+const FALLBACK_ENTITLEMENTS = {
+  tree_hole: { total: 600, remaining: 172 },
+  community: { total: 1200, remaining: 214 },
+  mood_analysis: { total: 80, remaining: 48 },
+  assessment_analysis: { total: 100, remaining: 44 },
+};
+
+const FALLBACK_ADDONS = [
   {
-    code: 'vip_light',
-    product_type: 'membership',
-    plan_code: 'light',
-    name: '轻语会员',
-    price_fen: 899,
-    pricing_label: '首发体验价',
-    quotas: {
-      tree_hole: 300,
-      community: 500,
-      mood_analysis: 40,
-      assessment_analysis: 50,
-    },
+    code: 'addon_tree_300',
+    product_type: 'addon',
+    feature: 'tree_hole',
+    name: '树洞加量包',
+    amount: 300,
+    price_fen: 399,
   },
   {
-    code: 'vip_knowing',
-    product_type: 'membership',
-    plan_code: 'knowing',
-    name: '相知会员',
-    recommended: true,
-    price_fen: 1399,
-    pricing_label: '首发体验价',
-    quotas: {
-      tree_hole: 600,
-      community: 1200,
-      mood_analysis: 80,
-      assessment_analysis: 100,
-    },
+    code: 'addon_community_300',
+    product_type: 'addon',
+    feature: 'community',
+    name: '社区加量包',
+    amount: 300,
+    price_fen: 799,
   },
   {
-    code: 'vip_companion',
-    product_type: 'membership',
-    plan_code: 'companion',
-    name: '长伴会员',
-    price_fen: 1899,
-    pricing_label: '首发体验价',
-    quotas: {
-      tree_hole: 1200,
-      community: 2400,
-      mood_analysis: 120,
-      assessment_analysis: 200,
-    },
+    code: 'addon_mood_20',
+    product_type: 'addon',
+    feature: 'mood_analysis',
+    name: '心情分析加量包',
+    amount: 20,
+    price_fen: 199,
+  },
+  {
+    code: 'addon_assessment_20',
+    product_type: 'addon',
+    feature: 'assessment_analysis',
+    name: '测评分析加量包',
+    amount: 20,
+    price_fen: 199,
   },
 ];
 
@@ -93,21 +108,68 @@ function formatPrice(priceFen) {
   return (normalized / 100).toFixed(2);
 }
 
-function formatProduct(product, currentPlanCode) {
-  const presentation = PLAN_PRESENTATION[product.plan_code] || PLAN_PRESENTATION.light;
-  const quotas = product.quotas || {};
+function formatDate(timestamp) {
+  if (!timestamp) {
+    return '';
+  }
+  const date = new Date(Number(timestamp) * 1000);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function normalizeMember(membership) {
+  if (!membership || membership.status !== 'active') {
+    return FALLBACK_MEMBER;
+  }
+  const presentation = PLAN_PRESENTATION[membership.plan_code] || PLAN_PRESENTATION.knowing;
+  return {
+    planCode: membership.plan_code,
+    name: membership.plan_name || presentation.name,
+    icon: presentation.icon,
+    expiresText: `会员有效期至 ${formatDate(membership.expires_at) || '--'}`,
+  };
+}
+
+function normalizeUsage(entitlements) {
+  const source = entitlements || FALLBACK_ENTITLEMENTS;
+  return FEATURE_ORDER.map((feature) => {
+    const presentation = FEATURE_PRESENTATION[feature];
+    const item = source[feature] || {};
+    const total = Math.max(Number(item.total) || 0, 0);
+    const remaining = Math.max(Number(item.remaining) || 0, 0);
+    const used = Math.max(total - remaining, 0);
+    const percent = total ? Math.min(Math.round((used / total) * 100), 100) : 0;
+    return {
+      feature,
+      name: presentation.name,
+      icon: presentation.icon,
+      used,
+      total,
+      countText: `${used} / ${total} 次`,
+      progressStyle: `width: ${percent}%; background: ${presentation.color};`,
+    };
+  });
+}
+
+function normalizeAddon(product) {
+  const feature = product.feature || 'tree_hole';
+  const presentation = FEATURE_PRESENTATION[feature] || FEATURE_PRESENTATION.tree_hole;
+  const nameByFeature = {
+    tree_hole: '树洞加量包',
+    community: '社区加量包',
+    mood_analysis: '心情分析加量包',
+    assessment_analysis: '测评分析加量包',
+  };
   return {
     ...product,
-    image: presentation.image,
-    displayDescription: presentation.displayDescription,
+    name: nameByFeature[feature] || product.name,
+    amount: Number(product.amount) || 0,
+    icon: presentation.icon,
+    featureName: presentation.shortName,
+    description: presentation.description,
     priceText: formatPrice(product.price_fen),
-    isCurrent: product.plan_code === currentPlanCode,
-    quotaItems: FEATURE_ORDER.map((feature) => ({
-      feature,
-      name: FEATURE_PRESENTATION[feature].name,
-      icon: FEATURE_PRESENTATION[feature].icon,
-      amount: Number(quotas[feature]) || 0,
-    })),
   };
 }
 
@@ -125,28 +187,28 @@ function getRequestErrorMessage(response, fallback) {
 Page({
   data: {
     statusBarHeight: 24,
-    plans: [],
-    selectedPlanCode: 'vip_knowing',
-    selectedPlan: {},
-    currentPlanCode: '',
-    agreementChecked: true,
+    currentMember: FALLBACK_MEMBER,
+    usageItems: normalizeUsage(FALLBACK_ENTITLEMENTS),
+    addonProducts: FALLBACK_ADDONS.map(normalizeAddon),
+    selectedAddon: null,
+    addonQuantity: 1,
+    addonTotalText: '3.99',
+    addonModalVisible: false,
+    addonAgreementChecked: false,
     purchaseLoading: false,
-    purchaseDisabled: false,
-    purchaseButtonText: '开通相知会员',
     mockPaymentAvailable: false,
   },
 
   onLoad() {
     this.initLayout();
-    this.applyProducts(FALLBACK_PRODUCTS);
-    this.fetchVipState();
     this.fetchCatalog();
+    this.fetchVipState();
   },
 
   onPullDownRefresh() {
     Promise.all([
-      this.fetchVipState(),
       this.fetchCatalog(),
+      this.fetchVipState(),
     ]).finally(() => {
       wx.stopPullDownRefresh();
     });
@@ -169,11 +231,14 @@ Page({
         url: `${VIP_API_BASE_URL}/catalog`,
         method: 'GET',
         success: (res) => {
-          if (res.statusCode === 200 && res.data && Array.isArray(res.data.membership_products)) {
+          if (res.statusCode === 200 && res.data) {
+            const addonProducts = Array.isArray(res.data.addon_products)
+              ? res.data.addon_products.map(normalizeAddon)
+              : this.data.addonProducts;
             this.setData({
+              addonProducts,
               mockPaymentAvailable: Boolean(res.data.mock_payment_available),
             });
-            this.applyProducts(res.data.membership_products);
           }
           resolve();
         },
@@ -188,7 +253,10 @@ Page({
   fetchVipState() {
     const token = wx.getStorageSync('token');
     if (!token) {
-      this.applyCurrentPlan('');
+      this.setData({
+        currentMember: FALLBACK_MEMBER,
+        usageItems: normalizeUsage(FALLBACK_ENTITLEMENTS),
+      });
       return Promise.resolve();
     }
 
@@ -198,13 +266,12 @@ Page({
         method: 'GET',
         header: { Authorization: `Bearer ${token}` },
         success: (res) => {
-          const membership = res.statusCode === 200 && res.data
-            ? res.data.membership
-            : null;
-          const currentPlanCode = membership && membership.status === 'active'
-            ? membership.plan_code
-            : '';
-          this.applyCurrentPlan(currentPlanCode);
+          if (res.statusCode === 200 && res.data) {
+            this.setData({
+              currentMember: normalizeMember(res.data.membership),
+              usageItems: normalizeUsage(res.data.entitlements),
+            });
+          }
           resolve();
         },
         fail: (error) => {
@@ -215,102 +282,88 @@ Page({
     });
   },
 
-  applyCurrentPlan(currentPlanCode) {
-    this.setData({ currentPlanCode: currentPlanCode || '' });
-    const products = this.data.plans.length
-      ? this.data.plans
-      : FALLBACK_PRODUCTS.map((item) => formatProduct(item, currentPlanCode));
-    this.applyProducts(products);
-  },
-
-  applyProducts(products) {
-    const normalized = products
-      .filter((item) => item && item.product_type === 'membership')
-      .sort((left, right) => (left.rank || 0) - (right.rank || 0))
-      .map((item) => formatProduct(item, this.data.currentPlanCode));
-
-    if (!normalized.length) {
-      return;
-    }
-
-    const currentProduct = normalized.find(
-      (item) => item.plan_code === this.data.currentPlanCode
-    );
-    const existingSelection = normalized.find(
-      (item) => item.code === this.data.selectedPlanCode
-    );
-    const recommended = normalized.find((item) => item.recommended);
-    const selectedPlan = currentProduct || existingSelection || recommended || normalized[0];
-
-    this.setData({
-      plans: normalized,
-      selectedPlanCode: selectedPlan.code,
-      selectedPlan,
-    });
-    this.updatePurchaseState(selectedPlan);
-  },
-
-  selectPlan(event) {
+  openAddonModal(event) {
     const code = event.currentTarget.dataset.code;
-    const selectedPlan = this.data.plans.find((item) => item.code === code);
-    if (!selectedPlan) {
+    const selectedAddon = this.data.addonProducts.find((item) => item.code === code);
+    if (!selectedAddon) {
       return;
     }
     this.setData({
-      selectedPlanCode: code,
-      selectedPlan,
+      selectedAddon,
+      addonQuantity: 1,
+      addonTotalText: selectedAddon.priceText,
+      addonModalVisible: true,
+      addonAgreementChecked: false,
     });
-    this.updatePurchaseState(selectedPlan);
   },
 
-  updatePurchaseState(selectedPlan) {
-    if (!selectedPlan || !selectedPlan.code) {
+  closeAddonModal() {
+    if (this.data.purchaseLoading) {
       return;
     }
-    const isChangingActivePlan = Boolean(
-      this.data.currentPlanCode
-      && selectedPlan.plan_code !== this.data.currentPlanCode
-    );
-    const isRenewal = selectedPlan.plan_code === this.data.currentPlanCode;
     this.setData({
-      purchaseDisabled: isChangingActivePlan,
-      purchaseButtonText: isChangingActivePlan
-        ? '暂不支持更换等级'
-        : `${isRenewal ? '续费' : '开通'}${selectedPlan.name}`,
+      addonModalVisible: false,
+      selectedAddon: null,
+      addonQuantity: 1,
+      addonAgreementChecked: false,
     });
   },
 
-  toggleAgreement() {
+  decreaseQuantity() {
+    if (this.data.purchaseLoading) {
+      return;
+    }
+    this.updateAddonQuantity(Math.max(this.data.addonQuantity - 1, 1));
+  },
+
+  increaseQuantity() {
+    if (this.data.purchaseLoading) {
+      return;
+    }
+    this.updateAddonQuantity(Math.min(this.data.addonQuantity + 1, 99));
+  },
+
+  updateAddonQuantity(quantity) {
+    const selectedAddon = this.data.selectedAddon;
+    if (!selectedAddon) {
+      return;
+    }
     this.setData({
-      agreementChecked: !this.data.agreementChecked,
+      addonQuantity: quantity,
+      addonTotalText: formatPrice((Number(selectedAddon.price_fen) || 0) * quantity),
     });
   },
 
   openAgreement() {
     wx.showModal({
       title: '会员服务协议',
-      content: '会员服务协议页面将在支付系统正式上线前补充。当前页面不会自动续费。',
+      content: '会员服务协议页面将在支付系统正式上线前补充。当前会员和加量包均为单次购买，不会自动续费。',
       showCancel: false,
       confirmText: '我知道了',
     });
   },
 
-  handlePurchase() {
+  toggleAddonAgreement() {
     if (this.data.purchaseLoading) {
       return;
     }
-    if (this.data.purchaseDisabled) {
-      wx.showToast({
-        title: '当前暂不支持更换会员等级',
-        icon: 'none',
-      });
+    this.setData({
+      addonAgreementChecked: !this.data.addonAgreementChecked,
+    });
+  },
+
+  openPurchaseRecords() {
+    wx.showToast({
+      title: '购买记录页面建设中',
+      icon: 'none',
+    });
+  },
+
+  handleAddonPay() {
+    if (this.data.purchaseLoading || !this.data.selectedAddon) {
       return;
     }
-    if (!this.data.agreementChecked) {
-      wx.showToast({
-        title: '请先阅读并同意会员服务协议',
-        icon: 'none',
-      });
+    if (!this.data.addonAgreementChecked) {
       return;
     }
 
@@ -329,7 +382,8 @@ Page({
       method: 'POST',
       header: { Authorization: `Bearer ${token}` },
       data: {
-        product_code: this.data.selectedPlan.code,
+        product_code: this.data.selectedAddon.code,
+        quantity: this.data.addonQuantity,
       },
       success: (res) => {
         if (res.statusCode !== 201 || !res.data) {
@@ -377,14 +431,20 @@ Page({
           );
           return;
         }
-        this.setData({ purchaseLoading: false });
+        this.setData({
+          purchaseLoading: false,
+          addonModalVisible: false,
+          selectedAddon: null,
+          addonQuantity: 1,
+          addonAgreementChecked: false,
+        });
         wx.showModal({
-          title: '开通成功',
-          content: `${this.data.selectedPlan.name}权益已到账。`,
+          title: '购买成功',
+          content: '加量包权益已到账。',
           showCancel: false,
           confirmText: '完成',
           success: () => {
-            wx.navigateBack();
+            this.fetchVipState();
           },
         });
       },
@@ -398,11 +458,20 @@ Page({
     wx.requestPayment({
       ...payload,
       success: () => {
-        this.setData({ purchaseLoading: false });
+        this.setData({
+          purchaseLoading: false,
+          addonModalVisible: false,
+          selectedAddon: null,
+          addonQuantity: 1,
+          addonAgreementChecked: false,
+        });
         wx.showModal({
           title: '支付结果确认中',
-          content: '支付完成后，会员权益将以后端订单查询结果为准。',
+          content: '支付完成后，加量包权益将以后端订单查询结果为准。',
           showCancel: false,
+          success: () => {
+            this.fetchVipState();
+          },
         });
       },
       fail: (error) => {

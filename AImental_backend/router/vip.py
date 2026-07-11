@@ -28,6 +28,7 @@ router = APIRouter(
 
 class CreateOrderRequest(BaseModel):
     product_code: str = Field(..., min_length=1, max_length=64)
+    quantity: int = Field(1, ge=1, le=99)
 
 
 class OrderResponse(BaseModel):
@@ -117,6 +118,7 @@ def create_vip_order(
         order = vip_service.create_order(
             current_user_id,
             request_data.product_code,
+            quantity=request_data.quantity,
         )
     except VipError as exc:
         raise vip_http_error(exc) from exc
