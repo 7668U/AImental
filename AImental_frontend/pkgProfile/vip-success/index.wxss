@@ -1,0 +1,343 @@
+page {
+  min-height: 100%;
+  background: #fff7ee;
+  color: #3f2c22;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft Yahei', sans-serif;
+}
+
+.success-page {
+  min-height: 100vh;
+  padding-bottom: calc(34rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  overflow-x: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 247, 238, 0) 0%, #fff7ee 460rpx, #fff7ee 100%);
+}
+
+.hero-section {
+  position: relative;
+  height: 470rpx;
+  padding: 0 46rpx;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.status-spacer,
+.nav-row,
+.hero-copy {
+  position: relative;
+  z-index: 1;
+}
+
+.nav-row {
+  height: 90rpx;
+  display: flex;
+  align-items: center;
+}
+
+.back-button {
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8rpx 22rpx rgba(178, 106, 52, 0.12);
+}
+
+.back-button:active {
+  opacity: 0.72;
+}
+
+.back-icon {
+  margin-top: -5rpx;
+  color: #39251d;
+  font-size: 64rpx;
+  line-height: 1;
+  font-weight: 300;
+}
+
+.hero-copy {
+  margin-top: 20rpx;
+  max-width: 460rpx;
+}
+
+.hero-title {
+  font-size: 66rpx;
+  line-height: 1.08;
+  font-weight: 900;
+  color: #2f1b10;
+  letter-spacing: 0;
+}
+
+.hero-subtitle {
+  margin-top: 18rpx;
+  font-size: 29rpx;
+  line-height: 1.35;
+  font-weight: 500;
+  color: #3f2c22;
+  letter-spacing: 0;
+}
+
+.hero-note {
+  margin-top: 18rpx;
+  max-width: 430rpx;
+  font-size: 24rpx;
+  line-height: 1.48;
+  color: #715f54;
+  letter-spacing: 0;
+}
+
+.body-section {
+  position: relative;
+  z-index: 2;
+  margin-top: 12rpx;
+  padding: 0 42rpx;
+  box-sizing: border-box;
+}
+
+.membership-card {
+  position: relative;
+  min-height: 720rpx;
+  padding: 34rpx 42rpx 50rpx;
+  border-radius: 40rpx;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 18rpx 44rpx rgba(150, 93, 47, 0.12);
+}
+
+.leaf-decor {
+  position: absolute;
+  z-index: 1;
+  top: 14rpx;
+  width: 128rpx;
+  height: 204rpx;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.leaf-left {
+  left: 18rpx;
+  transform: rotate(-25deg);
+}
+
+.leaf-right {
+  right: 18rpx;
+  transform: scaleX(-1) rotate(-25deg);
+}
+
+.plan-summary,
+.message-block {
+  position: relative;
+  z-index: 1;
+}
+
+.plan-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.plan-icon-stage {
+  position: relative;
+  width: 430rpx;
+  height: 190rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plan-icon {
+  position: relative;
+  z-index: 2;
+  width: 170rpx;
+  height: 170rpx;
+}
+
+.plan-title-row {
+  margin-top: 16rpx;
+  min-height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plan-title {
+  font-size: 36rpx;
+  line-height: 1.2;
+  font-weight: 900;
+  color: #3b2217;
+}
+
+.opened-badge {
+  height: 34rpx;
+  margin-left: 16rpx;
+  padding: 0 14rpx;
+  border-radius: 999rpx;
+  display: flex;
+  align-items: center;
+  color: #249657;
+  font-size: 20rpx;
+  line-height: 1;
+  font-weight: 700;
+  background: #e9f8ee;
+  border: 1rpx solid rgba(72, 180, 107, 0.28);
+}
+
+.opened-check {
+  margin-right: 6rpx;
+  font-size: 21rpx;
+}
+
+.message-block {
+  margin-top: 44rpx;
+  padding: 0 34rpx;
+  box-sizing: border-box;
+}
+
+.thanks-title {
+  font-family: "STKaiti", "KaiTi", "Songti SC", "SimSun", serif;
+  font-size: 36rpx;
+  line-height: 1.32;
+  font-weight: 900;
+  color: #3a2217;
+  text-align: center;
+  letter-spacing: 0;
+}
+
+.heart-divider {
+  margin-top: 26rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.divider-line {
+  width: 96rpx;
+  height: 2rpx;
+  background: rgba(255, 124, 32, 0.42);
+}
+
+.divider-heart {
+  margin: 0 18rpx;
+  color: #ff7a24;
+  font-size: 24rpx;
+  line-height: 1;
+}
+
+.thanks-copy {
+  margin-top: 28rpx;
+  font-family: "STKaiti", "KaiTi", "Songti SC", "SimSun", serif;
+  font-size: 27rpx;
+  line-height: 1.7;
+  font-weight: 400;
+  color: #3f2a20;
+  text-align: center;
+}
+
+.copy-gap {
+  margin-top: 20rpx;
+}
+
+.action-area {
+  margin-top: 28rpx;
+}
+
+.action-button {
+  height: 76rpx;
+  margin: 0;
+  padding: 0;
+  border-radius: 999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 31rpx;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.action-button::after {
+  display: none;
+}
+
+.action-button.primary {
+  color: #fff;
+  border: 0;
+  background: linear-gradient(135deg, #ff9f3d 0%, #ff6f17 100%);
+  box-shadow: 0 12rpx 26rpx rgba(255, 116, 26, 0.18);
+}
+
+@media (max-width: 350px) {
+  .hero-section {
+    height: 438rpx;
+    padding-left: 36rpx;
+    padding-right: 36rpx;
+  }
+
+  .hero-title {
+    font-size: 58rpx;
+  }
+
+  .hero-subtitle {
+    font-size: 26rpx;
+  }
+
+  .hero-note {
+    font-size: 22rpx;
+  }
+
+  .body-section {
+    padding-left: 32rpx;
+    padding-right: 32rpx;
+  }
+
+  .membership-card {
+    padding-left: 34rpx;
+    padding-right: 34rpx;
+  }
+
+  .plan-icon-stage {
+    width: 370rpx;
+  }
+
+  .leaf-decor {
+    width: 108rpx;
+    height: 184rpx;
+  }
+
+  .leaf-left {
+    left: 12rpx;
+  }
+
+  .leaf-right {
+    right: 12rpx;
+  }
+
+  .message-block {
+    margin-top: 38rpx;
+    padding-left: 20rpx;
+    padding-right: 20rpx;
+  }
+
+  .thanks-title {
+    font-size: 31rpx;
+  }
+
+  .thanks-copy {
+    font-size: 24rpx;
+    line-height: 1.76;
+  }
+}

@@ -14,8 +14,11 @@
   </view>
 
   <view class="hero-copy">
-    <view class="page-title">选择适合你的陪伴方式</view>
-    <view class="page-subtitle">每月获得更多树洞、社区与 AI 分析额度</view>
+    <view class="page-title">选择适合你的陪伴计划</view>
+    <view class="page-subtitle">
+      <text>获得更多的树洞、社区聊天次数以及</text>
+      <text class="subtitle-break">AI分析次数</text>
+    </view>
   </view>
 
   <view class="plan-list">
@@ -31,14 +34,11 @@
           <view class="plan-name-row">
             <view class="plan-dot"></view>
             <text class="plan-name">{{item.name}}</text>
-            <text wx:if="{{item.recommended}}" class="recommended-tag">最受欢迎</text>
             <text wx:if="{{item.isCurrent}}" class="current-tag">当前</text>
           </view>
-          <view class="plan-description">{{item.displayDescription}}</view>
         </view>
 
         <view class="plan-price-area">
-          <view class="pricing-label">{{item.pricing_label || '首发体验价'}}</view>
           <view class="plan-price">
             <text class="currency">¥</text>
             <text class="price-value">{{item.priceText}}</text>
@@ -88,9 +88,10 @@
       <view class="purchase-divider"></view>
 
       <button
-        class="purchase-button {{purchaseDisabled ? 'disabled' : ''}}"
+        class="purchase-button {{purchaseDisabled || !agreementChecked ? 'disabled' : ''}}"
+        style="width: 176rpx; min-width: 176rpx; max-width: 176rpx; flex-basis: 176rpx; flex-shrink: 0;"
         loading="{{purchaseLoading}}"
-        disabled="{{purchaseLoading}}"
+        disabled="{{purchaseLoading || purchaseDisabled || !agreementChecked}}"
         bindtap="handlePurchase"
       >
         {{purchaseButtonText}}
@@ -104,6 +105,78 @@
       <text class="agreement-copy" bindtap="toggleAgreement">我已阅读并同意</text>
       <text class="agreement-link" catchtap="openAgreement">会员服务协议</text>
       <text class="agreement-arrow">›</text>
+    </view>
+  </view>
+
+  <view wx:if="{{agreementModalVisible}}" class="agreement-modal-mask" catchtap="closeAgreement" catchtouchmove="noop">
+    <view class="agreement-modal" catchtap="noop">
+      <view class="agreement-modal-header">
+        <view class="agreement-modal-title">会员服务协议</view>
+        <view class="agreement-modal-close" catchtap="closeAgreement">×</view>
+      </view>
+
+      <scroll-view class="agreement-modal-scroll" scroll-y>
+        <view class="agreement-modal-content">
+          <view class="agreement-intro">生效日期：2026 年 7 月 11 日</view>
+          <view class="agreement-paragraph">欢迎开通本小程序会员服务。请在购买前仔细阅读本协议。你点击勾选、支付或使用会员权益，即表示你已理解并同意本协议内容。</view>
+
+          <view class="agreement-section">
+            <view class="agreement-section-title">一、会员服务内容</view>
+            <view class="agreement-paragraph">会员服务为虚拟数字服务，主要提供以下四项额度权益。不同套餐包含的具体次数以购买页面展示为准。</view>
+
+            <view class="agreement-item-title">1. 心情树洞</view>
+            <view class="agreement-paragraph">对应小程序底部导航中的“心情树洞”对话模块，也就是你与 AI 陪伴助手进行情绪表达、日常倾诉、连续对话和获得文字回应的功能。</view>
+            <view class="agreement-paragraph">当你发送一条消息，并且系统成功生成并返回 AI 回复时，扣除 1 次心情树洞额度。若同一用户回合内 AI 连续返回多条消息，仍按 1 次计算。模型调用失败、系统异常、内容安全拦截、输入超限或风控拦截未生成回复的，不扣除额度。</view>
+
+            <view class="agreement-item-title">2. 心灵社区</view>
+            <view class="agreement-paragraph">对应小程序底部导航中的“心灵社区”模块，包括社区 AI 虚拟角色列表、角色聊天页、与虚拟角色建立对话关系、查看角色信息与好感度相关互动等内容。</view>
+            <view class="agreement-paragraph">当你在心灵社区中向 AI 虚拟角色发送一条消息，并且系统成功生成并返回角色回复时，扣除 1 次心灵社区额度。社区中的角色均为 AI 虚拟角色，不代表真实用户、真人咨询师或现实联系人。</view>
+
+            <view class="agreement-item-title">3. 单项心情分析</view>
+            <view class="agreement-paragraph">对应心情记录、心情报告或相关统计页面中的 AI 心情分析能力。该权益包含四个可独立生成的分析模块：心情分布分析、状态与心情关联分析、日记词云与主题分析、情绪颜色分析。</view>
+            <view class="agreement-paragraph">每成功新生成 1 个分析模块，扣除 1 次单项心情分析额度。若一次完整生成上述四个模块，则共扣除 4 次。查看已生成结果、命中缓存、重复打开同一报告时，不重复扣除额度；如果你的记录发生变化并触发重新生成，或你主动刷新并实际调用 AI 生成新内容，则按实际生成模块数扣除。</view>
+
+            <view class="agreement-item-title">4. 测评分析</view>
+            <view class="agreement-paragraph">对应心理测评结果页、历史测评报告和历史测评综合分析中的 AI 解读能力。该权益用于生成单份测评结果的新 AI 解读，或基于多份历史测评生成综合分析。</view>
+            <view class="agreement-paragraph">基础量表答题、规则评分、结果等级和基础解释不扣除测评分析额度。只有实际调用 AI 并成功生成新的测评解读或综合分析时，才扣除 1 次。查看历史报告、重复打开结果页、命中相同测评记录组合的缓存，或模型失败导致报告未成功保存的，不扣除额度。</view>
+          </view>
+
+          <view class="agreement-section">
+            <view class="agreement-section-title">二、开通、有效期与额度</view>
+            <view class="agreement-paragraph">会员套餐为单次购买服务，当前不自动续费。购买成功后，会员权益将发放至你的当前登录账号，不能转让、拆分、赠送、出售或合并到其他账号。</view>
+            <view class="agreement-paragraph">页面中的“次/月”表示对应周期内可使用的额度。会员有效期、剩余额度、重置时间和消耗记录以系统实际记录和页面展示为准。未使用完的周期额度通常不结转至下一周期，法律法规或平台规则另有要求的除外。</view>
+          </view>
+
+          <view class="agreement-section">
+            <view class="agreement-section-title">三、支付与退款</view>
+            <view class="agreement-paragraph">会员价格、套餐内容和支付方式以购买页面展示为准。你应在确认套餐、价格、账号和权益内容后再完成支付。</view>
+            <view class="agreement-paragraph">会员属于在线虚拟服务。开通后，如非重复扣款、系统原因导致权益无法发放、法律法规或微信支付平台规则要求等情形，通常不支持无理由退款。若发生支付异常或权益未到账，可通过小程序内反馈入口联系我们处理。</view>
+          </view>
+
+          <view class="agreement-section">
+            <view class="agreement-section-title">四、使用规范</view>
+            <view class="agreement-paragraph">你不得利用会员服务发布、生成、传播违法违规、侵害他人权益、骚扰攻击、恶意刷量、绕过系统限制或破坏服务稳定性的内容。若账号存在异常调用、共享转卖、脚本刷量、攻击接口等行为，我们有权限制、暂停或终止相关权益。</view>
+          </view>
+
+          <view class="agreement-section">
+            <view class="agreement-section-title">五、隐私与数据</view>
+            <view class="agreement-paragraph">为提供会员服务，系统可能会处理你的账号信息、会员状态、额度使用记录、支付结果、对话或分析所需的必要内容。我们会按照隐私政策和适用法律法规处理你的个人信息，并尽量采取必要措施保护数据安全。</view>
+          </view>
+
+          <view class="agreement-section">
+            <view class="agreement-section-title">六、重要提示</view>
+            <view class="agreement-paragraph">本小程序提供的是情绪记录、AI 陪伴、AI 分析和自我理解辅助服务，不构成医疗诊断、心理治疗、专业心理咨询、法律意见或其他专业意见。若你正处于自伤、自杀、伤害他人、严重心理危机或其他紧急情况，请立即联系当地紧急救助、医疗机构或可信任的人。</view>
+            <view class="agreement-paragraph">AI 生成内容可能存在不准确、不完整或不适合你当前情况的地方，请结合自身判断理性使用。未成年人使用会员服务前，应取得监护人同意并在监护指导下使用。</view>
+          </view>
+
+          <view class="agreement-section">
+            <view class="agreement-section-title">七、协议更新</view>
+            <view class="agreement-paragraph">我们可能因功能调整、运营策略、法律法规或平台规则变化更新会员服务和本协议。重大变化会尽量通过页面提示、公告或其他合理方式告知。更新后继续使用会员服务，视为你接受更新后的内容。</view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <button class="agreement-modal-button" bindtap="closeAgreement">我知道了</button>
     </view>
   </view>
 </view>

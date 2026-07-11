@@ -1,0 +1,78 @@
+<view class="success-page">
+  <view class="hero-section">
+    <image
+      class="hero-bg"
+      src="/images/vip/membership-success-hero-bg.png"
+      mode="aspectFill"
+    ></image>
+
+    <view class="status-spacer" style="height: {{statusBarHeight}}px;"></view>
+
+    <view class="nav-row">
+      <view class="back-button" bindtap="handleBack" aria-label="返回">
+        <text class="back-icon">‹</text>
+      </view>
+    </view>
+
+    <view class="hero-copy">
+      <view class="hero-title">开通成功！</view>
+      <view class="hero-subtitle">恭喜你！已成为{{plan.name}}</view>
+      <view class="hero-note">愿接下来的陪伴，温柔回应你的每一次情绪起伏</view>
+    </view>
+  </view>
+
+  <view class="body-section">
+    <view class="membership-card">
+      <view class="plan-summary {{plan.themeClass}}">
+        <view class="plan-icon-stage">
+          <image
+            class="leaf-decor leaf-left"
+            src="/images/vip/membership-success-leaf-left.png"
+            mode="aspectFit"
+          ></image>
+          <image class="plan-icon" src="{{plan.image}}" mode="aspectFit"></image>
+          <image
+            class="leaf-decor leaf-right"
+            src="/images/vip/membership-success-leaf-left.png"
+            mode="aspectFit"
+          ></image>
+        </view>
+
+        <view class="plan-title-row">
+          <text class="plan-title">{{plan.name}}</text>
+          <view class="opened-badge">
+            <text class="opened-check">✓</text>
+            <text>已开通</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="message-block">
+        <view class="thanks-title">谢谢你，把这份信任交给我们</view>
+
+        <view class="heart-divider">
+          <view class="divider-line"></view>
+          <text class="divider-heart">♥</text>
+          <view class="divider-line"></view>
+        </view>
+
+        <view class="thanks-copy">
+          <view>这一份相遇，</view>
+          <view>我们会认真珍惜。</view>
+          <view>愿这里能替你</view>
+          <view>留住片刻安静，</view>
+          <view>在情绪起伏的时候，</view>
+          <view>给你一处可以停靠的地方。</view>
+          <view class="copy-gap">也愿你在漫长而具体的生活里，</view>
+          <view>始终拥有感受微风的能力；</view>
+          <view>有人听懂你的沉默，</view>
+          <view>也有人回应你的真心。</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="action-area">
+      <button class="action-button primary" bindtap="startExperience">立即开始体验</button>
+    </view>
+  </view>
+</view>

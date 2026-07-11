@@ -15,7 +15,7 @@ const FEATURE_PRESENTATION = {
     icon: '/images/vip/feature-mood-analysis.png',
   },
   assessment_analysis: {
-    name: 'AI 测评分析',
+    name: '测评分析',
     icon: '/images/vip/feature-assessment-analysis.png',
   },
 };
@@ -30,15 +30,12 @@ const FEATURE_ORDER = [
 const PLAN_PRESENTATION = {
   light: {
     image: '/images/vip/plan-light.png',
-    displayDescription: '第一次靠近，轻盈陪伴',
   },
   knowing: {
     image: '/images/vip/plan-knowing.png',
-    displayDescription: '理解与回应，综合更均衡',
   },
   companion: {
     image: '/images/vip/plan-companion.png',
-    displayDescription: '稳定长久，持续陪伴',
   },
 };
 
@@ -49,7 +46,6 @@ const FALLBACK_PRODUCTS = [
     plan_code: 'light',
     name: '轻语会员',
     price_fen: 899,
-    pricing_label: '首发体验价',
     quotas: {
       tree_hole: 300,
       community: 500,
@@ -64,7 +60,6 @@ const FALLBACK_PRODUCTS = [
     name: '相知会员',
     recommended: true,
     price_fen: 1399,
-    pricing_label: '首发体验价',
     quotas: {
       tree_hole: 600,
       community: 1200,
@@ -78,7 +73,6 @@ const FALLBACK_PRODUCTS = [
     plan_code: 'companion',
     name: '长伴会员',
     price_fen: 1899,
-    pricing_label: '首发体验价',
     quotas: {
       tree_hole: 1200,
       community: 2400,
@@ -99,7 +93,6 @@ function formatProduct(product, currentPlanCode) {
   return {
     ...product,
     image: presentation.image,
-    displayDescription: presentation.displayDescription,
     priceText: formatPrice(product.price_fen),
     isCurrent: product.plan_code === currentPlanCode,
     quotaItems: FEATURE_ORDER.map((feature) => ({
@@ -132,7 +125,8 @@ Page({
     agreementChecked: true,
     purchaseLoading: false,
     purchaseDisabled: false,
-    purchaseButtonText: '开通相知会员',
+    purchaseButtonText: '开通',
+    agreementModalVisible: false,
     mockPaymentAvailable: false,
   },
 
@@ -252,6 +246,9 @@ Page({
 
   selectPlan(event) {
     const code = event.currentTarget.dataset.code;
+    if (!code || code === this.data.selectedPlanCode) {
+      return;
+    }
     const selectedPlan = this.data.plans.find((item) => item.code === code);
     if (!selectedPlan) {
       return;
@@ -275,8 +272,8 @@ Page({
     this.setData({
       purchaseDisabled: isChangingActivePlan,
       purchaseButtonText: isChangingActivePlan
-        ? '暂不支持更换等级'
-        : `${isRenewal ? '续费' : '开通'}${selectedPlan.name}`,
+        ? '不可'
+        : (isRenewal ? '续费' : '开通'),
     });
   },
 
@@ -287,13 +284,18 @@ Page({
   },
 
   openAgreement() {
-    wx.showModal({
-      title: '会员服务协议',
-      content: '会员服务协议页面将在支付系统正式上线前补充。当前页面不会自动续费。',
-      showCancel: false,
-      confirmText: '我知道了',
+    this.setData({
+      agreementModalVisible: true,
     });
   },
+
+  closeAgreement() {
+    this.setData({
+      agreementModalVisible: false,
+    });
+  },
+
+  noop() {},
 
   handlePurchase() {
     if (this.data.purchaseLoading) {
@@ -378,15 +380,7 @@ Page({
           return;
         }
         this.setData({ purchaseLoading: false });
-        wx.showModal({
-          title: '开通成功',
-          content: `${this.data.selectedPlan.name}权益已到账。`,
-          showCancel: false,
-          confirmText: '完成',
-          success: () => {
-            wx.navigateBack();
-          },
-        });
+        this.navigateToSuccessPage();
       },
       fail: () => {
         this.finishPurchaseWithError('模拟支付请求失败');
@@ -399,11 +393,7 @@ Page({
       ...payload,
       success: () => {
         this.setData({ purchaseLoading: false });
-        wx.showModal({
-          title: '支付结果确认中',
-          content: '支付完成后，会员权益将以后端订单查询结果为准。',
-          showCancel: false,
-        });
+        this.navigateToSuccessPage();
       },
       fail: (error) => {
         this.setData({ purchaseLoading: false });
@@ -413,6 +403,19 @@ Page({
         }
         wx.showToast({ title: '支付未完成', icon: 'none' });
       },
+    });
+  },
+
+  navigateToSuccessPage() {
+    const selectedPlan = this.data.selectedPlan || {};
+    const params = [
+      `plan_code=${encodeURIComponent(selectedPlan.plan_code || 'knowing')}`,
+      `name=${encodeURIComponent(selectedPlan.name || '相知会员')}`,
+      `price=${encodeURIComponent(selectedPlan.priceText || '13.99')}`,
+    ].join('&');
+
+    wx.navigateTo({
+      url: `/pkgProfile/vip-success/index?${params}`,
     });
   },
 

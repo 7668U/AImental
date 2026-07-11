@@ -42,7 +42,8 @@
         "inform",
         "history",
         "privacy",
-        "vip/index"
+        "vip/index",
+        "vip-success/index"
       ]
     }
   ],
