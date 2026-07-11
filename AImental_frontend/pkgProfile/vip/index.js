@@ -4,19 +4,31 @@ const VIP_API_BASE_URL = `${SERVER_BASE_URL}/api/v1/vip`;
 const FEATURE_PRESENTATION = {
   tree_hole: {
     name: '心情树洞',
+    shortName: '树洞',
     icon: '/images/vip/feature-tree-hole.png',
+    color: '#ff8a24',
+    description: '陪你倾诉，温暖每一次心事',
   },
   community: {
     name: '心灵社区',
+    shortName: '社区',
     icon: '/images/vip/feature-community.png',
+    color: '#6fc3a5',
+    description: '更多陪伴，更多温柔回应',
   },
   mood_analysis: {
     name: '单项心情分析',
+    shortName: '心情分析',
     icon: '/images/vip/feature-mood-analysis.png',
+    color: '#ef7369',
+    description: '看见情绪背后的线索',
   },
   assessment_analysis: {
     name: '测评分析',
+    shortName: '测评分析',
     icon: '/images/vip/feature-assessment-analysis.png',
+    color: '#77b9e7',
+    description: '解读测评，获得更清晰的自己',
   },
 };
 
@@ -29,12 +41,15 @@ const FEATURE_ORDER = [
 
 const PLAN_PRESENTATION = {
   light: {
+    name: '轻语会员',
     image: '/images/vip/plan-light.png',
   },
   knowing: {
+    name: '相知会员',
     image: '/images/vip/plan-knowing.png',
   },
   companion: {
+    name: '长伴会员',
     image: '/images/vip/plan-companion.png',
   },
 };
@@ -82,9 +97,74 @@ const FALLBACK_PRODUCTS = [
   },
 ];
 
+const FALLBACK_ENTITLEMENTS = {
+  tree_hole: { total: 600, remaining: 600 },
+  community: { total: 1200, remaining: 1200 },
+  mood_analysis: { total: 80, remaining: 80 },
+  assessment_analysis: { total: 100, remaining: 100 },
+};
+
+const FALLBACK_ADDONS = [
+  {
+    code: 'addon_tree_300',
+    product_type: 'addon',
+    feature: 'tree_hole',
+    name: '树洞加量包',
+    amount: 300,
+    price_fen: 399,
+  },
+  {
+    code: 'addon_community_300',
+    product_type: 'addon',
+    feature: 'community',
+    name: '社区加量包',
+    amount: 300,
+    price_fen: 799,
+  },
+  {
+    code: 'addon_mood_20',
+    product_type: 'addon',
+    feature: 'mood_analysis',
+    name: '心情分析加量包',
+    amount: 20,
+    price_fen: 199,
+  },
+  {
+    code: 'addon_assessment_20',
+    product_type: 'addon',
+    feature: 'assessment_analysis',
+    name: '测评分析加量包',
+    amount: 20,
+    price_fen: 199,
+  },
+];
+
 function formatPrice(priceFen) {
   const normalized = Number(priceFen) || 0;
   return (normalized / 100).toFixed(2);
+}
+
+function formatDate(value) {
+  if (!value) {
+    return '';
+  }
+  const normalized = typeof value === 'number' || /^\d+$/.test(String(value))
+    ? new Date(Number(value) * 1000)
+    : new Date(value);
+  if (Number.isNaN(normalized.getTime())) {
+    return '';
+  }
+  const year = normalized.getFullYear();
+  const month = String(normalized.getMonth() + 1).padStart(2, '0');
+  const day = String(normalized.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function normalizeQuotaItem(rawItem) {
+  const item = rawItem || {};
+  const total = Math.max(Number(item.total ?? item.limit ?? item.monthly_quota) || 0, 0);
+  const remaining = Math.max(Number(item.remaining) || 0, 0);
+  return { total, remaining };
 }
 
 function formatProduct(product, currentPlanCode) {
@@ -92,6 +172,7 @@ function formatProduct(product, currentPlanCode) {
   const quotas = product.quotas || {};
   return {
     ...product,
+    name: product.name || presentation.name,
     image: presentation.image,
     priceText: formatPrice(product.price_fen),
     isCurrent: product.plan_code === currentPlanCode,
@@ -101,6 +182,59 @@ function formatProduct(product, currentPlanCode) {
       icon: FEATURE_PRESENTATION[feature].icon,
       amount: Number(quotas[feature]) || 0,
     })),
+  };
+}
+
+function normalizeMember(membership) {
+  if (!membership || membership.status !== 'active') {
+    return null;
+  }
+  const presentation = PLAN_PRESENTATION[membership.plan_code] || PLAN_PRESENTATION.knowing;
+  const expiresText = formatDate(membership.expires_at || membership.expire_at);
+  return {
+    planCode: membership.plan_code,
+    name: membership.plan_name || presentation.name,
+    icon: presentation.image,
+    expiresText: expiresText ? `会员有效期至 ${expiresText}` : '会员权益使用中',
+  };
+}
+
+function normalizeUsage(entitlements) {
+  const source = entitlements || FALLBACK_ENTITLEMENTS;
+  return FEATURE_ORDER.map((feature) => {
+    const presentation = FEATURE_PRESENTATION[feature];
+    const item = normalizeQuotaItem(source[feature]);
+    const used = Math.max(item.total - item.remaining, 0);
+    const percent = item.total ? Math.min(Math.round((used / item.total) * 100), 100) : 0;
+    return {
+      feature,
+      name: presentation.name,
+      icon: presentation.icon,
+      used,
+      total: item.total,
+      countText: `${used} / ${item.total} 次`,
+      progressStyle: `width: ${percent}%; background: ${presentation.color};`,
+    };
+  });
+}
+
+function normalizeAddon(product) {
+  const feature = product.feature || 'tree_hole';
+  const presentation = FEATURE_PRESENTATION[feature] || FEATURE_PRESENTATION.tree_hole;
+  const nameByFeature = {
+    tree_hole: '树洞加量包',
+    community: '社区加量包',
+    mood_analysis: '心情分析加量包',
+    assessment_analysis: '测评分析加量包',
+  };
+  return {
+    ...product,
+    name: nameByFeature[feature] || product.name,
+    amount: Number(product.amount) || 0,
+    icon: presentation.icon,
+    featureName: presentation.shortName,
+    description: presentation.description,
+    priceText: formatPrice(product.price_fen),
   };
 }
 
@@ -118,6 +252,15 @@ function getRequestErrorMessage(response, fallback) {
 Page({
   data: {
     statusBarHeight: 24,
+    isMemberView: false,
+    currentMember: null,
+    usageItems: normalizeUsage(FALLBACK_ENTITLEMENTS),
+    addonProducts: FALLBACK_ADDONS.map(normalizeAddon),
+    selectedAddon: null,
+    addonQuantity: 1,
+    addonTotalText: '3.99',
+    addonModalVisible: false,
+    addonAgreementChecked: false,
     plans: [],
     selectedPlanCode: 'vip_knowing',
     selectedPlan: {},
@@ -133,14 +276,14 @@ Page({
   onLoad() {
     this.initLayout();
     this.applyProducts(FALLBACK_PRODUCTS);
-    this.fetchVipState();
     this.fetchCatalog();
+    this.fetchVipState();
   },
 
   onPullDownRefresh() {
     Promise.all([
-      this.fetchVipState(),
       this.fetchCatalog(),
+      this.fetchVipState(),
     ]).finally(() => {
       wx.stopPullDownRefresh();
     });
@@ -163,11 +306,17 @@ Page({
         url: `${VIP_API_BASE_URL}/catalog`,
         method: 'GET',
         success: (res) => {
-          if (res.statusCode === 200 && res.data && Array.isArray(res.data.membership_products)) {
+          if (res.statusCode === 200 && res.data) {
+            if (Array.isArray(res.data.membership_products)) {
+              this.applyProducts(res.data.membership_products);
+            }
+            const addonProducts = Array.isArray(res.data.addon_products)
+              ? res.data.addon_products.map(normalizeAddon)
+              : this.data.addonProducts;
             this.setData({
+              addonProducts,
               mockPaymentAvailable: Boolean(res.data.mock_payment_available),
             });
-            this.applyProducts(res.data.membership_products);
           }
           resolve();
         },
@@ -182,6 +331,11 @@ Page({
   fetchVipState() {
     const token = wx.getStorageSync('token');
     if (!token) {
+      this.setData({
+        isMemberView: false,
+        currentMember: null,
+        usageItems: normalizeUsage(FALLBACK_ENTITLEMENTS),
+      });
       this.applyCurrentPlan('');
       return Promise.resolve();
     }
@@ -195,14 +349,19 @@ Page({
           const membership = res.statusCode === 200 && res.data
             ? res.data.membership
             : null;
-          const currentPlanCode = membership && membership.status === 'active'
-            ? membership.plan_code
-            : '';
+          const currentMember = normalizeMember(membership);
+          const currentPlanCode = currentMember ? currentMember.planCode : '';
+          this.setData({
+            isMemberView: Boolean(currentMember),
+            currentMember,
+            usageItems: normalizeUsage(res.data && res.data.entitlements),
+          });
           this.applyCurrentPlan(currentPlanCode);
           resolve();
         },
         fail: (error) => {
           console.error('fetchVipState failed:', error);
+          this.applyCurrentPlan('');
           resolve();
         },
       });
@@ -343,11 +502,11 @@ Page({
 
         const payment = res.data.payment || {};
         if (payment.mode === 'mock' && payment.mock_pay_endpoint) {
-          this.completeMockPayment(payment.mock_pay_endpoint, token);
+          this.completeMockPayment(payment.mock_pay_endpoint, token, 'membership');
           return;
         }
         if (payment.mode === 'wechat' && payment.payload) {
-          this.requestWechatPayment(payment.payload);
+          this.requestWechatPayment(payment.payload, 'membership');
           return;
         }
 
@@ -364,7 +523,136 @@ Page({
     });
   },
 
-  completeMockPayment(endpoint, token) {
+  openAddonModal(event) {
+    const code = event.currentTarget.dataset.code;
+    const selectedAddon = this.data.addonProducts.find((item) => item.code === code);
+    if (!selectedAddon) {
+      return;
+    }
+    this.setData({
+      selectedAddon,
+      addonQuantity: 1,
+      addonTotalText: selectedAddon.priceText,
+      addonModalVisible: true,
+      addonAgreementChecked: false,
+    });
+  },
+
+  closeAddonModal() {
+    if (this.data.purchaseLoading) {
+      return;
+    }
+    this.setData({
+      addonModalVisible: false,
+      selectedAddon: null,
+      addonQuantity: 1,
+      addonAgreementChecked: false,
+    });
+  },
+
+  decreaseQuantity() {
+    if (this.data.purchaseLoading) {
+      return;
+    }
+    this.updateAddonQuantity(Math.max(this.data.addonQuantity - 1, 1));
+  },
+
+  increaseQuantity() {
+    if (this.data.purchaseLoading) {
+      return;
+    }
+    this.updateAddonQuantity(Math.min(this.data.addonQuantity + 1, 99));
+  },
+
+  updateAddonQuantity(quantity) {
+    const selectedAddon = this.data.selectedAddon;
+    if (!selectedAddon) {
+      return;
+    }
+    this.setData({
+      addonQuantity: quantity,
+      addonTotalText: formatPrice((Number(selectedAddon.price_fen) || 0) * quantity),
+    });
+  },
+
+  toggleAddonAgreement() {
+    if (this.data.purchaseLoading) {
+      return;
+    }
+    this.setData({
+      addonAgreementChecked: !this.data.addonAgreementChecked,
+    });
+  },
+
+  openPurchaseRecords() {
+    wx.showToast({
+      title: '购买记录页面建设中',
+      icon: 'none',
+    });
+  },
+
+  handleAddonPay() {
+    if (this.data.purchaseLoading || !this.data.selectedAddon) {
+      return;
+    }
+    if (!this.data.addonAgreementChecked) {
+      wx.showToast({
+        title: '请先阅读并同意会员服务协议',
+        icon: 'none',
+      });
+      return;
+    }
+
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      wx.showToast({
+        title: '请先返回“我的”页面登录',
+        icon: 'none',
+      });
+      return;
+    }
+
+    this.setData({ purchaseLoading: true });
+    wx.request({
+      url: `${VIP_API_BASE_URL}/orders`,
+      method: 'POST',
+      header: { Authorization: `Bearer ${token}` },
+      data: {
+        product_code: this.data.selectedAddon.code,
+        quantity: this.data.addonQuantity,
+      },
+      success: (res) => {
+        if (res.statusCode !== 201 || !res.data) {
+          this.finishPurchaseWithError(
+            getRequestErrorMessage(res, '订单创建失败，请稍后重试')
+          );
+          return;
+        }
+
+        const payment = res.data.payment || {};
+        if (payment.mode === 'mock' && payment.mock_pay_endpoint) {
+          this.completeMockPayment(payment.mock_pay_endpoint, token, 'addon');
+          return;
+        }
+        if (payment.mode === 'wechat' && payment.payload) {
+          this.requestWechatPayment(payment.payload, 'addon');
+          return;
+        }
+
+        this.setData({ purchaseLoading: false });
+        wx.showModal({
+          title: '支付暂未开放',
+          content: '订单能力已经接通，但微信支付参数尚未配置，本次不会扣款。',
+          showCancel: false,
+        });
+      },
+      fail: () => {
+        this.finishPurchaseWithError('网络异常，请稍后重试');
+      },
+    });
+  },
+
+  completeMockPayment(endpoint, token, purchaseType) {
     const url = endpoint.startsWith('http')
       ? endpoint
       : `${SERVER_BASE_URL}${endpoint}`;
@@ -379,6 +667,10 @@ Page({
           );
           return;
         }
+        if (purchaseType === 'addon') {
+          this.finishAddonPurchaseSuccess();
+          return;
+        }
         this.setData({ purchaseLoading: false });
         this.navigateToSuccessPage();
       },
@@ -388,10 +680,14 @@ Page({
     });
   },
 
-  requestWechatPayment(payload) {
+  requestWechatPayment(payload, purchaseType) {
     wx.requestPayment({
       ...payload,
       success: () => {
+        if (purchaseType === 'addon') {
+          this.finishAddonPurchaseSuccess();
+          return;
+        }
         this.setData({ purchaseLoading: false });
         this.navigateToSuccessPage();
       },
@@ -402,6 +698,25 @@ Page({
           return;
         }
         wx.showToast({ title: '支付未完成', icon: 'none' });
+      },
+    });
+  },
+
+  finishAddonPurchaseSuccess() {
+    this.setData({
+      purchaseLoading: false,
+      addonModalVisible: false,
+      selectedAddon: null,
+      addonQuantity: 1,
+      addonAgreementChecked: false,
+    });
+    wx.showModal({
+      title: '购买成功',
+      content: '加量包权益已到账。',
+      showCancel: false,
+      confirmText: '完成',
+      success: () => {
+        this.fetchVipState();
       },
     });
   },

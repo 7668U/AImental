@@ -1,110 +1,239 @@
-<view class="vip-page">
-  <image
-    class="page-background"
-    src="/images/vip/membership-background.jpg"
-    mode="aspectFill"
-  ></image>
+<view class="vip-page {{isMemberView ? 'member-mode' : 'purchase-mode'}}">
+  <block wx:if="{{!isMemberView}}">
+    <image
+      class="page-background"
+      src="/images/vip/membership-background.jpg"
+      mode="aspectFill"
+    ></image>
 
-  <view class="status-spacer" style="height: {{statusBarHeight}}px;"></view>
+    <view class="status-spacer" style="height: {{statusBarHeight}}px;"></view>
 
-  <view class="nav-row">
-    <view class="back-button" bindtap="handleBack" aria-label="返回">
-      <text class="back-icon">‹</text>
-    </view>
-  </view>
-
-  <view class="hero-copy">
-    <view class="page-title">选择适合你的陪伴计划</view>
-    <view class="page-subtitle">
-      <text>获得更多的树洞、社区聊天次数以及</text>
-      <text class="subtitle-break">AI分析次数</text>
-    </view>
-  </view>
-
-  <view class="plan-list">
-    <view
-      wx:for="{{plans}}"
-      wx:key="code"
-      class="plan-card plan-{{item.plan_code}} {{selectedPlanCode === item.code ? 'selected' : ''}}"
-      data-code="{{item.code}}"
-      bindtap="selectPlan"
-    >
-      <view class="plan-heading">
-        <view class="plan-heading-copy">
-          <view class="plan-name-row">
-            <view class="plan-dot"></view>
-            <text class="plan-name">{{item.name}}</text>
-            <text wx:if="{{item.isCurrent}}" class="current-tag">当前</text>
-          </view>
-        </view>
-
-        <view class="plan-price-area">
-          <view class="plan-price">
-            <text class="currency">¥</text>
-            <text class="price-value">{{item.priceText}}</text>
-            <text class="price-unit">/月</text>
-          </view>
-        </view>
-
-        <view class="select-indicator">
-          <text wx:if="{{selectedPlanCode === item.code}}" class="select-check">✓</text>
-        </view>
-      </view>
-
-      <image class="plan-art" src="{{item.image}}" mode="aspectFit"></image>
-
-      <view class="quota-list">
-        <view wx:for="{{item.quotaItems}}" wx:key="feature" wx:for-item="quota" class="quota-row">
-          <view class="quota-name-wrap">
-            <view class="quota-icon-wrap">
-              <image class="quota-icon" src="{{quota.icon}}" mode="aspectFit"></image>
-            </view>
-            <text class="quota-name">{{quota.name}}</text>
-          </view>
-          <text class="quota-value">{{quota.amount}} 次/月</text>
-        </view>
+    <view class="nav-row">
+      <view class="back-button" bindtap="handleBack" aria-label="返回">
+        <text class="back-icon">‹</text>
       </view>
     </view>
-  </view>
 
-  <view class="purchase-spacer"></view>
-
-  <view class="purchase-bar">
-    <view class="purchase-main">
-      <view class="selected-plan-thumb">
-        <image src="{{selectedPlan.image}}" mode="aspectFit"></image>
+    <view class="hero-copy">
+      <view class="page-title">选择适合你的陪伴计划</view>
+      <view class="page-subtitle">
+        <text>获得更多的树洞、社区聊天次数以及</text>
+        <text class="subtitle-break">AI分析次数</text>
       </view>
+    </view>
 
-      <view class="selected-plan-summary">
-        <view class="selected-plan-line">
-          <text class="selected-plan-name">{{selectedPlan.name}}</text>
-          <text class="summary-separator">·</text>
-          <text class="selected-price">¥{{selectedPlan.priceText}}</text>
-          <text class="selected-price-unit">/月</text>
-        </view>
-        <view class="purchase-note">单次购买，不自动续费</view>
-      </view>
-
-      <view class="purchase-divider"></view>
-
-      <button
-        class="purchase-button {{purchaseDisabled || !agreementChecked ? 'disabled' : ''}}"
-        style="width: 176rpx; min-width: 176rpx; max-width: 176rpx; flex-basis: 176rpx; flex-shrink: 0;"
-        loading="{{purchaseLoading}}"
-        disabled="{{purchaseLoading || purchaseDisabled || !agreementChecked}}"
-        bindtap="handlePurchase"
+    <view class="plan-list">
+      <view
+        wx:for="{{plans}}"
+        wx:key="code"
+        class="plan-card plan-{{item.plan_code}} {{selectedPlanCode === item.code ? 'selected' : ''}}"
+        data-code="{{item.code}}"
+        bindtap="selectPlan"
       >
-        {{purchaseButtonText}}
-      </button>
+        <view class="plan-heading">
+          <view class="plan-heading-copy">
+            <view class="plan-name-row">
+              <view class="plan-dot"></view>
+              <text class="plan-name">{{item.name}}</text>
+              <text wx:if="{{item.isCurrent}}" class="current-tag">当前</text>
+            </view>
+          </view>
+
+          <view class="plan-price-area">
+            <view class="plan-price">
+              <text class="currency">¥</text>
+              <text class="price-value">{{item.priceText}}</text>
+              <text class="price-unit">/月</text>
+            </view>
+          </view>
+
+          <view class="select-indicator">
+            <text wx:if="{{selectedPlanCode === item.code}}" class="select-check">✓</text>
+          </view>
+        </view>
+
+        <image class="plan-art" src="{{item.image}}" mode="aspectFit"></image>
+
+        <view class="quota-list">
+          <view wx:for="{{item.quotaItems}}" wx:key="feature" wx:for-item="quota" class="quota-row">
+            <view class="quota-name-wrap">
+              <view class="quota-icon-wrap">
+                <image class="quota-icon" src="{{quota.icon}}" mode="aspectFit"></image>
+              </view>
+              <text class="quota-name">{{quota.name}}</text>
+            </view>
+            <text class="quota-value">{{quota.amount}} 次/月</text>
+          </view>
+        </view>
+      </view>
     </view>
 
-    <view class="agreement-row">
-      <view class="agreement-check {{agreementChecked ? 'checked' : ''}}" bindtap="toggleAgreement">
-        <text wx:if="{{agreementChecked}}">✓</text>
+    <view class="purchase-spacer"></view>
+
+    <view class="purchase-bar">
+      <view class="purchase-main">
+        <view class="selected-plan-thumb">
+          <image src="{{selectedPlan.image}}" mode="aspectFit"></image>
+        </view>
+
+        <view class="selected-plan-summary">
+          <view class="selected-plan-line">
+            <text class="selected-plan-name">{{selectedPlan.name}}</text>
+            <text class="summary-separator">·</text>
+            <text class="selected-price">¥{{selectedPlan.priceText}}</text>
+            <text class="selected-price-unit">/月</text>
+          </view>
+          <view class="purchase-note">单次购买，不自动续费</view>
+        </view>
+
+        <view class="purchase-divider"></view>
+
+        <button
+          class="purchase-button {{purchaseDisabled || !agreementChecked ? 'disabled' : ''}}"
+          style="width: 176rpx; min-width: 176rpx; max-width: 176rpx; flex-basis: 176rpx; flex-shrink: 0;"
+          loading="{{purchaseLoading}}"
+          disabled="{{purchaseLoading || purchaseDisabled || !agreementChecked}}"
+          bindtap="handlePurchase"
+        >
+          {{purchaseButtonText}}
+        </button>
       </view>
-      <text class="agreement-copy" bindtap="toggleAgreement">我已阅读并同意</text>
-      <text class="agreement-link" catchtap="openAgreement">会员服务协议</text>
-      <text class="agreement-arrow">›</text>
+
+      <view class="agreement-row">
+        <view class="agreement-check {{agreementChecked ? 'checked' : ''}}" bindtap="toggleAgreement">
+          <text wx:if="{{agreementChecked}}">✓</text>
+        </view>
+        <text class="agreement-copy" bindtap="toggleAgreement">我已阅读并同意</text>
+        <text class="agreement-link" catchtap="openAgreement">会员服务协议</text>
+        <text class="agreement-arrow">›</text>
+      </view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="status-spacer" style="height: {{statusBarHeight}}px;"></view>
+
+    <view class="nav-row">
+      <view class="back-button" bindtap="handleBack" aria-label="返回">
+        <text class="back-icon">‹</text>
+      </view>
+    </view>
+
+    <view class="member-page-header">
+      <view class="member-page-title">会员中心</view>
+      <view class="record-entry" bindtap="openPurchaseRecords">
+        <view class="record-icon">
+          <text>▤</text>
+        </view>
+        <text>购买记录</text>
+      </view>
+    </view>
+
+    <view class="member-card">
+      <image class="member-card-bg" src="/images/vip/member-card-bg.png" mode="aspectFill"></image>
+      <view class="member-expire-top">{{currentMember.expiresText}}</view>
+      <view class="member-card-content">
+        <image class="member-avatar" src="{{currentMember.icon}}" mode="aspectFit"></image>
+        <view class="member-info">
+          <view class="member-name">{{currentMember.name}}</view>
+        </view>
+      </view>
+      <view class="service-link" bindtap="openAgreement">
+        <text>会员服务协议</text>
+      </view>
+    </view>
+
+    <view class="usage-card section-card">
+      <view class="section-title">会员权益使用情况</view>
+      <view class="usage-list">
+        <view wx:for="{{usageItems}}" wx:key="feature" class="usage-row">
+          <image class="usage-icon" src="{{item.icon}}" mode="aspectFit"></image>
+          <text class="usage-name">{{item.name}}</text>
+          <view class="progress-track">
+            <view class="progress-fill" style="{{item.progressStyle}}"></view>
+          </view>
+          <text class="usage-count">{{item.countText}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="addon-section section-card">
+      <view class="section-title addon-title">加量包购买</view>
+      <view class="addon-grid">
+        <view
+          wx:for="{{addonProducts}}"
+          wx:key="code"
+          class="addon-card"
+          data-code="{{item.code}}"
+          bindtap="openAddonModal"
+        >
+          <image class="addon-icon" src="{{item.icon}}" mode="aspectFit"></image>
+          <view class="addon-copy">
+            <view class="addon-name">{{item.name}}</view>
+            <view class="addon-amount">{{item.amount}} 次</view>
+          </view>
+          <view class="addon-price">¥{{item.priceText}}</view>
+          <view class="addon-buy-button">
+            <text>›</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="footer-art-wrap">
+      <image class="footer-art" src="/images/vip/member-center-footer.png" mode="aspectFill"></image>
+    </view>
+  </block>
+
+  <view wx:if="{{addonModalVisible}}" class="modal-layer">
+    <view class="modal-mask" bindtap="closeAddonModal"></view>
+    <view class="addon-modal">
+      <view class="modal-title">购买加量包</view>
+      <view class="modal-close" bindtap="closeAddonModal">×</view>
+
+      <view class="modal-product">
+        <view class="modal-product-art">
+          <image src="{{selectedAddon.icon}}" mode="aspectFit"></image>
+        </view>
+        <view class="modal-product-copy">
+          <view class="modal-product-name">{{selectedAddon.name}}</view>
+          <view class="modal-product-amount">{{selectedAddon.amount}}次</view>
+          <view class="modal-product-desc">{{selectedAddon.description}}</view>
+        </view>
+      </view>
+
+      <view class="modal-divider"></view>
+
+      <view class="modal-price">¥{{selectedAddon.priceText}}</view>
+      <view class="quantity-stepper">
+        <view class="stepper-button" bindtap="decreaseQuantity">−</view>
+        <view class="stepper-value">{{addonQuantity}}</view>
+        <view class="stepper-button plus" bindtap="increaseQuantity">＋</view>
+      </view>
+      <view class="stepper-tip">可按需选择购买数量</view>
+
+      <view class="pay-panel">
+        <view class="total-row">
+          <text>合计</text>
+          <text class="total-price">¥{{addonTotalText}}</text>
+        </view>
+        <button
+          class="pay-button {{addonAgreementChecked ? '' : 'disabled'}}"
+          loading="{{purchaseLoading}}"
+          disabled="{{purchaseLoading || !addonAgreementChecked}}"
+          bindtap="handleAddonPay"
+        >
+          立即支付
+        </button>
+        <view class="modal-agreement">
+          <view class="modal-agreement-check {{addonAgreementChecked ? 'checked' : ''}}" bindtap="toggleAddonAgreement">
+            <text wx:if="{{addonAgreementChecked}}">✓</text>
+          </view>
+          <text class="modal-agreement-copy" bindtap="toggleAddonAgreement">我已阅读并同意</text>
+          <text class="modal-agreement-link" catchtap="openAgreement">会员服务协议</text>
+          <text class="modal-agreement-arrow">›</text>
+        </view>
+      </view>
     </view>
   </view>
 
