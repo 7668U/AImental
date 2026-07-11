@@ -4,7 +4,6 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
 // --- 全局状态变量 ---
 let authToken = null;
 let currentCharacterId = null;
-let websocket = null;
 
 // --- DOM 元素引用 ---
 const userIdInput = document.getElementById('user-id-input');
@@ -78,35 +77,10 @@ async function login() {
         logStatus(`用户 '${userId}' 登录成功，获取Token成功。`, 'info');
 
         fetchCharacters();
-        connectWebSocket();
     } catch (error) {
         logStatus(error.message, 'error');
         alert(error.message);
     }
-}
-
-function connectWebSocket() {
-    if (websocket) websocket.close();
-    const wsUrl = `ws://127.0.0.1:8000/api/v1/community/ws?token=${authToken}`;
-    websocket = new WebSocket(wsUrl);
-    websocket.onopen = () => logStatus('WebSocket 连接成功!', 'info');
-    websocket.onclose = () => logStatus('WebSocket 连接已断开。', 'warn');
-    websocket.onerror = () => logStatus('WebSocket 发生错误', 'error');
-    websocket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        logStatus(`收到服务器推送: ${JSON.stringify(data)}`, 'info');
-        switch (data.type) {
-            case 'new_message':
-                if (data.from_character_id === currentCharacterId) appendMessage(data.message.content, 'ai');
-                else alert(`收到来自 ${data.from_character_id} 的新消息！`);
-                break;
-            case 'friend_request_result':
-                alert(`好友请求结果: 来自 ${data.from_character_id} \n状态: ${data.status} \n消息: ${data.initial_message || '无'}`);
-                break;
-            default:
-                logStatus(`收到未知类型的推送: ${data.type}`, 'warn');
-        }
-    };
 }
 
 async function fetchCharacters() {
@@ -202,7 +176,8 @@ async function sendMessage() {
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.detail);
-        logStatus('消息已发送到后端，等待AI回复...');
+        (result.ai_messages || []).forEach(msg => appendMessage(msg.content, 'ai'));
+        logStatus('消息已发送，AI回复已同步返回。');
     } catch (error) {
         logStatus(error.message, 'error');
         appendMessage(`发送失败: ${error.message}`, 'error');

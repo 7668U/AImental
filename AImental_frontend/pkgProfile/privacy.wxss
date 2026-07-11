@@ -1,0 +1,258 @@
+page {
+  height: 100%;
+  background: #fff8ed;
+  color: #3f342d;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.privacy-page {
+  height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 13%, rgba(255, 207, 137, 0.38), rgba(255, 207, 137, 0) 26%),
+    radial-gradient(circle at 94% 34%, rgba(167, 209, 190, 0.28), rgba(167, 209, 190, 0) 28%),
+    linear-gradient(180deg, #fff4df 0%, #fffaf4 42%, #ffffff 100%);
+}
+
+.privacy-nav {
+  height: 88rpx;
+  padding: 0 28rpx;
+  display: flex;
+  align-items: center;
+}
+
+.nav-back,
+.nav-placeholder {
+  width: 68rpx;
+  flex: 0 0 auto;
+}
+
+.nav-back {
+  color: #69584e;
+  font-size: 62rpx;
+  line-height: 1;
+}
+
+.nav-title {
+  flex: 1;
+  font-size: 34rpx;
+  font-weight: 800;
+  text-align: center;
+}
+
+.privacy-scroll {
+  height: calc(100vh - 88rpx);
+  padding: 0 38rpx calc(80rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+.privacy-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4rpx 28rpx 30rpx;
+}
+
+.hero-shield {
+  width: 166rpx;
+  height: 166rpx;
+}
+
+.hero-title {
+  margin-top: 2rpx;
+  font-size: 38rpx;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.hero-copy {
+  margin-top: 18rpx;
+  color: #796b62;
+  font-size: 24rpx;
+  line-height: 1.7;
+  text-align: center;
+}
+
+.protection-band {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16rpx;
+}
+
+.protection-item {
+  min-height: 196rpx;
+  padding: 20rpx 14rpx;
+  border: 1rpx solid rgba(236, 220, 207, 0.92);
+  border-radius: 20rpx;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.88);
+  text-align: center;
+}
+
+.protection-mark {
+  width: 64rpx;
+  height: 64rpx;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #fff3e4;
+  box-shadow: inset 0 0 0 1rpx rgba(255, 170, 82, 0.25);
+}
+
+.protection-icon {
+  width: 42rpx;
+  height: 42rpx;
+  display: block;
+}
+
+.protection-title {
+  margin-top: 16rpx;
+  font-size: 23rpx;
+  font-weight: 800;
+}
+
+.protection-copy {
+  margin-top: 10rpx;
+  color: #8d8179;
+  font-size: 19rpx;
+  line-height: 1.45;
+}
+
+.consent-status {
+  margin-top: 24rpx;
+  padding: 28rpx;
+  display: flex;
+  align-items: center;
+  border-radius: 22rpx;
+  background: #fff;
+  box-shadow: 0 14rpx 34rpx rgba(113, 81, 52, 0.08);
+}
+
+.status-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.status-title {
+  font-size: 26rpx;
+  font-weight: 800;
+}
+
+.status-desc {
+  margin-top: 10rpx;
+  color: #8b7d74;
+  font-size: 20rpx;
+  line-height: 1.5;
+}
+
+.status-pill {
+  flex: 0 0 auto;
+  margin-left: 18rpx;
+  padding: 10rpx 16rpx;
+  border-radius: 18rpx;
+  color: #9a887d;
+  background: #f1ebe6;
+  font-size: 19rpx;
+  font-weight: 800;
+}
+
+.status-pill.is-current {
+  color: #42725f;
+  background: #e3f1ea;
+}
+
+.policy-card {
+  margin-top: 24rpx;
+  padding: 34rpx 30rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 14rpx 34rpx rgba(113, 81, 52, 0.07);
+}
+
+.policy-title-row {
+  display: flex;
+  align-items: center;
+}
+
+.policy-heading-icon {
+  width: 58rpx;
+  height: 58rpx;
+  margin-right: 18rpx;
+  flex: 0 0 auto;
+}
+
+.policy-heading-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.policy-heading {
+  font-size: 31rpx;
+  font-weight: 800;
+}
+
+.policy-meta {
+  margin-top: 10rpx;
+  color: #ae7952;
+  font-size: 19rpx;
+}
+
+.policy-summary {
+  margin-top: 24rpx;
+  padding: 22rpx;
+  border-radius: 18rpx;
+  color: #675a52;
+  background: #fff4e6;
+  font-size: 22rpx;
+  line-height: 1.7;
+}
+
+.policy-section {
+  margin-top: 32rpx;
+}
+
+.policy-section-title {
+  font-size: 26rpx;
+  font-weight: 800;
+}
+
+.policy-section-content {
+  margin-top: 12rpx;
+  color: #75685f;
+  font-size: 22rpx;
+  line-height: 1.8;
+}
+
+.policy-notice {
+  margin-top: 34rpx;
+  padding: 22rpx 24rpx;
+  border-left: 6rpx solid #9bc8b5;
+  color: #6b6058;
+  background: #edf6f1;
+  font-size: 21rpx;
+  line-height: 1.7;
+}
+
+.withdraw-button {
+  height: 84rpx;
+  margin: 28rpx 36rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1rpx solid #e5b7a1;
+  border-radius: 24rpx;
+  color: #bd6139;
+  background: #fff7f2;
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.page-bottom-note {
+  padding: 30rpx 24rpx 0;
+  color: #a0948c;
+  font-size: 19rpx;
+  line-height: 1.6;
+  text-align: center;
+}

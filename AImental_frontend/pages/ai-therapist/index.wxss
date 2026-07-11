@@ -293,7 +293,7 @@ page {
   bottom: calc(6rpx + env(safe-area-inset-bottom));
   z-index: 20;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 18rpx;
   min-height: 112rpx;
   padding: 18rpx 20rpx;
@@ -367,13 +367,14 @@ page {
 .input-shell {
   flex: 1;
   min-width: 0;
-  height: 74rpx;
+  min-height: 74rpx;
+  max-height: 154rpx;
   border-radius: 40rpx;
   border: 1rpx solid rgba(231, 217, 207, 0.92);
   background: rgba(255, 255, 255, 0.9);
   display: flex;
-  align-items: center;
-  padding: 0 24rpx;
+  align-items: flex-end;
+  padding: 14rpx 24rpx;
   box-sizing: border-box;
 }
 
@@ -419,10 +420,14 @@ page {
 .input-field {
   flex: 1;
   min-width: 0;
-  height: 70rpx;
+  min-height: 46rpx;
+  max-height: 126rpx;
   color: var(--text-primary);
   font-size: 26rpx;
-  line-height: 70rpx;
+  line-height: 42rpx;
+  padding: 2rpx 0;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .input-placeholder {

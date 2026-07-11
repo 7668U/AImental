@@ -6,3 +6,8 @@
         微信授权登录
     </button>
 </view>
+<privacy-consent
+  visible="{{privacyVisible}}"
+  bind:confirm="onPrivacyConfirm"
+  bind:reject="onPrivacyReject"
+/>

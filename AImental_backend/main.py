@@ -15,7 +15,8 @@ from feature_flags import ENABLE_COMMUNITY_BACKEND
 from db import all_dbs, user_db, chat_db, assessment_db, status_db, feedback_db, promotion_db, airplane_db, note_db
 
 # --- 2. 导入所有模型 (保持不变) ---
-from model.user import User
+from model.user import PrivacyConsent, User
+from model.private_media import PrivateMedia
 from model.chat import Chat
 from model.assessment import Scale, UserAssessment
 from model.status import Checkin
@@ -47,6 +48,7 @@ from router import feedback as feedback_router
 from router import promotion as promotion_router
 from router import airplane as airplane_router
 from router import note as note_router
+from router import private_media as private_media_router
 if ENABLE_COMMUNITY_BACKEND:
     from router import ai_community as ai_community_router
 
@@ -206,6 +208,8 @@ def on_startup():
     model_db_mapping = {
         # 您原有的模型映射
         User: user_db,
+        PrivacyConsent: user_db,
+        PrivateMedia: user_db,
         Feedback: feedback_db,
         Chat: chat_db,
         Scale: assessment_db,
@@ -246,15 +250,6 @@ def on_startup():
         except Exception as e:
             print(f"❌ 创建表 '{model._meta.table_name}' 时发生错误: {e}")
     print("✨ [Startup]: 所有数据库表创建完成！")
-
-    try:
-        updated_rows = (User
-                        .update({User.allow_ai_read_data: True})
-                        .where(User.allow_ai_read_data == False)
-                        .execute())
-        print(f"✅ [Startup]: 已将 {updated_rows} 个用户的个性化陪伴权限默认开启。")
-    except Exception as e:
-        print(f"❌ 初始化个性化陪伴权限时发生错误: {e}")
 
     if ENABLE_COMMUNITY_BACKEND:
         try:
@@ -298,6 +293,7 @@ app.include_router(feedback_router.router, prefix=API_PREFIX)
 app.include_router(promotion_router.router, prefix=API_PREFIX)
 app.include_router(airplane_router.router, prefix=API_PREFIX)
 app.include_router(note_router.router, prefix=API_PREFIX)
+app.include_router(private_media_router.router, prefix=API_PREFIX)
 # AI社区路由：通过 ENABLE_COMMUNITY_BACKEND 控制是否注册社区接口。
 if ENABLE_COMMUNITY_BACKEND:
     app.include_router(ai_community_router.router, prefix=API_PREFIX)

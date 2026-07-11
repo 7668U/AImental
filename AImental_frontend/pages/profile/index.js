@@ -7,9 +7,11 @@ const defaultAvatarUrl = 'https://assets.feelyourself.cn/miniprogram/assets/v1/i
 
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 const { loginWithBackend } = require('../../utils/auth.js');
+const { hasCurrentPrivacyConsent } = require('../../utils/privacy.js');
 Page({
   data: {
     isLogin: false,
+    privacyVisible: false,
     topSafeHeight: 72,
     userInfo: {
       avatar_url: defaultAvatarUrl,
@@ -64,6 +66,14 @@ Page({
   },
 
   login: function() {
+    if (!hasCurrentPrivacyConsent()) {
+      this.setData({ privacyVisible: true });
+      return;
+    }
+    this.performLogin();
+  },
+
+  performLogin: function() {
     wx.showLoading({ title: '登录中...' });
     loginWithBackend(SERVER_BASE_URL + '/api/v1')
       .then((apiRes) => {
@@ -83,6 +93,19 @@ Page({
         console.error('登录请求失败:', err);
         wx.showToast({ title: '登录失败，请重试', icon: 'none' });
       });
+  },
+
+  onPrivacyConfirm: function() {
+    this.setData({ privacyVisible: false });
+    this.performLogin();
+  },
+
+  onPrivacyReject: function() {
+    this.setData({ privacyVisible: false });
+    wx.showToast({
+      title: '同意隐私协议后才能登录',
+      icon: 'none'
+    });
   },
   fetchUserProfile: function(token) {
     wx.request({
@@ -231,6 +254,12 @@ Page({
     // 只需修改这里的 url 指向我们新创建的 history 页面
     wx.navigateTo({
       url: '/pkgProfile/history' 
+    });
+  },
+
+  goToPrivacy: function() {
+    wx.navigateTo({
+      url: '/pkgProfile/privacy'
     });
   },
 

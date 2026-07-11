@@ -9,18 +9,14 @@ for stream in (sys.stdout, sys.stderr):
         pass
 
 import time
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 import random
 import json
 import re
-from typing import Optional
 
 # 导入 APScheduler
 from apscheduler.schedulers.background import BackgroundScheduler
 import pytz 
-import redis
-from redis.backoff import NoBackoff
-from redis.retry import Retry
 
 # --- 导入我们项目的所有组件 ---
 from db import chat_db, status_db, user_db
@@ -33,7 +29,7 @@ if ENABLE_COMMUNITY_BACKEND:
     from model.ai_status import ai_status_table
     from model.ai_task import ai_task_table
     from model.friendship import friendship_table, Friendship
-    from model.chat_community import community_chat_table, ChatMessageModel
+    from model.chat_community import community_chat_table
     from model.community_memory import community_memory_table
 
     # --- 导入AI能力生成器 ---
@@ -51,26 +47,6 @@ PROACTIVE_MIN_MESSAGES = 40
 PROACTIVE_MIN_IDLE_AFTER_USER_MINUTES = 90
 PROACTIVE_MIN_IDLE_AFTER_AI_MINUTES = 360
 PROACTIVE_COOLDOWN_HOURS = 18
-
-# --- Redis 同步客户端 ---
-redis_client_sync = None
-if ENABLE_COMMUNITY_BACKEND:
-    try:
-        redis_client_sync = redis.Redis(
-            host='127.0.0.1',
-            port=6379,
-            db=0,
-            decode_responses=True,
-            socket_connect_timeout=0.5,
-            socket_timeout=0.5,
-            retry_on_timeout=False,
-            retry=Retry(NoBackoff(), 0),
-            health_check_interval=0
-        )
-        redis_client_sync.ping()
-        logger.info("✅ 后台工作进程已成功连接到Redis。")
-    except redis.exceptions.RedisError as e:
-        logger.warning(f"后台工作进程未连接到Redis，实时推送能力将跳过: {e}")
 
 # ---------------------------------------------------
 # 核心工作函数 (Jobs for the Scheduler)
@@ -200,11 +176,8 @@ def parse_message_history(raw_history: str) -> list:
     except json.JSONDecodeError:
         return []
 
-def push_message_to_user_from_worker(user_id: str, character_id: str, message_content: str):
-    """
-    一个同步函数，负责将AI的回复存入数据库，然后打包一个包含“最新会话摘要”的
-    情报包，通过Redis发布出去。(此函数逻辑保持不变)
-    """
+def save_ai_message_from_worker(user_id: str, character_id: str, message_content: str):
+    """后台任务生成的消息只写入数据库。"""
     new_msg_record = community_chat_table.add_message(
         user_id=user_id,
         character_id=character_id,
@@ -213,58 +186,10 @@ def push_message_to_user_from_worker(user_id: str, character_id: str, message_co
     )
 
     if not new_msg_record:
-        logger.error(f"保存来自角色 {character_id} 的消息失败，无法推送。")
+        logger.error(f"保存来自角色 {character_id} 的消息失败。")
         return
 
-    if not redis_client_sync:
-        logger.warning("Redis未连接，AI消息已保存到数据库，但无法实时推送。")
-        return
-
-    chat_summary_data = {
-        "character_id": new_msg_record.character.id,
-        "character_name": new_msg_record.character.name,
-        "character_avatar_url": new_msg_record.character.avatar_url,
-        "last_message_snippet": new_msg_record.last_message_snippet,
-        "last_message_timestamp": new_msg_record.last_message_timestamp,
-        "unread": not new_msg_record.user_has_peeked, 
-        "favorability": new_msg_record.favorability
-    }
-    
-    message_data = ChatMessageModel(
-        role='ai',
-        content=message_content,
-        timestamp=new_msg_record.last_message_timestamp
-    ).model_dump()
-    
-    payload = {
-        "type": "new_message",
-        "from_character_id": character_id,
-        "message": message_data,
-        "chat_summary": chat_summary_data
-    }
-    
-    channel = f"ws_channel:{user_id}"
-    redis_client_sync.publish(channel, json.dumps(payload))
-    logger.debug(f"已通过Redis频道 '{channel}' 发布了包含完整摘要的消息。")
-            
-def push_friend_request_result_from_worker(user_id: str, character_id: str, status: str, initial_message: Optional[str] = None):
-    """
-    将好友请求的结果通过Redis发布出去。(此函数逻辑保持不变)
-    """
-    if not redis_client_sync:
-        logger.warning("Redis未连接，无法推送好友请求结果。")
-        return
-
-    payload = {
-        "type": "friend_request_result",
-        "from_character_id": character_id,
-        "status": status,
-        "initial_message": initial_message
-    }
-    
-    channel = f"ws_channel:{user_id}"
-    redis_client_sync.publish(channel, json.dumps(payload))
-    logger.debug(f"已通过Redis频道 '{channel}' 发布好友请求结果")
+    logger.debug(f"已保存来自角色 {character_id} 的后台消息。")
     
 def schedule_daily_status_generation():
     """
@@ -570,9 +495,9 @@ def process_pending_tasks():
                             ai_task_table.update_task_status(task.id, 'failed')
                             continue
                         
-                        # 3. 推送消息
+                        # 3. 保存消息
                         for msg in structured_response.messages:
-                            push_message_to_user_from_worker(task.user_id, task.character_id, msg)
+                            save_ai_message_from_worker(task.user_id, task.character_id, msg)
                             time.sleep(random.uniform(1.0, 2.5))
 
                         # 4. 日程只影响回复风格，不再允许暂停对话。
@@ -728,10 +653,6 @@ def process_pending_tasks():
                                 community_chat_table.add_message(user_id=task.user_id, character_id=task.character_id, role='user', content=friend_request.verification_message)
                                 community_chat_table.add_message(user_id=task.user_id, character_id=task.character_id, role='ai', content=initial_msg)
                             
-                            push_friend_request_result_from_worker(
-                                user_id=task.user_id, character_id=task.character_id,
-                                status=new_status, initial_message=initial_msg
-                            )
                             ai_task_table.update_task_status(task.id, 'done')
                             logger.info(f"✅ 好友请求任务 {task.id} 处理完成。")
                         else:

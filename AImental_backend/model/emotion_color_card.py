@@ -14,6 +14,7 @@ from urllib import error, request
 
 from dotenv import load_dotenv
 from peewee import CharField, IntegerField, Model, TextField
+from security.data_encryption import EncryptedTextField
 
 from db import status_db
 from model.checkin_dimensions import get_color_meta
@@ -127,20 +128,44 @@ def fallback_color_name(mixed_color: dict[str, Any]) -> dict[str, Any]:
 
 class EmotionColorCardCache(Model):
     palette_key = CharField(primary_key=True, max_length=64)
-    palette_signature = TextField()
-    mixed_hex = CharField(max_length=20)
-    mixed_color = TextField()
-    selected_colors = TextField()
-    color_name = CharField(max_length=50)
-    subtitle = CharField(max_length=120)
-    tags = TextField(null=True)
-    scene_hint = CharField(max_length=120, null=True)
+    palette_signature = EncryptedTextField(
+        purpose="emotion_color_card_cache.palette_signature"
+    )
+    mixed_hex = EncryptedTextField(
+        purpose="emotion_color_card_cache.mixed_hex"
+    )
+    mixed_color = EncryptedTextField(
+        purpose="emotion_color_card_cache.mixed_color"
+    )
+    selected_colors = EncryptedTextField(
+        purpose="emotion_color_card_cache.selected_colors"
+    )
+    color_name = EncryptedTextField(
+        purpose="emotion_color_card_cache.color_name"
+    )
+    subtitle = EncryptedTextField(
+        purpose="emotion_color_card_cache.subtitle"
+    )
+    tags = EncryptedTextField(
+        purpose="emotion_color_card_cache.tags",
+        null=True,
+    )
+    scene_hint = EncryptedTextField(
+        purpose="emotion_color_card_cache.scene_hint",
+        null=True,
+    )
     background_image_url = CharField(max_length=1024, null=True)
     local_path = CharField(max_length=1024, null=True)
     raw_path = CharField(max_length=1024, null=True)
-    prompt = TextField(null=True)
+    prompt = EncryptedTextField(
+        purpose="emotion_color_card_cache.prompt",
+        null=True,
+    )
     source = CharField(max_length=50, default="fallback")
-    error = TextField(null=True)
+    error = EncryptedTextField(
+        purpose="emotion_color_card_cache.error",
+        null=True,
+    )
     created_at = IntegerField(default=_now)
     updated_at = IntegerField(default=_now)
 

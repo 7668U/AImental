@@ -3,5 +3,7 @@
     "custom-modal": "/components/custom-modal/custom-modal"
   },
   "navigationBarTitleText": "",
-  "navigationStyle": "custom"
+  "navigationStyle": "custom",
+  "backgroundColor": "#fff7ef",
+  "disableScroll": true
 }

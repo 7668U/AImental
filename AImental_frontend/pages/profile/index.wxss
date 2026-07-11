@@ -172,6 +172,11 @@ page {
   height: 52rpx;
 }
 
+.menu-icon-privacy {
+  width: 50rpx;
+  height: 50rpx;
+}
+
 .menu-copy {
   flex: 1;
   min-width: 0;

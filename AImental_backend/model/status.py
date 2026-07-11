@@ -6,7 +6,6 @@ import datetime
 import calendar
 import json
 import os
-import shutil
 from typing import Optional, List, Dict, Any
 
 # Import necessary types from peewee and pydantic
@@ -24,6 +23,7 @@ from .checkin_dimensions import (
     build_status_meta_from_tags,
     load_list,
 )
+from security.data_encryption import EncryptedFloatField, EncryptedTextField
 
 MAX_CHECKIN_IMAGES = 3
 
@@ -83,27 +83,42 @@ class Checkin(Model):
     """The Peewee Model for the 'checkins' table."""
     id = CharField(primary_key=True, max_length=36, default=lambda: str(uuid.uuid4()))
     user_id = CharField(max_length=36, index=True)
-    mood = CharField(max_length=50)
-    mood_id = CharField(max_length=50, null=True)
-    mood_family = CharField(max_length=50, null=True)
-    mood_valence = CharField(max_length=20, null=True)
-    mood_energy = CharField(max_length=20, null=True)
-    color = CharField(max_length=20) # e.g., "#RRGGBB"
-    color_id = CharField(max_length=50, null=True)
-    color_label = CharField(max_length=50, null=True)
-    color_group = CharField(max_length=50, null=True)
-    color_tone = CharField(max_length=20, null=True)
-    color_description = CharField(max_length=255, null=True)
-    tags = CharField(max_length=255, null=True) # Comma-separated tags
-    status_ids = TextField(null=True) # JSON list
-    status_families = TextField(null=True) # JSON list
-    text_content = TextField(null=True)
-    image_url = CharField(max_length=1024, null=True)
-    image_urls = TextField(null=True) # JSON list
-    location_name = CharField(max_length=255, null=True)
-    location_address = CharField(max_length=1024, null=True)
-    location_latitude = FloatField(null=True)
-    location_longitude = FloatField(null=True)
+    mood = EncryptedTextField(purpose="checkins.mood")
+    mood_id = EncryptedTextField(purpose="checkins.mood_id", null=True)
+    mood_family = EncryptedTextField(purpose="checkins.mood_family", null=True)
+    mood_valence = EncryptedTextField(purpose="checkins.mood_valence", null=True)
+    mood_energy = EncryptedTextField(purpose="checkins.mood_energy", null=True)
+    color = EncryptedTextField(purpose="checkins.color")
+    color_id = EncryptedTextField(purpose="checkins.color_id", null=True)
+    color_label = EncryptedTextField(purpose="checkins.color_label", null=True)
+    color_group = EncryptedTextField(purpose="checkins.color_group", null=True)
+    color_tone = EncryptedTextField(purpose="checkins.color_tone", null=True)
+    color_description = EncryptedTextField(
+        purpose="checkins.color_description",
+        null=True,
+    )
+    tags = EncryptedTextField(purpose="checkins.tags", null=True)
+    status_ids = EncryptedTextField(purpose="checkins.status_ids", null=True)
+    status_families = EncryptedTextField(
+        purpose="checkins.status_families",
+        null=True,
+    )
+    text_content = EncryptedTextField(purpose="checkins.text_content", null=True)
+    image_url = EncryptedTextField(purpose="checkins.image_url", null=True)
+    image_urls = EncryptedTextField(purpose="checkins.image_urls", null=True)
+    location_name = EncryptedTextField(purpose="checkins.location_name", null=True)
+    location_address = EncryptedTextField(
+        purpose="checkins.location_address",
+        null=True,
+    )
+    location_latitude = EncryptedFloatField(
+        purpose="checkins.location_latitude",
+        null=True,
+    )
+    location_longitude = EncryptedFloatField(
+        purpose="checkins.location_longitude",
+        null=True,
+    )
     timestamp = IntegerField(default=lambda: int(time.time()))
     updated_at = IntegerField(default=lambda: int(time.time()))
 
@@ -415,34 +430,28 @@ class CheckinTable:
         return rows_affected > 0
     
     def save_checkin_image(self, user_id: str, image_file: UploadFile) -> Optional[str]:
-        """
-        Saves an uploaded image for a check-in into a structured directory.
-        """
+        """Encrypt and store an uploaded check-in image outside the static root."""
         try:
-            base_upload_dir = "static/status"
-            today_str = datetime.datetime.now().strftime('%Y-%m-%d')
-            user_specific_dir = os.path.join(base_upload_dir, user_id, today_str)
-            os.makedirs(user_specific_dir, exist_ok=True)
-            file_extension = os.path.splitext(image_file.filename)[1]
-            new_filename = f"{int(time.time())}-{uuid.uuid4().hex[:8]}{file_extension}"
-            save_path = os.path.join(user_specific_dir, new_filename)
-            
-            # --- FIX: Perform the string replacement outside of the f-string ---
-            clean_path = save_path.replace('\\', '/')
-            web_path = f"/{clean_path}"
-            
-            with open(save_path, "wb") as buffer:
-                shutil.copyfileobj(image_file.file, buffer)
-            return web_path
-        except IOError as e:
-            print(f"Error saving check-in image: {e}")
+            from model.private_media import private_media_table
+
+            return private_media_table.store_upload(
+                owner_user_id=user_id,
+                media_type="checkin",
+                upload=image_file,
+            )
+        except (OSError, ValueError) as exc:
+            print(f"Error saving encrypted check-in image: {exc}")
             return None
-        finally:
-            image_file.file.close()
             
     def update_image_url(self, checkin_id: str, image_url: str) -> bool:
         """Updates only the image_url for a given check-in."""
-        image_urls = normalize_image_urls([image_url])
+        checkin = self.get_checkin_by_id(checkin_id)
+        if not checkin:
+            return False
+        image_urls = self._normalize_owned_image_urls(
+            [image_url],
+            checkin.user_id,
+        )
         query = Checkin.update(
             image_url=image_urls[0] if image_urls else None,
             image_urls=dump_image_urls(image_urls),
@@ -458,7 +467,10 @@ class CheckinTable:
         )
 
     def set_image_urls(self, checkin_id: str, image_urls: List[str]) -> Optional[Checkin]:
-        urls = normalize_image_urls(image_urls)
+        checkin = self.get_checkin_by_id(checkin_id)
+        if not checkin:
+            return None
+        urls = self._normalize_owned_image_urls(image_urls, checkin.user_id)
         if len(image_urls) > MAX_CHECKIN_IMAGES or len(urls) > MAX_CHECKIN_IMAGES:
             return None
         query = Checkin.update(
@@ -470,6 +482,20 @@ class CheckinTable:
         if rows_affected > 0:
             return self.get_checkin_by_id(checkin_id)
         return None
+
+    def _normalize_owned_image_urls(
+        self,
+        image_urls: List[str],
+        user_id: str,
+    ) -> List[str]:
+        from model.private_media import private_media_table
+
+        normalized = []
+        for value in normalize_image_urls(image_urls):
+            normalized.append(
+                private_media_table.normalize_owner_reference(value, user_id)
+            )
+        return normalize_image_urls(normalized)
 
     def append_image_urls(self, checkin_id: str, image_urls: List[str]) -> Optional[Checkin]:
         checkin = self.get_checkin_by_id(checkin_id)
@@ -525,6 +551,11 @@ def model_to_dict(model_instance: Model) -> Dict:
         getattr(model_instance, "image_urls", None),
         getattr(model_instance, "image_url", None),
     )
+    from model.private_media import private_media_table
+    signed_image_urls = [
+        private_media_table.signed_url(image_url)
+        for image_url in image_urls
+    ]
 
     return {
         "id": model_instance.id,
@@ -546,8 +577,8 @@ def model_to_dict(model_instance: Model) -> Dict:
         "status_families": status_families,
         "status_items": status_items,
         "text_content": model_instance.text_content,
-        "image_url": image_urls[0] if image_urls else None,
-        "image_urls": image_urls,
+        "image_url": signed_image_urls[0] if signed_image_urls else None,
+        "image_urls": signed_image_urls,
         "location_name": getattr(model_instance, "location_name", None),
         "location_address": getattr(model_instance, "location_address", None),
         "location_latitude": getattr(model_instance, "location_latitude", None),

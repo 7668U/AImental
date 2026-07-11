@@ -147,6 +147,17 @@ class AITaskTable:
         rows_updated = query.execute()
         return rows_updated > 0
 
+    def clear_for_conversation(self, user_id: str, character_id: str) -> int:
+        """删除单个用户与角色之间所有历史和待处理社区任务。"""
+        return (
+            AITask.delete()
+            .where(
+                (AITask.user_id == user_id)
+                & (AITask.character_id == character_id)
+            )
+            .execute()
+        )
+
     def has_pending_task(self, user_id: str, character_id: str, task_type: str) -> bool:
         """检查是否已经有同类型待处理任务。"""
         return AITask.select().where(

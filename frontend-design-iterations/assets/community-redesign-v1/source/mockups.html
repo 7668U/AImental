@@ -1,0 +1,1429 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>心灵社区 redesign v1</title>
+  <style>
+    :root {
+      --orange: #ff7426;
+      --orange-deep: #e85f19;
+      --orange-soft: #fff0e3;
+      --amber: #f5b15c;
+      --cream: #fff9f3;
+      --surface: #fffdf9;
+      --ink: #342b27;
+      --ink-soft: #655852;
+      --muted: #948983;
+      --line: #f1e2d5;
+      --sage: #8ca07b;
+      --blue: #8ca6ad;
+      --rose: #d88f7d;
+      --danger: #c95d55;
+      --shadow: 0 10px 28px rgba(103, 67, 39, 0.11);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: #d9d2cc;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+      letter-spacing: 0;
+    }
+
+    body {
+      padding: 48px;
+    }
+
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 52px;
+    }
+
+    .board-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .board-label {
+      color: #5b514b;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .phone {
+      position: relative;
+      width: 375px;
+      height: 812px;
+      overflow: hidden;
+      background: var(--cream);
+      box-shadow: 0 24px 70px rgba(42, 31, 23, 0.2);
+    }
+
+    .status-bar {
+      position: absolute;
+      inset: 0 0 auto 0;
+      z-index: 80;
+      height: 28px;
+      padding: 8px 15px 0 20px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      color: #302824;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding-right: 82px;
+    }
+
+    .signal {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 10px;
+    }
+
+    .signal i {
+      display: block;
+      width: 2px;
+      border-radius: 1px;
+      background: currentColor;
+    }
+
+    .signal i:nth-child(1) { height: 4px; }
+    .signal i:nth-child(2) { height: 6px; }
+    .signal i:nth-child(3) { height: 8px; }
+    .signal i:nth-child(4) { height: 10px; }
+
+    .wifi {
+      width: 12px;
+      height: 9px;
+      border-top: 2px solid currentColor;
+      border-radius: 50% 50% 0 0;
+      position: relative;
+    }
+
+    .wifi::after {
+      content: "";
+      position: absolute;
+      left: 4px;
+      bottom: 0;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .battery {
+      width: 17px;
+      height: 9px;
+      border: 1.5px solid currentColor;
+      border-radius: 2px;
+      padding: 1px;
+      position: relative;
+    }
+
+    .battery::before {
+      content: "";
+      display: block;
+      width: 10px;
+      height: 4px;
+      border-radius: 1px;
+      background: currentColor;
+    }
+
+    .battery::after {
+      content: "";
+      position: absolute;
+      right: -3px;
+      top: 2px;
+      width: 2px;
+      height: 4px;
+      border-radius: 0 2px 2px 0;
+      background: currentColor;
+    }
+
+    .wechat-capsule {
+      position: absolute;
+      z-index: 90;
+      top: 7px;
+      right: 9px;
+      width: 80px;
+      height: 28px;
+      border: 1px solid rgba(65, 53, 46, 0.18);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.66);
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      color: #2e2824;
+    }
+
+    .capsule-dots {
+      display: flex;
+      gap: 3px;
+    }
+
+    .capsule-dots i {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .capsule-ring {
+      width: 13px;
+      height: 13px;
+      border: 2px solid currentColor;
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .capsule-ring::after {
+      content: "";
+      position: absolute;
+      left: 3px;
+      top: 3px;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .main-hero {
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 222px;
+      background: #fff3e7 url("../assets/community-hero-atmosphere.png") center top / cover no-repeat;
+      overflow: hidden;
+    }
+
+    .main-hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(255, 249, 243, 0.98) 0%, rgba(255, 249, 243, 0.82) 42%, rgba(255, 249, 243, 0.08) 75%);
+    }
+
+    .hero-copy {
+      position: absolute;
+      z-index: 3;
+      left: 20px;
+      top: 55px;
+      width: 220px;
+    }
+
+    .hero-title {
+      margin: 0;
+      color: #4a3428;
+      font-size: 29px;
+      line-height: 1.15;
+      font-weight: 800;
+    }
+
+    .hero-subtitle {
+      width: 198px;
+      margin-top: 10px;
+      color: #8a6c59;
+      font-size: 13px;
+      line-height: 1.55;
+      font-weight: 500;
+    }
+
+    .meet-button {
+      margin-top: 17px;
+      width: 112px;
+      height: 34px;
+      border-radius: 17px;
+      background: var(--orange);
+      box-shadow: 0 8px 18px rgba(255, 103, 27, 0.22);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+
+    .plus-icon {
+      position: relative;
+      width: 13px;
+      height: 13px;
+    }
+
+    .plus-icon::before,
+    .plus-icon::after {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 1px;
+      width: 1.5px;
+      height: 12px;
+      border-radius: 2px;
+      background: currentColor;
+    }
+
+    .plus-icon::after {
+      transform: rotate(90deg);
+    }
+
+    .main-sheet {
+      position: absolute;
+      z-index: 4;
+      inset: 201px 0 68px 0;
+      padding: 22px 16px 18px;
+      border-radius: 20px 20px 0 0;
+      background: rgba(255, 253, 249, 0.98);
+    }
+
+    .section-head {
+      height: 30px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .section-title {
+      color: #3a302b;
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .section-note {
+      color: #a18f83;
+      font-size: 11px;
+      line-height: 18px;
+    }
+
+    .chat-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .chat-row {
+      position: relative;
+      min-height: 82px;
+      padding: 12px 12px 12px 72px;
+      border: 1px solid rgba(238, 220, 205, 0.84);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 7px 19px rgba(108, 76, 49, 0.065);
+    }
+
+    .chat-avatar {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      width: 50px;
+      height: 50px;
+      border-radius: 14px;
+      object-fit: cover;
+      background: #f0e9e2;
+    }
+
+    .avatar-ring {
+      position: absolute;
+      left: 9px;
+      top: 9px;
+      width: 56px;
+      height: 56px;
+      border: 2px solid rgba(255, 188, 126, 0.58);
+      border-radius: 17px;
+      pointer-events: none;
+    }
+
+    .unread-dot {
+      position: absolute;
+      left: 55px;
+      top: 7px;
+      width: 11px;
+      height: 11px;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      background: var(--orange);
+    }
+
+    .chat-topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .chat-name-wrap {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .chat-name {
+      color: #342c28;
+      font-size: 15px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .relation-pill {
+      height: 20px;
+      padding: 0 7px;
+      border-radius: 10px;
+      background: #fff0e5;
+      color: #b9683b;
+      font-size: 9px;
+      font-weight: 700;
+      line-height: 20px;
+      white-space: nowrap;
+    }
+
+    .relation-pill.blue {
+      background: #edf4f5;
+      color: #6f8990;
+    }
+
+    .relation-pill.sage {
+      background: #eff3ea;
+      color: #708260;
+    }
+
+    .chat-time {
+      color: #aea39d;
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .chat-preview {
+      margin-top: 8px;
+      color: #81746e;
+      font-size: 12px;
+      line-height: 1.35;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chat-meta {
+      margin-top: 6px;
+      color: #b0a29a;
+      font-size: 9px;
+      line-height: 1;
+    }
+
+    .discover-strip {
+      position: relative;
+      height: 78px;
+      margin-top: 12px;
+      padding: 13px 54px 12px 68px;
+      border: 1px solid rgba(236, 217, 201, 0.78);
+      border-radius: 8px;
+      background: #fff7ef;
+      overflow: hidden;
+    }
+
+    .discover-strip::after {
+      content: "";
+      position: absolute;
+      right: -20px;
+      top: -34px;
+      width: 116px;
+      height: 116px;
+      border-radius: 50%;
+      background: rgba(255, 191, 126, 0.16);
+    }
+
+    .discover-avatar {
+      position: absolute;
+      left: 13px;
+      top: 15px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .discover-title {
+      color: #49362c;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .discover-copy {
+      margin-top: 6px;
+      color: #9b7c68;
+      font-size: 10px;
+      line-height: 1.35;
+    }
+
+    .discover-action {
+      position: absolute;
+      z-index: 2;
+      right: 13px;
+      top: 22px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 6px 14px rgba(130, 83, 46, 0.12);
+      color: var(--orange);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tab-bar {
+      position: absolute;
+      z-index: 20;
+      inset: auto 0 0;
+      height: 69px;
+      padding: 7px 9px 10px;
+      border-top: 1px solid rgba(111, 85, 66, 0.09);
+      background: rgba(255, 252, 247, 0.98);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+    }
+
+    .tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      color: #8f8580;
+      font-size: 9px;
+    }
+
+    .tab.active {
+      color: var(--orange);
+      font-weight: 700;
+    }
+
+    .tab img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
+
+    .chat-screen {
+      background: #fff9f3 url("../assets/community-paper-texture.png") center / cover no-repeat;
+    }
+
+    .chat-nav {
+      position: absolute;
+      z-index: 20;
+      left: 0;
+      right: 0;
+      top: 28px;
+      height: 62px;
+      padding: 7px 16px 8px 12px;
+      border-bottom: 1px solid rgba(225, 205, 189, 0.62);
+      background: rgba(255, 252, 247, 0.9);
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) auto;
+      align-items: center;
+    }
+
+    .back-button {
+      width: 34px;
+      height: 34px;
+      color: #5c4d45;
+      font-size: 28px;
+      font-weight: 300;
+      line-height: 31px;
+      text-align: center;
+    }
+
+    .nav-person {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .nav-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      object-fit: cover;
+    }
+
+    .nav-copy {
+      min-width: 0;
+    }
+
+    .nav-name {
+      color: #332b27;
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+
+    .nav-status {
+      max-width: 190px;
+      margin-top: 5px;
+      color: #94867d;
+      font-size: 9px;
+      line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .affinity {
+      height: 34px;
+      padding: 0 9px 0 6px;
+      border-radius: 17px;
+      background: #fff3eb;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .affinity img {
+      width: 27px;
+      height: 27px;
+      object-fit: contain;
+    }
+
+    .affinity-score {
+      color: #b85f51;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .relationship-strip {
+      position: absolute;
+      z-index: 10;
+      left: 14px;
+      right: 14px;
+      top: 103px;
+      min-height: 48px;
+      padding: 10px 12px 10px 43px;
+      border: 1px solid rgba(241, 209, 184, 0.9);
+      border-radius: 8px;
+      background: rgba(255, 246, 237, 0.9);
+      box-shadow: 0 7px 16px rgba(105, 69, 40, 0.05);
+    }
+
+    .relationship-icon {
+      position: absolute;
+      left: 12px;
+      top: 11px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #fff;
+      color: var(--orange);
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 26px;
+      text-align: center;
+    }
+
+    .relationship-title {
+      color: #6b4b39;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .relationship-note {
+      margin-top: 4px;
+      color: #a0806c;
+      font-size: 9px;
+      line-height: 1.25;
+    }
+
+    .message-area {
+      position: absolute;
+      inset: 160px 0 89px 0;
+      padding: 13px 14px 20px;
+      overflow: hidden;
+    }
+
+    .date-chip {
+      width: max-content;
+      margin: 0 auto 16px;
+      padding: 5px 10px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.66);
+      color: #aaa09a;
+      font-size: 9px;
+    }
+
+    .message {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 17px;
+    }
+
+    .message.user {
+      justify-content: flex-end;
+    }
+
+    .message-avatar {
+      width: 34px;
+      height: 34px;
+      margin-right: 9px;
+      border-radius: 11px;
+      object-fit: cover;
+      flex: 0 0 auto;
+    }
+
+    .message.user .message-avatar {
+      order: 2;
+      margin-right: 0;
+      margin-left: 9px;
+      border-radius: 50%;
+    }
+
+    .message-stack {
+      max-width: 252px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .message.user .message-stack {
+      align-items: flex-end;
+    }
+
+    .bubble {
+      position: relative;
+      padding: 10px 13px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.93);
+      box-shadow: 0 7px 18px rgba(96, 64, 42, 0.08);
+      color: #4a403a;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .message.user .bubble {
+      background: #ffd3a4;
+      box-shadow: 0 7px 18px rgba(190, 108, 42, 0.11);
+      color: #4e3527;
+    }
+
+    .message-time {
+      margin-top: 5px;
+      color: #b0a59e;
+      font-size: 8px;
+    }
+
+    .typing-bubble {
+      width: 54px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .typing-bubble i {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #c9a890;
+    }
+
+    .input-dock {
+      position: absolute;
+      z-index: 30;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      height: 70px;
+      padding: 10px;
+      border: 1px solid rgba(236, 216, 200, 0.88);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 10px 26px rgba(82, 55, 37, 0.11);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .smile-icon {
+      position: relative;
+      width: 31px;
+      height: 31px;
+      border: 2px solid var(--orange);
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .smile-icon::before,
+    .smile-icon::after {
+      content: "";
+      position: absolute;
+      top: 9px;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--orange);
+    }
+
+    .smile-icon::before { left: 7px; }
+    .smile-icon::after { right: 7px; }
+
+    .smile-mouth {
+      position: absolute;
+      left: 8px;
+      top: 14px;
+      width: 11px;
+      height: 7px;
+      border-bottom: 2px solid var(--orange);
+      border-radius: 0 0 10px 10px;
+    }
+
+    .input-shell {
+      min-width: 0;
+      height: 43px;
+      padding: 0 13px;
+      border: 1px solid #eee1d7;
+      border-radius: 18px;
+      background: #fffdfb;
+      color: #aaa09a;
+      font-size: 12px;
+      line-height: 43px;
+      flex: 1;
+    }
+
+    .send-button {
+      width: 48px;
+      height: 43px;
+      border-radius: 18px;
+      background: var(--orange);
+      box-shadow: 0 7px 15px rgba(255, 102, 28, 0.22);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 43px;
+      text-align: center;
+      flex: 0 0 auto;
+    }
+
+    .profile-screen {
+      background: #fff9f3 url("../assets/community-paper-texture.png") center / cover no-repeat;
+    }
+
+    .profile-backdrop {
+      position: absolute;
+      inset: 0;
+      opacity: 0.86;
+    }
+
+    .ghost-nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 28px;
+      height: 62px;
+      border-bottom: 1px solid rgba(226, 210, 197, 0.6);
+      background: rgba(255, 253, 249, 0.92);
+    }
+
+    .ghost-avatar {
+      position: absolute;
+      left: 60px;
+      top: 41px;
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
+      object-fit: cover;
+    }
+
+    .ghost-name {
+      position: absolute;
+      left: 105px;
+      top: 48px;
+      color: #4a403a;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .ghost-bubble {
+      position: absolute;
+      height: 56px;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 6px 18px rgba(91, 61, 40, 0.08);
+    }
+
+    .ghost-bubble.one {
+      left: 54px;
+      top: 170px;
+      width: 226px;
+    }
+
+    .ghost-bubble.two {
+      right: 52px;
+      top: 260px;
+      width: 185px;
+      background: #ffd3a4;
+    }
+
+    .profile-dim {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      background: rgba(40, 33, 29, 0.52);
+      backdrop-filter: blur(4px);
+    }
+
+    .profile-modal {
+      position: absolute;
+      z-index: 20;
+      left: 16px;
+      right: 16px;
+      top: 99px;
+      height: 670px;
+      padding: 20px 18px 18px;
+      border: 1px solid rgba(220, 194, 172, 0.72);
+      border-radius: 16px;
+      background: #fffdf9;
+      box-shadow: 0 24px 62px rgba(36, 29, 24, 0.27);
+    }
+
+    .profile-close {
+      position: absolute;
+      right: 13px;
+      top: 12px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #f7efe8;
+      color: #675a53;
+      font-size: 21px;
+      font-weight: 300;
+      line-height: 27px;
+      text-align: center;
+    }
+
+    .profile-hero {
+      min-height: 104px;
+      padding-right: 26px;
+      display: flex;
+      align-items: center;
+    }
+
+    .profile-avatar {
+      width: 88px;
+      height: 88px;
+      border: 4px solid #fff3e7;
+      border-radius: 22px;
+      box-shadow: 0 8px 19px rgba(96, 61, 39, 0.12);
+      object-fit: cover;
+      flex: 0 0 auto;
+    }
+
+    .profile-intro {
+      min-width: 0;
+      margin-left: 15px;
+    }
+
+    .profile-name-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .profile-name {
+      color: #332a26;
+      font-family: "STKaiti", "KaiTi", "Microsoft YaHei", sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .profile-stage {
+      height: 22px;
+      padding: 0 8px;
+      border-radius: 11px;
+      background: #fff0e5;
+      color: #b9683b;
+      font-size: 9px;
+      font-weight: 800;
+      line-height: 22px;
+    }
+
+    .profile-motto {
+      margin-top: 9px;
+      color: #75665e;
+      font-family: "STKaiti", "KaiTi", "Microsoft YaHei", sans-serif;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .affinity-line {
+      height: 46px;
+      margin-top: 10px;
+      padding: 0 4px;
+      display: grid;
+      grid-template-columns: 74px minmax(0, 1fr) 34px;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .affinity-label {
+      color: #5e4e46;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .affinity-label small {
+      display: block;
+      margin-top: 4px;
+      color: #a7958a;
+      font-size: 8px;
+      font-weight: 500;
+    }
+
+    .progress {
+      height: 7px;
+      border-radius: 4px;
+      background: #f3e4da;
+      overflow: hidden;
+    }
+
+    .progress span {
+      display: block;
+      width: 64%;
+      height: 100%;
+      border-radius: 4px;
+      background: var(--orange);
+    }
+
+    .affinity-number {
+      color: #b95e52;
+      font-size: 15px;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .profile-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 5px;
+    }
+
+    .profile-tag {
+      height: 25px;
+      padding: 0 10px;
+      border-radius: 12px;
+      background: #edf3f4;
+      color: #627a80;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 25px;
+    }
+
+    .profile-tag:nth-child(2) {
+      background: #f7ece8;
+      color: #a16c5d;
+    }
+
+    .profile-tag:nth-child(3) {
+      background: #f0f3e9;
+      color: #718160;
+    }
+
+    .profile-quote {
+      position: relative;
+      min-height: 59px;
+      margin-top: 13px;
+      padding: 11px 12px 10px 29px;
+      border-left: 3px solid #f1a667;
+      background: #fff8f1;
+      color: #6e5d53;
+      font-family: "STKaiti", "KaiTi", "Microsoft YaHei", sans-serif;
+      font-size: 11px;
+      line-height: 1.55;
+    }
+
+    .profile-quote::before {
+      content: "“";
+      position: absolute;
+      left: 9px;
+      top: 2px;
+      color: #efaa71;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .profile-details {
+      margin-top: 10px;
+      border-top: 1px solid #f0e2d6;
+    }
+
+    .profile-row {
+      min-height: 47px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(240, 226, 214, 0.82);
+      display: grid;
+      grid-template-columns: 26px 55px minmax(0, 1fr);
+      gap: 8px;
+      align-items: start;
+    }
+
+    .detail-icon {
+      width: 25px;
+      height: 25px;
+      border-radius: 8px;
+      background: #fff0e4;
+      color: var(--orange-deep);
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 25px;
+      text-align: center;
+    }
+
+    .detail-icon.blue {
+      background: #edf4f5;
+      color: #6d8990;
+    }
+
+    .detail-icon.sage {
+      background: #eef3e9;
+      color: #758665;
+    }
+
+    .detail-label {
+      padding-top: 4px;
+      color: #6e6058;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .detail-value {
+      padding-top: 3px;
+      color: #4c423d;
+      font-size: 10px;
+      line-height: 1.45;
+    }
+
+    .rewind-note {
+      margin-top: 11px;
+      color: #ad9188;
+      font-size: 8px;
+      line-height: 1.3;
+      text-align: center;
+    }
+
+    .rewind-button {
+      height: 39px;
+      margin-top: 7px;
+      border: 1px solid rgba(201, 93, 85, 0.44);
+      border-radius: 8px;
+      background: #fff8f6;
+      color: var(--danger);
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 37px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <main class="gallery">
+    <div class="board-wrap">
+      <div class="board-label">主界面</div>
+      <section class="phone" id="mockup-main">
+        <div class="main-hero">
+          <div class="status-bar">
+            <span>9:41</span>
+            <span class="status-icons">
+              <span class="signal"><i></i><i></i><i></i><i></i></span>
+              <span class="wifi"></span>
+              <span class="battery"></span>
+            </span>
+          </div>
+          <div class="wechat-capsule">
+            <span class="capsule-dots"><i></i><i></i><i></i></span>
+            <span class="capsule-ring"></span>
+          </div>
+          <div class="hero-copy">
+            <h1 class="hero-title">心灵社区</h1>
+            <div class="hero-subtitle">有人在这里，等你慢慢开口。每一次对话，都可以从一句你好开始。</div>
+            <div class="meet-button"><span class="plus-icon"></span><span>遇见新伙伴</span></div>
+          </div>
+        </div>
+
+        <div class="main-sheet">
+          <div class="section-head">
+            <div class="section-title">最近对话</div>
+            <div class="section-note">3 位伙伴在线</div>
+          </div>
+
+          <div class="chat-list">
+            <div class="chat-row">
+              <img class="chat-avatar" src="../../../../AImental_backend/static/avatars/ling_yue.png" alt="">
+              <span class="avatar-ring"></span>
+              <span class="unread-dot"></span>
+              <div class="chat-topline">
+                <div class="chat-name-wrap">
+                  <span class="chat-name">泠月</span>
+                  <span class="relation-pill">渐渐熟悉</span>
+                </div>
+                <span class="chat-time">刚刚</span>
+              </div>
+              <div class="chat-preview">刚把一只碎成六片的小碗拼回去了。</div>
+              <div class="chat-meta">文物修复师 · 今日在线</div>
+            </div>
+
+            <div class="chat-row">
+              <img class="chat-avatar" src="../../../../AImental_backend/static/avatars/liu_shuqin.png" alt="">
+              <span class="avatar-ring"></span>
+              <div class="chat-topline">
+                <div class="chat-name-wrap">
+                  <span class="chat-name">刘书沁</span>
+                  <span class="relation-pill blue">初识观察</span>
+                </div>
+                <span class="chat-time">18:26</span>
+              </div>
+              <div class="chat-preview">有些停顿，也是在认真地回应生活。</div>
+              <div class="chat-meta">中文系学生 · 2 小时前活跃</div>
+            </div>
+
+            <div class="chat-row">
+              <img class="chat-avatar" src="../../../../AImental_backend/static/avatars/xia_yang.png" alt="">
+              <span class="avatar-ring"></span>
+              <div class="chat-topline">
+                <div class="chat-name-wrap">
+                  <span class="chat-name">夏阳</span>
+                  <span class="relation-pill sage">自在相处</span>
+                </div>
+                <span class="chat-time">昨天</span>
+              </div>
+              <div class="chat-preview">下次发现好吃的冰淇淋，我第一个告诉你！</div>
+              <div class="chat-meta">播音主持系 · 昨晚在线</div>
+            </div>
+          </div>
+
+          <div class="discover-strip">
+            <img class="discover-avatar" src="../../../../AImental_backend/static/avatars/su_jin.png" alt="">
+            <div class="discover-title">今天也可以认识新伙伴</div>
+            <div class="discover-copy">看看谁与你此刻的心情合拍</div>
+            <div class="discover-action"><span class="plus-icon"></span></div>
+          </div>
+        </div>
+
+        <div class="tab-bar">
+          <div class="tab">
+            <img src="../../../../AImental_frontend/images/tabbar/chat_default.png" alt="">
+            <span>心情树洞</span>
+          </div>
+          <div class="tab">
+            <img src="../../../../AImental_frontend/images/tabbar/assessment_default.png" alt="">
+            <span>心理测评</span>
+          </div>
+          <div class="tab active">
+            <img src="../../../../AImental_frontend/images/community_selected.png" alt="">
+            <span>心灵社区</span>
+          </div>
+          <div class="tab">
+            <img src="../../../../AImental_frontend/images/tabbar/checkin_default.png" alt="">
+            <span>心情日记</span>
+          </div>
+          <div class="tab">
+            <img src="../../../../AImental_frontend/images/tabbar/profile_default.png" alt="">
+            <span>我的</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="board-wrap">
+      <div class="board-label">聊天界面</div>
+      <section class="phone chat-screen" id="mockup-chat">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="status-icons">
+            <span class="signal"><i></i><i></i><i></i><i></i></span>
+            <span class="wifi"></span>
+            <span class="battery"></span>
+          </span>
+        </div>
+        <div class="wechat-capsule">
+          <span class="capsule-dots"><i></i><i></i><i></i></span>
+          <span class="capsule-ring"></span>
+        </div>
+
+        <header class="chat-nav">
+          <div class="back-button">‹</div>
+          <div class="nav-person">
+            <img class="nav-avatar" src="../../../../AImental_backend/static/avatars/ling_yue.png" alt="">
+            <div class="nav-copy">
+              <div class="nav-name">泠月</div>
+              <div class="nav-status">正在修复一只青瓷小碗</div>
+            </div>
+          </div>
+          <div class="affinity">
+            <img src="../../../../AImental_frontend/images/community-affinity/affinity-heart-060.png" alt="">
+            <span class="affinity-score">64</span>
+          </div>
+        </header>
+
+        <div class="relationship-strip">
+          <div class="relationship-icon">7</div>
+          <div class="relationship-title">你们已经聊过 7 天 · 渐渐熟悉</div>
+          <div class="relationship-note">自然地聊下去，关系会在细节里慢慢生长</div>
+        </div>
+
+        <div class="message-area">
+          <div class="date-chip">今天 20:14</div>
+
+          <div class="message">
+            <img class="message-avatar" src="../../../../AImental_backend/static/avatars/ling_yue.png" alt="">
+            <div class="message-stack">
+              <div class="bubble">刚把一只碎成六片的小碗拼回去了。修复到最后，总会觉得它像重新学会了呼吸。</div>
+              <div class="message-time">20:14</div>
+            </div>
+          </div>
+
+          <div class="message user">
+            <img class="message-avatar" src="../../../../AImental_backend/static/avatars/default.png" alt="">
+            <div class="message-stack">
+              <div class="bubble">听起来很治愈。你今天累吗？</div>
+              <div class="message-time">20:16</div>
+            </div>
+          </div>
+
+          <div class="message">
+            <img class="message-avatar" src="../../../../AImental_backend/static/avatars/ling_yue.png" alt="">
+            <div class="message-stack">
+              <div class="bubble">有一点，不过是安静的累。你呢，今天有没有哪一刻，想让时间慢一点？</div>
+              <div class="message-time">20:17</div>
+            </div>
+          </div>
+
+          <div class="message user">
+            <img class="message-avatar" src="../../../../AImental_backend/static/avatars/default.png" alt="">
+            <div class="message-stack">
+              <div class="bubble">下班走到楼下的时候，风很舒服。</div>
+              <div class="message-time">20:19</div>
+            </div>
+          </div>
+
+          <div class="message">
+            <img class="message-avatar" src="../../../../AImental_backend/static/avatars/ling_yue.png" alt="">
+            <div class="message-stack">
+              <div class="bubble typing-bubble"><i></i><i></i><i></i></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-dock">
+          <div class="smile-icon"><span class="smile-mouth"></span></div>
+          <div class="input-shell">说点什么...</div>
+          <div class="send-button">发送</div>
+        </div>
+      </section>
+    </div>
+
+    <div class="board-wrap">
+      <div class="board-label">资料卡弹层</div>
+      <section class="phone profile-screen" id="mockup-profile">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="status-icons">
+            <span class="signal"><i></i><i></i><i></i><i></i></span>
+            <span class="wifi"></span>
+            <span class="battery"></span>
+          </span>
+        </div>
+        <div class="wechat-capsule">
+          <span class="capsule-dots"><i></i><i></i><i></i></span>
+          <span class="capsule-ring"></span>
+        </div>
+
+        <div class="profile-backdrop">
+          <div class="ghost-nav"></div>
+          <img class="ghost-avatar" src="../../../../AImental_backend/static/avatars/ling_yue.png" alt="">
+          <div class="ghost-name">泠月</div>
+          <div class="ghost-bubble one"></div>
+          <div class="ghost-bubble two"></div>
+        </div>
+        <div class="profile-dim"></div>
+
+        <article class="profile-modal">
+          <div class="profile-close">×</div>
+          <div class="profile-hero">
+            <img class="profile-avatar" src="../../../../AImental_backend/static/avatars/ling_yue.png" alt="">
+            <div class="profile-intro">
+              <div class="profile-name-line">
+                <div class="profile-name">泠月</div>
+                <div class="profile-stage">渐渐熟悉</div>
+              </div>
+              <div class="profile-motto">“每一件旧物里，都藏着一个未被听见的故事。”</div>
+            </div>
+          </div>
+
+          <div class="affinity-line">
+            <div class="affinity-label">好感度<small>关系正在升温</small></div>
+            <div class="progress"><span></span></div>
+            <div class="affinity-number">64</div>
+          </div>
+
+          <div class="profile-tags">
+            <span class="profile-tag">文艺青年</span>
+            <span class="profile-tag">细节控</span>
+            <span class="profile-tag">共情力强</span>
+          </div>
+
+          <div class="profile-quote">她说话很轻，喜欢用器物、时间与光影作比喻，也习惯先听完，再慢慢回应。</div>
+
+          <div class="profile-details">
+            <div class="profile-row">
+              <div class="detail-icon">IN</div>
+              <div class="detail-label">MBTI</div>
+              <div class="detail-value">INFJ · 提倡者</div>
+            </div>
+            <div class="profile-row">
+              <div class="detail-icon blue">职</div>
+              <div class="detail-label">职业</div>
+              <div class="detail-value">文物修复师</div>
+            </div>
+            <div class="profile-row">
+              <div class="detail-icon sage">乡</div>
+              <div class="detail-label">来自</div>
+              <div class="detail-value">苏州，一座有悠久历史的江南水乡</div>
+            </div>
+            <div class="profile-row">
+              <div class="detail-icon">喜</div>
+              <div class="detail-label">喜欢</div>
+              <div class="detail-value">博物馆、旧书市集、雨天临窗听雨</div>
+            </div>
+            <div class="profile-row">
+              <div class="detail-icon blue">避</div>
+              <div class="detail-label">不喜欢</div>
+              <div class="detail-value">嘈杂拥挤、没有分寸感的玩笑</div>
+            </div>
+          </div>
+
+          <div class="rewind-note">重新回到初遇会清空当前聊天记录与好感度</div>
+          <div class="rewind-button">↶　重新回到初遇</div>
+        </article>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,5 +1,4 @@
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
-const { loginWithBackend } = require('../../utils/auth.js');
 // pages/assessment/index.js
 
 const SERVER_BASE_URL = 'http://127.0.0.1:8000';
@@ -45,6 +44,7 @@ Page({
 
   onShow() {
     this.checkLoginStatus();
+    this.checkDisclaimer();
     const systemInfo = wx.getSystemInfoSync();
     this.setData({
       statusBarHeight: systemInfo.statusBarHeight
@@ -55,29 +55,8 @@ Page({
     const token = wx.getStorageSync('token');
     if (token) {
       this.setData({ isLoggedIn: true });
-      this.checkDisclaimer();
     } else {
       this.setData({ isLoggedIn: false });
-    }
-  },
-
-  // --- [修改] 采用 async/await 重构登录函数，逻辑更清晰 ---
-  async handleLogin() {
-    wx.showLoading({ title: '登录中...' });
-    try {
-      const tokenRes = await loginWithBackend(SERVER_BASE_URL + '/api/v1');
-      if (tokenRes.access_token) {
-        wx.setStorageSync('token', tokenRes.access_token);
-        wx.hideLoading();
-        wx.showToast({ title: '登录成功', icon: 'success' });
-        this.checkLoginStatus();
-      } else {
-        throw new Error('登录接口未返回 token');
-      }
-    } catch (error) {
-      wx.hideLoading();
-      wx.showToast({ title: '登录失败，请重试', icon: 'none' });
-      console.error('登录失败: ' , error);
     }
   },
 

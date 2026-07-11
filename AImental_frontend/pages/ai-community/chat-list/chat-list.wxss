@@ -1,196 +1,511 @@
-/* pages/ai-community/chat-list/chat-list.wxss */
-
 page {
-  background-color: #F9F7F3;
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --orange: #ff6b16;
+  --orange-deep: #e95a0b;
+  --orange-pale: #fff0e4;
+  --paper: #fffdf9;
+  --cream: #fff8f1;
+  --ink: #392a22;
+  --copy: #776960;
+  --muted: #a3978f;
+  --sage: #7f9673;
+  min-height: 100vh;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
-.page-container {
-  height: 100vh;
+.community-page {
+  position: relative;
   width: 100vw;
-  overflow: hidden;
-}
-
-/* =========================================== */
-/* pages/ai-community/chat-list/chat-list.wxss */
-
-page {
-  background-color: #F9F7F3;
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-}
-
-.page-container {
   height: 100vh;
-  width: 100vw;
   overflow: hidden;
+  background: var(--cream);
 }
 
-/* =========================================== */
-/* 1. 动态自定义导航栏 (采用新版样式) */
-/* =========================================== */
-
-/* 【移除】所有 .top-bar, .nav-bar-content, .top-bar-* 等旧样式 */
-
-/* 【新增】来自参考代码的导航栏样式结构 */
 .custom-nav-wrapper {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
   z-index: 100;
-  /* 保留你原有的背景模糊效果 */
-  background-color: #F9F7F3(240, 225, 195, 0.85);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 5rpx solid rgba(0, 0, 0, 0.04);
+  width: 100%;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 248, 240, 0.66) 0%, rgba(255, 248, 240, 0) 100%);
 }
+
 .custom-nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   width: 100%;
-  box-sizing: border-box;
-}
-.nav-left, .nav-right {
-  display: flex;
-  align-items: center;
-  /* 【核心】设置一个固定的、对称的宽度 */
-  width: 90rpx; 
-}
-.nav-left {
-  justify-content: flex-start;
-  /* 保留你原有的边距 */
-  padding-left: 30rpx;
-  box-sizing: border-box;
-}
-.nav-right {
-  /* 这个是空的，但必须存在且宽度与左边一致，以保证标题居中 */
-  justify-content: flex-end;
-}
-.nav-center {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-}
-.nav-title {
-  /* 保留你原有的标题字体样式 */
-  font-size: 34rpx;
-  font-weight: 600;
-  color: #000;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
-.action-icon {
-  width: 44rpx;
-  height: 44rpx;
 }
 
-/* =========================================== */
-/* 2. 角色聊天列表 */
-/* =========================================== */
-.list-container {
-  height: 100vh;
+.community-scroll {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   width: 100%;
+  height: 100%;
   box-sizing: border-box;
-  background-color: #F9F7F3;
 }
 
-.chat-item {
+.community-hero {
+  position: relative;
+  height: 500rpx;
+  min-height: 0;
+  padding: 0 44rpx 58rpx;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.community-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 248, 240, 0.98) 0%,
+    rgba(255, 248, 240, 0.91) 38%,
+    rgba(255, 248, 240, 0.42) 60%,
+    rgba(255, 248, 240, 0.02) 82%
+  );
+  pointer-events: none;
+}
+
+.community-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-leaf-accent {
+  position: absolute;
+  left: 20rpx;
+  top: 168rpx;
+  z-index: 2;
+  width: 124rpx;
+  height: 124rpx;
+  opacity: 0.34;
+}
+
+.hero-copy {
+  position: relative;
+  z-index: 3;
+  width: 370rpx;
+  padding-top: 0rpx;
+}
+
+.hero-title {
+  color: #4b2c1b;
+  font-family: 'LXGWWenKaiHome', "STKaiti", "KaiTi", "Songti SC", "PingFang SC", serif;
+  font-size: 60rpx;
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+.hero-subtitle {
+  max-width: 370rpx;
+  margin-top: 16rpx;
+  font-family: 'LXGWWenKaiHome', "STKaiti", "KaiTi", "Songti SC", "PingFang SC", serif;
+  color: #806d61;
+  font-size: 28rpx;
+  line-height: 1.5;
+  font-weight: 400;
+  letter-spacing: 0;
   display: flex;
-  padding: 25rpx 30rpx;
+  flex-direction: column;
+}
+
+.community-body {
+  position: relative;
+  z-index: 4;
+  min-height: 900rpx;
+  margin-top: -34rpx;
+  padding: 30rpx 30rpx calc(54rpx + env(safe-area-inset-bottom));
+  border-radius: 38rpx 38rpx 0 0;
+  background: linear-gradient(180deg, rgba(255, 253, 249, 0.98) 0%, #fffaf5 100%);
+  box-shadow: 0 -12rpx 36rpx rgba(105, 66, 38, 0.07);
+  box-sizing: border-box;
+}
+
+.refresh-notice {
+  min-height: 62rpx;
+  margin-bottom: 18rpx;
+  padding: 0 22rpx;
+  border-radius: 14rpx;
+  font-size: 22rpx;
+  display: flex;
   align-items: center;
-  transition: background-color 0.2s;
-  border-bottom: 1rpx solid #F1EEE9;
-  padding-left: 155rpx;
-  padding-right: 30rpx;
-  background-color: #f5ecd7; 
+  box-sizing: border-box;
 }
 
-.chat-item:active {
-  background-color: #fad89f;
+.refresh-notice-dot {
+  width: 10rpx;
+  height: 10rpx;
+  margin-right: 13rpx;
+  flex-shrink: 0;
+  border-radius: 50%;
 }
 
-.chat-item:last-child {
-  border-bottom: none;
+.refresh-notice {
+  border: 1rpx solid rgba(221, 126, 64, 0.22);
+  background: #fff3e9;
+  color: #9a6645;
+}
+
+.refresh-notice-dot {
+  background: #ed7b32;
+}
+
+.character-card,
+.skeleton-card {
+  width: 100%;
+  min-height: 180rpx;
+  margin-bottom: 18rpx;
+  border: 1rpx solid rgba(237, 211, 192, 0.86);
+  border-radius: 18rpx;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10rpx 28rpx rgba(100, 66, 43, 0.065);
+  box-sizing: border-box;
+}
+
+.character-card {
+  padding: 22rpx;
+  display: flex;
+  align-items: center;
+  transition: transform 0.18s ease, background-color 0.18s ease;
+}
+
+.character-card:active {
+  transform: scale(0.985);
+  background: #fff8f2;
+}
+
+.character-card-unread {
+  border-color: rgba(255, 139, 66, 0.5);
+  box-shadow: 0 12rpx 30rpx rgba(219, 105, 39, 0.11);
 }
 
 .avatar-container {
   position: relative;
-  margin-left: -125rpx;
-  margin-right: 25rpx;
+  width: 112rpx;
+  height: 112rpx;
+  margin-right: 22rpx;
+  flex-shrink: 0;
 }
 
 .avatar {
-  width: 100rpx;
-  height: 100rpx;
-  border-radius: 12rpx;
-  background-color: #eee;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 4rpx solid rgba(255, 255, 255, 0.96);
+  border-radius: 28rpx;
+  background: #eee8e2;
+  box-shadow: 0 8rpx 18rpx rgba(82, 55, 37, 0.11);
+  box-sizing: border-box;
 }
 
 .unread-dot {
   position: absolute;
-  top: -8rpx;
-  right: -8rpx;
-  width: 20rpx;
-  height: 20rpx;
-  background-color: #fa5151;
+  right: -3rpx;
+  top: -5rpx;
+  width: 24rpx;
+  height: 24rpx;
+  border: 4rpx solid #ffffff;
   border-radius: 50%;
-  border: 4rpx solid #F9F7F3;
+  background: var(--orange);
+  box-sizing: border-box;
 }
 
-.info-container {
-  flex: 1;
+.character-info {
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 120rpx;
+  flex: 1;
 }
 
-.info-header {
+.character-topline {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 8rpx;
+  justify-content: space-between;
+  gap: 14rpx;
 }
 
-.name {
-  font-size: 32rpx;
-  color: #333;
+.name-group {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
 }
 
-.time {
-  font-size: 24rpx;
-  color: #aaa;
-}
-
-.last-message {
-  font-size: 28rpx;
-  color: #888;
+.character-name {
+  max-width: 190rpx;
+  color: #342b26;
+  font-size: 34rpx;
+  font-weight: 800;
+  line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.empty-state {
+.character-time {
+  flex-shrink: 0;
+  color: #a99e98;
+  font-size: 21rpx;
+  line-height: 1;
+}
+
+.last-message {
+  max-width: 100%;
+  margin-top: 13rpx;
+  color: #746a64;
+  font-size: 26rpx;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.character-meta {
+  min-height: 34rpx;
+  margin-top: 13rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.presence {
+  min-width: 0;
+  flex: 1;
+  color: #73866b;
+  font-size: 21rpx;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.presence text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.presence-dot {
+  width: 9rpx;
+  height: 9rpx;
+  margin-right: 10rpx;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #8da982;
+}
+
+.affinity-meta {
+  min-width: 70rpx;
+  flex-shrink: 0;
+  color: #e06b3d;
+  font-size: 23rpx;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.affinity-icon {
+  width: 38rpx;
+  height: 38rpx;
+  margin-right: 4rpx;
+}
+
+.skeleton-card {
+  padding: 24rpx;
+  display: flex;
+  align-items: center;
+}
+
+.skeleton-avatar {
+  width: 108rpx;
+  height: 108rpx;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+  border-radius: 28rpx;
+}
+
+.skeleton-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.skeleton-line {
+  height: 20rpx;
+  margin-bottom: 18rpx;
+  border-radius: 7rpx;
+}
+
+.skeleton-line-title {
+  width: 44%;
+  height: 28rpx;
+}
+
+.skeleton-line-message {
+  width: 88%;
+}
+
+.skeleton-line-meta {
+  width: 58%;
+  height: 16rpx;
+  margin-bottom: 0;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #f2ede8 0%, #fbf8f5 50%, #f2ede8 100%);
+  background-size: 200% 100%;
+  animation: skeletonFlow 1.35s ease-in-out infinite;
+}
+
+.state-panel {
+  min-height: 380rpx;
+  padding: 60rpx 44rpx;
+  border: 1rpx solid rgba(225, 196, 174, 0.6);
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.8);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-top: 250rpx;
-  opacity: 0.6;
+  box-sizing: border-box;
 }
 
-.empty-icon {
-  width: 200rpx;
-  height: 200rpx;
+.state-panel-error {
+  background: #fffaf8;
 }
 
-.empty-text {
-  margin-top: 20rpx;
-  font-size: 28rpx;
-  color: #aaa;
+.state-icon {
+  width: 82rpx;
+  height: 82rpx;
+  border-radius: 50%;
+  background: #fbe9e7;
+  color: #c46159;
+  font-size: 34rpx;
+  font-weight: 800;
+  line-height: 82rpx;
+  text-align: center;
+}
+
+.state-illustration {
+  width: 290rpx;
+  height: 210rpx;
+}
+
+.state-title {
+  margin-top: 22rpx;
+  color: #493a31;
+  font-size: 31rpx;
+  font-weight: 800;
+}
+
+.state-description {
+  max-width: 500rpx;
+  margin-top: 14rpx;
+  color: #91847c;
+  font-size: 24rpx;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.state-action {
+  min-width: 190rpx;
+  height: 68rpx;
+  margin-top: 28rpx;
+  padding: 0 30rpx;
+  border-radius: 999rpx;
+  background: var(--orange);
+  box-shadow: 0 10rpx 22rpx rgba(255, 107, 22, 0.2);
+  color: #ffffff;
+  font-size: 25rpx;
+  font-weight: 700;
+  line-height: 68rpx;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.community-guide-modal {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 300;
+  width: 100%;
+  height: 100%;
+  padding: 46rpx;
+  box-sizing: border-box;
+  background: rgba(42, 34, 28, 0.46);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.community-guide-content {
+  position: relative;
+  width: 100%;
+  max-width: 660rpx;
+  max-height: 86vh;
+  border-radius: 32rpx;
+  background: rgba(255, 255, 255, 0.98);
+  border: 2rpx solid rgba(255, 235, 213, 0.92);
+  box-shadow: 0 30rpx 78rpx rgba(70, 46, 30, 0.24);
+  overflow: visible;
+}
+
+.community-guide-icon {
+  position: absolute;
+  left: 34rpx;
+  top: 42rpx;
+  z-index: 1;
+  width: 88rpx;
+  height: 88rpx;
+}
+
+.community-guide-body {
+  padding: 56rpx 40rpx 40rpx;
+  box-sizing: border-box;
+}
+
+.community-guide-title {
+  color: #3a302a;
+  font-size: 40rpx;
+  font-weight: 800;
+  line-height: 1.18;
+  text-align: center;
+}
+
+.community-guide-text {
+  margin-top: 26rpx;
+  color: #6f625b;
+  font-size: 27rpx;
+  line-height: 1.68;
+  text-align: left;
+}
+
+.community-guide-paragraph + .community-guide-paragraph {
+  margin-top: 18rpx;
+}
+
+.community-guide-button {
+  width: 100%;
+  height: 82rpx;
+  margin-top: 34rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #ff8c2f 0%, #ff6418 100%);
+  box-shadow: 0 16rpx 32rpx rgba(255, 100, 24, 0.25);
+  color: #ffffff;
+  font-size: 30rpx;
+  font-weight: 800;
+  line-height: 82rpx;
+  text-align: center;
+}
+
+@keyframes skeletonFlow {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }

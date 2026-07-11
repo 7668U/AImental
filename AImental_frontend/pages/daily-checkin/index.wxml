@@ -3,8 +3,6 @@
 <view class="page-container">
   <image class="diary-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/daily-checkin/layout/mood-diary-bg.jpg" mode="aspectFill"></image>
 
-  <block wx:if="{{isLoggedIn}}">
-
     <view class="top-bar" style="height: {{totalNavBarHeight}}px;">
       <view class="nav-bar-content" style="margin-top: {{statusBarHeight}}px; height: {{navBarHeight}}px;">
         <view class="nav-bar-title"></view>
@@ -52,16 +50,25 @@
 
     </view>
 
-  </block>
-
-  <block wx:else>
-    <view class="login-wrapper">
-      <login-prompt 
-        title="欢迎使用心情日记"
-        subtitle="登录后即可记录和查看你的心情"
-        bind:loginevent="handleLogin" 
-      />
-    </view>
-  </block>
-
 </view>
+
+<view class="daily-guide-modal" wx:if="{{showDailyCheckinGuide}}" catchtouchmove="preventDailyCheckinGuideClose">
+  <view class="daily-guide-content" catchtap="preventDailyCheckinGuideClose">
+    <image class="daily-guide-icon" src="{{dailyCheckinGuideIcon}}" mode="aspectFit"></image>
+    <view class="daily-guide-body">
+      <view class="daily-guide-title">温馨提示</view>
+      <view class="daily-guide-text">
+        <view class="daily-guide-paragraph">欢迎来到每日打卡。这里会陪你留下一些属于自己的记录：今天的心情、状态、色彩，还有那些想说却没来得及说出口的话。</view>
+        <view class="daily-guide-paragraph">我们希望这个小工具，能陪你更细致地感受和理解自己的情绪。开心、疲惫、低落、焦虑、平静，每一种感受都有它出现的原因，也都值得被认真看见。</view>
+        <view class="daily-guide-paragraph">学会爱自己，是一生都在练习的必修课；而学会理解自己的情绪，就是这门课里很重要的一部分。愿你在一次次记录里，慢慢认识自己，也慢慢学会用更温柔的方式照顾自己。</view>
+      </view>
+      <view class="daily-guide-button" bindtap="handleConfirmDailyCheckinGuide">开始记录</view>
+    </view>
+  </view>
+</view>
+
+<privacy-consent
+  visible="{{privacyVisible}}"
+  bind:confirm="onPrivacyConfirm"
+  bind:reject="onPrivacyReject"
+/>

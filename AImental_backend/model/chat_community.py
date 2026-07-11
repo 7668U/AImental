@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 # 导入数据库连接和日志记录器
 from db import chat_db 
 from logger_config import logger 
+from security.data_encryption import EncryptedTextField
 
 # 确保从正确的路径导入您的AICharacter模型
 from .ai_character import AICharacter
@@ -42,6 +43,7 @@ class ChatListSummaryModel(BaseModel):
     last_message_timestamp: int
     favorability: float
     unread: bool = Field(..., description="用户是否还没查看最新消息 (True代表有红点)")
+    current_status: str = Field(default="在线", description="AI角色当前的状态类别")
 
 # ---------------------------------------------------
 # 2. Peewee 数据库模型 (已升级)
@@ -56,9 +58,15 @@ class CommunityChat(Model):
     user_id = CharField(index=True)
     character = ForeignKeyField(AICharacter, field='id', backref='chats', on_delete='CASCADE')
     
-    messages_history = TextField(default='[]')
+    messages_history = EncryptedTextField(
+        purpose="community_chats.messages_history",
+        default='[]',
+    )
     favorability = FloatField(default=0.0)
-    favorability_history = TextField(default='[]')
+    favorability_history = EncryptedTextField(
+        purpose="community_chats.favorability_history",
+        default='[]',
+    )
     
     user_has_peeked = BooleanField(default=True, help_text="用户是否已查看过由AI发送的最新消息")
     
@@ -75,7 +83,10 @@ class CommunityChat(Model):
     # --- --------------------------- ---
     
     last_message_timestamp = IntegerField(default=lambda: int(time.time()))
-    last_message_snippet = CharField(max_length=100, default="点击开始聊天")
+    last_message_snippet = EncryptedTextField(
+        purpose="community_chats.last_message_snippet",
+        default="点击开始聊天",
+    )
 
     class Meta:
         database = chat_db
@@ -88,6 +99,32 @@ class CommunityChat(Model):
 
 class CommunityChatTable:
     """封装所有对 'community_chats' 表的数据库操作。"""
+
+    DEFAULT_GREETINGS = {
+        "泠月": "嗯……你好呀，我是泠月，一名文物修复师。",
+        "刘书沁": "嗯，你好呀，我是刘书沁，中文系学生。",
+        "凌曜": "嗨，我是凌曜，平时做街拍摄影。",
+        "张卫国": "你好啊，我是张卫国，平时做企业行政管理。",
+        "顾明轩": "你好，我是顾明轩，誊信科技的负责人。",
+        "Harrison": "Hello, I’m Edward Harrison, a retired history teacher.",
+        "夏阳": "哈喽！我是夏阳，播音主持系的学生。",
+        "韩之昱": "你好，我是韩之昱，建筑设计师。",
+        "苏瑾": "你好呀，我是苏瑾，一名艺术策展人。",
+        "顾屿": "噢，你好。我是顾屿，独立游戏开发者。",
+    }
+
+    LEGACY_DEFAULT_GREETING_REPLACEMENTS = {
+        "嗯…你好呀，我是泠月。刚刚在整理一只旧瓷杯的裂纹，看到你来了，就想先和你打个招呼。( ´ ▽ ` )ﾉ": DEFAULT_GREETINGS["泠月"],
+        "嗯…你好呀，我是刘书沁。刚在本子上记下一句话，正好也想听听你今天过得怎么样。": DEFAULT_GREETINGS["刘书沁"],
+        "哟，来了？我是凌曜。今天光线不错，感觉适合拍点什么，也适合认识一个新朋友。": DEFAULT_GREETINGS["凌曜"],
+        "你好，我是张卫国。刚泡了杯茶，坐下来歇会儿。你要是愿意，就慢慢跟我聊聊。": DEFAULT_GREETINGS["张卫国"],
+        "你好，我是顾明轩。刚处理完一点工作，看到你来了。今天想聊点什么？": DEFAULT_GREETINGS["顾明轩"],
+        "Hi, I am Harrison. It is very nice to meet you. May I ask what I should call you?": DEFAULT_GREETINGS["Harrison"],
+        "嘿，你好呀，我是夏阳。刚运动完还有点兴奋，很高兴认识你。我该怎么称呼你？": DEFAULT_GREETINGS["夏阳"],
+        "你好，我是韩之昱。刚看完一段资料，脑子还算清醒。你可以从任何地方开始说。": DEFAULT_GREETINGS["韩之昱"],
+        "你好呀，我是苏瑾。刚把手边的小事收拾好，想安静地听你说会儿话。": DEFAULT_GREETINGS["苏瑾"],
+        "唔...我是顾屿。刚把一个小 bug 修掉，脑子终于空出来一点。你今天怎么样？": DEFAULT_GREETINGS["顾屿"],
+    }
     
     def __init__(self, db_connection):
         self.db = db_connection
@@ -107,21 +144,9 @@ class CommunityChatTable:
         keywords = dialogue.get("keywords") or []
         opener = keywords[0] if keywords else "你好"
 
-        custom_greetings = {
-            "泠月": "嗯…你好呀，我是泠月。刚刚在整理一只旧瓷杯的裂纹，看到你来了，就想先和你打个招呼。( ´ ▽ ` )ﾉ",
-            "刘书沁": "嗯…你好呀，我是刘书沁。刚在本子上记下一句话，正好也想听听你今天过得怎么样。",
-            "凌曜": "哟，来了？我是凌曜。今天光线不错，感觉适合拍点什么，也适合认识一个新朋友。",
-            "张卫国": "你好，我是张卫国。刚泡了杯茶，坐下来歇会儿。你要是愿意，就慢慢跟我聊聊。",
-            "顾明轩": "你好，我是顾明轩。刚处理完一点工作，看到你来了。今天想聊点什么？",
-            "Harrison": "Hi，我是 Harrison。刚从一段旋律里回过神来，正好想问问你，今天的心情是什么颜色？",
-            "夏阳": "嘿，你来啦！我是夏阳。刚运动完还有点兴奋，要不要跟我说说你今天发生了什么？",
-            "韩之昱": "你好，我是韩之昱。刚看完一段资料，脑子还算清醒。你可以从任何地方开始说。",
-            "苏瑾": "你好呀，我是苏瑾。刚把手边的小事收拾好，想安静地听你说会儿话。",
-            "顾屿": "唔...我是顾屿。刚把一个小 bug 修掉，脑子终于空出来一点。你今天怎么样？"
-        }
         for greeting_key in (character_name, name):
-            if greeting_key in custom_greetings:
-                return custom_greetings[greeting_key]
+            if greeting_key in self.DEFAULT_GREETINGS:
+                return self.DEFAULT_GREETINGS[greeting_key]
 
         if occupation and philosophy:
             return f"{opener}，我是{name}。平时在做{occupation}，也一直相信“{philosophy}”。很高兴认识你，今天想从哪里聊起？"
@@ -143,8 +168,20 @@ class CommunityChatTable:
         except json.JSONDecodeError:
             history = []
 
+        greeting = self.build_default_greeting(character)
+        if (
+            len(history) == 1
+            and history[0].get("role") == "ai"
+            and history[0].get("content") in self.LEGACY_DEFAULT_GREETING_REPLACEMENTS
+        ):
+            replacement = self.LEGACY_DEFAULT_GREETING_REPLACEMENTS[history[0]["content"]]
+            if replacement == greeting:
+                history[0]["content"] = replacement
+                conversation.messages_history = json.dumps(history, ensure_ascii=False)
+                conversation.last_message_snippet = replacement
+                conversation.save()
+
         if not has_messages:
-            greeting = self.build_default_greeting(character)
             greeting_message = ChatMessageModel(role="ai", content=greeting)
             conversation.messages_history = json.dumps([greeting_message.model_dump()], ensure_ascii=False)
             conversation.last_message_timestamp = greeting_message.timestamp
@@ -193,6 +230,33 @@ class CommunityChatTable:
         conversation.save()
         
         return conversation
+
+    def rewind_conversation(self, user_id: str, character_id: str) -> List[Dict[str, Any]]:
+        """清空单个用户与角色的关系数据，并恢复为新版默认问候。"""
+        character = AICharacter.get_or_none(AICharacter.id == character_id)
+        if not character:
+            raise DoesNotExist(f"Character {character_id} does not exist.")
+
+        conversation, _ = CommunityChat.get_or_create(
+            user_id=user_id,
+            character=character_id,
+        )
+        greeting = self.build_default_greeting(character)
+        greeting_message = ChatMessageModel(role="ai", content=greeting)
+        history = [greeting_message.model_dump()]
+
+        conversation.messages_history = json.dumps(history, ensure_ascii=False)
+        conversation.favorability = 0.0
+        conversation.favorability_history = "[]"
+        conversation.user_has_peeked = True
+        conversation.conversation_state = "CONTINUOUS"
+        conversation.conversation_resumes_at = None
+        conversation.last_message_timestamp = greeting_message.timestamp
+        conversation.last_message_snippet = (
+            greeting[:97] + "..." if len(greeting) > 100 else greeting
+        )
+        conversation.save()
+        return history
     
     # --- 【以下为本次新增或修改的函数】 ---
 
@@ -414,18 +478,17 @@ class CommunityChatTable:
 
     def reset_uninitialized_favorability(self) -> int:
         """把旧默认值 50 且没有好感度历史的会话迁移为 0。"""
-        query = (
-            CommunityChat
-            .update({CommunityChat.favorability: 0.0})
-            .where(
-                (CommunityChat.favorability == 50.0)
-                & (
-                    (CommunityChat.favorability_history == "[]")
-                    | (CommunityChat.favorability_history == "")
-                )
-            )
+        updated = 0
+        candidates = CommunityChat.select().where(
+            CommunityChat.favorability == 50.0
         )
-        return query.execute()
+        for conversation in candidates:
+            if conversation.favorability_history not in ("", "[]"):
+                continue
+            conversation.favorability = 0.0
+            conversation.save(only=[CommunityChat.favorability])
+            updated += 1
+        return updated
 
 # ---------------------------------------------------
 # 4. 实例化

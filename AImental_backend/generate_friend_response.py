@@ -117,8 +117,10 @@ def generate_friend_request_decision(
         
     except ValidationError as e:
         print(f"[错误] AI返回的JSON格式不正确或字段不匹配: \n{e}")
-        # 在Pydantic v2中，e.json()可以更清晰地打印错误
-        print(f"原始响应内容: {raw_response_content}")
+        print(
+            "原始响应已省略，避免敏感内容进入日志。"
+            f" response_chars={len(str(raw_response_content or ''))}"
+        )
         return None
     except Exception as e:
         print(f"[错误] 调用API或处理数据时发生未知错误: {e}")

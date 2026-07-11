@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 # Import the database connection for the chat module
 from db import chat_db
+from security.data_encryption import EncryptedTextField
 
 # ---------------------------------------------------
 # 1. Peewee & Pydantic Models
@@ -21,8 +22,8 @@ class Chat(Model):
     """
     id = CharField(primary_key=True, max_length=36, default=lambda: str(uuid.uuid4()))
     user_id = CharField(index=True)
-    title = CharField(default="New Chat")
-    message = TextField(default='[]')
+    title = EncryptedTextField(purpose="chats.title", default="New Chat")
+    message = EncryptedTextField(purpose="chats.message", default='[]')
     timestamp = IntegerField(default=lambda: int(time.time()))
     # 【第2步】: 新增 with_context 字段，记录此会话是否加载历史背景
     with_context = BooleanField(default=True, help_text="是否在对话中引入用户历史背景")
@@ -81,11 +82,13 @@ class ChatTable:
         """
         Returns the latest empty chat session for the user, if one exists.
         """
-        return (Chat
-                .select()
-                .where((Chat.user_id == user_id) & (Chat.message == '[]'))
-                .order_by(Chat.timestamp.desc())
-                .first())
+        candidates = (
+            Chat.select()
+            .where(Chat.user_id == user_id)
+            .order_by(Chat.timestamp.desc())
+            .limit(10)
+        )
+        return next((chat for chat in candidates if chat.message == "[]"), None)
 
     # 【第4步】: 修改 create_new_chat 函数签名，使其可以接收 with_context 参数
     def create_new_chat(self, user_id: str, with_context: bool = True) -> Chat:

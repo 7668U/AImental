@@ -1,4 +1,4 @@
-// pages/daily-checkin/analysis.js
+﻿// pages/daily-checkin/analysis.js
 import * as echarts from './components-ecanvas/ec-canvas/echarts';
 
 // --- 全局配置 ---

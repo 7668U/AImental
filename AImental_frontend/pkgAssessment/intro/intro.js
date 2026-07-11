@@ -4,13 +4,15 @@ const { getScaleDisplayName, getScaleIconName } = require('../../utils/assessmen
 function request(options) {
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
+    const header = { ...options.header };
+    if (token) {
+      header.Authorization = `Bearer ${token}`;
+    }
+
     wx.request({
       ...options,
       url: `http://127.0.0.1:8000/api/v1${options.url}`,
-      header: {
-        ...options.header,
-        'Authorization': `Bearer ${token}`
-      },
+      header,
       success(res) {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve(res.data);

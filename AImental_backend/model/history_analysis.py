@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 
 from db import assessment_db 
 from .user import User
+from security.data_encryption import EncryptedTextField
 
 # ---------------------------------------------------
 # 1. Peewee 数据模型 (数据库表结构)
@@ -26,8 +27,14 @@ class HistoryAnalysis(Model):
     # ✅ 2. 【新增字段】用于存储ID列表的唯一签名，这是实现缓存的关键
     analysis_signature = CharField(max_length=64, unique=True, index=True, help_text="SHA256 hash of sorted history IDs")
     
-    analyzed_history_ids = TextField(help_text="被分析的用户测评历史记录ID列表的JSON字符串")
-    content = TextField(help_text="AI生成的分析报告内容的JSON字符串")
+    analyzed_history_ids = EncryptedTextField(
+        purpose="history_analyses.analyzed_history_ids",
+        help_text="被分析的用户测评历史记录ID列表的JSON字符串",
+    )
+    content = EncryptedTextField(
+        purpose="history_analyses.content",
+        help_text="AI生成的分析报告内容的JSON字符串",
+    )
     created_at = DateTimeField(default=datetime.now)
 
     class Meta:
@@ -61,9 +68,7 @@ class HistoryAnalysisTables:
     """封装所有与历史记录分析相关的数据库操作"""
     def __init__(self, db_connection):
         self.db = db_connection
-        # 确保新字段的表被创建、
-        self.db.drop_tables([HistoryAnalysis], safe=True)
-        self.db.create_tables([HistoryAnalysis])
+        self.db.create_tables([HistoryAnalysis], safe=True)
 
     # ✅ 3. 【新增辅助函数】用于创建唯一签名
     def _create_signature(self, history_ids: List[str]) -> str:

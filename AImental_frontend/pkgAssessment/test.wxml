@@ -112,3 +112,9 @@
     </view>
   </view>
 </view>
+
+<privacy-consent
+  visible="{{privacyVisible}}"
+  bind:confirm="onPrivacyConfirm"
+  bind:reject="onPrivacyReject"
+/>

@@ -7,6 +7,7 @@ from peewee import (
     Model, CharField, TextField, DateTimeField, BooleanField, IntegerField, fn
 )
 from db import cabinet_db
+from security.data_encryption import EncryptedTextField
 
 # ---------------------------------------------------
 # 1) Peewee Models (模型已重构)
@@ -27,8 +28,8 @@ class NoteItem(BaseModel):
 
     # --- 其他字段保持不变 ---
     item_type = CharField()
-    title = CharField(max_length=255, null=True)
-    content = TextField()
+    title = EncryptedTextField(purpose="notes.title", null=True)
+    content = EncryptedTextField(purpose="notes.content")
     is_completed = BooleanField(default=False)
     item_order = IntegerField(default=0)
     created_at = DateTimeField(default=datetime.now)

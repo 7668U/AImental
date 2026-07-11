@@ -1,5 +1,7 @@
 {
-  "usingComponents": {},
+  "usingComponents": {
+    "privacy-consent": "/components/privacy-consent/privacy-consent"
+  },
   "navigationBarTitleText": "心理测评",
   "navigationBarBackgroundColor": "#ffffff",
   "navigationBarTextStyle": "black",

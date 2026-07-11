@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 from db import promotion_db
 # 🔴 重要：导入 User 模型，用于建立外键关联
 from .user import User
+from security.data_encryption import EncryptedTextField, blind_index
 
 # ---------------------------------------------------
 # 1. 问卷静态数据
@@ -295,9 +296,15 @@ class TestRecord(Model):
     # null=True 表示这条记录初始可以没有对应的用户（即匿名状态）。
     user = ForeignKeyField(User, backref='test_records', null=True)
     
-    result_personality_id = CharField(max_length=20, null=True)
+    result_personality_id = EncryptedTextField(
+        purpose="test_records.result_personality_id",
+        null=True,
+    )
     status = CharField(max_length=20, default='IN_PROGRESS') # e.g., IN_PROGRESS, COMPLETED, CLAIMED
-    answers_json = TextField(null=True) # 以JSON字符串形式存储原始答案
+    answers_json = EncryptedTextField(
+        purpose="test_records.answers_json",
+        null=True,
+    )
     created_at = DateTimeField(default=datetime.now)
     updated_at = DateTimeField(default=datetime.now)
 
@@ -359,13 +366,26 @@ SOUL_DRINK_SCORE_MAP = [
 class SoulDrinkRecord(Model):
     """H5 灵魂饮料测试的匿名记录。"""
     id = CharField(primary_key=True, max_length=36, default=lambda: str(uuid.uuid4()))
-    visitor_token = CharField(max_length=64, unique=True, index=True, default=lambda: str(uuid.uuid4()))
+    visitor_token = EncryptedTextField(purpose="soul_drink_records.visitor_token")
+    visitor_token_lookup = CharField(max_length=64, unique=True, index=True, null=True)
     status = CharField(max_length=20, default='IN_PROGRESS')
     current_index = IntegerField(default=0)
-    answers_json = TextField(null=True)
-    scores_json = TextField(null=True)
-    result_type = CharField(max_length=10, null=True)
-    result_drink = CharField(max_length=50, null=True)
+    answers_json = EncryptedTextField(
+        purpose="soul_drink_records.answers_json",
+        null=True,
+    )
+    scores_json = EncryptedTextField(
+        purpose="soul_drink_records.scores_json",
+        null=True,
+    )
+    result_type = EncryptedTextField(
+        purpose="soul_drink_records.result_type",
+        null=True,
+    )
+    result_drink = EncryptedTextField(
+        purpose="soul_drink_records.result_drink",
+        null=True,
+    )
     created_at = DateTimeField(default=datetime.now)
     updated_at = DateTimeField(default=datetime.now)
     completed_at = DateTimeField(null=True)
@@ -454,17 +474,52 @@ class SoulDrinkTable:
 
     def __init__(self, db_connection):
         self.db = db_connection
-        self.db.create_tables([SoulDrinkRecord])
+        if not self.db.table_exists(SoulDrinkRecord._meta.table_name):
+            self.db.create_tables([SoulDrinkRecord], safe=True)
+        existing_columns = {
+            column.name
+            for column in self.db.get_columns(SoulDrinkRecord._meta.table_name)
+        }
+        if "visitor_token_lookup" not in existing_columns:
+            self.db.execute_sql(
+                "ALTER TABLE soul_drink_records "
+                "ADD COLUMN visitor_token_lookup VARCHAR(64)"
+            )
+        self.db.execute_sql(
+            "CREATE UNIQUE INDEX IF NOT EXISTS soul_drink_token_lookup "
+            "ON soul_drink_records(visitor_token_lookup)"
+        )
+        for record in SoulDrinkRecord.select().where(
+            SoulDrinkRecord.visitor_token_lookup.is_null(True)
+        ):
+            record.visitor_token_lookup = blind_index(
+                record.visitor_token,
+                "soul_drink_records.visitor_token",
+            )
+            record.save(only=[SoulDrinkRecord.visitor_token_lookup])
 
     def get_or_create_session(self, visitor_token: Optional[str] = None) -> SoulDrinkRecord:
         if visitor_token:
-            record = SoulDrinkRecord.get_or_none(SoulDrinkRecord.visitor_token == visitor_token)
+            record = self.get_by_token(visitor_token)
             if record:
                 return record
-        return SoulDrinkRecord.create(visitor_token=visitor_token or str(uuid.uuid4()))
+        token = visitor_token or str(uuid.uuid4())
+        return SoulDrinkRecord.create(
+            visitor_token=token,
+            visitor_token_lookup=blind_index(
+                token,
+                "soul_drink_records.visitor_token",
+            ),
+        )
 
     def get_by_token(self, visitor_token: str) -> Optional[SoulDrinkRecord]:
-        return SoulDrinkRecord.get_or_none(SoulDrinkRecord.visitor_token == visitor_token)
+        lookup = blind_index(
+            visitor_token,
+            "soul_drink_records.visitor_token",
+        )
+        return SoulDrinkRecord.get_or_none(
+            SoulDrinkRecord.visitor_token_lookup == lookup
+        )
 
     def save_progress(self, visitor_token: str, answers: List[Optional[str]], current_index: int) -> Optional[SoulDrinkRecord]:
         record = self.get_by_token(visitor_token)

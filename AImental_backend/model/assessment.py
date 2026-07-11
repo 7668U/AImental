@@ -11,6 +11,10 @@ from pydantic import BaseModel, Field
 
 from db import assessment_db
 from .user import User  # 假设 User 模型可以从 .user 导入
+from security.data_encryption import (
+    EncryptedFloatField,
+    EncryptedTextField,
+)
 
 # --- 静态配置 ---
 ASSESSMENT_DATA_DIR = "assessment_data/"
@@ -159,13 +163,40 @@ class UserAssessment(Model):
     id = CharField(primary_key=True, max_length=36, default=lambda: str(uuid.uuid4()))
     user = ForeignKeyField(User, backref='assessments', field='id', on_delete='CASCADE')
     scale = ForeignKeyField(Scale, backref='attempts', field='id', on_delete='SET NULL', null=True)
-    answers = TextField(help_text="用户提交的答案详情 (JSON字符串)")
-    raw_score = FloatField(null=True, help_text="原始总分")
-    final_score = FloatField(null=True, help_text="最终标准分 (如果适用)")
-    result_level = CharField(max_length=255, null=True, help_text="结果等级或分类名, 如 '轻度抑郁' 或 '图书馆生态信息学'")
-    result_interpretation = TextField(null=True, help_text="对结果的详细文字解释")
-    result_recommendation = TextField(null=True, help_text="给用户的建议")
-    result_details = TextField(null=True, help_text="存储额外结果详情的JSON字符串")
+    answers = EncryptedTextField(
+        purpose="user_assessments.answers",
+        help_text="用户提交的答案详情 (JSON字符串)",
+    )
+    raw_score = EncryptedFloatField(
+        purpose="user_assessments.raw_score",
+        null=True,
+        help_text="原始总分",
+    )
+    final_score = EncryptedFloatField(
+        purpose="user_assessments.final_score",
+        null=True,
+        help_text="最终标准分 (如果适用)",
+    )
+    result_level = EncryptedTextField(
+        purpose="user_assessments.result_level",
+        null=True,
+        help_text="结果等级或分类名",
+    )
+    result_interpretation = EncryptedTextField(
+        purpose="user_assessments.result_interpretation",
+        null=True,
+        help_text="对结果的详细文字解释",
+    )
+    result_recommendation = EncryptedTextField(
+        purpose="user_assessments.result_recommendation",
+        null=True,
+        help_text="给用户的建议",
+    )
+    result_details = EncryptedTextField(
+        purpose="user_assessments.result_details",
+        null=True,
+        help_text="存储额外结果详情的JSON字符串",
+    )
     
     completed_at = DateTimeField(default=datetime.now, help_text="测评完成时间")
 

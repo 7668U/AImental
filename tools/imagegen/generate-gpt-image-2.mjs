@@ -32,6 +32,7 @@ async function loadEnv() {
   const candidates = [
     resolve(process.cwd(), '.env'),
     resolve(projectRoot, '.env'),
+    resolve(projectRoot, 'AImental_backend', '.env'),
   ]
 
   for (const envPath of [...new Set(candidates)]) {
@@ -108,6 +109,18 @@ function normalizeImagesApiRoot(value) {
   return trimmed.replace(/\/v1$/i, '')
 }
 
+function imageGenerationUrl(baseUrl) {
+  return /\/apiv2$/i.test(baseUrl)
+    ? `${baseUrl}/images/generations`
+    : `${baseUrl}/v1/images/generations`
+}
+
+function imageEditUrl(baseUrl) {
+  return /\/apiv2$/i.test(baseUrl)
+    ? `${baseUrl}/images/edits`
+    : `${baseUrl}/v1/images/edits`
+}
+
 function printHelp() {
   console.log(`Usage:
   node tools/imagegen/generate-gpt-image-2.mjs --prompt "your image prompt"
@@ -135,14 +148,20 @@ if (hasFlag(args, 'help')) {
   process.exit(0)
 }
 
-const apiKey = process.env.OPENAI_API_KEY?.trim()
+const requestedBaseUrl = readOption(args, 'base-url', process.env.OPENAI_BASE_URL || 'https://api.openai.com')
+const baseUrl = normalizeImagesApiRoot(requestedBaseUrl)
+const isHepai = /\/apiv2$/i.test(baseUrl)
+const apiKey = (
+  isHepai
+    ? process.env.HEPAI_API_KEY || process.env.OPENAI_API_KEY
+    : process.env.OPENAI_API_KEY
+)?.trim()
 if (!apiKey) {
-  console.error('Missing OPENAI_API_KEY. Paste it into the project .env file first.')
+  console.error(`Missing ${isHepai ? 'HEPAI_API_KEY or OPENAI_API_KEY' : 'OPENAI_API_KEY'}. Configure it in a local .env file first.`)
   process.exit(1)
 }
 
 const model = readOption(args, 'model', 'gpt-image-2')
-const baseUrl = normalizeImagesApiRoot(readOption(args, 'base-url', process.env.OPENAI_BASE_URL || 'https://api.openai.com'))
 const size = readOption(args, 'size', '1024x1024')
 const quality = readOption(args, 'quality', 'low')
 const outputFormat = readOption(args, 'format', 'png')
@@ -184,7 +203,7 @@ if (imagePaths.length) {
     formData.append(index === 0 ? 'image' : 'image[]', new Blob([bytes], { type }), basename(imagePath))
   }
 
-  response = await fetch(`${baseUrl}/v1/images/edits`, {
+  response = await fetch(imageEditUrl(baseUrl), {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -192,7 +211,7 @@ if (imagePaths.length) {
     body: formData,
   })
 } else {
-  response = await fetch(`${baseUrl}/v1/images/generations`, {
+  response = await fetch(imageGenerationUrl(baseUrl), {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,

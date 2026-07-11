@@ -10,7 +10,9 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 
 # --- 安全配置 ---
-SECRET_KEY = os.getenv("SECRET_KEY", "a_very_secret_and_long_random_string_for_jwt")
+SECRET_KEY = os.getenv("SECRET_KEY", "").strip()
+if len(SECRET_KEY) < 32:
+    raise RuntimeError("SECRET_KEY must be configured with at least 32 characters.")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 30
 
@@ -38,11 +40,8 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 # --- 真实的认证依赖项 ---
-def get_current_user_id(token: str = Depends(oauth2_scheme)) -> str:
-    """
-    解码JWT Token，验证并返回用户ID。
-    新增了黑名单检查。
-    """
+def get_authenticated_user_id(token: str = Depends(oauth2_scheme)) -> str:
+    """Decode and validate a JWT without applying privacy-consent gating."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -62,5 +61,25 @@ def get_current_user_id(token: str = Depends(oauth2_scheme)) -> str:
             
     except JWTError:
         raise credentials_exception
-    
+
+    return user_id
+
+
+def get_current_user_id(token: str = Depends(oauth2_scheme)) -> str:
+    """Validate the token and require the current privacy policy consent."""
+    user_id = get_authenticated_user_id(token)
+
+    # Late import avoids a model/router import cycle during application startup.
+    from model.user import user_table
+    from privacy_policy import PRIVACY_POLICY_VERSION
+
+    if not user_table.has_current_privacy_consent(user_id):
+        raise HTTPException(
+            status_code=status.HTTP_428_PRECONDITION_REQUIRED,
+            detail={
+                "code": "privacy_consent_required",
+                "message": "Please review and accept the current privacy policy.",
+                "privacy_policy_version": PRIVACY_POLICY_VERSION,
+            },
+        )
     return user_id

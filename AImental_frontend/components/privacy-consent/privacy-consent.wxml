@@ -1,0 +1,99 @@
+<view
+  wx:if="{{visible}}"
+  class="privacy-mask"
+  catchtouchmove="preventTouchMove"
+>
+  <view class="privacy-dialog">
+    <view class="privacy-close" bindtap="rejectConsent" aria-label="关闭">×</view>
+
+    <image
+      class="privacy-illustration"
+      src="/images/privacy/privacy-shield.png"
+      mode="aspectFit"
+    />
+
+    <view class="privacy-eyebrow">PRIVACY FIRST</view>
+    <view class="privacy-title">你的心事，只属于你</view>
+    <view class="privacy-lead">登录前，请花一点时间了解我们如何使用并保护你的信息。</view>
+
+    <view class="privacy-promises">
+      <view class="privacy-promise">
+        <view class="promise-icon-shell">
+          <image class="promise-icon-image" src="/images/privacy/privacy-lock-line.png" mode="aspectFit"></image>
+        </view>
+        <view class="promise-copy">
+          <view class="promise-title">敏感数据加密保存</view>
+          <view class="promise-desc">情绪记录、测评与聊天内容均采用认证加密</view>
+        </view>
+      </view>
+      <view class="privacy-promise">
+        <view class="promise-icon-shell">
+          <image class="promise-icon-image" src="/images/privacy/privacy-minimal-line.png" mode="aspectFit"></image>
+        </view>
+        <view class="promise-copy">
+          <view class="promise-title">只收集功能所必需的信息</view>
+          <view class="promise-desc">未使用对应功能时，不主动收集相关内容</view>
+        </view>
+      </view>
+      <view class="privacy-promise">
+        <view class="promise-icon-shell">
+          <image class="promise-icon-image" src="/images/privacy/privacy-control-line.png" mode="aspectFit"></image>
+        </view>
+        <view class="promise-copy">
+          <view class="promise-title">你的数据由你掌控</view>
+          <view class="promise-desc">可以查询、更正、删除，也可以随时撤回同意</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="privacy-agreement" bindtap="toggleChecked">
+      <view class="privacy-check {{checked ? 'is-checked' : ''}}">
+        <text wx:if="{{checked}}">✓</text>
+      </view>
+      <view class="privacy-agreement-copy">
+        我已阅读并同意
+        <text class="privacy-link" catchtap="openDetails">《用户隐私保护协议》</text>
+        ，并理解 AI 内容不替代专业医疗或心理咨询。
+      </view>
+    </view>
+
+    <button
+      class="privacy-primary {{checked ? 'is-enabled' : ''}}"
+      disabled="{{!checked}}"
+      bindtap="confirmConsent"
+    >
+      同意并继续登录
+    </button>
+    <view class="privacy-secondary" bindtap="rejectConsent">暂不同意</view>
+    <view class="privacy-safe-note">我们会持续采用与数据敏感程度相匹配的安全措施保护你的隐私。</view>
+  </view>
+
+  <view wx:if="{{detailVisible}}" class="privacy-detail-layer">
+    <view class="privacy-detail">
+      <view class="detail-header">
+        <view class="detail-back" bindtap="closeDetails">‹</view>
+        <view class="detail-title">{{policy.title}}</view>
+        <view class="detail-placeholder"></view>
+      </view>
+      <scroll-view class="detail-scroll" scroll-y="true" enhanced="true">
+        <view class="detail-meta">版本 {{policy.version}} · 生效日期 {{policy.effectiveDate}}</view>
+        <view class="detail-summary">
+          <image class="detail-summary-icon" src="/images/privacy/privacy-shield-line.png" mode="aspectFit"></image>
+          <view class="detail-summary-copy">{{policy.summary}}</view>
+        </view>
+        <view
+          wx:for="{{policy.sections}}"
+          wx:key="title"
+          class="detail-section"
+        >
+          <view class="detail-section-title">{{item.title}}</view>
+          <view class="detail-section-content">{{item.content}}</view>
+        </view>
+        <view class="detail-notice">{{policy.notice}}</view>
+      </scroll-view>
+      <view class="detail-footer">
+        <view class="detail-confirm" bindtap="closeDetails">我已了解</view>
+      </view>
+    </view>
+  </view>
+</view>

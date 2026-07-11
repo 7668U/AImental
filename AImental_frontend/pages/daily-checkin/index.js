@@ -1,6 +1,14 @@
 // pages/daily-checkin/index.js (修改后)
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
-const { loginWithBackend } = require('../../utils/auth.js');
+const {
+  confirmPrivacyAwareLogin,
+  loginWithBackend,
+  rejectPrivacyAwareLogin,
+  requestPrivacyAwareLogin
+} = require('../../utils/auth.js');
+
+const DAILY_CHECKIN_GUIDE_VERSION = 'v1';
+const DAILY_CHECKIN_GUIDE_ICON = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/daily-checkin/layout/calendar-card.png';
 
 // 从 ai-therapist 页面“借鉴”过来的网络请求函数，你也可以把它封装成公共模块
 function request(options) {
@@ -36,6 +44,9 @@ Page({
     statusBarHeight: 0,
     navBarHeight: 0,
     totalNavBarHeight: 0,
+    privacyVisible: false,
+    showDailyCheckinGuide: false,
+    dailyCheckinGuideIcon: DAILY_CHECKIN_GUIDE_ICON
   },
 
   onLoad(options) {},
@@ -57,6 +68,7 @@ Page({
           navBarHeight: navBarHeight,
           totalNavBarHeight: totalNavBarHeight
         });
+        this.showDailyCheckinGuideIfNeeded();
     
         // 模拟登录状态和打卡状态
         // this.setData({ isLoggedIn: true, hasCheckedInToday: false });
@@ -74,16 +86,64 @@ Page({
       // 如果已登录，才去获取打卡状态
       this.fetchCheckinData();
     } else {
-      this.setData({ isLoggedIn: false });
+      this.setData({
+        isLoggedIn: false,
+        hasCheckedInToday: false,
+        showCalendar: false
+      });
     }
   },
 
+  getDailyCheckinGuideStorageKey() {
+    const userInfo = wx.getStorageSync('userInfo') || {};
+    const userKey = userInfo.id || userInfo.user_id || userInfo.openid || 'default';
+    return `daily_checkin_guide_seen_${DAILY_CHECKIN_GUIDE_VERSION}_${userKey}`;
+  },
+
+  showDailyCheckinGuideIfNeeded() {
+    const storageKey = this.getDailyCheckinGuideStorageKey();
+    if (wx.getStorageSync(storageKey) || this._dailyCheckinGuideVisible) return;
+
+    this._dailyCheckinGuideVisible = true;
+    setTimeout(() => {
+      this.setData({ showDailyCheckinGuide: true });
+    }, 260);
+  },
+
+  handleConfirmDailyCheckinGuide() {
+    const storageKey = this.getDailyCheckinGuideStorageKey();
+    wx.setStorageSync(storageKey, true);
+    this._dailyCheckinGuideVisible = false;
+    this.setData({ showDailyCheckinGuide: false });
+  },
+
+  preventDailyCheckinGuideClose() {},
+
+  promptLogin(content = '登录后可以继续使用这个功能。') {
+    wx.showModal({
+      title: '登录后继续',
+      content,
+      confirmText: '去登录',
+      cancelText: '先逛逛',
+      confirmColor: '#ff6b16',
+      success: (res) => {
+        if (res.confirm) {
+          this.handleLogin();
+        }
+      }
+    });
+  },
+
   /**
-   * 新增：处理登录逻辑的函数，由 login-prompt 组件触发
+   * 新增：处理登录逻辑的函数，由需要账号的操作触发
    */
   handleLogin() {
+    return requestPrivacyAwareLogin(this, this.performLogin);
+  },
+
+  performLogin() {
     wx.showLoading({ title: '登录中...' });
-    loginWithBackend('http://127.0.0.1:8000/api/v1')
+    return loginWithBackend('http://127.0.0.1:8000/api/v1')
       .then((tokenRes) => {
         if (tokenRes.access_token) {
           wx.hideLoading();
@@ -99,6 +159,14 @@ Page({
         wx.hideLoading();
         wx.showToast({ title: '登录失败，请重试', icon: 'none' });
       });
+  },
+
+  onPrivacyConfirm() {
+    return confirmPrivacyAwareLogin(this);
+  },
+
+  onPrivacyReject() {
+    rejectPrivacyAwareLogin(this);
   },
 
   /**
@@ -126,6 +194,11 @@ Page({
    * 以下是原有的页面业务逻辑函数，保持不变
    */
   goToRecord() {
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后可以记录和保存你的今日心情。');
+      return;
+    }
+
     let url = '/pkgDailyCheckin/record';
     if (this.data.hasCheckedInToday) {
       url = '/pkgDailyCheckin/record?mode=edit';
@@ -134,6 +207,11 @@ Page({
   },
   
   openCalendar() {
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后可以查看你的心情日历。');
+      return;
+    }
+
     this.setData({ showCalendar: true });
   },
 
@@ -142,6 +220,11 @@ Page({
   },
 
   onDayTap(e) {
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后可以查看和补记心情。');
+      return;
+    }
+
     const { date, hasCheckin } = e.detail;
     
     if (hasCheckin) {
@@ -175,6 +258,11 @@ Page({
   },
 
   goToStatistics() {
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后可以查看你的心情分析。');
+      return;
+    }
+
     wx.navigateTo({
       url: '/pkgDailyCheckin/analysis'
     });

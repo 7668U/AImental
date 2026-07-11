@@ -1,5 +1,7 @@
 {
   "component": true,
-  "usingComponents": {},
+  "usingComponents": {
+    "privacy-consent": "/components/privacy-consent/privacy-consent"
+  },
   "navigationStyle": "custom"
 }

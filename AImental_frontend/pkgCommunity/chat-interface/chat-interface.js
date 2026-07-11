@@ -3,7 +3,7 @@ const API_BASE_URL = 'http://127.0.0.1:8000/api/v1/community';
 const SERVER_BASE_URL = API_BASE_URL.replace('/api/v1/community', '');
 const CDN_ASSET_BASE_URL = 'https://assets.feelyourself.cn/miniprogram/assets/v1';
 const DEFAULT_USER_AVATAR = `${CDN_ASSET_BASE_URL}/images/default-avatar.png`;
-const COMMUNITY_PROFILE_MBTI_ICON = `${CDN_ASSET_BASE_URL}/images/community-profile/profile-icon-mbti-2x.png`;
+const COMMUNITY_PROFILE_MBTI_ICON = '/images/community-profile-mbti.png';
 const app = getApp();
 
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');

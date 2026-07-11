@@ -330,7 +330,10 @@ def generate_daily_schedule(
 
     except ValidationError as e:
         print(f"❌ 数据验证失败: AI返回的JSON格式不符合预定义的Schema。错误详情: {e}")
-        print("原始响应内容:", raw_response_content)
+        print(
+            "原始响应已省略，避免模型内容进入日志。"
+            f" response_chars={len(str(raw_response_content or ''))}"
+        )
         print("⚠️ 使用本地兜底日程继续。")
         return build_fallback_daily_schedule(character_profile)
     except Exception as e:

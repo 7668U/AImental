@@ -21,6 +21,7 @@ from generate_community_memory import (
     merge_history_summary_cards,
 )
 from logger_config import logger
+from security.data_encryption import EncryptedTextField
 from .ai_character import AICharacter
 from .chat_community import community_chat_table
 
@@ -35,7 +36,10 @@ class CharacterUserMemory(Model):
     id = CharField(primary_key=True, max_length=36, default=lambda: str(uuid.uuid4()))
     user_id = CharField(index=True)
     character = ForeignKeyField(AICharacter, field="id", backref="user_memories", on_delete="CASCADE")
-    profile_card_json = TextField(default=lambda: json.dumps(build_default_profile_card(), ensure_ascii=False))
+    profile_card_json = EncryptedTextField(
+        purpose="community_user_memory.profile_card_json",
+        default=lambda: json.dumps(build_default_profile_card(), ensure_ascii=False),
+    )
     last_profile_update_message_count = IntegerField(default=0)
     last_summary_message_count = IntegerField(default=0)
     created_at = DateTimeField(default=lambda: datetime.now(BEIJING_TZ))
@@ -54,7 +58,9 @@ class CommunityHistorySummary(Model):
     start_message_index = IntegerField()
     end_message_index = IntegerField()
     level = IntegerField(default=1)
-    summary_card_json = TextField()
+    summary_card_json = EncryptedTextField(
+        purpose="community_history_summaries.summary_card_json"
+    )
     created_at = DateTimeField(default=lambda: datetime.now(BEIJING_TZ))
     updated_at = DateTimeField(default=lambda: datetime.now(BEIJING_TZ))
 
@@ -110,6 +116,29 @@ class CommunityMemoryTable:
             "user_profile_memory": self.get_profile_card(user_id, character_id),
             "history_summaries": self.get_summary_cards(user_id, character_id),
             "relationship_affinity": community_chat_table.get_favorability_context(user_id, character_id),
+        }
+
+    def clear_for_conversation(self, user_id: str, character_id: str) -> Dict[str, int]:
+        """删除单个用户与角色之间的画像记忆和历史摘要。"""
+        summary_count = (
+            CommunityHistorySummary.delete()
+            .where(
+                (CommunityHistorySummary.user_id == user_id)
+                & (CommunityHistorySummary.character == character_id)
+            )
+            .execute()
+        )
+        memory_count = (
+            CharacterUserMemory.delete()
+            .where(
+                (CharacterUserMemory.user_id == user_id)
+                & (CharacterUserMemory.character == character_id)
+            )
+            .execute()
+        )
+        return {
+            "memories": memory_count,
+            "summaries": summary_count,
         }
 
     def update_profile_affinity_note(self, user_id: str, character_id: str, affinity_note: str) -> bool:

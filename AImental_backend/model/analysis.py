@@ -7,6 +7,7 @@ from typing import List, Dict, Any, Optional # 引入 Optional
 
 from peewee import Model, CharField, TextField, IntegerField, CompositeKey
 from pydantic import BaseModel, Field
+from security.data_encryption import EncryptedTextField
 
 # 导入数据库连接
 try:
@@ -84,7 +85,7 @@ class Analysis(Model):
     user_id = CharField(max_length=36, index=True)
     period_key = CharField(max_length=50, index=True)
     analysis_type = CharField(max_length=50)
-    content = TextField()
+    content = EncryptedTextField(purpose="analyses.content")
     created_at = IntegerField(default=lambda: int(time.time()))
     updated_at = IntegerField(default=lambda: int(time.time()))
 

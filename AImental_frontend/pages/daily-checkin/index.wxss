@@ -88,9 +88,11 @@ page {
 }
 
 .welcome-wrapper .title {
-  font-size: 52rpx;
-  font-weight: bold;
-  color: #5f3c26;
+  font-family: 'LXGWWenKaiHome', "STKaiti", "KaiTi", "Songti SC", "PingFang SC", serif;
+  font-size: 60rpx;
+  line-height: 1.12;
+  font-weight: 400;
+  color: #4b2c1b;
   letter-spacing: 0;
 }
 
@@ -104,9 +106,13 @@ page {
 }
 
 .welcome-wrapper .subtitle {
-  font-size: 32rpx;
-  color: #8b684d;
-  margin-top: 10rpx;
+  margin-top: 16rpx;
+  font-family: 'LXGWWenKaiHome', "STKaiti", "KaiTi", "Songti SC", "PingFang SC", serif;
+  font-size: 28rpx;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #806d61;
+  letter-spacing: 0;
 }
 
 .card-scroll-area {
@@ -229,6 +235,83 @@ page {
   color: #92745c;
   text-align: center;
   letter-spacing: 0;
+}
+
+.daily-guide-modal {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 300;
+  width: 100%;
+  height: 100%;
+  padding: 46rpx;
+  box-sizing: border-box;
+  background: rgba(52, 38, 26, 0.44);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.daily-guide-content {
+  position: relative;
+  width: 100%;
+  max-width: 660rpx;
+  max-height: 86vh;
+  border-radius: 32rpx;
+  background: rgba(255, 255, 255, 0.98);
+  border: 2rpx solid rgba(255, 227, 190, 0.92);
+  box-shadow: 0 30rpx 78rpx rgba(115, 69, 28, 0.22);
+  overflow: hidden;
+}
+
+.daily-guide-icon {
+  position: absolute;
+  left: 34rpx;
+  top: 42rpx;
+  z-index: 1;
+  width: 88rpx;
+  height: 88rpx;
+}
+
+.daily-guide-body {
+  max-height: 86vh;
+  padding: 56rpx 40rpx 40rpx;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.daily-guide-title {
+  color: #3b2d24;
+  font-size: 40rpx;
+  font-weight: 800;
+  line-height: 1.18;
+  text-align: center;
+}
+
+.daily-guide-text {
+  margin-top: 26rpx;
+  color: #725f52;
+  font-size: 27rpx;
+  line-height: 1.68;
+  text-align: left;
+}
+
+.daily-guide-paragraph + .daily-guide-paragraph {
+  margin-top: 18rpx;
+}
+
+.daily-guide-button {
+  width: 100%;
+  height: 82rpx;
+  margin-top: 34rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #ff9639 0%, #ff6418 100%);
+  box-shadow: 0 16rpx 32rpx rgba(255, 105, 24, 0.25);
+  color: #ffffff;
+  font-size: 30rpx;
+  font-weight: 800;
+  line-height: 82rpx;
+  text-align: center;
 }
 
 /* 注意：旧的 .container 样式已被完全删除，因为它的功能被 .welcome-wrapper 和 .daily-layout 的 padding 取代了 */

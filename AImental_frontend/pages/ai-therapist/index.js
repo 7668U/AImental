@@ -1,6 +1,11 @@
 // pages/ai-therapist/index.js
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
-const { loginWithBackend } = require('../../utils/auth.js');
+const {
+  confirmPrivacyAwareLogin,
+  loginWithBackend,
+  rejectPrivacyAwareLogin,
+  requestPrivacyAwareLogin
+} = require('../../utils/auth.js');
 
 // --- 全局配置与网络请求封装 ---
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
@@ -59,6 +64,7 @@ Page({
     emojiOptions: ['😊', '🙂', '😌', '🥰', '🤗', '😢', '😭', '😔', '😴', '😮', '😤', '✨', '🌙', '☀️', '🍀', '💛', '🧡', '👍'],
     // 【新增】控制温馨提示弹窗的显示/隐藏
     isDisclaimerVisible: false,
+    privacyVisible: false,
   },
 
   _isInitializingChat: false,
@@ -98,21 +104,60 @@ Page({
         this.loadUserSettings(); 
       }
     } else {
-      if (this.data.isLoggedIn) {
-        this._isInitializingChat = false;
-        this._hasInitializedChat = false;
-        this.setData({
-          isLoggedIn: false, messages: [], chatHistory: [],
-          activeChatId: null, isSidebarVisible: false, inputValue: '',
-          isSettingsVisible: false, isEmojiPanelVisible: false,
-        });
-      }
+      const wasLoggedIn = this.data.isLoggedIn;
+      this._isInitializingChat = false;
+      this._hasInitializedChat = false;
+      this.setData({
+        isLoggedIn: false,
+        chatHistory: [],
+        activeChatId: null,
+        isSidebarVisible: false,
+        isSettingsVisible: false,
+        isEmojiPanelVisible: false,
+        ...(wasLoggedIn ? { inputValue: '' } : {}),
+      }, () => this.ensureGuestConversation(wasLoggedIn));
     }
   },
 
+  ensureGuestConversation(forceReset = false) {
+    if (!forceReset && this.data.messages.length > 0 && !this.data.activeChatId) {
+      return;
+    }
+
+    this.setData({
+      messages: [{
+        id: 1,
+        sender: 'ai',
+        text: WELCOME_MESSAGE,
+        displayTime: this.formatMessageTime()
+      }],
+      messageCounter: 1,
+      latestMessageId: 'msg-1',
+    });
+  },
+
+  promptLogin(content = '登录后可以继续使用这个功能。') {
+    wx.showModal({
+      title: '登录后继续',
+      content,
+      confirmText: '去登录',
+      cancelText: '先逛逛',
+      confirmColor: '#ff6b16',
+      success: (res) => {
+        if (res.confirm) {
+          this.handleLogin();
+        }
+      }
+    });
+  },
+
   handleLogin() {
+    return requestPrivacyAwareLogin(this, this.performLogin);
+  },
+
+  performLogin() {
     wx.showLoading({ title: '登录中...' });
-    loginWithBackend(API_BASE_URL)
+    return loginWithBackend(API_BASE_URL)
       .then(tokenRes => {
         wx.hideLoading();
         if (!tokenRes.access_token) {
@@ -128,6 +173,14 @@ Page({
         console.error('登录失败', err);
         wx.showToast({ title: '登录失败，请重试', icon: 'none' });
       });
+  },
+
+  onPrivacyConfirm() {
+    return confirmPrivacyAwareLogin(this);
+  },
+
+  onPrivacyReject() {
+    rejectPrivacyAwareLogin(this);
   },
 
   async initializeChat() {
@@ -260,6 +313,11 @@ Page({
   },
 
   async startNewChat() {
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后可以创建并保存新的聊天记录。');
+      return null;
+    }
+
     wx.showLoading({ title: '创建中...' });
     try {
       // 【核心修改】: 在创建新聊天时，将当前的设置状态作为请求体发送给后端
@@ -316,6 +374,11 @@ Page({
   },
 
   switchChat(e) {
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后可以查看历史聊天记录。');
+      return;
+    }
+
     const chatId = e.currentTarget.dataset.id;
     if (chatId === this.data.activeChatId && this.data.isSidebarVisible) {
       this.setData({ isSidebarVisible: false });
@@ -358,6 +421,11 @@ Page({
   },
   
   toggleSidebar() {
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后可以查看和管理历史聊天。');
+      return;
+    }
+
     this.setData({ isSidebarVisible: !this.data.isSidebarVisible });
   },
   
@@ -375,6 +443,11 @@ Page({
   },
 
   showChatOptions(e) {
+      if (!this.data.isLoggedIn) {
+          this.promptLogin('登录后可以管理你的聊天记录。');
+          return;
+      }
+
       const { id, title } = e.currentTarget.dataset;
       wx.showActionSheet({
           itemList: ['重命名', '删除'],
@@ -468,12 +541,19 @@ Page({
   },
 
   async onSend() {
-    if (!this.data.isLoggedIn) {
-      wx.showToast({ title: '请先登录', icon: 'none' });
-      return;
-    }
     const text = this.data.inputValue.trim();
     if (!text) return;
+
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后就可以把这段话发送给 Polaris，并保存这次对话。');
+      return;
+    }
+
+    if (!this.data.activeChatId) {
+      await this.startNewChat();
+      if (!this.data.activeChatId) return;
+    }
+
     const isFirstUserMessage = this.data.messages.length <= 1;
     this.addMessage('user', text);
     this.syncActiveChatPreview(text);
@@ -554,6 +634,11 @@ Page({
   },
 
   toggleSettings() {
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后可以调整个性化对话设置。');
+      return;
+    }
+
     if (!this.data.isSettingsVisible) {
       this.loadUserSettings();
     }
