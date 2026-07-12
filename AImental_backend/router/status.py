@@ -3,7 +3,6 @@
 # 1. 导入所有需要的模块
 from fastapi import APIRouter, Depends, HTTPException, Body, File, UploadFile
 from typing import Any, List, Optional, Dict
-from datetime import date
 from pydantic import BaseModel, Field
 
 # 2. 从项目其他文件中导入
@@ -50,21 +49,32 @@ def get_owned_checkin_or_404(checkin_id: str, current_user_id: str):
 @router.post(
     "/",
     response_model=CheckinModel,
-    summary="创建新的打卡记录 (不含图片)"
+    summary="创建新的此刻心情记录 (兼容旧路径，不含图片)"
 )
 def create_new_checkin(
     checkin_data: CheckinBaseModel = Body(...),
     current_user_id: str = Depends(get_current_user_id)
 ):
-    """为当前用户创建一条新的打卡记录，只包含文本和选择数据。"""
-    today = date.today()
-    today_str = today.strftime('%Y-%m-%d')
-    if checkin_table.get_checkin_by_date(user_id=current_user_id, target_date_str=today_str):
-        raise HTTPException(status_code=409, detail="A check-in for today already exists.")
-    
-    new_checkin = checkin_table.create_checkin(user_id=current_user_id, data=checkin_data)
+    """为当前用户创建一条新的此刻心情记录，只包含文本和选择数据。"""
+    new_checkin = checkin_table.create_moment(user_id=current_user_id, data=checkin_data)
     if not new_checkin:
         raise HTTPException(status_code=500, detail="Could not create the check-in record.")
+    return model_to_dict(new_checkin)
+
+
+@router.post(
+    "/moments",
+    response_model=CheckinModel,
+    summary="创建此刻心情记录"
+)
+def create_checkin_moment(
+    checkin_data: CheckinBaseModel = Body(...),
+    current_user_id: str = Depends(get_current_user_id)
+):
+    """每次提交都创建一条新的 moment，不限制一天一次。"""
+    new_checkin = checkin_table.create_moment(user_id=current_user_id, data=checkin_data)
+    if not new_checkin:
+        raise HTTPException(status_code=500, detail="Could not create the moment record.")
     return model_to_dict(new_checkin)
 
 
@@ -190,14 +200,13 @@ def delete_checkin_image(
 
 # --- 【最终修改】只修改这个接口 ---
 @router.get(
-    "/month/{year}/{month}", 
-    response_model=Dict[str, CheckinModel], 
-    summary="获取指定月份的打卡记录 (按天聚合)"
+    "/month/{year}/{month}",
+    response_model=Dict[str, Dict[str, Any]],
+    summary="获取指定月份的心情记录汇总 (按天聚合)"
 )
 def get_checkins_for_month(year: int, month: int, current_user_id: str = Depends(get_current_user_id)):
     """
-    获取一个字典，key是天(e.g., "28")，value是当天的打卡记录。
-    返回中包含 `mood_icon`，用于兼容新版 24 心情图标。
+    获取一个字典，key 是天(e.g., "28")，value 是当天 moment/review 汇总。
     """
     return checkin_table.get_checkins_by_month(user_id=current_user_id, year=year, month=month)
 
@@ -222,6 +231,33 @@ def seed_five_days_for_current_user(
         year=payload.year,
         month=payload.month,
     )
+
+@router.get("/date/{record_date}/timeline", response_model=Dict[str, Any], summary="获取指定日期的心情轨迹")
+def get_timeline_for_date(
+    record_date: str,
+    current_user_id: str = Depends(get_current_user_id)
+):
+    return checkin_table.get_timeline_by_date(
+        user_id=current_user_id,
+        target_date_str=record_date,
+    )
+
+
+@router.put("/date/{record_date}/review", response_model=CheckinModel, summary="创建或更新指定日期的每日回顾")
+def upsert_daily_review(
+    record_date: str,
+    review_data: CheckinBaseModel = Body(...),
+    current_user_id: str = Depends(get_current_user_id)
+):
+    updated_review = checkin_table.upsert_daily_review(
+        user_id=current_user_id,
+        target_date_str=record_date,
+        data=review_data,
+    )
+    if not updated_review:
+        raise HTTPException(status_code=500, detail="Could not save the daily review.")
+    return model_to_dict(updated_review)
+
 
 # Find the get_checkin_for_date endpoint and modify the signature
 @router.get("/date/{record_date}", response_model=CheckinModel, summary="获取指定日期的打卡记录")

@@ -85,6 +85,15 @@
   border-radius: 16rpx;
 }
 
+.day-cell.has-moments .day-content {
+  background: #fff4e6;
+}
+
+.day-cell.has-review .day-content {
+  background: #fffaf3;
+  border: 2rpx solid #ffd49a;
+}
+
 .day-content {
   width: 90rpx;
   height: 90rpx;
@@ -106,6 +115,68 @@
   position: absolute;
   opacity: 0.9;
   z-index: 1;
+}
+
+.review-icon {
+  width: 58rpx;
+  height: 58rpx;
+}
+
+.moment-check {
+  width: 54rpx;
+  height: 54rpx;
+  border-radius: 50%;
+  background: #ff9d16;
+  color: #fff;
+  font-size: 34rpx;
+  line-height: 54rpx;
+  text-align: center;
+  font-weight: 900;
+  box-shadow: 0 6rpx 14rpx rgba(255, 126, 24, 0.18);
+}
+
+.moment-count {
+  position: absolute;
+  right: 10rpx;
+  bottom: 8rpx;
+  min-width: 28rpx;
+  height: 28rpx;
+  padding: 0 6rpx;
+  border-radius: 999rpx;
+  background: #fff;
+  color: #d66e14;
+  font-size: 20rpx;
+  line-height: 28rpx;
+  text-align: center;
+  font-weight: 800;
+  box-sizing: border-box;
+}
+
+.moment-dot {
+  position: absolute;
+  right: 12rpx;
+  bottom: 10rpx;
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: #ff9d16;
+  z-index: 2;
+}
+
+.review-mark {
+  position: absolute;
+  left: 8rpx;
+  top: 8rpx;
+  width: 28rpx;
+  height: 28rpx;
+  border-radius: 50%;
+  background: #fff0d8;
+  color: #c96a18;
+  font-size: 18rpx;
+  line-height: 28rpx;
+  text-align: center;
+  font-weight: 800;
+  z-index: 2;
 }
 
 .day-number {

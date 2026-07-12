@@ -10,8 +10,8 @@
     <view class="record-content">
       <view class="hero-card">
         <view class="hero-copy">
-          <view class="hero-title">{{isLocked ? '回看那天心情' : '记录今日心情'}}</view>
-          <view class="hero-subtitle">看看这些记录，能想起那是怎样的一天吗？</view>
+          <view class="hero-title">{{isLocked ? '回看此刻心情' : '此刻的你，感觉如何？'}}</view>
+          <view class="hero-subtitle">{{isLocked ? '看看这条记录，想起那一刻的自己。' : '把现在这一刻轻轻记下来。'}}</view>
         </view>
         <image class="hero-art" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/banner-art-sun.png" mode="aspectFit"></image>
       </view>
@@ -89,7 +89,7 @@
         <view class="journal-header">
           <view class="section-header journal-title-wrap">
             <image class="section-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/section/note.png" mode="aspectFit"></image>
-            <view class="section-title">写下今天的小记忆</view>
+            <view class="section-title">写下此刻的小记忆</view>
           </view>
           <view class="meta-row">
             <view class="meta-chip">▣ {{dateLabel}}</view>
@@ -100,7 +100,7 @@
         <view class="textarea-wrap">
           <textarea
             class="text-area"
-            placeholder="{{isLocked ? '这是过去的记录，无法修改哦' : '今天发生了什么让你印象深刻的事呢？记录你的感受、想法，或者任何想留下的瞬间...'}}"
+            placeholder="{{isLocked ? '这是过去的记录，无法修改哦' : '此刻有什么想留下的？可以是一句话、一个念头，或者一点身体感受...'}}"
             value="{{textContent}}"
             bindinput="onTextInput"
             maxlength="500"
@@ -139,7 +139,7 @@
 
   <view class="footer">
     <button class="submit-btn" bindtap="submitCheckin" disabled="{{isLocked}}">
-      {{isLocked ? '不可修改过去状态' : '保存今日心情'}}
+      {{isLocked ? '不可修改过去状态' : '保存此刻心情'}}
     </button>
   </view>
 </view>

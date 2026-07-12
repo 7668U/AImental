@@ -51,7 +51,11 @@ Component({
         days.push({
           day: i,
           isToday: isCurrentMonth && i === todayDate,
-          checkin: null // 先初始化为null
+          checkin: null,
+          hasMoments: false,
+          hasReview: false,
+          momentCount: 0,
+          reviewMoodIcon: '',
         });
       }
       this.setData({ days });
@@ -69,7 +73,7 @@ Component({
         header: { 'Authorization': `Bearer ${token}` },
         success: (res) => {
           if (res.statusCode === 200) {
-            const checkinData = res.data; // { "1": {...}, "15": {...} }
+            const checkinData = res.data; // { "1": {...summary}, "15": {...summary} }
             this.mergeData(checkinData);
             this.setData({
               hasCheckinsThisMonth: Object.keys(checkinData).length > 0
@@ -85,7 +89,12 @@ Component({
       days.forEach(dayObj => {
         if (dayObj.day > 0) { // 只处理有效日期
           if (checkinData[dayObj.day]) {
-            dayObj.checkin = checkinData[dayObj.day];
+            const summary = checkinData[dayObj.day];
+            dayObj.checkin = summary;
+            dayObj.hasMoments = !!summary.has_moments;
+            dayObj.hasReview = !!summary.has_review;
+            dayObj.momentCount = summary.moment_count || 0;
+            dayObj.reviewMoodIcon = summary.review_mood_icon || summary.review_mood_id || summary.review_mood || '';
           }
         }
       });
@@ -119,6 +128,7 @@ Component({
       this.triggerEvent('daytap', {
         date: dateStr,
         hasCheckin: !!day.checkin,
+        hasTimeline: !!(day.hasMoments || day.hasReview),
       });
       this.hide(); // 点击后自动隐藏日历
     },

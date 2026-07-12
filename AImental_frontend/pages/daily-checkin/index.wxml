@@ -23,12 +23,13 @@
         <view class="daily-layout">
           <view class="primary-checkin-card" bind:tap="goToRecord">
             <view class="primary-copy">
-              <view class="primary-title">{{hasCheckedInToday ? '查看今日心情' : '今日打卡'}}</view>
-              <view class="primary-subtitle">{{hasCheckedInToday ? '今日已打卡，回看此刻的感受' : '关照此刻的感受，从这里开始'}}</view>
+              <view class="primary-title">此刻心情记录</view>
+              <view class="primary-subtitle">现在的你，感觉怎么样？</view>
+              <view wx:if="{{todayMomentCount > 0}}" class="primary-count-hint">今天已记录 {{todayMomentCount}} 次</view>
             </view>
             <image class="primary-illustration" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/daily-checkin/layout/checkin-hero.png" mode="aspectFit"></image>
             <view class="primary-action">
-              <text>{{hasCheckedInToday ? '查看记录' : '开始记录'}}</text>
+              <text>记录此刻</text>
             </view>
           </view>
 
@@ -43,6 +44,40 @@
               <image class="secondary-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/daily-checkin/layout/analysis-card.png" mode="aspectFit"></image>
               <view class="secondary-title">心情分析</view>
               <view class="secondary-subtitle">发现情绪的流动</view>
+            </view>
+          </view>
+
+          <view class="trajectory-panel" bind:tap="goToTrajectory">
+            <view class="trajectory-header">
+              <view>
+                <view class="trajectory-title">今日心情轨迹</view>
+                <view class="trajectory-subtitle">{{trajectorySubtitle}}</view>
+              </view>
+              <view class="trajectory-link">查看全部</view>
+            </view>
+
+            <view wx:if="{{todayMomentCount > 0}}" class="trajectory-body">
+              <scroll-view class="trajectory-preview-scroll" scroll-x="true" show-scrollbar="false">
+                <view class="trajectory-preview-list">
+                  <view wx:for="{{todayTrajectoryPreview}}" wx:key="id" class="trajectory-preview-item">
+                    <image class="trajectory-preview-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/mood24/{{item.moodIcon}}.png" mode="aspectFit"></image>
+                    <view class="trajectory-preview-time">{{item.localTime}}</view>
+                  </view>
+                  <view wx:if="{{hasDailyReview}}" class="trajectory-preview-item review">
+                    <image class="trajectory-preview-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/mood24/{{reviewMoodIcon}}.png" mode="aspectFit"></image>
+                    <view class="trajectory-preview-time">回顾</view>
+                  </view>
+                </view>
+              </scroll-view>
+              <view class="trajectory-meta">
+                <text wx:if="{{latestMomentTime}}">最近一次 {{latestMomentTime}}</text>
+                <text wx:if="{{hasDailyReview}}" class="review-badge">已回顾</text>
+              </view>
+            </view>
+
+            <view wx:else class="trajectory-empty">
+              <view class="trajectory-empty-text">把这一刻轻轻记下来</view>
+              <view class="trajectory-empty-button" catchtap="goToRecord">记录此刻</view>
             </view>
           </view>
         </view>
