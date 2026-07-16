@@ -11,7 +11,15 @@
       </view>
       <view class="nav-title-container">
         <view class="nav-title">{{aiName}}</view>
-        <view class="nav-status" wx:if="{{aiCurrentStatus}}">{{aiCurrentStatus}}</view>
+        <view class="nav-status nav-typing-status" wx:if="{{isAiTyping}}">
+          <text>对方正在输入</text>
+          <view class="nav-typing-dots" aria-hidden="true">
+            <view class="nav-typing-dot nav-typing-dot--1"></view>
+            <view class="nav-typing-dot nav-typing-dot--2"></view>
+            <view class="nav-typing-dot nav-typing-dot--3"></view>
+          </view>
+        </view>
+        <view class="nav-status" wx:elif="{{aiCurrentStatus}}">{{aiCurrentStatus}}</view>
       </view>
     </view>
 
@@ -96,6 +104,17 @@
           </view>
         </view>
       </block>
+
+      <view class="message-item message-item-fade-in" wx:if="{{isAiTyping && !isHistoryLoading}}">
+        <view class="message-row ai">
+          <image class="avatar" src="{{aiAvatar}}" mode="aspectFill"></image>
+          <view class="typing-bubble" aria-label="正在回复">
+            <view class="typing-dot typing-dot--1"></view>
+            <view class="typing-dot typing-dot--2"></view>
+            <view class="typing-dot typing-dot--3"></view>
+          </view>
+        </view>
+      </view>
       </view>
     </scroll-view>
   </view>

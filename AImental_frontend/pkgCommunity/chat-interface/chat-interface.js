@@ -4,9 +4,14 @@ const SERVER_BASE_URL = API_BASE_URL.replace('/api/v1/community', '');
 const CDN_ASSET_BASE_URL = 'https://assets.feelyourself.cn/miniprogram/assets/v1';
 const DEFAULT_USER_AVATAR = `${CDN_ASSET_BASE_URL}/images/default-avatar.png`;
 const COMMUNITY_PROFILE_MBTI_ICON = '/images/community-profile-mbti.png';
+const REPLY_STATUS_POLL_INTERVAL_MS = 1500;
 const app = getApp();
 
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
+const {
+  isVipQuotaExhaustedError,
+  showVipQuotaModal,
+} = require('../../utils/vip-quota.js');
 Page({
   data: {
     // --- 原有 data ---
@@ -125,6 +130,8 @@ Page({
     // 每次进入页面，都启动“窥视”心跳
     this.notifyPeek();
     this.startPeeking();
+    // 页面重载后，本地请求状态会丢失，需要向服务端确认是否仍在生成回复。
+    this.refreshReplyProgress();
   },
 
   // 【最终修复 1】新增 onHide 生命周期，处理页面隐藏
@@ -132,6 +139,7 @@ Page({
     // 页面隐藏时，停止窥视心跳，节省资源
     console.log("页面隐藏 (onHide)，停止窥视心跳。");
     this.stopPeeking();
+    this.stopReplyRecoveryPolling();
     if (this.data.isEmojiPanelVisible) {
       this.setData({ isEmojiPanelVisible: false });
     }
@@ -141,6 +149,7 @@ Page({
     // 页面被销毁时，注销监听器
     this.setData({ isLeavingPage: true });
     this.stopPeeking(); // 双重保险
+    this.stopReplyRecoveryPolling();
     this.clearTypingTimer();
   },
 
@@ -331,12 +340,145 @@ Page({
   },
 
   finishAiReplyState: function() {
+    this.stopReplyRecoveryPolling();
     this.clearTypingTimer();
     this.setData({
       isSending: false,
       isAiTyping: false,
       isSendDisabled: !this.data.inputValue.trim() || this.data.isMessageLimitReached
     });
+  },
+
+  stopReplyRecoveryPolling: function() {
+    if (this.replyRecoveryTimer) {
+      clearTimeout(this.replyRecoveryTimer);
+      this.replyRecoveryTimer = null;
+    }
+  },
+
+  scheduleReplyRecoveryPoll: function() {
+    this.stopReplyRecoveryPolling();
+    if (this.data.isLeavingPage || !this.data.aiId) return;
+
+    this.replyRecoveryTimer = setTimeout(() => {
+      this.replyRecoveryTimer = null;
+      this.refreshReplyProgress();
+    }, REPLY_STATUS_POLL_INTERVAL_MS);
+  },
+
+  beginReplyRecovery: function() {
+    if (this.data.isLeavingPage) return;
+
+    this.setData({
+      isSending: false,
+      isAiTyping: true,
+      isSendDisabled: true
+    });
+    this.scheduleReplyRecoveryPoll();
+  },
+
+  refreshReplyProgress: function() {
+    if (!this.data.aiId || this.data.isLeavingPage) return;
+
+    this._request({
+      url: `/chats/${this.data.aiId}/reply-status`,
+      method: 'GET'
+    }).then((data) => {
+      const replyInProgress = Boolean(data && data.reply_in_progress);
+      if (replyInProgress) {
+        if (this.data.isSending) {
+          this.scheduleReplyRecoveryPoll();
+        } else {
+          this.beginReplyRecovery();
+        }
+        return;
+      }
+
+      this.stopReplyRecoveryPolling();
+      if (!this.data.isSending && this.data.isAiTyping) {
+        this.reloadConversationAfterReply();
+      }
+    }).catch((err) => {
+      console.warn('获取回复进度失败:', err);
+      if (this.data.isAiTyping && !this.data.isSending) {
+        this.scheduleReplyRecoveryPoll();
+      }
+    });
+  },
+
+  reloadConversationAfterReply: function() {
+    if (!this.data.aiId || this.data.isLeavingPage) return;
+
+    this._request({
+      url: `/chats/${this.data.aiId}/details`,
+      method: 'GET'
+    }).then((data) => {
+      this.applyChatDetailsData(data, {
+        animateScroll: true,
+        showProfileCard: false
+      });
+    }).catch((err) => {
+      console.warn('回复结束后刷新聊天记录失败:', err);
+      this.finishAiReplyState();
+      wx.showToast({ title: '回复已结束，请重新进入聊天查看', icon: 'none' });
+    });
+  },
+
+  applyChatDetailsData: function(data = {}, options = {}) {
+    const formattedMessages = this.formatMessages(data.history);
+    const character = data.character || {};
+    const profile = character.profile || null;
+    const profileCardData = this.buildProfileCardData(profile || {});
+    const affinityDisplay = this.buildAffinityDisplay(data.favorability_context || {});
+    const backendBaseUrl = API_BASE_URL.replace('/api/v1/community', '');
+    const avatarUrl = character.avatar_url
+      ? (character.avatar_url.startsWith('http') ? character.avatar_url : backendBaseUrl + character.avatar_url)
+      : this.data.aiAvatar;
+    const replyInProgress = Boolean(data.reply_in_progress);
+    const preservedDraft = this.pendingConflictDraft !== undefined
+      ? String(this.pendingConflictDraft || '')
+      : this.data.inputValue;
+    const isSending = this.data.isSending;
+    const isAiTyping = isSending || replyInProgress;
+
+    this.setData({
+      messageList: formattedMessages,
+      inputValue: preservedDraft,
+      aiCurrentStatus: data.character_status || '在线',
+      aiName: character.name || this.data.aiName,
+      aiAvatar: avatarUrl,
+      aiProfile: profile,
+      isHistoryLoading: false,
+      isHistoryLoadFailed: false,
+      isAiTyping,
+      isSendDisabled: !preservedDraft.trim()
+        || this.data.isMessageLimitReached
+        || isSending
+        || replyInProgress,
+      ...affinityDisplay,
+      ...profileCardData
+    }, () => {
+      if (replyInProgress && !isSending) {
+        this.beginReplyRecovery();
+      } else if (!replyInProgress) {
+        this.stopReplyRecoveryPolling();
+        this.pendingConflictDraft = undefined;
+      }
+
+      if (options.showProfileCard !== false) {
+        this.showProfileCardOnFirstVisit();
+      }
+      this.scrollToBottom({ animate: options.animateScroll === true });
+    });
+  },
+
+  getRequestErrorMessage: function(err, fallback) {
+    const detail = err && err.data ? err.data.detail : null;
+    if (typeof detail === 'string' && detail.trim()) return detail;
+    if (detail && typeof detail.message === 'string' && detail.message.trim()) {
+      return detail.message;
+    }
+    return fallback;
   },
 
   getNextReplyDelay: function(message, index) {
@@ -381,9 +523,12 @@ Page({
         return;
       }
 
-      this.setData({
-        messageList: [...this.data.messageList, nextMessage]
-      }, () => {
+      const updates = {
+        messageList: [...this.data.messageList, nextMessage],
+        isAiTyping: index < aiMessages.length - 1
+      };
+
+      this.setData(updates, () => {
         this.scrollToBottom({ animate: true });
         const delay = index >= aiMessages.length - 1
           ? 360
@@ -495,7 +640,7 @@ Page({
     }
 
     if (this.data.isMessageLimitReached) {
-      this.showLimitModal(`您今天发送的总消息条数已经达到${this.data.messageLimit}条限额啦~明天再来吧~`);
+      showVipQuotaModal({ feature: 'community' });
       return;
     }
     
@@ -568,8 +713,22 @@ Page({
       fail: (err) => {
         console.error("发送失败:", err);
 
-        if (err && err.statusCode === 429) {
-          this.showLimitModal(err.data.detail || '今日消息已达上限');
+        if (isVipQuotaExhaustedError(err)) {
+          this.setData({
+            messageList: this.data.messageList.filter(message => message.id !== messageId),
+            inputValue: content,
+            isSending: false,
+            isAiTyping: false,
+            isMessageLimitReached: true,
+            remainingMessageCount: 0,
+            isSendDisabled: true
+          }, () => {
+            this.scrollToBottom({ animate: true });
+          });
+          showVipQuotaModal({ error: err, feature: 'community' });
+          return;
+        } else if (err && err.statusCode === 429) {
+          this.showLimitModal(this.getRequestErrorMessage(err, '今日消息已达上限'));
           this.setData({
               isMessageLimitReached: true,
               remainingMessageCount: 0,
@@ -580,8 +739,22 @@ Page({
             inputValue: ''
           });
         } else if (err && err.statusCode === 409) {
-          wx.showToast({ title: err.data.detail || '对方正在回复您哦~稍后再发吧', icon: 'none' });
-          this.updateMessageStatus(messageId, 'failed');
+          this.pendingConflictDraft = content;
+          this.setData({
+            messageList: this.data.messageList.filter(message => message.id !== messageId),
+            inputValue: content,
+            isSending: false,
+            isAiTyping: true,
+            isSendDisabled: true
+          }, () => {
+            this.scrollToBottom({ animate: true });
+          });
+          wx.showToast({
+            title: this.getRequestErrorMessage(err, '对方仍在回复，完成后会自动刷新'),
+            icon: 'none'
+          });
+          this.beginReplyRecovery();
+          return;
         } else {
           this.updateMessageStatus(messageId, 'failed');
           wx.showToast({
@@ -623,7 +796,7 @@ Page({
     }
 
     if (this.data.isMessageLimitReached) {
-      this.showLimitModal(`您今天发送的总消息条数已经达到${this.data.messageLimit}条限额啦~明天再来吧~`);
+      showVipQuotaModal({ feature: 'community' });
       return;
     }
 
@@ -682,31 +855,10 @@ Page({
     this._request({
       url: `/chats/${this.data.aiId}/details`,
       success: (data) => {
-        const formattedMessages = this.formatMessages(data.history);
-        const character = data.character || {};
-        const profile = character.profile || null;
-        const profileCardData = this.buildProfileCardData(profile || {});
-        const affinityDisplay = this.buildAffinityDisplay(data.favorability_context || {});
-        const backendBaseUrl = API_BASE_URL.replace('/api/v1/community', '');
-        const avatarUrl = character.avatar_url
-          ? (character.avatar_url.startsWith('http') ? character.avatar_url : backendBaseUrl + character.avatar_url)
-          : this.data.aiAvatar;
-
-        this.setData({ 
-          messageList: formattedMessages,
-          aiCurrentStatus: data.character_status || '在线',
-          aiName: character.name || this.data.aiName,
-          aiAvatar: avatarUrl,
-          aiProfile: profile,
-          isHistoryLoading: false,
-          isHistoryLoadFailed: false,
-          ...affinityDisplay,
-          ...profileCardData
-        }, () => {
-          this.showProfileCardOnFirstVisit();
-          this.scrollToBottom({ animate: false });
+        this.applyChatDetailsData(data, {
+          animateScroll: false,
+          showProfileCard: true
         });
-
       },
       fail: () => {
         console.warn("'/details' endpoint failed. Falling back to history only.");

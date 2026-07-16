@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 import pytz
 
-os.environ.setdefault("SCHEDULE_LLM_TIMEOUT_SECONDS", "90")
+os.environ.setdefault("SCHEDULE_LLM_TIMEOUT_SECONDS", "180")
 
 from db import chat_db, status_db
 from generate_ai_status import generate_daily_schedule

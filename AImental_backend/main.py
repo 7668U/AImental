@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
+import threading
 from fastapi.responses import FileResponse
 from datetime import date, datetime, timedelta
 import pytz
@@ -10,6 +11,11 @@ import pytz
 # Load environment variables
 load_dotenv()
 from feature_flags import ENABLE_COMMUNITY_BACKEND
+
+GENERATE_SCHEDULES_ON_API_STARTUP = os.getenv(
+    "GENERATE_SCHEDULES_ON_API_STARTUP",
+    "0",
+).strip().lower() in {"1", "true", "yes", "on"}
 
 # --- 1. 导入数据库连接 (保持不变) ---
 from db import all_dbs, user_db, chat_db, assessment_db, status_db, feedback_db, promotion_db, airplane_db, note_db, vip_db
@@ -35,7 +41,7 @@ if ENABLE_COMMUNITY_BACKEND:
     from model.chat_community import CommunityChat, community_chat_table
     from model.community_memory import CharacterUserMemory, CommunityHistorySummary
     from model.friendship import Friendship
-    from generate_ai_status import generate_daily_schedule
+    from generate_ai_status import build_fallback_daily_schedule, generate_daily_schedule
 
 # --- 3. 导入所有路由 (保持不变) ---
 from router import user as user_router
@@ -119,7 +125,7 @@ def check_and_generate_today_schedules():
     """
     【已修正并增加重试机制版】
     在系统启动时，检查所有AI角色是否已生成当天的日程。
-    如果首次生成失败，会自动重试一次。
+    如果首次生成失败，会自动重试两次。
     强制使用北京时间来定义“今天”。
     """
     if not ENABLE_COMMUNITY_BACKEND:
@@ -155,7 +161,7 @@ def check_and_generate_today_schedules():
             
             # --- 【核心修改点：增加重试逻辑】 ---
             daily_schedule = None
-            max_attempts = 2  # 设置最大尝试次数（首次 + 1次重试）
+            max_attempts = 3  # 设置最大尝试次数（首次 + 2次重试）
             for attempt in range(max_attempts):
                 print(f"   [第 {attempt + 1}/{max_attempts} 次尝试] 正在为 '{character.name}' 生成日程...")
                 
@@ -163,7 +169,8 @@ def check_and_generate_today_schedules():
                 generated_data = generate_daily_schedule(
                     character_profile=character.profile,
                     recent_history=recent_history,
-                    target_date=today_in_beijing
+                    target_date=today_in_beijing,
+                    fallback_on_error=False,
                 )
                 
                 # 检查生成结果是否有效（不为None且不为空列表）
@@ -174,6 +181,10 @@ def check_and_generate_today_schedules():
                 else:
                     print(f"   [第 {attempt + 1} 次尝试] 生成失败。")
             # --- 【重试逻辑结束】 ---
+
+            if not daily_schedule:
+                print(f"   经过 {max_attempts} 次 LLM 尝试后仍未成功，使用本地兜底日程。")
+                daily_schedule = build_fallback_daily_schedule(character.profile)
 
             if daily_schedule:
                 for activity in daily_schedule:
@@ -197,6 +208,27 @@ def check_and_generate_today_schedules():
 
         except Exception as e:
             print(f"🚨 在为角色 '{character.name}' 检查或生成日程时发生严重错误: {e}")
+
+
+def start_schedule_check_in_background():
+    """在后台补齐角色日程，避免上游LLM阻塞整个API启动。"""
+    def run():
+        try:
+            check_and_generate_today_schedules()
+        except Exception as exc:
+            print(f"❌ [Startup Check]: 后台日程检查异常: {exc}")
+        finally:
+            for db in (chat_db, status_db):
+                if not db.is_closed():
+                    db.close()
+
+    thread = threading.Thread(
+        target=run,
+        name="startup-community-schedule-check",
+        daemon=True,
+    )
+    thread.start()
+
 
 @app.on_event("startup")
 def on_startup():
@@ -261,14 +293,13 @@ def on_startup():
         except Exception as e:
             print(f"❌ 初始化社区会话好感度时发生错误: {e}")
 
-    print("🚀 [Startup]: 开始执行数据播种和日程检查...")
+    print("🚀 [Startup]: 开始执行数据播种...")
     paper_airplane_table.add_default_airplanes_if_needed()
     if ENABLE_COMMUNITY_BACKEND:
         ai_character_table.create_default_character_if_not_exists() # 确保默认角色存在
-        check_and_generate_today_schedules()
     else:
         print("ℹ️ [Startup]: 心灵社区后端已下线，跳过AI角色播种与日程补生成。")
-    print("✨ [Startup]: 数据播种和日程检查完成！")
+    print("✨ [Startup]: 数据播种完成！")
 
     # 4. 【核心步骤3】在启动任务的最后，关闭所有临时连接
     print("💤 [Startup]: 正在关闭临时数据库连接...")
@@ -276,6 +307,12 @@ def on_startup():
         if not db.is_closed():
             db.close()
     print("👍 [Startup]: 服务准备就绪！连接已交由中间件按需管理。")
+
+    if ENABLE_COMMUNITY_BACKEND and GENERATE_SCHEDULES_ON_API_STARTUP:
+        print("🧵 [Startup]: AI角色日程检查已转入后台，不阻塞接口启动。")
+        start_schedule_check_in_background()
+    elif ENABLE_COMMUNITY_BACKEND:
+        print("ℹ️ [Startup]: API进程跳过LLM日程生成；请由独立后台任务负责。")
 
 # 【改动】移除 on_shutdown 事件，因为中间件已完美处理连接关闭，不再需要全局关闭钩子。
 

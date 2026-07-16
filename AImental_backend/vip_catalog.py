@@ -27,10 +27,10 @@ FEATURES: Dict[str, Dict[str, str]] = {
 }
 
 FREE_MONTHLY_QUOTAS = {
-    FEATURE_TREE_HOLE: 30,
-    FEATURE_COMMUNITY: 30,
+    FEATURE_TREE_HOLE: 100,
+    FEATURE_COMMUNITY: 100,
     FEATURE_MOOD_ANALYSIS: 4,
-    FEATURE_ASSESSMENT_ANALYSIS: 2,
+    FEATURE_ASSESSMENT_ANALYSIS: 4,
 }
 
 PLAN_PRODUCTS: Dict[str, Dict[str, Any]] = {
@@ -46,10 +46,10 @@ PLAN_PRODUCTS: Dict[str, Dict[str, Any]] = {
         "pricing_label": "首发体验价",
         "duration_months": 1,
         "quotas": {
-            FEATURE_TREE_HOLE: 300,
-            FEATURE_COMMUNITY: 500,
-            FEATURE_MOOD_ANALYSIS: 40,
-            FEATURE_ASSESSMENT_ANALYSIS: 50,
+            FEATURE_TREE_HOLE: 1000,
+            FEATURE_COMMUNITY: 1000,
+            FEATURE_MOOD_ANALYSIS: 100,
+            FEATURE_ASSESSMENT_ANALYSIS: 100,
         },
     },
     "vip_knowing": {
@@ -65,10 +65,10 @@ PLAN_PRODUCTS: Dict[str, Dict[str, Any]] = {
         "pricing_label": "首发体验价",
         "duration_months": 1,
         "quotas": {
-            FEATURE_TREE_HOLE: 600,
-            FEATURE_COMMUNITY: 1200,
-            FEATURE_MOOD_ANALYSIS: 80,
-            FEATURE_ASSESSMENT_ANALYSIS: 100,
+            FEATURE_TREE_HOLE: 2000,
+            FEATURE_COMMUNITY: 2000,
+            FEATURE_MOOD_ANALYSIS: 200,
+            FEATURE_ASSESSMENT_ANALYSIS: 200,
         },
     },
     "vip_companion": {
@@ -83,60 +83,60 @@ PLAN_PRODUCTS: Dict[str, Dict[str, Any]] = {
         "pricing_label": "首发体验价",
         "duration_months": 1,
         "quotas": {
-            FEATURE_TREE_HOLE: 1200,
-            FEATURE_COMMUNITY: 2400,
-            FEATURE_MOOD_ANALYSIS: 120,
-            FEATURE_ASSESSMENT_ANALYSIS: 200,
+            FEATURE_TREE_HOLE: 3000,
+            FEATURE_COMMUNITY: 3000,
+            FEATURE_MOOD_ANALYSIS: 300,
+            FEATURE_ASSESSMENT_ANALYSIS: 300,
         },
     },
 }
 
 ADDON_PRODUCTS: Dict[str, Dict[str, Any]] = {
-    "addon_tree_300": {
-        "code": "addon_tree_300",
+    "addon_tree_500": {
+        "code": "addon_tree_500",
         "product_type": "addon",
         "name": "树洞加量包",
-        "description": "增加 300 次心情树洞额度",
+        "description": "增加 500 次心情树洞额度",
         "feature": FEATURE_TREE_HOLE,
-        "amount": 300,
-        "price_fen": 399,
-        "planned_standard_price_fen": 499,
+        "amount": 500,
+        "price_fen": 199,
+        "planned_standard_price_fen": 299,
         "pricing_label": "首发加量价",
         "valid_days": 90,
     },
-    "addon_community_300": {
-        "code": "addon_community_300",
+    "addon_community_500": {
+        "code": "addon_community_500",
         "product_type": "addon",
         "name": "社区加量包",
-        "description": "增加 300 次心灵社区额度",
+        "description": "增加 500 次心灵社区额度",
         "feature": FEATURE_COMMUNITY,
-        "amount": 300,
-        "price_fen": 799,
-        "planned_standard_price_fen": 999,
+        "amount": 500,
+        "price_fen": 299,
+        "planned_standard_price_fen": 399,
         "pricing_label": "首发加量价",
         "valid_days": 90,
     },
-    "addon_mood_20": {
-        "code": "addon_mood_20",
+    "addon_mood_50": {
+        "code": "addon_mood_50",
         "product_type": "addon",
         "name": "心情分析包",
-        "description": "增加 20 次单项心情分析额度",
+        "description": "增加 50 次单项心情分析额度",
         "feature": FEATURE_MOOD_ANALYSIS,
-        "amount": 20,
-        "price_fen": 199,
-        "planned_standard_price_fen": 299,
+        "amount": 50,
+        "price_fen": 99,
+        "planned_standard_price_fen": 149,
         "pricing_label": "首发加量价",
         "valid_days": 90,
     },
-    "addon_assessment_20": {
-        "code": "addon_assessment_20",
+    "addon_assessment_50": {
+        "code": "addon_assessment_50",
         "product_type": "addon",
         "name": "测评分析包",
-        "description": "增加 20 次 AI 测评分析额度",
+        "description": "增加 50 次 AI 测评分析额度",
         "feature": FEATURE_ASSESSMENT_ANALYSIS,
-        "amount": 20,
-        "price_fen": 199,
-        "planned_standard_price_fen": 299,
+        "amount": 50,
+        "price_fen": 99,
+        "planned_standard_price_fen": 149,
         "pricing_label": "首发加量价",
         "valid_days": 90,
     },

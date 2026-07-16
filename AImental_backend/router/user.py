@@ -127,6 +127,10 @@ def create_test_login_token(
     user, created = user_table.get_or_create_test_user(user_id_for_test)
     if created:
         print(f"Created local test user: {user_id_for_test}")
+    user_table.update_wechat_session_key(
+        user.id,
+        f"local-session-key-{user.id}",
+    )
     return issue_login_token(user, "local_test_login")
 
 
@@ -161,6 +165,7 @@ def wechat_login(login_data: UserLoginRequest):
         raise HTTPException(status_code=500, detail=f"请求微信服务器失败: {e}")
 
     openid = data.get("openid")
+    session_key = data.get("session_key")
     if not openid:
         if os.getenv("ALLOW_LOCAL_DEV_LOGIN", "1") == "1":
             print(f"WeChat login failed in local development, falling back to test login: {data}")
@@ -177,6 +182,7 @@ def wechat_login(login_data: UserLoginRequest):
             nickname=login_data.nickname or "微信用户",
             avatar_url=login_data.avatar_url or ""
         )
+    user_table.update_wechat_session_key(user.id, session_key)
     return issue_login_token(user, "mini_program_login")
 
 

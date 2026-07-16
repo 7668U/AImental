@@ -12,6 +12,22 @@ const ANALYSIS_TYPE_MAP = {
 };
 
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
+const {
+  isVipQuotaExhaustedError,
+  showVipQuotaModal,
+} = require('../utils/vip-quota.js');
+
+function getApiErrorMessage(res, fallback) {
+  const detail = res && res.data ? res.data.detail : null;
+  if (typeof detail === 'string') {
+    return detail;
+  }
+  if (detail && typeof detail.message === 'string') {
+    return detail.message;
+  }
+  return fallback;
+}
+
 Page({
   data: {
     // --- 新增：导航栏数据 ---
@@ -136,6 +152,10 @@ navigateBack() {
         colorCardResult: null,
         colorCardError: ''
       });
+      if (isVipQuotaExhaustedError(err)) {
+        showVipQuotaModal({ error: err, feature: 'mood_analysis' });
+        return;
+      }
       wx.showToast({ title: err.errMsg || '暂时无法检查打卡天数', icon: 'none' });
       return;
     }
@@ -163,7 +183,6 @@ navigateBack() {
       })
       .catch(err => {
         console.error("API请求失败:", err);
-        wx.showToast({ title: err.errMsg || '生成报告失败', icon: 'none', duration: 2000 });
         this.setData({
           isLoading: false,
           analysisResult: null,
@@ -171,6 +190,11 @@ navigateBack() {
           colorCardResult: null,
           colorCardError: ''
         });
+        if (isVipQuotaExhaustedError(err)) {
+          showVipQuotaModal({ error: err, feature: 'mood_analysis' });
+          return;
+        }
+        wx.showToast({ title: err.errMsg || '生成报告失败', icon: 'none', duration: 2000 });
       });
   },
   
@@ -182,7 +206,13 @@ navigateBack() {
         header: { 'Authorization': `Bearer ${token}` },
         success: (res) => {
           if (res.statusCode >= 200 && res.statusCode < 300) { resolve(res); } 
-          else { reject({ errMsg: res.data.detail || `服务器错误 ${res.statusCode}` }); }
+          else {
+            reject({
+              statusCode: res.statusCode,
+              data: res.data,
+              errMsg: getApiErrorMessage(res, `服务器错误 ${res.statusCode}`),
+            });
+          }
         },
         fail: (err) => { reject(err); }
       });
@@ -234,9 +264,14 @@ navigateBack() {
         });
       })
       .catch((err) => {
+        if (isVipQuotaExhaustedError(err)) {
+          showVipQuotaModal({ error: err, feature: 'mood_analysis' });
+        }
         this.setData({
           colorCardResult: null,
-          colorCardError: err.errMsg || 'AI 颜色背景图暂时生成失败'
+          colorCardError: isVipQuotaExhaustedError(err)
+            ? ''
+            : (err.errMsg || 'AI 颜色背景图暂时生成失败')
         });
       })
       .finally(() => {

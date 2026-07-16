@@ -27,6 +27,10 @@ class User(Model):
     id = CharField(primary_key=True, max_length=36, default=lambda: str(uuid.uuid4()))
     openid = EncryptedTextField(purpose="users.openid")
     openid_lookup = CharField(max_length=64, unique=True, index=True, null=True)
+    wechat_session_key = EncryptedTextField(
+        purpose="users.wechat_session_key",
+        null=True,
+    )
     nickname = EncryptedTextField(purpose="users.nickname", null=True)
     avatar_url = EncryptedTextField(purpose="users.avatar_url", null=True)
     has_unlocked_community = BooleanField(default=False, help_text="是否已分享解锁了社区")
@@ -102,6 +106,7 @@ class UserTable:
         }
         migrations = {
             "openid_lookup": "VARCHAR(64)",
+            "wechat_session_key": "TEXT",
             "privacy_consent_version": "VARCHAR(32)",
             "privacy_policy_digest": "VARCHAR(64)",
             "privacy_consented_at": "DATETIME",
@@ -184,6 +189,18 @@ class UserTable:
         if update_data:
             query = User.update(update_data).where(User.id == user_id)
             query.execute()
+
+    def update_wechat_session_key(
+        self,
+        user_id: str,
+        session_key: Optional[str],
+    ) -> bool:
+        user = self.get_user_by_id(user_id)
+        if not user:
+            return False
+        user.wechat_session_key = session_key or None
+        user.save(only=[User.wechat_session_key])
+        return True
 
     def update_avatar(self, user_id: str, image_file: UploadFile) -> Optional[str]:
         user = User.get_or_none(User.id == user_id)

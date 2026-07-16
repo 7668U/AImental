@@ -5,7 +5,12 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
-from feature_flags import ENABLE_VIP_MOCK_PAYMENT
+from feature_flags import (
+    ENABLE_VIP_TEST_TOOLS,
+    ENABLE_VIP_LOCAL_VIRTUAL_PAYMENT,
+    ENABLE_VIP_MOCK_PAYMENT,
+)
+from model.user import user_table
 from model.vip import VipOrder
 from vip_catalog import public_catalog
 from vip_service import (
@@ -16,6 +21,7 @@ from vip_service import (
     VipQuotaExceeded,
     vip_service,
 )
+from vip_virtual_payment import build_virtual_payment
 
 from .auth import get_current_user_id
 
@@ -95,6 +101,8 @@ def vip_http_error(exc: VipError) -> HTTPException:
 def get_vip_catalog():
     catalog = public_catalog()
     catalog["mock_payment_available"] = ENABLE_VIP_MOCK_PAYMENT
+    catalog["local_virtual_payment_available"] = ENABLE_VIP_LOCAL_VIRTUAL_PAYMENT
+    catalog["test_tools_available"] = ENABLE_VIP_TEST_TOOLS
     return catalog
 
 
@@ -102,7 +110,24 @@ def get_vip_catalog():
 def get_my_vip_state(
     current_user_id: str = Depends(get_current_user_id),
 ):
-    return vip_service.get_summary(current_user_id)
+    summary = vip_service.get_summary(current_user_id)
+    summary["test_tools_available"] = ENABLE_VIP_TEST_TOOLS
+    return summary
+
+
+@router.post("/me/test-cancel-membership", response_model=Dict[str, Any])
+def test_cancel_my_vip_membership(
+    current_user_id: str = Depends(get_current_user_id),
+):
+    if not ENABLE_VIP_TEST_TOOLS:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "code": "vip_test_tools_disabled",
+                "message": "VIP test tools are disabled.",
+            },
+        )
+    return vip_service.cancel_membership_for_testing(current_user_id)
 
 
 @router.post(
@@ -123,23 +148,11 @@ def create_vip_order(
     except VipError as exc:
         raise vip_http_error(exc) from exc
     serialized = order_payload(order)
-    return CreateOrderResponse(
-        order=serialized,
-        payment={
-            "provider": "wechat",
-            "mode": (
-                "mock"
-                if ENABLE_VIP_MOCK_PAYMENT
-                else "wechat_not_configured"
-            ),
-            "payload": None,
-            "mock_pay_endpoint": (
-                f"/api/v1/vip/orders/{order.id}/mock-pay"
-                if ENABLE_VIP_MOCK_PAYMENT
-                else None
-            ),
-        },
-    )
+    user = user_table.get_user_by_id(current_user_id)
+    payment = build_virtual_payment(order=order, user=user)
+    if ENABLE_VIP_MOCK_PAYMENT:
+        payment["legacy_mock_pay_endpoint"] = f"/api/v1/vip/orders/{order.id}/mock-pay"
+    return CreateOrderResponse(order=serialized, payment=payment)
 
 
 @router.get("/orders", response_model=List[OrderResponse])
@@ -184,6 +197,33 @@ def mock_pay_vip_order(
             order_id=order_id,
             user_id=current_user_id,
             transaction_id=f"mock-{uuid.uuid4()}",
+        )
+    except VipError as exc:
+        raise vip_http_error(exc) from exc
+    return order_payload(order)
+
+
+@router.post(
+    "/orders/{order_id}/virtual-pay/local-confirm",
+    response_model=OrderResponse,
+)
+def local_confirm_virtual_payment(
+    order_id: str,
+    current_user_id: str = Depends(get_current_user_id),
+):
+    if not ENABLE_VIP_LOCAL_VIRTUAL_PAYMENT:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "code": "local_virtual_payment_disabled",
+                "message": "Local virtual payment confirmation is disabled.",
+            },
+        )
+    try:
+        order = vip_service.mark_order_paid(
+            order_id=order_id,
+            user_id=current_user_id,
+            transaction_id=f"local-virtual-{uuid.uuid4()}",
         )
     except VipError as exc:
         raise vip_http_error(exc) from exc

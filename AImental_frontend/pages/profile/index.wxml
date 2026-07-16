@@ -9,8 +9,8 @@
   <view class="profile-hero">
     <view class="avatar-ring">
       <image class="avatar" src="{{userInfo.avatar_url || 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png'}}" mode="aspectFill"></image>
-      <view wx:if="{{isMember}}" class="membership-avatar-badge">
-        <image class="membership-avatar-icon" src="/images/vip/membership-heart-line.png" mode="aspectFit"></image>
+      <view wx:if="{{isMember && membershipAvatarIcon}}" class="membership-avatar-badge">
+        <image class="membership-avatar-icon" src="{{membershipAvatarIcon}}" mode="aspectFit"></image>
       </view>
     </view>
     <view class="nickname">{{userInfo.nickname || '访客'}}</view>
@@ -87,6 +87,13 @@
   </view>
 
   <view class="action-btn-container">
+    <view
+      wx:if="{{isLogin && isMember && vipTestToolsAvailable}}"
+      class="action-btn cancel-vip-test-btn"
+      bindtap="cancelVipForTesting"
+    >
+      <text>{{cancelVipLoading ? '正在取消...' : '临时取消会员'}}</text>
+    </view>
     <view wx:if="{{isLogin}}" class="action-btn logout-btn" bindtap="logout">
       <text class="action-icon">↪</text>
       <text>退出登录</text>

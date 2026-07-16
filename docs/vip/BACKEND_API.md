@@ -1,6 +1,6 @@
 # VIP 后端 API 合同
 
-更新日期：2026-07-11
+更新日期：2026-07-13
 
 基础路径：
 
@@ -32,10 +32,10 @@ vip_companion
 加量包商品：
 
 ```text
-addon_tree_300
-addon_community_300
-addon_mood_20
-addon_assessment_20
+addon_tree_500
+addon_community_500
+addon_mood_50
+addon_assessment_50
 ```
 
 价格、名称、额度和有效期全部以后端商品目录为准，前端不得硬编码为支付依据。
@@ -73,15 +73,15 @@ Authorization: Bearer <token>
       "feature": "tree_hole",
       "name": "心情树洞",
       "unit": "次",
-      "total": 30,
-      "remaining": 30,
+      "total": 100,
+      "remaining": 100,
       "sources": [
         {
           "bucket_id": "uuid",
           "source_type": "free",
           "source_ref": "free:user:2026-07:tree_hole",
-          "total": 30,
-          "remaining": 30,
+          "total": 100,
+          "remaining": 100,
           "valid_from": 0,
           "expires_at": 0
         }
@@ -110,7 +110,7 @@ Authorization: Bearer <token>
 Content-Type: application/json
 
 {
-  "product_code": "addon_community_300"
+  "product_code": "addon_community_500"
 }
 ```
 
@@ -120,9 +120,9 @@ Content-Type: application/json
 {
   "order": {
     "id": "uuid",
-    "product_code": "addon_community_300",
+    "product_code": "addon_community_500",
     "product_type": "addon",
-    "amount_fen": 799,
+    "amount_fen": 299,
     "status": "pending",
     "product_snapshot": {},
     "payment_provider": "wechat",

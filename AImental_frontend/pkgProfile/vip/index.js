@@ -42,15 +42,18 @@ const FEATURE_ORDER = [
 const PLAN_PRESENTATION = {
   light: {
     name: '轻语会员',
-    image: '/images/vip/plan-light.png',
+    image: '/images/vip/member-badge-light.png',
+    memberBadge: '/images/vip/member-badge-light.png',
   },
   knowing: {
     name: '相知会员',
-    image: '/images/vip/plan-knowing.png',
+    image: '/images/vip/member-badge-knowing.png',
+    memberBadge: '/images/vip/member-badge-knowing.png',
   },
   companion: {
     name: '长伴会员',
-    image: '/images/vip/plan-companion.png',
+    image: '/images/vip/member-badge-companion.png',
+    memberBadge: '/images/vip/member-badge-companion.png',
   },
 };
 
@@ -62,10 +65,10 @@ const FALLBACK_PRODUCTS = [
     name: '轻语会员',
     price_fen: 899,
     quotas: {
-      tree_hole: 300,
-      community: 500,
-      mood_analysis: 40,
-      assessment_analysis: 50,
+      tree_hole: 1000,
+      community: 1000,
+      mood_analysis: 100,
+      assessment_analysis: 100,
     },
   },
   {
@@ -76,10 +79,10 @@ const FALLBACK_PRODUCTS = [
     recommended: true,
     price_fen: 1399,
     quotas: {
-      tree_hole: 600,
-      community: 1200,
-      mood_analysis: 80,
-      assessment_analysis: 100,
+      tree_hole: 2000,
+      community: 2000,
+      mood_analysis: 200,
+      assessment_analysis: 200,
     },
   },
   {
@@ -89,53 +92,53 @@ const FALLBACK_PRODUCTS = [
     name: '长伴会员',
     price_fen: 1899,
     quotas: {
-      tree_hole: 1200,
-      community: 2400,
-      mood_analysis: 120,
-      assessment_analysis: 200,
+      tree_hole: 3000,
+      community: 3000,
+      mood_analysis: 300,
+      assessment_analysis: 300,
     },
   },
 ];
 
 const FALLBACK_ENTITLEMENTS = {
-  tree_hole: { total: 600, remaining: 600 },
-  community: { total: 1200, remaining: 1200 },
-  mood_analysis: { total: 80, remaining: 80 },
-  assessment_analysis: { total: 100, remaining: 100 },
+  tree_hole: { total: 2000, remaining: 2000 },
+  community: { total: 2000, remaining: 2000 },
+  mood_analysis: { total: 200, remaining: 200 },
+  assessment_analysis: { total: 200, remaining: 200 },
 };
 
 const FALLBACK_ADDONS = [
   {
-    code: 'addon_tree_300',
+    code: 'addon_tree_500',
     product_type: 'addon',
     feature: 'tree_hole',
     name: '树洞加量包',
-    amount: 300,
-    price_fen: 399,
+    amount: 500,
+    price_fen: 199,
   },
   {
-    code: 'addon_community_300',
+    code: 'addon_community_500',
     product_type: 'addon',
     feature: 'community',
     name: '社区加量包',
-    amount: 300,
-    price_fen: 799,
+    amount: 500,
+    price_fen: 299,
   },
   {
-    code: 'addon_mood_20',
+    code: 'addon_mood_50',
     product_type: 'addon',
     feature: 'mood_analysis',
     name: '心情分析加量包',
-    amount: 20,
-    price_fen: 199,
+    amount: 50,
+    price_fen: 99,
   },
   {
-    code: 'addon_assessment_20',
+    code: 'addon_assessment_50',
     product_type: 'addon',
     feature: 'assessment_analysis',
     name: '测评分析加量包',
-    amount: 20,
-    price_fen: 199,
+    amount: 50,
+    price_fen: 99,
   },
 ];
 
@@ -195,6 +198,7 @@ function normalizeMember(membership) {
     planCode: membership.plan_code,
     name: membership.plan_name || presentation.name,
     icon: presentation.image,
+    badgeIcon: presentation.memberBadge || presentation.image,
     expiresText: expiresText ? `会员有效期至 ${expiresText}` : '会员权益使用中',
   };
 }
@@ -247,6 +251,55 @@ function getRequestErrorMessage(response, fallback) {
     return detail;
   }
   return fallback;
+}
+
+function getPurchaseState(selectedPlan, currentPlanCode) {
+  if (!selectedPlan || !selectedPlan.code) {
+    return {};
+  }
+  const isChangingActivePlan = Boolean(
+    currentPlanCode
+    && selectedPlan.plan_code !== currentPlanCode
+  );
+  const isRenewal = selectedPlan.plan_code === currentPlanCode;
+  return {
+    purchaseDisabled: isChangingActivePlan,
+    purchaseButtonText: isChangingActivePlan
+      ? '不可'
+      : (isRenewal ? '续费' : '开通'),
+  };
+}
+
+function compareVersion(left, right) {
+  const leftParts = String(left || '').split('.');
+  const rightParts = String(right || '').split('.');
+  const length = Math.max(leftParts.length, rightParts.length);
+  for (let index = 0; index < length; index += 1) {
+    const leftValue = parseInt(leftParts[index] || '0', 10);
+    const rightValue = parseInt(rightParts[index] || '0', 10);
+    if (leftValue > rightValue) {
+      return 1;
+    }
+    if (leftValue < rightValue) {
+      return -1;
+    }
+  }
+  return 0;
+}
+
+function canUseVirtualPayment() {
+  if (!wx.requestVirtualPayment) {
+    return false;
+  }
+  try {
+    const info = wx.getSystemInfoSync ? wx.getSystemInfoSync() : {};
+    return (
+      compareVersion(info.SDKVersion, '2.19.2') >= 0
+      || (wx.canIUse && wx.canIUse('requestVirtualPayment'))
+    );
+  } catch (error) {
+    return Boolean(wx.canIUse && wx.canIUse('requestVirtualPayment'));
+  }
 }
 
 Page({
@@ -399,8 +452,8 @@ Page({
       plans: normalized,
       selectedPlanCode: selectedPlan.code,
       selectedPlan,
+      ...getPurchaseState(selectedPlan, this.data.currentPlanCode),
     });
-    this.updatePurchaseState(selectedPlan);
   },
 
   selectPlan(event) {
@@ -415,24 +468,7 @@ Page({
     this.setData({
       selectedPlanCode: code,
       selectedPlan,
-    });
-    this.updatePurchaseState(selectedPlan);
-  },
-
-  updatePurchaseState(selectedPlan) {
-    if (!selectedPlan || !selectedPlan.code) {
-      return;
-    }
-    const isChangingActivePlan = Boolean(
-      this.data.currentPlanCode
-      && selectedPlan.plan_code !== this.data.currentPlanCode
-    );
-    const isRenewal = selectedPlan.plan_code === this.data.currentPlanCode;
-    this.setData({
-      purchaseDisabled: isChangingActivePlan,
-      purchaseButtonText: isChangingActivePlan
-        ? '不可'
-        : (isRenewal ? '续费' : '开通'),
+      ...getPurchaseState(selectedPlan, this.data.currentPlanCode),
     });
   },
 
@@ -501,6 +537,8 @@ Page({
         }
 
         const payment = res.data.payment || {};
+        this.handleVirtualPayment(payment, token, 'membership', res.data.order);
+        return;
         if (payment.mode === 'mock' && payment.mock_pay_endpoint) {
           this.completeMockPayment(payment.mock_pay_endpoint, token, 'membership');
           return;
@@ -534,7 +572,7 @@ Page({
       addonQuantity: 1,
       addonTotalText: selectedAddon.priceText,
       addonModalVisible: true,
-      addonAgreementChecked: false,
+      addonAgreementChecked: true,
     });
   },
 
@@ -585,9 +623,8 @@ Page({
   },
 
   openPurchaseRecords() {
-    wx.showToast({
-      title: '购买记录页面建设中',
-      icon: 'none',
+    wx.navigateTo({
+      url: '/pkgProfile/vip-records/index',
     });
   },
 
@@ -630,6 +667,8 @@ Page({
         }
 
         const payment = res.data.payment || {};
+        this.handleVirtualPayment(payment, token, 'addon', res.data.order);
+        return;
         if (payment.mode === 'mock' && payment.mock_pay_endpoint) {
           this.completeMockPayment(payment.mock_pay_endpoint, token, 'addon');
           return;
@@ -650,6 +689,155 @@ Page({
         this.finishPurchaseWithError('网络异常，请稍后重试');
       },
     });
+  },
+
+  endpointToUrl(endpoint) {
+    return endpoint && endpoint.startsWith('http')
+      ? endpoint
+      : `${SERVER_BASE_URL}${endpoint}`;
+  },
+
+  handleVirtualPayment(payment, token, purchaseType, order) {
+    const orderId = order && order.id;
+    if (payment.mode === 'local_virtual_mock' && payment.local_confirm_endpoint) {
+      this.completeLocalVirtualPayment(
+        payment.local_confirm_endpoint,
+        token,
+        purchaseType
+      );
+      return;
+    }
+    if (payment.mode === 'wechat_virtual' && payment.payload) {
+      this.requestVirtualPayment(
+        payment.payload,
+        token,
+        purchaseType,
+        orderId,
+        payment.local_confirm_endpoint
+      );
+      return;
+    }
+    if (payment.mode === 'mock' && payment.mock_pay_endpoint) {
+      this.completeMockPayment(payment.mock_pay_endpoint, token, purchaseType);
+      return;
+    }
+    if (payment.legacy_mock_pay_endpoint) {
+      this.completeMockPayment(payment.legacy_mock_pay_endpoint, token, purchaseType);
+      return;
+    }
+    this.setData({ purchaseLoading: false });
+    wx.showModal({
+      title: '\u652f\u4ed8\u672a\u914d\u7f6e',
+      content: '\u672c\u5730\u865a\u62df\u652f\u4ed8\u6216\u5fae\u4fe1\u865a\u62df\u652f\u4ed8\u53c2\u6570\u5c1a\u672a\u5c31\u7eea\u3002',
+      showCancel: false,
+    });
+  },
+
+  completeLocalVirtualPayment(endpoint, token, purchaseType) {
+    wx.showModal({
+      title: '\u672c\u5730\u865a\u62df\u652f\u4ed8',
+      content: '\u5c06\u6a21\u62df wx.requestVirtualPayment \u6210\u529f\uff0c\u5e76\u8ba9\u540e\u7aef\u786e\u8ba4\u6743\u76ca\u5230\u8d26\u3002',
+      confirmText: '\u786e\u8ba4\u652f\u4ed8',
+      cancelText: '\u53d6\u6d88',
+      success: (modalRes) => {
+        if (!modalRes.confirm) {
+          this.setData({ purchaseLoading: false });
+          return;
+        }
+        this.confirmVirtualPayment(endpoint, token, purchaseType);
+      },
+      fail: () => {
+        this.setData({ purchaseLoading: false });
+      },
+    });
+  },
+
+  confirmVirtualPayment(endpoint, token, purchaseType) {
+    wx.request({
+      url: this.endpointToUrl(endpoint),
+      method: 'POST',
+      header: { Authorization: `Bearer ${token}` },
+      success: (res) => {
+        if (res.statusCode !== 200 || !res.data) {
+          this.finishPurchaseWithError(
+            getRequestErrorMessage(res, '\u652f\u4ed8\u786e\u8ba4\u5931\u8d25\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5')
+          );
+          return;
+        }
+        this.finishPurchaseSuccess(purchaseType);
+      },
+      fail: () => {
+        this.finishPurchaseWithError('\u652f\u4ed8\u786e\u8ba4\u8bf7\u6c42\u5931\u8d25');
+      },
+    });
+  },
+
+  requestVirtualPayment(payload, token, purchaseType, orderId, localConfirmEndpoint) {
+    if (!canUseVirtualPayment()) {
+      this.finishPurchaseWithError('\u5f53\u524d\u5fae\u4fe1\u7248\u672c\u4e0d\u652f\u6301\u865a\u62df\u652f\u4ed8');
+      return;
+    }
+    wx.requestVirtualPayment({
+      ...payload,
+      success: () => {
+        if (localConfirmEndpoint) {
+          this.confirmVirtualPayment(localConfirmEndpoint, token, purchaseType);
+          return;
+        }
+        this.pollOrderFulfilled(orderId, token, purchaseType);
+      },
+      fail: (error) => {
+        this.setData({ purchaseLoading: false });
+        const errCode = error && Number(error.errCode);
+        if (errCode === -2 || String((error && error.errMsg) || '').includes('cancel')) {
+          wx.showToast({ title: '\u5df2\u53d6\u6d88\u652f\u4ed8', icon: 'none' });
+          return;
+        }
+        wx.showToast({ title: '\u652f\u4ed8\u672a\u5b8c\u6210', icon: 'none' });
+      },
+    });
+  },
+
+  pollOrderFulfilled(orderId, token, purchaseType, retries = 8) {
+    if (!orderId) {
+      this.finishPurchaseWithError('\u8ba2\u5355\u72b6\u6001\u786e\u8ba4\u5931\u8d25');
+      return;
+    }
+    wx.request({
+      url: `${VIP_API_BASE_URL}/orders/${orderId}`,
+      method: 'GET',
+      header: { Authorization: `Bearer ${token}` },
+      success: (res) => {
+        if (res.statusCode === 200 && res.data && res.data.status === 'fulfilled') {
+          this.finishPurchaseSuccess(purchaseType);
+          return;
+        }
+        if (retries > 0) {
+          setTimeout(() => {
+            this.pollOrderFulfilled(orderId, token, purchaseType, retries - 1);
+          }, 1000);
+          return;
+        }
+        this.setData({ purchaseLoading: false });
+        wx.showModal({
+          title: '\u652f\u4ed8\u786e\u8ba4\u4e2d',
+          content: '\u652f\u4ed8\u7ed3\u679c\u5df2\u63d0\u4ea4\uff0c\u6743\u76ca\u5230\u8d26\u4ecd\u5728\u786e\u8ba4\u3002\u8bf7\u7a0d\u540e\u5237\u65b0\u4f1a\u5458\u4e2d\u5fc3\u3002',
+          showCancel: false,
+        });
+      },
+      fail: () => {
+        this.finishPurchaseWithError('\u8ba2\u5355\u72b6\u6001\u786e\u8ba4\u5931\u8d25');
+      },
+    });
+  },
+
+  finishPurchaseSuccess(purchaseType) {
+    if (purchaseType === 'addon') {
+      this.finishAddonPurchaseSuccess();
+      return;
+    }
+    this.setData({ purchaseLoading: false });
+    this.navigateToSuccessPage();
   },
 
   completeMockPayment(endpoint, token, purchaseType) {

@@ -5,6 +5,18 @@ const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 const API_BASE_URL = `${SERVER_BASE_URL}/api/v1/users`; 
 const VIP_API_BASE_URL = `${SERVER_BASE_URL}/api/v1/vip`;
 const defaultAvatarUrl = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png';
+const MEMBERSHIP_ICON_BY_PLAN = {
+  light: '/images/vip/member-badge-light.png',
+  knowing: '/images/vip/member-badge-knowing.png',
+  companion: '/images/vip/member-badge-companion.png',
+  vip_light: '/images/vip/member-badge-light.png',
+  vip_knowing: '/images/vip/member-badge-knowing.png',
+  vip_companion: '/images/vip/member-badge-companion.png',
+};
+
+function getMembershipIcon(planCode) {
+  return MEMBERSHIP_ICON_BY_PLAN[planCode] || MEMBERSHIP_ICON_BY_PLAN.knowing;
+}
 
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 const { loginWithBackend } = require('../../utils/auth.js');
@@ -14,6 +26,9 @@ Page({
     isLogin: false,
     isMember: false,
     membership: null,
+    membershipAvatarIcon: '',
+    vipTestToolsAvailable: false,
+    cancelVipLoading: false,
     vipEntryTitle: '成为会员',
     vipEntryDesc: '查看会员套餐与专属权益',
     privacyVisible: false,
@@ -62,6 +77,9 @@ Page({
           isLogin: false,
           isMember: false,
           membership: null,
+          membershipAvatarIcon: '',
+          vipTestToolsAvailable: false,
+          cancelVipLoading: false,
           vipEntryTitle: '成为会员',
           vipEntryDesc: '查看会员套餐与专属权益',
           userInfo: {
@@ -161,6 +179,8 @@ Page({
         this.setData({
           isMember,
           membership: isMember ? membership : null,
+          membershipAvatarIcon: isMember ? getMembershipIcon(membership.plan_code) : '',
+          vipTestToolsAvailable: Boolean(res.data && res.data.test_tools_available),
           vipEntryTitle: isMember ? '会员权益' : '成为会员',
           vipEntryDesc: isMember
             ? `${membership.plan_name || '当前会员'} · 查看当前额度`
@@ -208,6 +228,9 @@ Page({
       isLogin: false,
       isMember: false,
       membership: null,
+      membershipAvatarIcon: '',
+      vipTestToolsAvailable: false,
+      cancelVipLoading: false,
       vipEntryTitle: '成为会员',
       vipEntryDesc: '查看会员套餐与专属权益',
       userInfo: {
@@ -272,6 +295,52 @@ Page({
   goToVip: function() {
     wx.navigateTo({
       url: '/pkgProfile/vip/index'
+    });
+  },
+
+  cancelVipForTesting: function() {
+    if (this.data.cancelVipLoading) {
+      return;
+    }
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
+    wx.showModal({
+      title: '临时测试按钮',
+      content: '确认把当前账号重置为非会员吗？会员额度也会从当前状态里移除。',
+      confirmText: '确认取消',
+      cancelText: '再想想',
+      success: (modalRes) => {
+        if (!modalRes.confirm) {
+          return;
+        }
+        this.setData({ cancelVipLoading: true });
+        wx.request({
+          url: `${VIP_API_BASE_URL}/me/test-cancel-membership`,
+          method: 'POST',
+          header: { 'Authorization': `Bearer ${token}` },
+          success: (res) => {
+            if (res.statusCode !== 200) {
+              const detail = res.data && res.data.detail;
+              const message = typeof detail === 'string'
+                ? detail
+                : (detail && detail.message) || '取消会员测试失败';
+              wx.showToast({ title: message, icon: 'none' });
+              return;
+            }
+            wx.showToast({ title: '已重置为非会员', icon: 'success' });
+            this.fetchVipState(token);
+          },
+          fail: () => {
+            wx.showToast({ title: '请求失败，请稍后重试', icon: 'none' });
+          },
+          complete: () => {
+            this.setData({ cancelVipLoading: false });
+          },
+        });
+      },
     });
   },
 

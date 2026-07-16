@@ -52,7 +52,7 @@
           </view>
         </view>
 
-        <image class="plan-art" src="{{item.image}}" mode="aspectFit"></image>
+        <image class="plan-art" src="{{item.image}}" mode="aspectFit" fade-in="{{false}}"></image>
 
         <view class="quota-list">
           <view wx:for="{{item.quotaItems}}" wx:key="feature" wx:for-item="quota" class="quota-row">
@@ -73,7 +73,7 @@
     <view class="purchase-bar">
       <view class="purchase-main">
         <view class="selected-plan-thumb">
-          <image src="{{selectedPlan.image}}" mode="aspectFit"></image>
+          <image src="{{selectedPlan.image}}" mode="aspectFit" fade-in="{{false}}"></image>
         </view>
 
         <view class="selected-plan-summary">
@@ -120,26 +120,29 @@
     </view>
 
     <view class="member-page-header">
-      <view class="member-page-title">会员中心</view>
+      <view class="member-page-side-placeholder"></view>
+      <view class="member-page-title">会员权益</view>
       <view class="record-entry" bindtap="openPurchaseRecords">
-        <view class="record-icon">
-          <text>▤</text>
-        </view>
+        <image class="record-icon" src="/images/vip/purchase-record-icon-cutout.png" mode="aspectFit"></image>
         <text>购买记录</text>
       </view>
     </view>
 
     <view class="member-card">
-      <image class="member-card-bg" src="/images/vip/member-card-bg.png" mode="aspectFill"></image>
-      <view class="member-expire-top">{{currentMember.expiresText}}</view>
-      <view class="member-card-content">
-        <image class="member-avatar" src="{{currentMember.icon}}" mode="aspectFit"></image>
-        <view class="member-info">
-          <view class="member-name">{{currentMember.name}}</view>
-        </view>
+      <image class="member-card-bg" src="/images/vip/member-card-bg-redesign.png" mode="aspectFill"></image>
+      <view class="member-validity">
+        <image class="member-validity-icon" src="/images/vip/member-validity-leaf.png" mode="aspectFit"></image>
+        <text>{{currentMember.expiresText}}</text>
       </view>
+      <view class="member-name">{{currentMember.name}}</view>
+      <view class="member-title-ornament">
+        <view class="member-title-line"></view>
+        <view class="member-title-spark"></view>
+      </view>
+      <image class="member-badge-icon" src="{{currentMember.badgeIcon}}" mode="aspectFit"></image>
       <view class="service-link" bindtap="openAgreement">
         <text>会员服务协议</text>
+        <view class="service-arrow"></view>
       </view>
     </view>
 
@@ -178,10 +181,6 @@
           </view>
         </view>
       </view>
-    </view>
-
-    <view class="footer-art-wrap">
-      <image class="footer-art" src="/images/vip/member-center-footer.png" mode="aspectFill"></image>
     </view>
   </block>
 

@@ -116,6 +116,15 @@ def _save_ai_messages_and_build_payload(
 redis_client = None
 active_reply_sessions: set[str] = set()
 
+
+def _reply_lock_key(user_id: str, character_id: str) -> str:
+    return f"{user_id}:{character_id}"
+
+
+def _reply_in_progress(user_id: str, character_id: str) -> bool:
+    return _reply_lock_key(user_id, character_id) in active_reply_sessions
+
+
 @router.on_event("startup")
 async def startup_event():
     """应用启动时，创建 Redis 连接池，用于每日消息计数。"""
@@ -235,8 +244,8 @@ def rewind_chat_relationship(
             detail="角色不存在。",
         )
 
-    reply_lock_key = f"{current_user_id}:{character_id}"
-    if reply_lock_key in active_reply_sessions:
+    reply_lock_key = _reply_lock_key(current_user_id, character_id)
+    if _reply_in_progress(current_user_id, character_id):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="对方正在回复，请等待当前回复结束后再进行时间回溯。",
@@ -299,8 +308,8 @@ async def send_message(
     if not character:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="角色不存在")
 
-    reply_lock_key = f"{current_user_id}:{character_id}"
-    if reply_lock_key in active_reply_sessions:
+    reply_lock_key = _reply_lock_key(current_user_id, character_id)
+    if _reply_in_progress(current_user_id, character_id):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="对方正在回复您哦~稍后再发吧"
@@ -372,7 +381,7 @@ async def send_message(
         ]
         if not reply_messages:
             logger.warning(
-                f"角色 {character_id} 在重试后仍未生成可保存的AI回复，本次消息不落库并返回可重试错误。"
+                f"角色 {character_id} 未生成可保存的AI回复，本次消息不落库并返回可重试错误。"
             )
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -491,6 +500,7 @@ class ChatDetailsResponse(BaseModel):
     character_status: str = Field(..., description="AI角色当前的实时状态文本")
     character: AICharacterModel = Field(..., description="AI角色资料卡信息")
     favorability_context: Dict[str, Any] = Field(default_factory=dict, description="当前关系温度上下文")
+    reply_in_progress: bool = Field(False, description="当前角色是否正在为该用户生成回复")
 
 @router.get(
     "/chats/{character_id}/details", 
@@ -539,8 +549,32 @@ def get_chat_details(
         history=history,
         character_status=character_status_text,
         character=character,
-        favorability_context=community_chat_table.get_favorability_context(current_user_id, character_id)
+        favorability_context=community_chat_table.get_favorability_context(current_user_id, character_id),
+        reply_in_progress=_reply_in_progress(current_user_id, character_id),
     )
+
+
+class ChatReplyStatusResponse(BaseModel):
+    reply_in_progress: bool = Field(..., description="当前角色是否正在为该用户生成回复")
+
+
+@router.get(
+    "/chats/{character_id}/reply-status",
+    response_model=ChatReplyStatusResponse,
+    summary="获取指定角色当前是否正在生成回复",
+)
+def get_chat_reply_status(
+    character_id: str,
+    current_user_id: str = Depends(get_current_user_id),
+):
+    character = ai_character_table.get_character_by_id(character_id)
+    if not character:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="角色不存在")
+
+    return ChatReplyStatusResponse(
+        reply_in_progress=_reply_in_progress(current_user_id, character_id),
+    )
+
 
 # --- Pydantic模型 (保持不变) ---
 class FriendshipHistoryItem(BaseModel):

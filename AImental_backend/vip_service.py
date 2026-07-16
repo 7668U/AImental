@@ -163,6 +163,33 @@ class VipService:
                 metadata={"source_type": source_type, "source_ref": source_ref},
                 timestamp=timestamp,
             )
+        elif amount > bucket.total_amount:
+            increase = amount - bucket.total_amount
+            bucket.total_amount = amount
+            bucket.remaining_amount += increase
+            bucket.status = "active"
+            bucket.updated_at = timestamp
+            bucket.save(
+                only=[
+                    VipQuotaBucket.total_amount,
+                    VipQuotaBucket.remaining_amount,
+                    VipQuotaBucket.status,
+                    VipQuotaBucket.updated_at,
+                ]
+            )
+            self._ledger(
+                user_id=user_id,
+                feature=feature,
+                event_type="grant",
+                amount=increase,
+                bucket=bucket,
+                metadata={
+                    "source_type": source_type,
+                    "source_ref": source_ref,
+                    "reason": "quota_increase",
+                },
+                timestamp=timestamp,
+            )
         return bucket
 
     def ensure_free_buckets(self, user_id: str, timestamp: Optional[int] = None) -> None:
@@ -264,6 +291,12 @@ class VipService:
             changed = True
         if changed:
             membership.updated_at = timestamp
+        self._grant_membership_period(
+            membership,
+            membership.current_period_start,
+            membership.current_period_end,
+            timestamp,
+        )
         membership.save()
         return membership
 
@@ -497,6 +530,67 @@ class VipService:
             "entitlements": entitlements,
             "server_time": timestamp,
         }
+
+    def cancel_membership_for_testing(
+        self,
+        user_id: str,
+        timestamp: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        timestamp = timestamp or now_ts()
+        with self.db.atomic():
+            membership = VipMembership.get_or_none(VipMembership.user_id == user_id)
+            if membership:
+                membership.status = "expired"
+                membership.expires_at = timestamp
+                membership.current_period_end = min(
+                    membership.current_period_end,
+                    timestamp,
+                )
+                membership.updated_at = timestamp
+                membership.save(
+                    only=[
+                        VipMembership.status,
+                        VipMembership.expires_at,
+                        VipMembership.current_period_end,
+                        VipMembership.updated_at,
+                    ]
+                )
+
+            member_buckets = list(
+                VipQuotaBucket.select().where(
+                    (VipQuotaBucket.user_id == user_id)
+                    & (VipQuotaBucket.source_type == "membership")
+                    & (VipQuotaBucket.status.in_(["active", "exhausted"]))
+                )
+            )
+            for bucket in member_buckets:
+                remaining = bucket.remaining_amount
+                bucket.remaining_amount = 0
+                bucket.status = "expired"
+                bucket.expires_at = min(bucket.expires_at, timestamp)
+                bucket.updated_at = timestamp
+                bucket.save(
+                    only=[
+                        VipQuotaBucket.remaining_amount,
+                        VipQuotaBucket.status,
+                        VipQuotaBucket.expires_at,
+                        VipQuotaBucket.updated_at,
+                    ]
+                )
+                if remaining:
+                    self._ledger(
+                        user_id=user_id,
+                        feature=bucket.feature,
+                        event_type="cancel",
+                        amount=-remaining,
+                        bucket=bucket,
+                        metadata={"source_type": "membership", "reason": "test_cancel"},
+                        timestamp=timestamp,
+                    )
+
+            self.ensure_free_buckets(user_id, timestamp)
+
+        return self.get_summary(user_id, timestamp)
 
     def create_order(
         self,

@@ -18,10 +18,13 @@ page {
 }
 
 .member-mode {
+  height: 100vh;
+  max-height: 100vh;
   padding: 0 28rpx;
   background:
     radial-gradient(circle at 50% -10%, rgba(255, 232, 198, 0.72) 0, rgba(255, 250, 244, 0) 380rpx),
     linear-gradient(180deg, #fff8ee 0%, #fffaf5 58%, #fff6ea 100%);
+  overflow: hidden;
 }
 
 .page-background {
@@ -94,6 +97,11 @@ page {
   box-shadow: none;
 }
 
+.member-mode .nav-row {
+  height: 62rpx;
+  align-items: flex-start;
+}
+
 .member-mode .back-icon {
   margin-top: -6rpx;
   color: #111;
@@ -144,33 +152,20 @@ page {
   border-radius: 32rpx;
   border: 2rpx solid rgba(235, 183, 133, 0.36);
   box-sizing: border-box;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.94);
+  background: #fff;
   box-shadow: 0 12rpx 30rpx rgba(173, 108, 60, 0.08);
-  transition: border-color 180ms ease-out, box-shadow 180ms ease-out, transform 180ms ease-out;
-}
-
-.plan-card:active {
-  transform: scale(0.995);
-}
-
-.plan-card.selected {
-  border-width: 3rpx;
 }
 
 .plan-card.selected.plan-light {
   border-color: #f3a044;
-  box-shadow: 0 14rpx 34rpx rgba(225, 128, 42, 0.13);
 }
 
 .plan-card.selected.plan-knowing {
   border-color: #4db674;
-  box-shadow: 0 14rpx 34rpx rgba(61, 160, 97, 0.14);
 }
 
 .plan-card.selected.plan-companion {
   border-color: #e96b67;
-  box-shadow: 0 14rpx 34rpx rgba(220, 81, 76, 0.13);
 }
 
 .plan-heading {
@@ -297,14 +292,26 @@ page {
   font-size: 24rpx;
   line-height: 1;
   font-weight: 800;
+  opacity: 0;
+}
+
+.selected .select-check {
+  opacity: 1;
 }
 
 .plan-art {
   position: absolute;
-  left: 20rpx;
-  top: 75rpx;
-  width: 166rpx;
-  height: 196rpx;
+  left: 18rpx;
+  top: 76rpx;
+  width: 174rpx;
+  height: 174rpx;
+}
+
+.plan-light .plan-art {
+  left: 18rpx;
+  top: 76rpx;
+  width: 174rpx;
+  height: 174rpx;
 }
 
 .quota-list {
@@ -385,7 +392,7 @@ page {
   padding: 20rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
   border-radius: 32rpx 32rpx 0 0;
   box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.97);
+  background: #fff;
   box-shadow: 0 -10rpx 36rpx rgba(150, 93, 47, 0.12);
 }
 
@@ -548,23 +555,29 @@ page {
 }
 
 .member-page-header {
-  min-height: 138rpx;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  min-height: 104rpx;
+  display: grid;
+  grid-template-columns: 116rpx minmax(0, 1fr) 116rpx;
+  align-items: center;
+  column-gap: 8rpx;
 }
 
 .member-page-title {
-  padding-top: 24rpx;
-  color: #3b281c;
-  font-size: 48rpx;
+  min-width: 0;
+  color: #171717;
+  font-size: 44rpx;
   line-height: 1.2;
   font-weight: 900;
+  text-align: center;
   letter-spacing: 0;
 }
 
+.member-page-side-placeholder {
+  width: 116rpx;
+  height: 1rpx;
+}
+
 .record-entry {
-  margin-top: 2rpx;
   width: 116rpx;
   display: flex;
   flex-direction: column;
@@ -575,26 +588,18 @@ page {
 }
 
 .record-icon {
-  width: 54rpx;
-  height: 54rpx;
-  margin-bottom: 10rpx;
-  border: 2rpx solid rgba(238, 180, 112, 0.68);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #4e3a2c;
-  font-size: 31rpx;
-  background: rgba(255, 247, 236, 0.92);
+  width: 88rpx;
+  height: 78rpx;
+  margin-bottom: -2rpx;
 }
 
 .member-card {
-  height: 346rpx;
-  border: 1rpx solid rgba(237, 185, 120, 0.6);
-  border-radius: 28rpx;
+  height: 392rpx;
+  border: 1rpx solid rgba(239, 190, 124, 0.76);
+  border-radius: 30rpx;
   overflow: hidden;
-  background: #ffe8cf;
-  box-shadow: 0 16rpx 32rpx rgba(169, 103, 45, 0.08);
+  background: #fff0d7;
+  box-shadow: 0 16rpx 32rpx rgba(169, 103, 45, 0.09);
 }
 
 .member-card-bg {
@@ -604,65 +609,109 @@ page {
   top: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.96;
-}
-
-.member-card-content {
-  position: relative;
-  z-index: 1;
-  height: 100%;
-  padding: 92rpx 24rpx 64rpx 26rpx;
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-}
-
-.member-expire-top {
-  position: absolute;
-  z-index: 2;
-  left: 28rpx;
-  top: 28rpx;
-  color: #4c3b31;
-  font-size: 25rpx;
-  line-height: 1.25;
-}
-
-.member-avatar {
-  width: 150rpx;
-  height: 150rpx;
-  flex-shrink: 0;
-}
-
-.member-info {
-  margin-left: 22rpx;
-  display: flex;
-  align-items: center;
-  min-width: 0;
+  opacity: 1;
 }
 
 .member-name {
-  color: #3f2a1d;
-  font-size: 42rpx;
-  line-height: 1.15;
+  position: absolute;
+  z-index: 2;
+  left: 46rpx;
+  top: 112rpx;
+  color: #754012;
+  font-family: "Source Han Serif SC", "Noto Serif SC", "Songti SC", STSong, SimSun, serif;
+  font-size: 68rpx;
+  line-height: 1.08;
   font-weight: 900;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.member-validity {
+  position: absolute;
+  z-index: 2;
+  left: 42rpx;
+  top: 35rpx;
+  max-width: 390rpx;
+  display: flex;
+  align-items: center;
+  color: #87552d;
+  font-size: 25rpx;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.member-validity-icon {
+  width: 44rpx;
+  height: 44rpx;
+  margin-right: 13rpx;
+  flex-shrink: 0;
+}
+
+.member-title-ornament {
+  position: absolute;
+  z-index: 2;
+  left: 48rpx;
+  top: 194rpx;
+  width: 264rpx;
+  height: 24rpx;
+  display: flex;
+  align-items: center;
+}
+
+.member-title-line {
+  flex: 1;
+  height: 2rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, rgba(238, 172, 84, 0), rgba(238, 172, 84, 0.86), rgba(238, 172, 84, 0.08));
+}
+
+.member-title-spark {
+  width: 14rpx;
+  height: 14rpx;
+  margin-left: 12rpx;
+  background: #e9a952;
+  transform: rotate(45deg);
+}
+
+.member-badge-icon {
+  position: absolute;
+  z-index: 2;
+  left: 56rpx;
+  bottom: 34rpx;
+  width: 150rpx;
+  height: 140rpx;
 }
 
 .service-link {
   position: absolute;
   z-index: 2;
-  left: 28rpx;
-  bottom: 32rpx;
-  min-width: 154rpx;
-  height: 46rpx;
-  padding: 0 22rpx;
+  right: 32rpx;
+  top: 32rpx;
+  min-width: 184rpx;
+  height: 60rpx;
+  padding: 0 26rpx 0 30rpx;
   border-radius: 999rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #4e3b30;
-  font-size: 23rpx;
+  color: #875129;
+  font-size: 26rpx;
   line-height: 1;
-  background: rgba(255, 255, 255, 0.82);
+  font-weight: 700;
+  background: linear-gradient(180deg, rgba(255, 251, 242, 0.94), rgba(255, 239, 210, 0.9));
+  box-shadow:
+    inset 0 0 0 2rpx rgba(234, 190, 135, 0.44),
+    0 8rpx 18rpx rgba(169, 103, 45, 0.1);
+}
+
+.service-arrow {
+  width: 14rpx;
+  height: 14rpx;
+  margin-left: 18rpx;
+  border-top: 4rpx solid #8b542b;
+  border-right: 4rpx solid #8b542b;
+  transform: rotate(45deg);
+  box-sizing: border-box;
 }
 
 .section-card {
@@ -691,7 +740,9 @@ page {
 
 .usage-row {
   height: 78rpx;
-  display: flex;
+  display: grid;
+  grid-template-columns: 58rpx 166rpx minmax(118rpx, 1fr) 136rpx;
+  column-gap: 16rpx;
   align-items: center;
 }
 
@@ -702,12 +753,9 @@ page {
 .usage-icon {
   width: 58rpx;
   height: 58rpx;
-  flex-shrink: 0;
 }
 
 .usage-name {
-  width: 124rpx;
-  margin-left: 20rpx;
   color: #252321;
   font-size: 25rpx;
   line-height: 1.2;
@@ -716,9 +764,8 @@ page {
 
 .progress-track {
   position: relative;
-  flex: 1;
+  min-width: 0;
   height: 13rpx;
-  margin-left: 8rpx;
   border-radius: 999rpx;
   overflow: hidden;
   background: #fbecd8;
@@ -732,7 +779,6 @@ page {
 
 .usage-count {
   width: 136rpx;
-  margin-left: 22rpx;
   color: #23201e;
   font-size: 24rpx;
   line-height: 1.2;
@@ -741,7 +787,7 @@ page {
 }
 
 .addon-section {
-  padding: 24rpx 24rpx 28rpx;
+  padding: 24rpx 24rpx 22rpx;
 }
 
 .addon-title {
@@ -825,14 +871,20 @@ page {
 }
 
 .footer-art-wrap {
-  height: 118rpx;
-  margin: 26rpx -28rpx 0;
+  position: relative;
+  height: 226rpx;
+  margin: 4rpx -28rpx -20rpx;
   overflow: hidden;
 }
 
 .footer-art {
-  width: 100%;
-  height: 180rpx;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 110%;
+  height: 320rpx;
+  display: block;
+  transform: translateX(-50%);
 }
 
 .modal-layer {
@@ -1235,8 +1287,17 @@ page {
   }
 
   .plan-art {
-    width: 142rpx;
-    height: 174rpx;
+    left: 10rpx;
+    top: 70rpx;
+    width: 154rpx;
+    height: 154rpx;
+  }
+
+  .plan-light .plan-art {
+    left: 10rpx;
+    top: 70rpx;
+    width: 154rpx;
+    height: 154rpx;
   }
 
   .plan-name {
@@ -1265,17 +1326,42 @@ page {
     padding-right: 22rpx;
   }
 
-  .member-card-content {
-    padding-left: 20rpx;
+  .member-card {
+    height: 370rpx;
   }
 
-  .member-avatar {
-    width: 132rpx;
-    height: 132rpx;
+  .member-validity {
+    left: 34rpx;
+    top: 30rpx;
+    max-width: 340rpx;
+    font-size: 23rpx;
   }
 
   .member-name {
-    font-size: 37rpx;
+    left: 38rpx;
+    top: 104rpx;
+    font-size: 58rpx;
+  }
+
+  .member-title-ornament {
+    left: 40rpx;
+    top: 176rpx;
+    width: 228rpx;
+  }
+
+  .member-badge-icon {
+    left: 46rpx;
+    bottom: 30rpx;
+    width: 132rpx;
+    height: 124rpx;
+  }
+
+  .service-link {
+    right: 22rpx;
+    top: 28rpx;
+    min-width: 158rpx;
+    height: 52rpx;
+    font-size: 23rpx;
   }
 
   .usage-card {
@@ -1283,15 +1369,22 @@ page {
     padding-right: 22rpx;
   }
 
+  .usage-row {
+    grid-template-columns: 54rpx 152rpx minmax(84rpx, 1fr) 122rpx;
+    column-gap: 10rpx;
+  }
+
+  .usage-icon {
+    width: 54rpx;
+    height: 54rpx;
+  }
+
   .usage-name {
-    width: 116rpx;
-    margin-left: 14rpx;
     font-size: 23rpx;
   }
 
   .usage-count {
     width: 122rpx;
-    margin-left: 14rpx;
     font-size: 22rpx;
   }
 
@@ -1308,6 +1401,11 @@ page {
     margin-left: 76rpx;
   }
 
+  .footer-art-wrap {
+    margin-left: -22rpx;
+    margin-right: -22rpx;
+  }
+
   .agreement-modal-mask {
     padding-left: 28rpx;
     padding-right: 28rpx;
@@ -1315,11 +1413,5 @@ page {
 
   .agreement-modal-scroll {
     height: 56vh;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .plan-card {
-    transition: none;
   }
 }

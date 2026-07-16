@@ -16,7 +16,7 @@ def _env_float(name: str, default: float) -> float:
     except (TypeError, ValueError):
         return default
 
-SCHEDULE_LLM_TIMEOUT_SECONDS = _env_float("SCHEDULE_LLM_TIMEOUT_SECONDS", 90.0)
+SCHEDULE_LLM_TIMEOUT_SECONDS = _env_float("SCHEDULE_LLM_TIMEOUT_SECONDS", 180.0)
 
 def _no_retry_client():
     if client and hasattr(client, "with_options"):
@@ -290,12 +290,15 @@ def build_fallback_daily_schedule(character_profile: Dict[str, Any]) -> List[Dic
 def generate_daily_schedule(
     character_profile: Dict[str, Any], 
     recent_history: List[Dict[str, Any]],
-    target_date: date | None = None
-) -> List[Dict[str, Any]]:
+    target_date: date | None = None,
+    fallback_on_error: bool = True,
+) -> List[Dict[str, Any]] | None:
     """
     调用LLM API为指定角色生成指定日期的一天日程表。
     """
     if not client:
+        if not fallback_on_error:
+            return None
         print("错误: LLM客户端未初始化。")
         return build_fallback_daily_schedule(character_profile)
 
@@ -329,6 +332,9 @@ def generate_daily_schedule(
         return schedule_list
 
     except ValidationError as e:
+        if not fallback_on_error:
+            print(f"LLM schedule validation failed; will retry without fallback: {e}")
+            return None
         print(f"❌ 数据验证失败: AI返回的JSON格式不符合预定义的Schema。错误详情: {e}")
         print(
             "原始响应已省略，避免模型内容进入日志。"
@@ -337,6 +343,9 @@ def generate_daily_schedule(
         print("⚠️ 使用本地兜底日程继续。")
         return build_fallback_daily_schedule(character_profile)
     except Exception as e:
+        if not fallback_on_error:
+            print(f"LLM schedule request failed; will retry without fallback: {e}")
+            return None
         print(f"❌ 调用LLM API时发生未知错误: {e}")
         print("⚠️ 使用本地兜底日程继续。")
         return build_fallback_daily_schedule(character_profile)
