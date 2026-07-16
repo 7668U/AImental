@@ -2,24 +2,41 @@
 
 const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 const ASSESSMENTS_API_URL = `${SERVER_BASE_URL}/api/v1/assessments`;
+const MOOD_ANALYSIS_HISTORY_API_URL = `${SERVER_BASE_URL}/api/v1/report/history`;
 const { getScaleDisplayName } = require('../utils/assessment-display.js');
 
 const DELETE_BTN_WIDTH = 80;
 const REQUEST_TIMEOUT = 8000;
+const MOOD_ANALYSIS_TYPE_ORDER = {
+  mood: 1,
+  'tag-mood': 2,
+  'word-cloud': 3,
+  color: 4
+};
+const MOOD_ANALYSIS_FRONTEND_TYPE_MAP = {
+  mood: 'mood_distribution',
+  'tag-mood': 'tag_correlation',
+  'word-cloud': 'word_cloud',
+  color: 'color_palette'
+};
 
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 Page({
   data: {
     navTop: 0,
     navHeight: 0,
+    activeHistoryTab: 'assessment',
     isLoading: true,
+    isMoodAnalysisLoading: false,
     groupedHistory: [],
+    moodAnalysisHistory: [],
     touchStartX: 0,
   },
 
   onLoad(options) {
     this.setNavSize();
     this.fetchHistory();
+    this.fetchMoodAnalysisHistory();
   },
 
   setNavSize() {
@@ -76,6 +93,38 @@ Page({
     wx.showToast({ title: title, icon: 'none' });
   },
 
+  switchHistoryTab(e) {
+    const tab = e.currentTarget.dataset.tab;
+    if (!tab || tab === this.data.activeHistoryTab) return;
+    this.closeOtherSwipedItems(-1, -1);
+    this.setData({ activeHistoryTab: tab });
+  },
+
+  fetchMoodAnalysisHistory() {
+    this.setData({ isMoodAnalysisLoading: true });
+    wx.request({
+      url: MOOD_ANALYSIS_HISTORY_API_URL,
+      method: 'GET',
+      header: {
+        'Authorization': 'Bearer ' + wx.getStorageSync('token')
+      },
+      timeout: REQUEST_TIMEOUT,
+      success: (res) => {
+        if (res.statusCode === 200 && Array.isArray(res.data)) {
+          this.setData({ moodAnalysisHistory: this.processMoodAnalysisHistory(res.data) });
+        } else {
+          this.handleFetchError('心情分析历史加载失败');
+        }
+      },
+      fail: () => {
+        this.handleFetchError('网络错误，请检查网络连接');
+      },
+      complete: () => {
+        this.setData({ isMoodAnalysisLoading: false });
+      }
+    });
+  },
+
   toggleExpand(e) {
     const { index } = e.currentTarget.dataset;
     const key = `groupedHistory[${index}].is_expanded`;
@@ -101,6 +150,23 @@ Page({
       console.error("跳转到结果页时发生错误", err);
       wx.showToast({ title: '发生未知错误', icon: 'none' });
     }
+  },
+
+  goToMoodAnalysisReport(e) {
+    const { record } = e.currentTarget.dataset;
+    if (!record || !record.start_date || !record.end_date || !record.frontend_analysis_type) {
+      wx.showToast({ title: '报告信息不完整，暂时无法打开', icon: 'none' });
+      return;
+    }
+    const params = [
+      `type=${encodeURIComponent(record.frontend_analysis_type)}`,
+      `start_date=${encodeURIComponent(record.start_date)}`,
+      `end_date=${encodeURIComponent(record.end_date)}`,
+      'from=history'
+    ].join('&');
+    wx.navigateTo({
+      url: `/pkgDailyCheckin/analysis?${params}`
+    });
   },
 
     formatDateToYYYYMMDD(timestamp) {
@@ -146,6 +212,46 @@ Page({
       }
     });
     return Array.from(historyMap.values());
+  },
+
+  processMoodAnalysisHistory(records) {
+    if (!records || records.length === 0) return [];
+    return records
+      .map(record => ({
+        ...record,
+        date_range: `${record.start_date || '--'} 至 ${record.end_date || '--'}`,
+        display_report: record.report_text || record.summary_text || '暂无报告内容',
+        display_summary: record.summary_text || '',
+        updated_at_formatted: this.formatRecordDateTime(record.updated_at),
+        sort_time: this.resolveSortTime(record.updated_at || record.created_at),
+        type_order: MOOD_ANALYSIS_TYPE_ORDER[record.analysis_type] || 99,
+        frontend_analysis_type: MOOD_ANALYSIS_FRONTEND_TYPE_MAP[record.analysis_type] || ''
+      }))
+      .sort((a, b) => {
+        if (b.sort_time !== a.sort_time) return b.sort_time - a.sort_time;
+        return a.type_order - b.type_order;
+      });
+  },
+
+  resolveSortTime(value) {
+    if (!value) return 0;
+    if (typeof value === 'number') {
+      return value > 1000000000000 ? value : value * 1000;
+    }
+    const parsed = Date.parse(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  },
+
+  formatRecordDateTime(value) {
+    const time = this.resolveSortTime(value);
+    if (!time) return '';
+    const date = new Date(time);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hour}:${minute}`;
   },
 
   getDisplayResultLevel(level) {

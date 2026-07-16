@@ -119,6 +119,10 @@ class Checkin(Model):
         purpose="checkins.location_longitude",
         null=True,
     )
+    record_type = CharField(max_length=20, default="moment", index=True)
+    record_date = CharField(max_length=10, null=True, index=True)
+    recorded_at = IntegerField(null=True)
+    local_time = CharField(max_length=5, null=True)
     timestamp = IntegerField(default=lambda: int(time.time()))
     updated_at = IntegerField(default=lambda: int(time.time()))
 
@@ -160,6 +164,10 @@ class CheckinModel(CheckinBaseModel):
     user_id: str
     timestamp: int
     updated_at: int
+    record_type: str = "moment"
+    record_date: Optional[str] = None
+    recorded_at: Optional[int] = None
+    local_time: Optional[str] = None
     mood_icon: Optional[str] = None
     status_items: List[Dict[str, Any]] = Field(default_factory=list)
     image_urls: List[str] = Field(default_factory=list)
@@ -202,12 +210,44 @@ class CheckinTable:
             "location_address": "VARCHAR(1024)",
             "location_latitude": "REAL",
             "location_longitude": "REAL",
+            "record_type": "VARCHAR(20)",
+            "record_date": "VARCHAR(10)",
+            "recorded_at": "INTEGER",
+            "local_time": "VARCHAR(5)",
         }
         for column_name, column_type in migrations.items():
             if column_name not in existing_columns:
                 self.db.execute_sql(
                     f"ALTER TABLE checkins ADD COLUMN {column_name} {column_type}"
                 )
+        self.db.execute_sql(
+            "UPDATE checkins SET record_type = 'moment' "
+            "WHERE record_type IS NULL OR record_type = ''"
+        )
+        self.db.execute_sql(
+            "UPDATE checkins SET recorded_at = timestamp "
+            "WHERE recorded_at IS NULL"
+        )
+        self.db.execute_sql(
+            "UPDATE checkins SET record_date = strftime('%Y-%m-%d', timestamp, 'unixepoch', 'localtime') "
+            "WHERE record_date IS NULL OR record_date = ''"
+        )
+        self.db.execute_sql(
+            "UPDATE checkins SET local_time = strftime('%H:%M', timestamp, 'unixepoch', 'localtime') "
+            "WHERE local_time IS NULL OR local_time = ''"
+        )
+
+    def _normalize_record_date(self, value: Optional[str] = None, timestamp: Optional[int] = None) -> str:
+        if value:
+            return value
+        ts = timestamp if timestamp is not None else int(time.time())
+        return datetime.datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
+
+    def _normalize_local_time(self, value: Optional[str] = None, timestamp: Optional[int] = None) -> str:
+        if value:
+            return value
+        ts = timestamp if timestamp is not None else int(time.time())
+        return datetime.datetime.fromtimestamp(ts).strftime("%H:%M")
         
     def create_dummy_data_for_month(self, user_id: str = "c959d470-64e7-45fe-8942-45ee05d0f153"):
         """
@@ -344,11 +384,33 @@ class CheckinTable:
         """Creates a new checkin record."""
         try:
             payload = self._prepare_checkin_payload(data.model_dump(exclude_unset=True))
+            now_ts = int(time.time())
+            payload.setdefault("record_type", "moment")
+            payload.setdefault("timestamp", now_ts)
+            payload.setdefault("recorded_at", payload.get("timestamp", now_ts))
+            payload.setdefault("record_date", self._normalize_record_date(timestamp=payload["recorded_at"]))
+            payload.setdefault("local_time", self._normalize_local_time(timestamp=payload["recorded_at"]))
             checkin = Checkin.create(
                 user_id=user_id,
                 **payload
             )
             return checkin
+        except IntegrityError:
+            return None
+
+    def create_moment(self, user_id: str, data: CheckinBaseModel) -> Optional[Checkin]:
+        """Creates a moment check-in without enforcing a per-day limit."""
+        payload = data.model_dump(exclude_unset=True)
+        now_ts = int(time.time())
+        payload.update({
+            "record_type": "moment",
+            "timestamp": now_ts,
+            "recorded_at": now_ts,
+            "record_date": self._normalize_record_date(timestamp=now_ts),
+            "local_time": self._normalize_local_time(timestamp=now_ts),
+        })
+        try:
+            return Checkin.create(user_id=user_id, **self._prepare_checkin_payload(payload))
         except IntegrityError:
             return None
 
@@ -358,22 +420,58 @@ class CheckinTable:
 
     def get_checkin_by_date(self, user_id: str, target_date_str: str) -> Optional[Checkin]:
         """
-        Gets the checkin for a specific user on a specific date.
+        Gets the latest moment checkin for a specific user on a specific date.
         """
         try:
-            query = Checkin.select().where(
-                (Checkin.user_id == user_id) &
-                (fn.strftime('%Y-%m-%d', Checkin.timestamp, 'unixepoch') == target_date_str)
-            ).first()
+            date_filter = (
+                (Checkin.record_date == target_date_str) |
+                (fn.strftime('%Y-%m-%d', Checkin.timestamp, 'unixepoch', 'localtime') == target_date_str)
+            )
+            query = (Checkin
+                .select()
+                .where(
+                    (Checkin.user_id == user_id) &
+                    date_filter &
+                    ((Checkin.record_type.is_null(True)) | (Checkin.record_type == "moment"))
+                )
+                .order_by(Checkin.timestamp.desc())
+                .first())
             return query
         except Exception as e:
             print(f"Error in get_checkin_by_date: {e}")
             return None
 
+    def get_moments_by_date(self, user_id: str, target_date_str: str) -> List[Checkin]:
+        date_filter = (
+            (Checkin.record_date == target_date_str) |
+            (fn.strftime('%Y-%m-%d', Checkin.timestamp, 'unixepoch', 'localtime') == target_date_str)
+        )
+        return list(
+            Checkin
+            .select()
+            .where(
+                (Checkin.user_id == user_id) &
+                date_filter &
+                ((Checkin.record_type.is_null(True)) | (Checkin.record_type == "moment"))
+            )
+            .order_by(Checkin.timestamp.asc())
+        )
+
+    def get_timeline_by_date(self, user_id: str, target_date_str: str) -> Dict[str, Any]:
+        moments = [model_to_dict(item) for item in self.get_moments_by_date(user_id, target_date_str)]
+        return {
+            "date": target_date_str,
+            "moments": moments,
+            "summary": {
+                "moment_count": len(moments),
+                "first_mood": moments[0]["mood"] if moments else None,
+                "last_mood": moments[-1]["mood"] if moments else None,
+            }
+        }
+
     def get_checkins_by_month(self, user_id: str, year: int, month: int) -> Dict[str, Dict]:
         """
-        Gets all checkins for a specific user in a given month and returns them
-        as a dictionary keyed by the day of the month.
+        Gets a monthly summary keyed by day of month.
         """
         start_date = datetime.datetime(year, month, 1)
         if month == 12:
@@ -383,18 +481,47 @@ class CheckinTable:
             
         start_timestamp = int(start_date.timestamp())
         end_timestamp = int(end_date.timestamp())
+        start_date_str = start_date.strftime("%Y-%m-%d")
+        end_date_str = end_date.strftime("%Y-%m-%d")
 
         query = Checkin.select().where(
             (Checkin.user_id == user_id) &
-            (Checkin.timestamp >= start_timestamp) &
-            (Checkin.timestamp < end_timestamp)
+            ((Checkin.record_type.is_null(True)) | (Checkin.record_type == "moment")) &
+            (
+                (
+                    (Checkin.record_date >= start_date_str) &
+                    (Checkin.record_date < end_date_str)
+                ) |
+                (
+                    (Checkin.timestamp >= start_timestamp) &
+                    (Checkin.timestamp < end_timestamp)
+                )
+            )
         ).order_by(Checkin.timestamp.asc())
         
         checkins_map = {}
         for checkin in query:
-            checkin_date = datetime.datetime.fromtimestamp(checkin.timestamp)
+            data = model_to_dict(checkin)
+            record_date = data.get("record_date") or datetime.datetime.fromtimestamp(checkin.timestamp).strftime("%Y-%m-%d")
+            try:
+                checkin_date = datetime.datetime.strptime(record_date, "%Y-%m-%d")
+            except ValueError:
+                checkin_date = datetime.datetime.fromtimestamp(checkin.timestamp)
             day_key = str(checkin_date.day)
-            checkins_map[day_key] = model_to_dict(checkin)
+            day_summary = checkins_map.setdefault(day_key, {
+                "date": record_date,
+                "has_moments": False,
+                "moment_count": 0,
+                "latest_mood_id": None,
+                "latest_mood_icon": None,
+                "latest_local_time": None,
+                "color": "transparent",
+            })
+            day_summary["has_moments"] = True
+            day_summary["moment_count"] += 1
+            day_summary["latest_mood_id"] = data.get("mood_id")
+            day_summary["latest_mood_icon"] = data.get("mood_icon") or data.get("mood_id") or data.get("mood")
+            day_summary["latest_local_time"] = data.get("local_time")
             
         return checkins_map
 
@@ -405,6 +532,7 @@ class CheckinTable:
         """
         query = Checkin.select().where(
             (Checkin.user_id == user_id) &
+            ((Checkin.record_type.is_null(True)) | (Checkin.record_type == "moment")) &
             (Checkin.timestamp >= start_timestamp) &
             (Checkin.timestamp < end_timestamp)
         ).order_by(Checkin.timestamp.asc())
@@ -583,6 +711,10 @@ def model_to_dict(model_instance: Model) -> Dict:
         "location_address": getattr(model_instance, "location_address", None),
         "location_latitude": getattr(model_instance, "location_latitude", None),
         "location_longitude": getattr(model_instance, "location_longitude", None),
+        "record_type": getattr(model_instance, "record_type", None) or "moment",
+        "record_date": getattr(model_instance, "record_date", None) or datetime.datetime.fromtimestamp(model_instance.timestamp).strftime("%Y-%m-%d"),
+        "recorded_at": getattr(model_instance, "recorded_at", None) or model_instance.timestamp,
+        "local_time": getattr(model_instance, "local_time", None) or datetime.datetime.fromtimestamp(model_instance.timestamp).strftime("%H:%M"),
         "timestamp": model_instance.timestamp,
         "updated_at": model_instance.updated_at
     }

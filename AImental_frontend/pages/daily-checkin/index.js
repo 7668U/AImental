@@ -8,7 +8,7 @@ const {
 } = require('../../utils/auth.js');
 
 const DAILY_CHECKIN_GUIDE_VERSION = 'v1';
-const DAILY_CHECKIN_GUIDE_ICON = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/daily-checkin/layout/calendar-card.png';
+const DAILY_CHECKIN_GUIDE_ICON = '/pages/daily-checkin/assets/calendar-card.png';
 
 // 从 ai-therapist 页面“借鉴”过来的网络请求函数，你也可以把它封装成公共模块
 function request(options) {
@@ -40,6 +40,11 @@ Page({
   data: {
     isLoggedIn: false, // 新增：登录状态标志
     hasCheckedInToday: false,
+    todayDate: '',
+    todayMomentCount: 0,
+    todayTrajectoryPreview: [],
+    latestMomentTime: '',
+    trajectorySubtitle: '今天还没有留下心情记录',
     showCalendar: false,
     statusBarHeight: 0,
     navBarHeight: 0,
@@ -89,6 +94,11 @@ Page({
       this.setData({
         isLoggedIn: false,
         hasCheckedInToday: false,
+        todayDate: '',
+        todayMomentCount: 0,
+        todayTrajectoryPreview: [],
+        latestMomentTime: '',
+        trajectorySubtitle: '今天还没有留下心情记录',
         showCalendar: false
       });
     }
@@ -178,14 +188,32 @@ Page({
       // 使用封装的 request 函数，代码更简洁
       const timeRes = await request({ url: '/system/time' });
       const serverDateStr = timeRes.server_date;
-      
-      await request({ url: `/checkin/date/${serverDateStr}` });
-      // 如果上面这个请求成功 (没抛出异常)，说明已打卡
-      this.setData({ hasCheckedInToday: true });
+      const timeline = await request({ url: `/checkin/date/${serverDateStr}/timeline` });
+      const moments = Array.isArray(timeline.moments) ? timeline.moments : [];
+      const preview = moments.slice(-5).map(item => ({
+        id: item.id,
+        mood: item.mood,
+        moodIcon: item.mood_icon || item.mood_id || item.mood,
+        localTime: item.local_time || this.formatTimeFromTimestamp(item.recorded_at || item.timestamp),
+      }));
+      this.setData({
+        todayDate: serverDateStr,
+        hasCheckedInToday: moments.length > 0,
+        todayMomentCount: moments.length,
+        todayTrajectoryPreview: preview,
+        latestMomentTime: preview.length ? preview[preview.length - 1].localTime : '',
+        trajectorySubtitle: moments.length > 0 ? `今天已记录 ${moments.length} 次` : '今天还没有留下心情记录',
+      });
 
     } catch (error) {
-      // 任何请求失败 (比如404代表未打卡)，都视为未打卡
-      this.setData({ hasCheckedInToday: false });
+      // 任何请求失败都回到空状态，保持首页可继续记录。
+      this.setData({
+        hasCheckedInToday: false,
+        todayMomentCount: 0,
+        todayTrajectoryPreview: [],
+        latestMomentTime: '',
+        trajectorySubtitle: '今天还没有留下心情记录',
+      });
     }
   },
 
@@ -195,15 +223,20 @@ Page({
    */
   goToRecord() {
     if (!this.data.isLoggedIn) {
-      this.promptLogin('登录后可以记录和保存你的今日心情。');
+      this.promptLogin('登录后可以记录和保存你的此刻心情。');
       return;
     }
 
-    let url = '/pkgDailyCheckin/record';
-    if (this.data.hasCheckedInToday) {
-      url = '/pkgDailyCheckin/record?mode=edit';
+    wx.navigateTo({ url: '/pkgDailyCheckin/record' });
+  },
+
+  goToTrajectory() {
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后可以查看你的心情轨迹。');
+      return;
     }
-    wx.navigateTo({ url: url });
+    const date = this.data.todayDate || this.getTodayString();
+    wx.navigateTo({ url: `/pkgDailyCheckin/trajectory?date=${date}` });
   },
   
   openCalendar() {
@@ -225,16 +258,14 @@ Page({
       return;
     }
 
-    const { date, hasCheckin } = e.detail;
+    const { date, hasCheckin, hasTimeline } = e.detail;
     
-    if (hasCheckin) {
-      const mode = this.isWithinRecentDays(date, 3) ? 'edit' : 'view';
+    if (hasTimeline || hasCheckin) {
       wx.navigateTo({
-        url: `/pkgDailyCheckin/record?mode=${mode}&date=${date}`
+        url: `/pkgDailyCheckin/trajectory?date=${date}`
       });
     } else {
-      const today = new Date();
-      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const todayStr = this.getTodayString();
       
       if (date === todayStr) {
         wx.navigateTo({ url: '/pkgDailyCheckin/record' });
@@ -255,6 +286,18 @@ Page({
     const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const diffDays = Math.floor((todayStart.getTime() - target.getTime()) / (24 * 60 * 60 * 1000));
     return diffDays >= 0 && diffDays < days;
+  },
+
+  getTodayString() {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  },
+
+  formatTimeFromTimestamp(timestamp) {
+    if (!timestamp) return '';
+    const date = new Date(Number(timestamp) * 1000);
+    if (Number.isNaN(date.getTime())) return '';
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
   },
 
   goToStatistics() {

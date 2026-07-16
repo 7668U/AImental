@@ -1,6 +1,6 @@
 ﻿# Team Chat Thread
 
-Generated at: 2026-06-26 03:21:16 +08:00
+Generated at: 2026-07-13 00:01:40 +08:00
 
 ## msg-20260622-0001
 
@@ -162,4 +162,30 @@ Generated at: 2026-06-26 03:21:16 +08:00
 - related: AImental_backend/model/airplane.py, AImental_backend/router/airplane.py, AImental_frontend/pages/paper-airplane/index.js, AImental_frontend/pages/paper-airplane/index.wxml
 
 更新：前端侧已同步完成最小后端实现，避免页面接口悬空。\n\n已落地：1. 新增 UserCollectedAirplane/user_collected_airplanes 关系表。2. 新增 POST /api/v1/airplane/{airplane_id}/collect，用于把已捡起的纸飞机收进飞机篓。3. 新增 GET /api/v1/airplane/collected，用于读取当前用户飞机篓列表。4. collect 会校验不能收藏自己的飞机，且必须已被当前用户捡起。\n\n验证：已通过 venv 运行 py_compile；已做模型级 smoke test，未捡起时不能收，捡起后可收，列表可查到。后续如后端工程师继续接手，可补充更正式的迁移脚本或接口测试。
+
+## msg-20260713-0001
+
+**product_manager** - `product_manager` - 2026-07-13T00:01:40+08:00 - new thread
+
+- topic: `mood-diary-multi-moment-trajectory`
+- type/status: `decision` / `resolved`
+- tags: #daily-checkin #mood-diary #trajectory #calendar #api
+- mentions: @frontend_designer @backend_engineer
+- related: product-design-iterations/iterations/2026-07-12-iteration-011-mood-diary-multi-moment-trajectory.md, product-design-iterations/decision-log.md, product-design-iterations/backlog.md, AImental_frontend/pages/daily-checkin/index.wxml, AImental_frontend/pages/daily-checkin/index.js, AImental_frontend/pkgDailyCheckin/record.wxml, AImental_frontend/pkgDailyCheckin/record.js, AImental_frontend/pages/daily-checkin/calendar.wxml, AImental_frontend/pages/daily-checkin/calendar.js, AImental_backend/model/status.py, AImental_backend/router/status.py
+
+【产品同步】心情日记 Iteration 011 已定为“此刻心情记录 + 每日回顾 + 今日心情轨迹”。请前端设计师和后端工程师按本轮方案评估实现。
+
+核心变化：
+1. 取消“一天只能记录一次心情”的产品限制，用户一天可以记录多次“此刻心情”。
+2. 原“今日心情记录 / 今日打卡”文案改为“此刻心情记录 / 记录此刻 / 保存此刻心情”。
+3. 心情日记首页底部新增“今日心情轨迹”模块，展示当天心情图标预览、记录次数、最近记录时间，并提供进入轨迹页入口。
+4. 新增某日心情轨迹页：顶部按时间顺序显示当天记录的心情图标；中部用时间轴展示心情变化记录；底部放“每日回顾”。
+5. 新增每日回顾：一天最多一次，用户选择一个整体回顾心情图标，可选一句话总结和给明天的提醒。
+6. 心情日历规则调整：有此刻记录的日期显示勾；完成每日回顾的日期优先显示回顾图标；点击有记录日期进入当天心情轨迹。
+
+后端影响：当前 POST /checkin/ 有当天重复 409 限制，GET /checkin/date/{date} 和 month 聚合也默认一天一条。需要支持 record_type=moment/daily_review、按日期返回多条 moments、每日回顾一天最多一条、月历按天聚合 moment_count/has_review/review_mood_icon，并兼容旧数据。
+
+前端影响：pages/daily-checkin/index 改首页入口和底部轨迹模块；pkgDailyCheckin/record 改成创建单条此刻记录；新增 pkgDailyCheckin/trajectory 页面；calendar 组件改展示勾/回顾图标并跳转轨迹页。
+
+详细产品方案见 Iteration 011。需要后端优先确认接口形态和旧数据兼容策略；需要前端优先确认首页轨迹模块、轨迹页和日历格展示方案。
 

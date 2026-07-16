@@ -19,9 +19,13 @@ PROJECT_ROOT = BACKEND_DIR.parent
 load_dotenv(PROJECT_ROOT / ".env", override=False)
 load_dotenv(BACKEND_DIR / ".env", override=True)
 
-HEPAI_API_KEY = os.getenv("HEPAI_API_KEY", "").strip()
-HEPAI_BASE_URL = os.getenv("HEPAI_BASE_URL", "https://aiapi.ihep.ac.cn/apiv2").strip() or "https://aiapi.ihep.ac.cn/apiv2"
-HEPAI_MODEL = os.getenv("HEPAI_MODEL", "hepai/deepseek-v4-pro").strip() or "hepai/deepseek-v4-pro"
+HEPAI_API_KEY = (os.getenv("HEPAI_API_KEY") or os.getenv("OPENAI_API_KEY") or "").strip()
+HEPAI_BASE_URL = (
+    os.getenv("HEPAI_BASE_URL")
+    or os.getenv("OPENAI_BASE_URL")
+    or "https://aiapi.ihep.ac.cn/apiv2"
+).strip() or "https://aiapi.ihep.ac.cn/apiv2"
+HEPAI_MODEL = (os.getenv("HEPAI_MODEL") or os.getenv("OPENAI_MODEL") or "hepai/deepseek-v4-pro").strip() or "hepai/deepseek-v4-pro"
 LLM_SECURITY = build_security_config(model=HEPAI_MODEL)
 
 

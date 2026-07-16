@@ -194,7 +194,7 @@ function buildServerPhotos(data) {
 
 Page({
   data: {
-    navTitle: '今日心情记录',
+    navTitle: '记录此刻心情',
     statusBarHeight: 0,
     navBarHeight: 44,
     totalNavBarHeight: 44,
@@ -240,10 +240,10 @@ Page({
         isEditMode: false,
         isLocked: false,
         pageDate: today,
-        dateLabel: this.formatDateLabel(today),
-        navTitle: '今日心情记录',
+        dateLabel: this.formatCurrentMomentLabel(),
+        navTitle: '记录此刻心情',
       });
-      wx.setNavigationBarTitle({ title: '记录今日心情' });
+      wx.setNavigationBarTitle({ title: '记录此刻心情' });
     }
   },
 
@@ -306,11 +306,11 @@ Page({
     const canEdit = this.isWithinRecentDays(dateToFetch, 3);
     this.setData({
       isLocked: !canEdit,
-      navTitle: isToday ? '今日心情记录' : (canEdit ? '修改近期心情' : '历史心情记录'),
+      navTitle: isToday ? '回看此刻心情' : (canEdit ? '修改此刻心情' : '回看此刻心情'),
       dateLabel: this.formatDateLabel(dateToFetch),
     });
 
-    wx.setNavigationBarTitle({ title: canEdit ? '修改心情记录' : '查看历史心情' });
+    wx.setNavigationBarTitle({ title: canEdit ? '修改此刻心情' : '回看此刻心情' });
 
     const token = wx.getStorageSync('token');
     if (!token) return;
@@ -539,7 +539,7 @@ Page({
 
   createCheckinRecord(data) {
     this.sendRequest({
-      url: 'http://127.0.0.1:8000/api/v1/checkin/',
+      url: 'http://127.0.0.1:8000/api/v1/checkin/moments',
       method: 'POST',
       data,
       successCallback: (res) => {
@@ -698,6 +698,11 @@ Page({
     if (Number.isNaN(date.getTime())) return '';
     const weekNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
     return `${date.getMonth() + 1}月${date.getDate()}日 ${weekNames[date.getDay()]}`;
+  },
+
+  formatCurrentMomentLabel() {
+    const now = new Date();
+    return `今天 ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   },
 
   onShareAppMessage() {

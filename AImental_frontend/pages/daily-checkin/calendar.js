@@ -51,7 +51,9 @@ Component({
         days.push({
           day: i,
           isToday: isCurrentMonth && i === todayDate,
-          checkin: null // 先初始化为null
+          checkin: null,
+          hasMoments: false,
+          momentCount: 0,
         });
       }
       this.setData({ days });
@@ -69,7 +71,7 @@ Component({
         header: { 'Authorization': `Bearer ${token}` },
         success: (res) => {
           if (res.statusCode === 200) {
-            const checkinData = res.data; // { "1": {...}, "15": {...} }
+            const checkinData = res.data; // { "1": {...summary}, "15": {...summary} }
             this.mergeData(checkinData);
             this.setData({
               hasCheckinsThisMonth: Object.keys(checkinData).length > 0
@@ -85,7 +87,10 @@ Component({
       days.forEach(dayObj => {
         if (dayObj.day > 0) { // 只处理有效日期
           if (checkinData[dayObj.day]) {
-            dayObj.checkin = checkinData[dayObj.day];
+            const summary = checkinData[dayObj.day];
+            dayObj.checkin = summary;
+            dayObj.hasMoments = !!summary.has_moments;
+            dayObj.momentCount = summary.moment_count || 0;
           }
         }
       });
@@ -119,6 +124,7 @@ Component({
       this.triggerEvent('daytap', {
         date: dateStr,
         hasCheckin: !!day.checkin,
+        hasTimeline: !!day.hasMoments,
       });
       this.hide(); // 点击后自动隐藏日历
     },

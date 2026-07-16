@@ -12,6 +12,7 @@
       "name": "dailyCheckin",
       "pages": [
         "record",
+        "trajectory",
         "analysis",
         "note/note"
       ]

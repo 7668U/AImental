@@ -85,6 +85,10 @@
   border-radius: 16rpx;
 }
 
+.day-cell.has-moments .day-content {
+  background: #fff4e6;
+}
+
 .day-content {
   width: 90rpx;
   height: 90rpx;
@@ -100,12 +104,34 @@
     transform: scale(0.9);
 }
 
-.mood-icon {
+.moment-check {
   width: 54rpx;
   height: 54rpx;
+  border-radius: 50%;
+  background: #ff9d16;
+  color: #fff;
+  font-size: 34rpx;
+  line-height: 54rpx;
+  text-align: center;
+  font-weight: 900;
+  box-shadow: 0 6rpx 14rpx rgba(255, 126, 24, 0.18);
+}
+
+.moment-count {
   position: absolute;
-  opacity: 0.9;
-  z-index: 1;
+  right: 10rpx;
+  bottom: 8rpx;
+  min-width: 28rpx;
+  height: 28rpx;
+  padding: 0 6rpx;
+  border-radius: 999rpx;
+  background: #fff;
+  color: #d66e14;
+  font-size: 20rpx;
+  line-height: 28rpx;
+  text-align: center;
+  font-weight: 800;
+  box-sizing: border-box;
 }
 
 .day-number {
