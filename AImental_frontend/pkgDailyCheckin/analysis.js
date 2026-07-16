@@ -10,6 +10,47 @@ const ANALYSIS_TYPE_MAP = {
   word_cloud: 'word-cloud',
   color_palette: 'color'
 };
+const BACKEND_ANALYSIS_TYPE_MAP = {
+  mood: 'mood_distribution',
+  'tag-mood': 'tag_correlation',
+  'word-cloud': 'word_cloud',
+  color: 'color_palette'
+};
+const CHART_FONT_FAMILY = 'PingFang SC, Microsoft YaHei, Helvetica Neue, Arial, sans-serif';
+const ANALYSIS_MODULES = [
+  {
+    frontendType: 'mood_distribution',
+    backendType: 'mood',
+    title: '心情频次',
+    chartTitle: '心情频次总览',
+    chartId: 'chart_mood_distribution',
+    icon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-mood-distribution.png'
+  },
+  {
+    frontendType: 'tag_correlation',
+    backendType: 'tag-mood',
+    title: '状态关联',
+    chartTitle: '状态关联总览',
+    chartId: 'chart_tag_correlation',
+    icon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-status-correlation.png'
+  },
+  {
+    frontendType: 'word_cloud',
+    backendType: 'word-cloud',
+    title: '文字分析',
+    chartTitle: '文字分析总览',
+    chartId: 'chart_word_cloud',
+    icon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-text-analysis.png'
+  },
+  {
+    frontendType: 'color_palette',
+    backendType: 'color',
+    title: '情绪色卡',
+    chartTitle: '情绪色卡总览',
+    chartId: 'chart_color_palette',
+    icon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-color-card.png'
+  }
+];
 
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 Page({
@@ -19,20 +60,28 @@ Page({
     navHeight: 0,
     // --- 控制器状态 ---
     isReady: false,
-    selectedTimeRange: 'monthly',
     selectedAnalysis: '',
-    quarterMap: [
-      { label: '春季', value: 'Q1' }, { label: '夏季', value: 'Q2' },
-      { label: '秋季', value: 'Q3' }, { label: '冬季', value: 'Q4' }
+    dayOptions: [
+      { label: '近3天', days: 3 },
+      { label: '近7天', days: 7 },
+      { label: '近14天', days: 14 },
+      { label: '近30天', days: 30 }
     ],
-    showPicker: false,
-    pickerMode: 'monthly',
-    periodLabels: { monthly: '选择月份', quarterly: '选择季度', yearly: '选择年度' },
-    periodValues: { monthly: '', quarterly: '', yearly: '' },
+    selectedDayCount: 7,
+    selectedRangeDays: 7,
+    rangeStartDate: '',
+    rangeEndDate: '',
+    rangeLabel: '',
+    maxDate: '',
     
     // --- 内容区状态 ---
     isLoading: false,
     analysisResult: null,
+    analysisReports: [],
+    activeReport: null,
+    isChartReady: false,
+    hasAnalyzed: false,
+    pendingAnalysisType: '',
     isColorCardLoading: false,
     colorCardResult: null,
     colorCardError: '',
@@ -43,7 +92,7 @@ Page({
 
   onLoad(options) {
     this.setNavSize();
-    this.initDefaultPeriod();
+    this.initDefaultPeriod(options || {});
   },
 // --- 新增：为适配自定义导航栏新增的函数 ---
 setNavSize() {
@@ -61,119 +110,260 @@ navigateBack() {
   });
 },
 
-  initDefaultPeriod() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const monthForDisplay = month + 1;
-    const quarterIndex = Math.floor(month / 3);
-    const currentQuarterInfo = this.data.quarterMap[quarterIndex];
+  initDefaultPeriod(options = {}) {
+    const historyRange = this.getHistoryRangeFromOptions(options);
+    if (historyRange) {
+      this.setData({
+        selectedDayCount: 0,
+        selectedRangeDays: historyRange.days,
+        rangeStartDate: historyRange.startDate,
+        rangeEndDate: historyRange.endDate,
+        maxDate: this.formatDate(new Date()),
+        rangeLabel: this.formatRangeLabel(historyRange.startDate, historyRange.endDate),
+        pendingAnalysisType: historyRange.frontendType || ''
+      }, () => {
+        this.setData({ isReady: true });
+      });
+      return;
+    }
+
+    const range = this.buildDateRangeByDays(this.data.selectedDayCount);
 
     this.setData({
-      'periodLabels.monthly': `${year}年 ${monthForDisplay}月`,
-      'periodValues.monthly': `${year}-${String(monthForDisplay).padStart(2, '0')}`,
-      'periodLabels.quarterly': `${year}年 ${currentQuarterInfo.label}`,
-      'periodValues.quarterly': `${year}-${currentQuarterInfo.value}`,
-      'periodLabels.yearly': `${year}年`,
-      'periodValues.yearly': String(year),
+      rangeStartDate: range.startDate,
+      rangeEndDate: range.endDate,
+      maxDate: range.endDate,
+      selectedRangeDays: range.days,
+      rangeLabel: this.formatRangeLabel(range.startDate, range.endDate),
     }, () => {
       this.setData({ isReady: true });
     });
   },
-  
-  async selectAnalysis(e) {
-    if (!this.data.isReady) {
-      wx.showToast({ title: '页面正在初始化...', icon: 'none' });
-      return;
-    }
-      
-    const frontendType = e.currentTarget.dataset.type;
 
+  getHistoryRangeFromOptions(options = {}) {
+    const startDate = options.start_date || options.startDate;
+    const endDate = options.end_date || options.endDate;
+    const rawType = options.type || options.analysis_type || options.analysisType || '';
+    const decodedType = rawType ? decodeURIComponent(rawType) : '';
+    const frontendType = ANALYSIS_TYPE_MAP[decodedType] ? decodedType : BACKEND_ANALYSIS_TYPE_MAP[decodedType];
+
+    if (!startDate || !endDate) return null;
+    const days = this.getRangeDays(startDate, endDate);
+    if (!Number.isFinite(days) || days <= 0) return null;
+
+    return {
+      startDate,
+      endDate,
+      days,
+      frontendType
+    };
+  },
+
+  buildDateRangeByDays(days) {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - days + 1);
+    return {
+      startDate: this.formatDate(start),
+      endDate: this.formatDate(end),
+      days
+    };
+  },
+
+  formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  },
+
+  parseDate(dateStr) {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  },
+
+  getRangeDays(startDate, endDate) {
+    const start = this.parseDate(startDate);
+    const end = this.parseDate(endDate);
+    return Math.floor((end - start) / 86400000) + 1;
+  },
+
+  formatRangeLabel(startDate, endDate) {
+    const start = this.parseDate(startDate);
+    const end = this.parseDate(endDate);
+    const sameYear = start.getFullYear() === end.getFullYear();
+    const startLabel = sameYear
+      ? `${start.getMonth() + 1}月${start.getDate()}日`
+      : `${start.getFullYear()}年${start.getMonth() + 1}月${start.getDate()}日`;
+    return `${startLabel} - ${end.getMonth() + 1}月${end.getDate()}日`;
+  },
+
+  resetAnalysisResult() {
     this.setData({
-      selectedAnalysis: frontendType,
-      isLoading: true,
+      selectedAnalysis: '',
       analysisResult: null,
+      analysisReports: [],
+      activeReport: null,
+      isChartReady: false,
+      hasAnalyzed: false,
       isColorCardLoading: false,
       colorCardResult: null,
-      colorCardError: '',
+      colorCardError: ''
     });
+  },
 
-    const range = this.data.selectedTimeRange;
-    const periodValue = this.data.periodValues[range];
-    const backendType = ANALYSIS_TYPE_MAP[frontendType];
+  async loadAllAnalyses() {
+    if (!this.data.isReady) return;
+    if (this.data.isLoading) return;
 
-    let year, value;
-    if (range === 'yearly') { [year, value] = [periodValue, 1]; } 
-    else if (range === 'quarterly') { [year, value] = periodValue.split('-Q'); } 
-    else { [year, value] = periodValue.split('-'); }
-
+    const startDate = this.data.rangeStartDate;
+    const endDate = this.data.rangeEndDate;
     const token = wx.getStorageSync('token');
     if (!token) {
       wx.showToast({ title: '用户未登录', icon: 'none' });
-      this.setData({ isLoading: false });
       return;
     }
 
+    this.setData({
+      isLoading: true,
+      selectedAnalysis: '',
+      analysisResult: null,
+      analysisReports: [],
+      activeReport: null,
+      isChartReady: false,
+      hasAnalyzed: false,
+      isColorCardLoading: false,
+      colorCardResult: null,
+      colorCardError: ''
+    });
+
+    let eligibility = {};
     try {
-      const eligibilityRes = await this.fetchApiData(`/api/v1/report/eligibility/${range}/${year}/${value}`, token);
-      const eligibility = eligibilityRes.data || {};
+      const eligibilityRes = await this.fetchApiData(`/api/v1/report/eligibility/range/${startDate}/${endDate}`, token);
+      eligibility = eligibilityRes.data || {};
       if (!eligibility.can_analyze) {
-        this.setData({
-          isLoading: false,
-          analysisResult: null,
-          isColorCardLoading: false,
-          colorCardResult: null,
-          colorCardError: ''
-        });
+        this.setData({ isLoading: false });
         this.showNotEnoughDataModal(eligibility);
         return;
       }
     } catch (err) {
-      this.setData({
-        isLoading: false,
-        analysisResult: null,
-        isColorCardLoading: false,
-        colorCardResult: null,
-        colorCardError: ''
-      });
-      wx.showToast({ title: err.errMsg || '暂时无法检查打卡天数', icon: 'none' });
+      this.setData({ isLoading: false });
+      wx.showToast({ title: err.errMsg || '暂时无法检查打卡数据', icon: 'none' });
       return;
     }
 
-    const chartPromise = this.fetchApiData(`/api/v1/report/chart/${backendType}/${range}/${year}/${value}`, token);
-    const aiPromise = this.fetchApiData(`/api/v1/report/ai/${backendType}/${range}/${year}/${value}`, token);
+    const chartTasks = ANALYSIS_MODULES.map(module => (
+      this.loadReportModule(module, token, startDate, endDate, eligibility)
+    ));
+    const aiReportsPromise = this.fetchApiData(`/api/v1/report/ai/range/all/${startDate}/${endDate}`, token)
+      .then((res) => res.data || {})
+      .catch((err) => ({ __error: err.errMsg || 'AI 报告暂时没有生成成功，请稍后再试。' }));
 
-    Promise.all([chartPromise, aiPromise])
-      .then(([chartRes, aiRes]) => {
-        this.setData({
-          analysisResult: {
-            chartData: chartRes.data,
-            interpretation: aiRes.data.summary_text || chartRes.data.interpretation,
-            aiReport: aiRes.data.report_text || ''
-          },
-          isLoading: false
-        }, () => {
-          wx.nextTick(() => {
-            this.renderChart(frontendType, chartRes.data);
-          });
-          if (frontendType === 'color_palette') {
-            this.loadColorCardBackground(range, year, value, token);
+    Promise.all([Promise.all(chartTasks), aiReportsPromise])
+      .then(([chartReports, aiReports]) => {
+        const reports = chartReports.map((report) => {
+          if (report.skipped || report.error) return report;
+          if (aiReports.__error) {
+            return {
+              ...report,
+              aiReport: aiReports.__error,
+              aiLoaded: false,
+              aiLoading: false,
+              aiError: true
+            };
           }
+
+          const aiReport = aiReports[report.backendType];
+          if (!aiReport) return report;
+          if (aiReport.skipped) {
+            return {
+              ...report,
+              skipped: true,
+              skipMessage: aiReport.report_text || report.skipMessage || `${report.title}暂时无法生成。`
+            };
+          }
+
+          return {
+            ...report,
+            interpretation: aiReport.summary_text || report.interpretation || '',
+            aiReport: aiReport.report_text || '',
+            aiLoaded: true,
+            aiLoading: false,
+            aiError: false
+          };
+        });
+        this.setData({
+          analysisReports: reports,
+          activeReport: null,
+          isChartReady: false,
+          selectedAnalysis: '',
+          hasAnalyzed: true,
+          isLoading: false
         });
       })
-      .catch(err => {
-        console.error("API请求失败:", err);
-        wx.showToast({ title: err.errMsg || '生成报告失败', icon: 'none', duration: 2000 });
-        this.setData({
-          isLoading: false,
-          analysisResult: null,
-          isColorCardLoading: false,
-          colorCardResult: null,
-          colorCardError: ''
-        });
+      .catch((err) => {
+        console.error('批量生成报告失败:', err);
+        wx.showToast({ title: err.errMsg || '生成报告失败', icon: 'none' });
+        this.setData({ isLoading: false });
       });
   },
-  
+
+  selectReportSection(e) {
+    const frontendType = e.currentTarget.dataset.type;
+    const report = (this.data.analysisReports || []).find(item => item.frontendType === frontendType);
+    if (!report) return;
+
+    this.setData({
+      selectedAnalysis: frontendType,
+      activeReport: report,
+      isChartReady: false,
+      isColorCardLoading: false,
+      colorCardResult: null,
+      colorCardError: ''
+    }, () => {
+      if (report.skipped || report.error || !report.chartData) return;
+      wx.nextTick(() => {
+        this.setData({ isChartReady: true }, () => {
+          wx.nextTick(() => {
+            this.renderChart(report.frontendType, report.chartData);
+          });
+        });
+      });
+      if (report.frontendType === 'color_palette') {
+        const token = wx.getStorageSync('token');
+        this.loadColorCardBackground(this.data.rangeStartDate, this.data.rangeEndDate, token);
+      }
+    });
+  },
+
+  loadReportModule(module, token, startDate, endDate, eligibility) {
+    const minTextChars = eligibility.min_text_chars || 20;
+    const textCharCount = eligibility.text_char_count || 0;
+    if (module.backendType === 'word-cloud' && textCharCount < minTextChars) {
+      return Promise.resolve({
+        ...module,
+        skipped: true,
+        skipMessage: `这段时间的文字总字数为 ${textCharCount} 字，少于 ${minTextChars} 字，无法进行文字分析。`
+      });
+    }
+
+    return this.fetchApiData(`/api/v1/report/chart/range/${module.backendType}/${startDate}/${endDate}`, token)
+      .then((chartRes) => ({
+        ...module,
+        chartData: chartRes.data,
+        interpretation: chartRes.data.interpretation || '',
+        aiReport: '',
+        aiLoaded: false,
+        aiLoading: false,
+        aiError: false
+      }))
+      .catch((err) => ({
+        ...module,
+        error: true,
+        skipMessage: err.errMsg || `${module.title}暂时无法生成。`
+      }));
+  },
+
   fetchApiData(url, token) {
     return new Promise((resolve, reject) => {
       wx.request({
@@ -182,23 +372,36 @@ navigateBack() {
         header: { 'Authorization': `Bearer ${token}` },
         success: (res) => {
           if (res.statusCode >= 200 && res.statusCode < 300) { resolve(res); } 
-          else { reject({ errMsg: res.data.detail || `服务器错误 ${res.statusCode}` }); }
+          else { reject({ errMsg: this.formatApiError(res.data, res.statusCode) }); }
         },
         fail: (err) => { reject(err); }
       });
     });
   },
 
+  formatApiError(data, statusCode) {
+    const detail = data && data.detail;
+    if (detail && typeof detail === 'object') {
+      return detail.message || detail.code || `服务器错误 ${statusCode}`;
+    }
+    return detail || `服务器错误 ${statusCode}`;
+  },
+
   showNotEnoughDataModal(eligibility) {
     const periodName = eligibility.period_name || '这个周期';
-    const minDays = eligibility.min_days || 5;
+    const minDays = eligibility.min_days || 3;
+    const reason = eligibility.reason || '';
+    const content = reason === 'range_too_short'
+      ? `心情分析需要选择至少连续${minDays}天。请把开始和结束日期拉开一点点。`
+      : `您在${periodName}内还没有心情记录，暂时无法分析哦~\n先去留下几次此刻心情吧~`;
     wx.showModal({
       title: '还差一点点哦',
-      content: `您在${periodName}的打卡数据不大于5天，无法进行分析哦~\n快去积极记录心情吧~`,
-      confirmText: '去记录',
+      content,
+      confirmText: reason === 'range_too_short' ? '知道啦' : '去记录',
+      showCancel: reason !== 'range_too_short',
       cancelText: '知道啦',
       success: (res) => {
-        if (res.confirm) {
+        if (res.confirm && reason !== 'range_too_short') {
           wx.navigateTo({ url: '/pkgDailyCheckin/record' });
         }
       }
@@ -213,14 +416,14 @@ navigateBack() {
     return `${API_BASE_URL}${url}`;
   },
 
-  loadColorCardBackground(range, year, value, token) {
+  loadColorCardBackground(startDate, endDate, token) {
     this.setData({
       isColorCardLoading: true,
       colorCardResult: null,
       colorCardError: ''
     });
 
-    this.fetchApiData(`/api/v1/report/color-card/${range}/${year}/${value}`, token)
+    this.fetchApiData(`/api/v1/report/color-card/range/${startDate}/${endDate}`, token)
       .then((res) => {
         const payload = res.data || {};
         const imageResult = payload.image_result || {};
@@ -250,9 +453,13 @@ navigateBack() {
     wx.previewImage({ current: url, urls: [url] });
   },
 
-  renderChart(type, data) {
-    const chartComponent = this.selectComponent('#analysis-chart');
+  renderChart(type, data, chartId = 'analysis-chart') {
+    const chartComponent = this.selectComponent(`#${chartId}`);
     if (!chartComponent) { return; }
+    if (chartComponent.chart && typeof chartComponent.chart.dispose === 'function') {
+      chartComponent.chart.dispose();
+      chartComponent.chart = null;
+    }
     chartComponent.init((canvas, width, height, dpr) => {
         const chart = echarts.init(canvas, null, { width, height, devicePixelRatio: dpr });
         let option;
@@ -278,8 +485,22 @@ navigateBack() {
 
   getSoftPieChartOption({ name, data, tooltipFormatter, center = ['50%', '60%'], radius = '55%' }) {
     return {
+      animation: false,
+      textStyle: {
+        fontFamily: CHART_FONT_FAMILY,
+        color: '#543522',
+        fontWeight: 500
+      },
       tooltip: { trigger: 'item', formatter: tooltipFormatter },
-      legend: { top: '5%', left: 'center' },
+      legend: {
+        top: '5%',
+        left: 'center',
+        textStyle: {
+          fontFamily: CHART_FONT_FAMILY,
+          color: '#543522',
+          fontWeight: 500
+        }
+      },
       series: [{
         name,
         type: 'pie',
@@ -311,7 +532,7 @@ navigateBack() {
 
   getMoodChartOption(data) {
     return this.getSoftPieChartOption({
-      name: '情绪分布',
+      name: '心情频次',
       data: data.mood_distribution,
       tooltipFormatter: '{b}: {c}次 ({d}%)'
     });
@@ -319,8 +540,22 @@ navigateBack() {
 
   getTagMoodChartOption(data) {
     return {
+      animation: false,
+      textStyle: {
+        fontFamily: CHART_FONT_FAMILY,
+        color: '#543522',
+        fontWeight: 500
+      },
       tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-      legend: { data: data.chart_data.series.map(item => item.name), top: 5 },
+      legend: {
+        data: data.chart_data.series.map(item => item.name),
+        top: 5,
+        textStyle: {
+          fontFamily: CHART_FONT_FAMILY,
+          color: '#543522',
+          fontWeight: 500
+        }
+      },
       grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
       xAxis: { type: 'value' },
       yAxis: { type: 'category', data: data.chart_data.categories },
@@ -360,46 +595,51 @@ navigateBack() {
     });
   },
 
-  // ===================================================
-  // ========== 【新增功能】处理周期选择器的相关逻辑 ==========
-  // ===================================================
-
-  /**
-   * @description: 点击“月/季/年”按钮时触发
-   */
-  openPicker(e) {
-    const range = e.currentTarget.dataset.range;
+  selectDayRange(e) {
+    const days = Number(e.currentTarget.dataset.days);
+    const range = this.buildDateRangeByDays(days);
     this.setData({
-      selectedTimeRange: range, // 更新高亮按钮
-      pickerMode: range,        // 设置选择器模式
-      showPicker: true          // 弹出选择器
+      selectedDayCount: days,
+      selectedRangeDays: range.days,
+      rangeStartDate: range.startDate,
+      rangeEndDate: range.endDate,
+      rangeLabel: this.formatRangeLabel(range.startDate, range.endDate)
     });
+    this.resetAnalysisResult();
   },
 
-  /**
-   * @description: 周期选择器点击“确认”后触发
-   */
-  onPickerConfirm(e) {
-    const { label, value } = e.detail;
-    const range = this.data.selectedTimeRange;
-
-    // 更新按钮标签和内部值，并清空旧的分析结果
+  onStartDateChange(e) {
+    const startDate = e.detail.value;
+    let endDate = this.data.rangeEndDate;
+    if (this.parseDate(startDate) > this.parseDate(endDate)) {
+      endDate = startDate;
+    }
+    const days = this.getRangeDays(startDate, endDate);
     this.setData({
-      [`periodLabels.${range}`]: label,
-      [`periodValues.${range}`]: value,
-      showPicker: false,
-      selectedAnalysis: '',
-      analysisResult: null
+      selectedDayCount: 0,
+      selectedRangeDays: days,
+      rangeStartDate: startDate,
+      rangeEndDate: endDate,
+      rangeLabel: this.formatRangeLabel(startDate, endDate)
     });
+    this.resetAnalysisResult();
   },
 
-  /**
-   * @description: 周期选择器请求关闭时触发
-   */
-  onPickerClose() {
+  onEndDateChange(e) {
+    const endDate = e.detail.value;
+    let startDate = this.data.rangeStartDate;
+    if (this.parseDate(endDate) < this.parseDate(startDate)) {
+      startDate = endDate;
+    }
+    const days = this.getRangeDays(startDate, endDate);
     this.setData({
-      showPicker: false // 关闭选择器
+      selectedDayCount: 0,
+      selectedRangeDays: days,
+      rangeStartDate: startDate,
+      rangeEndDate: endDate,
+      rangeLabel: this.formatRangeLabel(startDate, endDate)
     });
+    this.resetAnalysisResult();
   },
 
   onShareAppMessage: function () {

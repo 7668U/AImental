@@ -16,23 +16,16 @@
       <view
         wx:for="{{days}}"
         wx:key="index"
-        class="day-cell {{item.isToday ? 'is-today' : ''}} {{item.day > 0 ? '' : 'is-placeholder'}} {{item.hasMoments ? 'has-moments' : ''}} {{item.hasReview ? 'has-review' : ''}}"
+        class="day-cell {{item.isToday ? 'is-today' : ''}} {{item.day > 0 ? '' : 'is-placeholder'}} {{item.hasMoments ? 'has-moments' : ''}}"
         bind:tap="handleDayTap"
         data-day="{{item}}"
       >
         <view class="day-content">
-          <image
-            wx:if="{{item.hasReview}}"
-            class="mood-icon review-icon"
-            src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/mood24/{{item.reviewMoodIcon}}.png"
-          ></image>
-          <block wx:elif="{{item.hasMoments}}">
+          <block wx:if="{{item.hasMoments}}">
             <text class="moment-check">✓</text>
             <text wx:if="{{item.momentCount > 1}}" class="moment-count">{{item.momentCount}}</text>
           </block>
           <text wx:else class="day-number">{{item.day > 0 ? item.day : ''}}</text>
-          <view wx:if="{{item.hasReview && item.hasMoments}}" class="moment-dot"></view>
-          <view wx:if="{{item.hasReview}}" class="review-mark">回</view>
           </view>
       </view>
     </view>

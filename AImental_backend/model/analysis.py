@@ -28,6 +28,7 @@ class MoodDistributionItem(BaseModel):
 
 class MoodAnalysisContent(BaseModel):
     total_checkins: int
+    recorded_days: Optional[int] = None
     dominant_mood: str
     mood_distribution: List[MoodDistributionItem]
     dominant_mood_family: Optional[str] = None
@@ -109,6 +110,17 @@ class AnalysisTable:
             (Analysis.user_id == user_id) &
             (Analysis.period_key == period_key) &
             (Analysis.analysis_type == analysis_type)
+        )
+
+    def list_ai_report_history(self, user_id: str, limit: int = 100) -> List[Analysis]:
+        return list(
+            Analysis.select()
+            .where(
+                (Analysis.user_id == user_id) &
+                (Analysis.analysis_type.contains("_ai_report_"))
+            )
+            .order_by(Analysis.updated_at.desc())
+            .limit(limit)
         )
 
     def save_analysis(self, user_id: str, period_key: str, analysis_type: str, content_model: BaseModel) -> Analysis:

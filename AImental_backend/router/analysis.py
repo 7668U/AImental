@@ -50,9 +50,11 @@ router = APIRouter(
     dependencies=[Depends(get_current_user_id)]
 )
 
-ANALYSIS_SCHEMA_VERSION = "v2"
-AI_REPORT_SCHEMA_VERSION = "v4"
-MIN_ANALYSIS_CHECKIN_DAYS = 6
+ANALYSIS_SCHEMA_VERSION = "v3"
+AI_REPORT_SCHEMA_VERSION = "v5"
+MIN_ANALYSIS_RANGE_DAYS = 3
+MIN_ANALYSIS_CHECKIN_DAYS = MIN_ANALYSIS_RANGE_DAYS
+MIN_WORD_CLOUD_TEXT_CHARS = 20
 
 # --- 辅助数据 ---
 # 中文停用词表 (一个简单的版本，您可以根据需要扩展)
@@ -63,6 +65,13 @@ STOPWORDS = {
 
 COLOR_NAME_MAP = {item["hex"].upper(): item["label"] for item in COLOR_OPTIONS}
 MOOD_FAMILY_ORDER = list(dict.fromkeys(item["family"] for item in MOOD_OPTIONS))
+ANALYSIS_TYPE_TITLES = {
+    "mood": "心情频次",
+    "tag-mood": "状态关联",
+    "word-cloud": "文字分析",
+    "color": "情绪色卡",
+}
+ANALYSIS_TYPE_ORDER = ["mood", "tag-mood", "word-cloud", "color"]
 
 
 # ===================================================
@@ -164,9 +173,322 @@ def _get_period_info(period_type: str, year: int, value: int) -> Tuple[int, int,
 
     return int(start_dt.timestamp()), int(end_dt.timestamp()), period_name
 
+
+def _get_date_range_info(start_date: str, end_date: str, enforce_min_days: bool = True) -> Tuple[int, int, str, int]:
+    try:
+        start_day = datetime.date.fromisoformat(start_date)
+        end_day = datetime.date.fromisoformat(end_date)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="日期格式必须为 YYYY-MM-DD。")
+
+    if end_day < start_day:
+        raise HTTPException(status_code=400, detail="结束日期不能早于开始日期。")
+
+    range_days = (end_day - start_day).days + 1
+    if enforce_min_days and range_days < MIN_ANALYSIS_RANGE_DAYS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"心情分析需要选择至少连续 {MIN_ANALYSIS_RANGE_DAYS} 天。",
+        )
+
+    start_dt = datetime.datetime.combine(start_day, datetime.time.min)
+    end_dt = datetime.datetime.combine(end_day + datetime.timedelta(days=1), datetime.time.min)
+    period_name = f"{start_day.strftime('%Y-%m-%d')} 至 {end_day.strftime('%Y-%m-%d')}（连续 {range_days} 天）"
+    return int(start_dt.timestamp()), int(end_dt.timestamp()), period_name, range_days
+
+
+def _recorded_day_count(checkins: List[Dict]) -> int:
+    return len({
+        record.get("record_date") or datetime.datetime.fromtimestamp(record.get("timestamp", 0)).strftime("%Y-%m-%d")
+        for record in checkins
+        if record.get("timestamp") or record.get("record_date")
+    })
+
+
+def _text_char_count(checkins: List[Dict]) -> int:
+    return len("".join(
+        "".join(str(record.get("text_content") or "").split())
+        for record in checkins
+    ))
+
+
+def _ensure_word_cloud_text(checkins: List[Dict]) -> None:
+    if _text_char_count(checkins) < MIN_WORD_CLOUD_TEXT_CHARS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"文字总字数少于 {MIN_WORD_CLOUD_TEXT_CHARS}，无法进行文字分析。",
+        )
+
+
+def _range_cache_key(
+    version: str,
+    start_date: str,
+    end_date: str,
+    analysis_type: str,
+    data_signature: str,
+    suffix: str,
+) -> str:
+    compact_start = start_date.replace("-", "")
+    compact_end = end_date.replace("-", "")
+    compact_type = analysis_type.replace("-", "")
+    return f"{version}-r-{compact_start}-{compact_end}-{compact_type}-{data_signature}-{suffix}"
+
+
+def _format_compact_date(value: str) -> str:
+    if len(value) == 8 and value.isdigit():
+        return f"{value[:4]}-{value[4:6]}-{value[6:8]}"
+    return value
+
+
+def _analysis_type_from_cache_type(cache_type: str) -> Optional[str]:
+    marker = "_ai_report_"
+    if marker not in cache_type:
+        return None
+    analysis_type = cache_type.split(marker, 1)[1]
+    return analysis_type if analysis_type in ANALYSIS_TYPE_TITLES else None
+
+
+def _parse_analysis_period_key(period_key: str, analysis_type: str) -> Optional[Dict[str, str]]:
+    parts = period_key.split("-")
+    if len(parts) >= 7 and parts[1] == "r":
+        start_date = _format_compact_date(parts[2])
+        end_date = _format_compact_date(parts[3])
+        return {
+            "start_date": start_date,
+            "end_date": end_date,
+            "period_name": f"{start_date} 至 {end_date}",
+        }
+
+    if len(parts) >= 7 and parts[-1] == "ai":
+        try:
+            year = int(parts[1])
+            value = int(parts[2])
+            period_type = parts[3]
+            start_ts, end_ts, _period_name = _get_period_info(period_type, year, value)
+            start_date = datetime.datetime.fromtimestamp(start_ts).strftime("%Y-%m-%d")
+            end_date = (
+                datetime.datetime.fromtimestamp(end_ts) - datetime.timedelta(days=1)
+            ).strftime("%Y-%m-%d")
+            return {
+                "start_date": start_date,
+                "end_date": end_date,
+                "period_name": f"{start_date} 至 {end_date}",
+            }
+        except Exception:
+            return None
+
+    return None
+
 # ===================================================
 # 3. 统一的图表数据接口
 # ===================================================
+class AIReportContent(BaseModel):
+    summary_text: str
+    report_text: str
+
+
+@router.get(
+    "/ai/range/all/{start_date}/{end_date}",
+    response_model=Dict[str, Dict[str, Any]],
+    summary="Generate all range AI reports with one mood-analysis quota reservation",
+)
+def get_all_ai_detailed_reports_by_range(
+    start_date: str = Path(..., description="寮€濮嬫棩鏈?YYYY-MM-DD"),
+    end_date: str = Path(..., description="缁撴潫鏃ユ湡 YYYY-MM-DD"),
+    current_user_id: str = Depends(get_current_user_id),
+    force_refresh: bool = False,
+    x_request_id: Optional[str] = Header(None, alias="X-Request-ID"),
+):
+    start_ts, end_ts, period_name, _range_days = _get_date_range_info(start_date, end_date)
+    checkins = checkin_table.get_checkins_by_period(current_user_id, start_ts, end_ts)
+    if not checkins:
+        raise HTTPException(status_code=404, detail="No mood records in this date range.")
+
+    data_signature = _build_checkin_cache_signature(checkins)
+    reports: Dict[str, Dict[str, Any]] = {}
+    pending_types: List[str] = []
+
+    for analysis_type in ANALYSIS_TYPE_ORDER:
+        cache_type_key = f"{AI_REPORT_SCHEMA_VERSION}_ai_report_{analysis_type}"
+        period_key = _range_cache_key(
+            AI_REPORT_SCHEMA_VERSION,
+            start_date,
+            end_date,
+            analysis_type,
+            data_signature,
+            "ai",
+        )
+
+        if analysis_type == "word-cloud" and _text_char_count(checkins) < MIN_WORD_CLOUD_TEXT_CHARS:
+            reports[analysis_type] = {
+                "summary_text": "",
+                "report_text": f"Text content is shorter than {MIN_WORD_CLOUD_TEXT_CHARS} characters, so text analysis is unavailable.",
+                "skipped": True,
+            }
+            continue
+
+        if not force_refresh:
+            cached = analysis_table.get_analysis(current_user_id, period_key, cache_type_key)
+            if cached:
+                cached_content = json.loads(cached.content)
+                reports[analysis_type] = {
+                    "summary_text": cached_content.get("summary_text", ""),
+                    "report_text": cached_content.get("report_text", ""),
+                    "cached": True,
+                }
+                continue
+
+        pending_types.append(analysis_type)
+
+    if not pending_types:
+        return reports
+
+    batch_request_id = f"{AI_REPORT_SCHEMA_VERSION}-range-ai-all-{start_date}-{end_date}-{data_signature}"
+    reservation = reserve_feature_or_http(
+        user_id=current_user_id,
+        feature=FEATURE_MOOD_ANALYSIS,
+        supplied_request_id=(x_request_id or (None if force_refresh else batch_request_id)),
+    )
+    model_called = False
+    try:
+        for analysis_type in pending_types:
+            prompt_template = AI_DETAILED_PROMPTS[analysis_type]
+            focus_summary = _build_ai_focus_summary(checkins, analysis_type)
+            report_payload = generate_ai_analysis_report(
+                checkins,
+                prompt_template,
+                period_name,
+                analysis_type,
+                focus_summary,
+            )
+            model_called = model_called or report_payload.get("_model_called", True)
+            if not report_payload.get("_success", True):
+                raise HTTPException(
+                    status_code=503,
+                    detail={
+                        "code": "model_generation_failed",
+                        "message": "AI report generation failed. Please try again later.",
+                    },
+                )
+
+            content_model = AIReportContent(
+                summary_text=report_payload.get("summary_text", ""),
+                report_text=report_payload.get("report_text", ""),
+            )
+            cache_type_key = f"{AI_REPORT_SCHEMA_VERSION}_ai_report_{analysis_type}"
+            period_key = _range_cache_key(
+                AI_REPORT_SCHEMA_VERSION,
+                start_date,
+                end_date,
+                analysis_type,
+                data_signature,
+                "ai",
+            )
+            analysis_table.save_analysis(current_user_id, period_key, cache_type_key, content_model)
+            reports[analysis_type] = {
+                **content_model.model_dump(),
+                "cached": False,
+            }
+
+        if model_called:
+            confirm_reservation(reservation)
+        else:
+            release_reservation(reservation)
+        return reports
+    except Exception:
+        release_reservation(reservation)
+        raise
+
+
+@router.get(
+    "/history",
+    response_model=List[Dict[str, Any]],
+    summary="获取心情分析报告历史",
+)
+def get_mood_analysis_history(
+    current_user_id: str = Depends(get_current_user_id),
+    limit: int = 100,
+):
+    rows = analysis_table.list_ai_report_history(current_user_id, limit=limit)
+    history: List[Dict[str, Any]] = []
+    for row in rows:
+        analysis_type = _analysis_type_from_cache_type(row.analysis_type)
+        if not analysis_type:
+            continue
+
+        period_info = _parse_analysis_period_key(row.period_key, analysis_type)
+        if not period_info:
+            continue
+
+        try:
+            content = json.loads(row.content)
+        except Exception:
+            content = {}
+
+        history.append({
+            "id": f"{row.period_key}:{row.analysis_type}",
+            "analysis_type": analysis_type,
+            "analysis_title": ANALYSIS_TYPE_TITLES[analysis_type],
+            "start_date": period_info["start_date"],
+            "end_date": period_info["end_date"],
+            "period_name": period_info["period_name"],
+            "summary_text": content.get("summary_text", ""),
+            "report_text": content.get("report_text", ""),
+            "created_at": row.created_at,
+            "updated_at": row.updated_at,
+        })
+    return history
+
+
+@router.get(
+    "/chart/range/{analysis_type}/{start_date}/{end_date}",
+    response_model=Any,
+    summary="获取连续日期范围内的分析图表数据",
+)
+def get_chart_data_by_range(
+    analysis_type: str = Path(..., description="分析模块: 'mood', 'tag-mood', 'word-cloud', 'color'"),
+    start_date: str = Path(..., description="开始日期 YYYY-MM-DD"),
+    end_date: str = Path(..., description="结束日期 YYYY-MM-DD"),
+    current_user_id: str = Depends(get_current_user_id),
+    force_refresh: bool = False,
+):
+    start_ts, end_ts, period_name, _range_days = _get_date_range_info(start_date, end_date)
+    checkins = checkin_table.get_checkins_by_period(current_user_id, start_ts, end_ts)
+    if not checkins:
+        raise HTTPException(status_code=404, detail="该连续时间段内暂无心情记录，无法进行分析。")
+    if analysis_type == "word-cloud":
+        _ensure_word_cloud_text(checkins)
+
+    data_signature = _build_checkin_cache_signature(checkins)
+    period_key = _range_cache_key(
+        ANALYSIS_SCHEMA_VERSION,
+        start_date,
+        end_date,
+        analysis_type,
+        data_signature,
+        "c",
+    )
+
+    if not force_refresh:
+        cached = analysis_table.get_analysis(current_user_id, period_key, analysis_type)
+        if cached:
+            return json.loads(cached.content)
+
+    if analysis_type == 'mood':
+        result_model = _generate_mood_analysis(checkins, period_name)
+    elif analysis_type == 'tag-mood':
+        result_model = _generate_tag_mood_analysis(checkins)
+    elif analysis_type == 'word-cloud':
+        result_model = _generate_word_cloud_analysis(checkins)
+    elif analysis_type == 'color':
+        result_model = _generate_color_analysis(checkins)
+    else:
+        raise HTTPException(status_code=400, detail="未知的分析类型。")
+
+    analysis_table.save_analysis(current_user_id, period_key, analysis_type, result_model)
+    return result_model
+
+
 @router.get(
     "/chart/{analysis_type}/{period_type}/{year}/{value}",
     response_model=Any,
@@ -191,8 +513,10 @@ def get_chart_data(
     if len(checkins) < MIN_ANALYSIS_CHECKIN_DAYS:
         raise HTTPException(
             status_code=400,
-            detail=f"{period_name} 的打卡数据不大于 5 天，无法进行分析。",
+            detail=f"{period_name} 的心情记录少于 {MIN_ANALYSIS_CHECKIN_DAYS} 次，无法进行分析。",
         )
+    if analysis_type == "word-cloud":
+        _ensure_word_cloud_text(checkins)
     data_signature = _build_checkin_cache_signature(checkins)
     period_key = f"{ANALYSIS_SCHEMA_VERSION}-{year}-{value}-{period_type}-{analysis_type}-{data_signature}-chart"
     
@@ -223,6 +547,92 @@ def get_chart_data(
 # 4. 统一的AI分析报告接口
 # ===================================================
 @router.get(
+    "/ai/range/{analysis_type}/{start_date}/{end_date}",
+    response_model=Dict[str, str],
+    summary="获取连续日期范围内的 AI 深度分析报告",
+)
+def get_ai_detailed_report_by_range(
+    analysis_type: str = Path(..., description="分析模块: 'mood', 'tag-mood', 'word-cloud', 'color'"),
+    start_date: str = Path(..., description="开始日期 YYYY-MM-DD"),
+    end_date: str = Path(..., description="结束日期 YYYY-MM-DD"),
+    current_user_id: str = Depends(get_current_user_id),
+    force_refresh: bool = False,
+    x_request_id: Optional[str] = Header(None, alias="X-Request-ID"),
+):
+    if analysis_type not in AI_DETAILED_PROMPTS:
+        raise HTTPException(status_code=400, detail="无效的分析模块类型。")
+
+    start_ts, end_ts, period_name, _range_days = _get_date_range_info(start_date, end_date)
+    cache_type_key = f"{AI_REPORT_SCHEMA_VERSION}_ai_report_{analysis_type}"
+    checkins = checkin_table.get_checkins_by_period(current_user_id, start_ts, end_ts)
+    if not checkins:
+        raise HTTPException(status_code=404, detail="该连续时间段内暂无心情记录，无法生成 AI 报告。")
+    if analysis_type == "word-cloud":
+        _ensure_word_cloud_text(checkins)
+
+    data_signature = _build_checkin_cache_signature(checkins)
+    period_key = _range_cache_key(
+        AI_REPORT_SCHEMA_VERSION,
+        start_date,
+        end_date,
+        analysis_type,
+        data_signature,
+        "ai",
+    )
+
+    if not force_refresh:
+        cached = analysis_table.get_analysis(current_user_id, period_key, cache_type_key)
+        if cached:
+            cached_content = json.loads(cached.content)
+            return {
+                "summary_text": cached_content.get("summary_text", ""),
+                "report_text": cached_content.get("report_text", ""),
+            }
+
+    reservation = reserve_feature_or_http(
+        user_id=current_user_id,
+        feature=FEATURE_MOOD_ANALYSIS,
+        supplied_request_id=(x_request_id or (None if force_refresh else period_key)),
+    )
+    try:
+        prompt_template = AI_DETAILED_PROMPTS[analysis_type]
+        focus_summary = _build_ai_focus_summary(checkins, analysis_type)
+        report_payload = generate_ai_analysis_report(
+            checkins,
+            prompt_template,
+            period_name,
+            analysis_type,
+            focus_summary,
+        )
+        if not report_payload.get("_success", True):
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "code": "model_generation_failed",
+                    "message": "AI 分析生成失败，请稍后重试。",
+                },
+            )
+
+        class AIReportContent(BaseModel):
+            summary_text: str
+            report_text: str
+
+        content_model = AIReportContent(
+            summary_text=report_payload.get("summary_text", ""),
+            report_text=report_payload.get("report_text", ""),
+        )
+        analysis_table.save_analysis(current_user_id, period_key, cache_type_key, content_model)
+        if report_payload.get("_model_called", True):
+            confirm_reservation(reservation)
+        else:
+            release_reservation(reservation)
+        return content_model.model_dump()
+    except Exception:
+        release_reservation(reservation)
+        raise
+
+
+@router.get(
     "/ai/{analysis_type}/{period_type}/{year}/{value}",
     response_model=Dict[str, str],
     summary="获取针对特定模块的AI深度分析报告"
@@ -249,8 +659,10 @@ def get_ai_detailed_report(
     if len(checkins) < MIN_ANALYSIS_CHECKIN_DAYS:
         raise HTTPException(
             status_code=400,
-            detail=f"{period_name} 的打卡数据不大于 5 天，无法进行分析。",
+            detail=f"{period_name} 的心情记录少于 {MIN_ANALYSIS_CHECKIN_DAYS} 次，无法进行分析。",
         )
+    if analysis_type == "word-cloud":
+        _ensure_word_cloud_text(checkins)
     data_signature = _build_checkin_cache_signature(checkins)
     period_key = f"{AI_REPORT_SCHEMA_VERSION}-{year}-{value}-{period_type}-{analysis_type}-{data_signature}-ai"
     
@@ -315,6 +727,28 @@ def get_ai_detailed_report(
 
 
 @router.get(
+    "/color-card/range/{start_date}/{end_date}",
+    response_model=Dict[str, Any],
+    summary="获取连续日期范围内的情绪色卡 AI 背景图",
+)
+def get_color_card_background_by_range(
+    start_date: str = Path(..., description="开始日期 YYYY-MM-DD"),
+    end_date: str = Path(..., description="结束日期 YYYY-MM-DD"),
+    current_user_id: str = Depends(get_current_user_id),
+    force_refresh: bool = False,
+):
+    start_ts, end_ts, _period_name, _range_days = _get_date_range_info(start_date, end_date)
+    checkins = checkin_table.get_checkins_by_period(current_user_id, start_ts, end_ts)
+    if not checkins:
+        raise HTTPException(status_code=404, detail="该连续时间段内暂无心情记录，无法生成色卡。")
+
+    try:
+        return emotion_color_card_cache_table.get_or_generate(checkins, force_refresh=force_refresh)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.get(
     "/color-card/{period_type}/{year}/{value}",
     response_model=Dict[str, Any],
     summary="获取情绪色卡 AI 背景图，按综合色板缓存复用"
@@ -333,13 +767,52 @@ def get_color_card_background(
     if len(checkins) < MIN_ANALYSIS_CHECKIN_DAYS:
         raise HTTPException(
             status_code=400,
-            detail=f"{period_name} 的打卡数据不大于 5 天，无法生成色卡。",
+            detail=f"{period_name} 的心情记录少于 {MIN_ANALYSIS_CHECKIN_DAYS} 次，无法生成色卡。",
         )
 
     try:
         return emotion_color_card_cache_table.get_or_generate(checkins, force_refresh=force_refresh)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.get(
+    "/eligibility/range/{start_date}/{end_date}",
+    response_model=Dict[str, Any],
+    summary="检查连续日期范围是否足够分析",
+)
+def get_analysis_eligibility_by_range(
+    start_date: str = Path(..., description="开始日期 YYYY-MM-DD"),
+    end_date: str = Path(..., description="结束日期 YYYY-MM-DD"),
+    current_user_id: str = Depends(get_current_user_id),
+):
+    start_ts, end_ts, period_name, range_days = _get_date_range_info(
+        start_date,
+        end_date,
+        enforce_min_days=False,
+    )
+    checkins = checkin_table.get_checkins_by_period(current_user_id, start_ts, end_ts)
+    total_records = len(checkins)
+    recorded_days = _recorded_day_count(checkins)
+    text_char_count = _text_char_count(checkins)
+    can_analyze = range_days >= MIN_ANALYSIS_RANGE_DAYS and total_records > 0
+    return {
+        "can_analyze": can_analyze,
+        "range_days": range_days,
+        "recorded_days": recorded_days,
+        "checkin_days": recorded_days,
+        "total_records": total_records,
+        "text_char_count": text_char_count,
+        "min_text_chars": MIN_WORD_CLOUD_TEXT_CHARS,
+        "can_word_analysis": text_char_count >= MIN_WORD_CLOUD_TEXT_CHARS,
+        "min_days": MIN_ANALYSIS_RANGE_DAYS,
+        "period_name": period_name,
+        "reason": (
+            "range_too_short"
+            if range_days < MIN_ANALYSIS_RANGE_DAYS
+            else ("no_records" if total_records <= 0 else "")
+        ),
+    }
 
 
 @router.get(
@@ -356,9 +829,13 @@ def get_analysis_eligibility(
     start_ts, end_ts, period_name = _get_period_info(period_type, year, value)
     checkins = checkin_table.get_checkins_by_period(current_user_id, start_ts, end_ts)
     checkin_days = len(checkins)
+    text_char_count = _text_char_count(checkins)
     return {
         "can_analyze": checkin_days >= MIN_ANALYSIS_CHECKIN_DAYS,
         "checkin_days": checkin_days,
+        "text_char_count": text_char_count,
+        "min_text_chars": MIN_WORD_CLOUD_TEXT_CHARS,
+        "can_word_analysis": text_char_count >= MIN_WORD_CLOUD_TEXT_CHARS,
         "min_days": MIN_ANALYSIS_CHECKIN_DAYS,
         "period_name": period_name,
     }
@@ -494,6 +971,7 @@ def _build_ai_focus_summary(checkins: List[Dict], analysis_type: str) -> str:
 
 def _generate_mood_analysis(checkins: List[Dict], period_name: str) -> MoodAnalysisContent:
     total_checkins = len(checkins)
+    recorded_days = _recorded_day_count(checkins)
     moods_list = [r['mood'] for r in checkins if r.get('mood')]
     mood_counts = Counter(moods_list)
     dominant_mood = mood_counts.most_common(1)[0][0] if mood_counts else "无"
@@ -518,8 +996,16 @@ def _generate_mood_analysis(checkins: List[Dict], period_name: str) -> MoodAnaly
         f"'{dominant_mood}' 是出现最多的心情"
         f"{f'，主要落在「{dominant_family}」情绪族' if dominant_family else ''}。"
     )
+    interpretation = (
+        f"在 {period_name}，你共留下 {total_checkins} 次心情记录，覆盖 {recorded_days} 个有记录的日期。"
+        f"「{dominant_mood}」是出现频次最高的心情"
+        f"{f'，主要落在「{dominant_family}」情绪族' if dominant_family else ''}。"
+        "这份分布按每一次心情记录统计，因此能更细地看见一天内多次情绪变化。"
+    )
+
     return MoodAnalysisContent(
         total_checkins=total_checkins,
+        recorded_days=recorded_days,
         dominant_mood=dominant_mood,
         dominant_mood_family=dominant_family,
         mood_distribution=mood_distribution,
@@ -592,6 +1078,7 @@ def _generate_tag_mood_analysis(checkins: List[Dict]) -> TagMoodAnalysisContent:
     )
 
 def _generate_word_cloud_analysis(checkins: List[Dict], top_n: int = 30) -> WordCloudAnalysisContent:
+    _ensure_word_cloud_text(checkins)
     all_text = "".join([r['text_content'] for r in checkins if r.get('text_content')])
     if not all_text.strip(): raise HTTPException(status_code=404, detail="无足够日记内容。")
     words = [word for word in jieba.lcut(all_text) if len(word) > 1 and word not in STOPWORDS]

@@ -1,4 +1,5 @@
 <view class="page-container">
+  <image class="trajectory-bg" src="/pkgDailyCheckin/assets/trajectory/trajectory-bg.jpg" mode="aspectFill"></image>
   <view class="trajectory-nav" style="padding-top: {{statusBarHeight}}px; height: {{totalNavBarHeight}}px;">
     <view class="nav-row" style="height: {{navBarHeight}}px;">
       <view class="nav-button nav-back" bindtap="goBack">‹</view>
@@ -10,7 +11,10 @@
   <scroll-view class="trajectory-scroll" scroll-y="true" enhanced="true" show-scrollbar="false">
     <view class="trajectory-content">
       <view class="date-header">
-        <view class="date-title">{{dateLabel}}</view>
+        <view class="date-title-row">
+          <view class="date-title">{{dateLabel}}</view>
+          <image class="title-leaf" src="/pkgDailyCheckin/assets/trajectory/leaf-title.jpg" mode="aspectFit"></image>
+        </view>
         <view class="date-subtitle">{{isToday ? '今天的心情正在流动' : '回看这一天的心情变化'}}</view>
       </view>
 
@@ -20,10 +24,6 @@
             <view wx:for="{{moments}}" wx:key="id" class="sequence-node">
               <image class="sequence-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/mood24/{{item.moodIcon}}.png" mode="aspectFit"></image>
               <view class="sequence-time">{{item.localTime}}</view>
-            </view>
-            <view wx:if="{{hasReview}}" class="sequence-node review-node">
-              <image class="sequence-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/mood24/{{reviewMoodIcon}}.png" mode="aspectFit"></image>
-              <view class="sequence-time">回顾</view>
             </view>
           </view>
         </scroll-view>
@@ -36,8 +36,13 @@
       </view>
 
       <view wx:if="{{moments.length > 0}}" class="timeline-section">
-        <view class="section-title">心情变化</view>
-        <view class="trend-copy">{{trendText}}</view>
+        <view class="timeline-heading">
+          <view>
+            <view class="section-title">心情变化</view>
+            <view class="trend-copy">{{trendText}}</view>
+          </view>
+          <view class="timeline-filter">按时间查看⌄</view>
+        </view>
 
         <view class="timeline-list">
           <view wx:for="{{moments}}" wx:key="id" class="timeline-item">
@@ -45,7 +50,9 @@
             <view class="timeline-line">
               <view class="timeline-dot"></view>
             </view>
-            <view class="timeline-card">
+            <view class="timeline-card mood-tone-{{item.moodTone}}">
+              <image class="timeline-scene" src="{{item.moodScene}}" mode="aspectFill"></image>
+              <view class="timeline-scene-fade"></view>
               <view class="timeline-card-main">
                 <image class="timeline-mood-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/mood24/{{item.moodIcon}}.png" mode="aspectFit"></image>
                 <view class="timeline-copy">
@@ -76,65 +83,6 @@
         </view>
       </view>
 
-      <view class="review-section">
-        <view class="section-title">每日回顾</view>
-        <view wx:if="{{hasReview}}" class="review-card">
-          <image class="review-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/mood24/{{dailyReview.moodIcon}}.png" mode="aspectFit"></image>
-          <view class="review-copy">
-            <view class="review-title">今天整体更像：{{dailyReview.mood}}</view>
-            <view wx:if="{{dailyReview.review_note}}" class="review-note">{{dailyReview.review_note}}</view>
-            <view wx:if="{{dailyReview.tomorrow_note}}" class="review-note muted">明天：{{dailyReview.tomorrow_note}}</view>
-          </view>
-          <view wx:if="{{isToday}}" class="review-edit" bindtap="openReviewForm">修改</view>
-        </view>
-
-        <view wx:if="{{!hasReview}}" class="review-empty">
-          <view>
-            <view class="review-empty-title">完成今日回顾</view>
-            <view class="review-empty-text">用一个心情图标，总结今天整体的感觉。</view>
-          </view>
-          <view wx:if="{{isToday}}" class="review-button" bindtap="openReviewForm">去回顾</view>
-        </view>
-      </view>
     </view>
   </scroll-view>
-</view>
-
-<view wx:if="{{reviewFormVisible}}" class="review-modal" catchtouchmove="noop">
-  <view class="review-modal-mask" bindtap="closeReviewForm"></view>
-  <view class="review-modal-card" catchtap="noop">
-    <view class="modal-title">今天整体更像哪种心情？</view>
-    <view class="review-mood-grid">
-      <view
-        wx:for="{{reviewMoods}}"
-        wx:key="id"
-        class="review-mood {{item.selected ? 'selected' : ''}}"
-        bindtap="handleReviewMoodSelect"
-        data-id="{{item.id}}"
-      >
-        <image class="review-mood-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/mood24/{{item.icon}}.png" mode="aspectFit"></image>
-        <view class="review-mood-name">{{item.name}}</view>
-      </view>
-    </view>
-
-    <textarea
-      class="review-textarea"
-      placeholder="如果用一句话总结今天，你会怎么说？"
-      value="{{reviewNote}}"
-      bindinput="onReviewNoteInput"
-      maxlength="200"
-    ></textarea>
-    <textarea
-      class="review-textarea"
-      placeholder="给明天的自己一点小小提醒。"
-      value="{{tomorrowNote}}"
-      bindinput="onTomorrowNoteInput"
-      maxlength="200"
-    ></textarea>
-
-    <view class="modal-actions">
-      <view class="modal-cancel" bindtap="closeReviewForm">取消</view>
-      <view class="modal-submit" bindtap="submitReview">保存回顾</view>
-    </view>
-  </view>
 </view>

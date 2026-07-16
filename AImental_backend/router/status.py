@@ -206,7 +206,7 @@ def delete_checkin_image(
 )
 def get_checkins_for_month(year: int, month: int, current_user_id: str = Depends(get_current_user_id)):
     """
-    获取一个字典，key 是天(e.g., "28")，value 是当天 moment/review 汇总。
+    获取一个字典，key 是天(e.g., "28")，value 是当天心情记录汇总。
     """
     return checkin_table.get_checkins_by_month(user_id=current_user_id, year=year, month=month)
 
@@ -241,22 +241,6 @@ def get_timeline_for_date(
         user_id=current_user_id,
         target_date_str=record_date,
     )
-
-
-@router.put("/date/{record_date}/review", response_model=CheckinModel, summary="创建或更新指定日期的每日回顾")
-def upsert_daily_review(
-    record_date: str,
-    review_data: CheckinBaseModel = Body(...),
-    current_user_id: str = Depends(get_current_user_id)
-):
-    updated_review = checkin_table.upsert_daily_review(
-        user_id=current_user_id,
-        target_date_str=record_date,
-        data=review_data,
-    )
-    if not updated_review:
-        raise HTTPException(status_code=500, detail="Could not save the daily review.")
-    return model_to_dict(updated_review)
 
 
 # Find the get_checkin_for_date endpoint and modify the signature

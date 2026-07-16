@@ -1,11 +1,9 @@
-/* pages/daily-checkin/index.wxss (Q弹效果版) */
+/* pages/daily-checkin/index.wxss */
 
 page {
-  background-color: #fff3df;
+  background-color: #fff4df;
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
 }
-
-/* ========== 全局布局样式 ========== */
 
 .page-container {
   position: relative;
@@ -21,23 +19,11 @@ page {
   right: 0;
   bottom: 0;
   left: 0;
+  z-index: 0;
   width: 100%;
   height: 100%;
-  z-index: 0;
   pointer-events: none;
 }
-
-.login-wrapper {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-}
-
-/* ========== 自定义导航栏样式 ========== */
 
 .top-bar {
   position: absolute;
@@ -45,41 +31,37 @@ page {
   left: 0;
   z-index: 10;
   width: 100%;
-  background: linear-gradient(180deg, rgba(255, 243, 223, 0.96) 0%, rgba(255, 243, 223, 0.72) 72%, rgba(255, 243, 223, 0) 100%);
   box-sizing: border-box;
+  background: linear-gradient(180deg, rgba(255, 244, 222, 0.88) 0%, rgba(255, 244, 222, 0) 100%);
 }
 
 .nav-bar-content {
-  width: 100%;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  width: 100%;
 }
 
 .nav-bar-title {
   font-size: 34rpx;
   font-weight: 600;
-  color: #333;
+  color: #3f2718;
 }
 
-/* ========== 页面内容区样式 ========== */
-
-/* 主内容容器，负责Flex布局和避开导航栏 */
 .main-content {
   position: relative;
   z-index: 1;
-  height: 100%;
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
 }
 
-/* 固定的欢迎语部分 */
 .welcome-wrapper {
-  padding: 0 40rpx;      /* 左右内边距 */
-  margin-bottom: 20rpx;  /* 和下方卡片的间距 */
-  flex-shrink: 0;          /* 高度不被压缩 */
+  flex-shrink: 0;
+  padding: 26rpx 60rpx 16rpx;
+  box-sizing: border-box;
 }
 
 .title-row {
@@ -89,180 +71,226 @@ page {
 
 .welcome-wrapper .title {
   font-family: 'LXGWWenKaiHome', "STKaiti", "KaiTi", "Songti SC", "PingFang SC", serif;
-  font-size: 60rpx;
-  line-height: 1.12;
-  font-weight: 400;
-  color: #4b2c1b;
+  font-size: 66rpx;
+  line-height: 1.05;
+  font-weight: 500;
+  color: #552814;
   letter-spacing: 0;
 }
 
 .greeting-heart {
   display: inline-block;
-  margin-left: 22rpx;
-  margin-bottom: 8rpx;
-  color: #ff8f32;
+  margin-left: 28rpx;
+  margin-bottom: 9rpx;
+  color: #ff8a2a;
   font-size: 38rpx;
   line-height: 1;
 }
 
 .welcome-wrapper .subtitle {
-  margin-top: 16rpx;
+  margin-top: 22rpx;
   font-family: 'LXGWWenKaiHome', "STKaiti", "KaiTi", "Songti SC", "PingFang SC", serif;
-  font-size: 28rpx;
-  line-height: 1.5;
-  font-weight: 400;
-  color: #806d61;
+  font-size: 32rpx;
+  line-height: 1.25;
+  font-weight: 500;
+  color: #653522;
   letter-spacing: 0;
 }
 
+.welcome-line {
+  display: flex;
+  align-items: center;
+  width: 335rpx;
+  margin-top: 14rpx;
+  margin-left: -8rpx;
+  color: #e8a958;
+}
+
+.welcome-line-stroke {
+  flex: 1;
+  height: 16rpx;
+  border-bottom: 2rpx solid rgba(226, 150, 65, 0.42);
+  border-radius: 50%;
+}
+
+.welcome-line-flower {
+  flex-shrink: 0;
+  margin-left: -2rpx;
+  font-size: 27rpx;
+  line-height: 1;
+}
+
 .card-scroll-area {
-  flex-grow: 1;
+  flex: 1;
   overflow-y: auto;
 }
 
 .daily-layout {
   width: 100%;
-  padding: 0 40rpx 44rpx;
+  padding: 0 35rpx 60rpx;
   box-sizing: border-box;
 }
 
 .primary-checkin-card,
-.secondary-card {
-  background-color: rgba(255, 255, 255, 0.86);
-  border: 1rpx solid rgba(255, 215, 165, 0.52);
-  box-shadow: 0 12rpx 36rpx rgba(210, 142, 64, 0.14);
-  backdrop-filter: blur(10rpx);
-  transition: transform 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.12), box-shadow 0.28s ease;
+.secondary-card,
+.trajectory-panel {
+  border: 2rpx solid rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 18rpx 44rpx rgba(167, 105, 34, 0.14);
+  box-sizing: border-box;
+  backdrop-filter: blur(12rpx);
 }
 
 .primary-checkin-card:active,
-.secondary-card:active {
-  transform: scale(0.97);
-  box-shadow: 0 6rpx 18rpx rgba(226, 172, 112, 0.22);
+.secondary-card:active,
+.trajectory-panel:active {
+  transform: scale(0.985);
+  box-shadow: 0 10rpx 28rpx rgba(167, 105, 34, 0.16);
 }
 
 .primary-checkin-card {
+  position: relative;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
   width: 100%;
-  height: 670rpx;
-  border-radius: 40rpx;
-  padding: 56rpx 52rpx 44rpx;
-  margin-bottom: 28rpx;
-  box-sizing: border-box;
+  height: 456rpx;
+  margin-bottom: 22rpx;
+  padding: 48rpx 46rpx 40rpx;
+  overflow: hidden;
+  border-radius: 38rpx;
+}
+
+.primary-illustration {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.primary-soft-mask {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  width: 58%;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.91) 58%, rgba(255, 255, 255, 0.28) 100%);
 }
 
 .primary-copy {
-  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+  width: 365rpx;
 }
 
 .primary-title {
-  font-size: 54rpx;
-  line-height: 1.12;
+  font-size: 46rpx;
+  line-height: 1.08;
   font-weight: 800;
-  color: #5d3a25;
+  color: #5a270f;
   letter-spacing: 0;
 }
 
 .primary-subtitle {
-  margin-top: 22rpx;
+  margin-top: 18rpx;
   font-size: 28rpx;
-  line-height: 1.35;
-  color: #8a6a51;
+  line-height: 1.3;
+  color: #805d4a;
   letter-spacing: 0;
 }
 
 .primary-count-hint {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  min-width: 188rpx;
   min-height: 42rpx;
-  margin-top: 18rpx;
-  padding: 0 18rpx;
+  margin-top: 22rpx;
+  padding: 0 22rpx;
   border-radius: 999rpx;
-  background: rgba(255, 143, 50, 0.12);
-  color: #b75f16;
-  font-size: 23rpx;
-  font-weight: 700;
-  line-height: 42rpx;
-}
-
-.primary-illustration {
-  width: 100%;
-  height: 338rpx;
-  margin-top: 20rpx;
-  flex-shrink: 0;
+  background: rgba(255, 150, 56, 0.18);
+  color: #d85812;
+  font-size: 25rpx;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 .primary-action {
-  width: 360rpx;
-  height: 76rpx;
-  line-height: 76rpx;
-  margin: 20rpx auto 0;
+  position: relative;
+  left: auto;
+  bottom: auto;
+  z-index: 2;
+  margin-top: 46rpx;
+  width: 254rpx;
+  height: 68rpx;
   border-radius: 999rpx;
-  text-align: center;
+  background: linear-gradient(180deg, #ff9332 0%, #ff681d 100%);
+  box-shadow: 0 14rpx 24rpx rgba(230, 91, 18, 0.25), inset 0 2rpx 0 rgba(255, 255, 255, 0.38);
   color: #ffffff;
-  font-size: 32rpx;
-  font-weight: 700;
-  background: linear-gradient(135deg, #ff8f32 0%, #ff6f20 100%);
-  box-shadow: 0 10rpx 20rpx rgba(255, 126, 39, 0.22);
+  font-size: 28rpx;
+  font-weight: 800;
+  line-height: 68rpx;
+  text-align: center;
 }
 
 .secondary-grid {
   display: flex;
   justify-content: space-between;
   width: 100%;
+  gap: 22rpx;
 }
 
 .secondary-card {
+  position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 321rpx;
-  height: 321rpx;
-  border-radius: 34rpx;
-  padding: 28rpx 24rpx 30rpx;
-  box-sizing: border-box;
+  flex: 1;
+  min-width: 0;
+  height: 166rpx;
+  padding: 26rpx 22rpx 24rpx;
   overflow: hidden;
+  border-radius: 28rpx;
 }
 
 .secondary-icon {
-  width: 132rpx;
-  height: 132rpx;
   flex-shrink: 0;
+  width: 98rpx;
+  height: 98rpx;
+  margin-right: 18rpx;
+}
+
+.secondary-copy {
+  min-width: 0;
+  flex: 1;
 }
 
 .secondary-title {
-  margin-top: 14rpx;
-  font-size: 34rpx;
+  font-size: 31rpx;
   line-height: 1.18;
   font-weight: 800;
-  color: #5d3a25;
-  text-align: center;
+  color: #5b2b18;
   letter-spacing: 0;
 }
 
 .secondary-subtitle {
   margin-top: 10rpx;
   font-size: 24rpx;
-  line-height: 1.25;
-  color: #92745c;
-  text-align: center;
+  line-height: 1.22;
+  color: #8d6856;
   letter-spacing: 0;
 }
 
 .trajectory-panel {
-  margin-top: 28rpx;
-  padding: 30rpx 28rpx 28rpx;
-  border-radius: 34rpx;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1rpx solid rgba(255, 215, 165, 0.52);
-  box-shadow: 0 12rpx 36rpx rgba(210, 142, 64, 0.14);
-  box-sizing: border-box;
-}
-
-.trajectory-panel:active {
-  transform: scale(0.98);
+  margin-top: 30rpx;
+  padding: 34rpx 40rpx 30rpx;
+  border-radius: 30rpx;
 }
 
 .trajectory-header {
@@ -276,33 +304,35 @@ page {
   font-size: 34rpx;
   line-height: 1.18;
   font-weight: 800;
-  color: #5d3a25;
+  color: #502413;
+  letter-spacing: 0;
 }
 
 .trajectory-subtitle {
   margin-top: 10rpx;
-  font-size: 24rpx;
-  line-height: 1.3;
-  color: #92745c;
+  font-size: 26rpx;
+  line-height: 1.25;
+  color: #8d6856;
+  letter-spacing: 0;
 }
 
 .trajectory-link {
   flex-shrink: 0;
-  min-width: 128rpx;
-  height: 48rpx;
-  padding: 0 18rpx;
+  min-width: 132rpx;
+  height: 52rpx;
+  padding: 0 22rpx;
   border-radius: 999rpx;
-  background: #fff4e6;
-  color: #cf6b18;
-  font-size: 23rpx;
+  background: rgba(255, 239, 221, 0.88);
+  color: #d45b12;
+  font-size: 24rpx;
   font-weight: 800;
-  line-height: 48rpx;
+  line-height: 52rpx;
   text-align: center;
   box-sizing: border-box;
 }
 
 .trajectory-body {
-  margin-top: 26rpx;
+  margin-top: 32rpx;
 }
 
 .trajectory-preview-scroll {
@@ -311,38 +341,47 @@ page {
 }
 
 .trajectory-preview-list {
+  position: relative;
   display: inline-flex;
   align-items: flex-start;
-  gap: 18rpx;
+  gap: 34rpx;
   min-width: 100%;
 }
 
+.trajectory-preview-list::before {
+  content: "";
+  position: absolute;
+  top: 48rpx;
+  left: 54rpx;
+  right: 54rpx;
+  z-index: 0;
+  border-top: 3rpx dashed rgba(229, 171, 105, 0.48);
+}
+
 .trajectory-preview-item {
-  width: 86rpx;
-  min-height: 116rpx;
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.trajectory-preview-item.review .trajectory-preview-icon {
-  background: #fff2d8;
-  border-color: #ffbd6a;
+  width: 94rpx;
+  min-height: 134rpx;
 }
 
 .trajectory-preview-icon {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 24rpx;
-  background: #fffaf3;
-  border: 2rpx solid #f1dfc9;
+  width: 86rpx;
+  height: 86rpx;
+  padding: 6rpx;
+  border: 2rpx solid rgba(232, 180, 122, 0.55);
+  border-radius: 50%;
+  background: rgba(255, 251, 245, 0.95);
   box-sizing: border-box;
 }
 
 .trajectory-preview-time {
-  margin-top: 8rpx;
-  color: #886b58;
-  font-size: 22rpx;
+  margin-top: 13rpx;
+  color: #7f5949;
+  font-size: 24rpx;
   line-height: 1.2;
   text-align: center;
 }
@@ -351,34 +390,29 @@ page {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 14rpx;
-  color: #9a7860;
-  font-size: 23rpx;
-}
-
-.review-badge {
-  padding: 8rpx 14rpx;
-  border-radius: 999rpx;
-  background: #fff0d8;
-  color: #c96a18;
-  font-weight: 800;
+  min-height: 62rpx;
+  margin-top: 16rpx;
+  padding-top: 18rpx;
+  border-top: 2rpx solid rgba(226, 184, 132, 0.42);
+  color: #8b6757;
+  font-size: 25rpx;
 }
 
 .trajectory-empty {
-  margin-top: 24rpx;
-  padding: 26rpx;
-  border-radius: 24rpx;
-  background: rgba(255, 248, 239, 0.78);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20rpx;
+  margin-top: 28rpx;
+  padding: 26rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 249, 240, 0.82);
 }
 
 .trajectory-empty-text {
   min-width: 0;
-  color: #8a6a51;
-  font-size: 25rpx;
+  color: #8a604b;
+  font-size: 26rpx;
   line-height: 1.35;
 }
 
@@ -388,8 +422,8 @@ page {
   height: 52rpx;
   padding: 0 20rpx;
   border-radius: 999rpx;
-  background: linear-gradient(135deg, #ff9639 0%, #ff6418 100%);
-  color: #fff;
+  background: linear-gradient(180deg, #ff9332 0%, #ff681d 100%);
+  color: #ffffff;
   font-size: 24rpx;
   font-weight: 800;
   line-height: 52rpx;
@@ -402,14 +436,14 @@ page {
   left: 0;
   top: 0;
   z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
   padding: 46rpx;
   box-sizing: border-box;
   background: rgba(52, 38, 26, 0.44);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .daily-guide-content {
@@ -417,9 +451,9 @@ page {
   width: 100%;
   max-width: 660rpx;
   max-height: 86vh;
+  border: 2rpx solid rgba(255, 227, 190, 0.92);
   border-radius: 32rpx;
   background: rgba(255, 255, 255, 0.98);
-  border: 2rpx solid rgba(255, 227, 190, 0.92);
   box-shadow: 0 30rpx 78rpx rgba(115, 69, 28, 0.22);
   overflow: hidden;
 }
@@ -465,7 +499,7 @@ page {
   height: 82rpx;
   margin-top: 34rpx;
   border-radius: 999rpx;
-  background: linear-gradient(135deg, #ff9639 0%, #ff6418 100%);
+  background: linear-gradient(180deg, #ff9332 0%, #ff681d 100%);
   box-shadow: 0 16rpx 32rpx rgba(255, 105, 24, 0.25);
   color: #ffffff;
   font-size: 30rpx;
@@ -473,5 +507,3 @@ page {
   line-height: 82rpx;
   text-align: center;
 }
-
-/* 注意：旧的 .container 样式已被完全删除，因为它的功能被 .welcome-wrapper 和 .daily-layout 的 padding 取代了 */

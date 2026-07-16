@@ -29,6 +29,70 @@ const MOOD_OPTIONS = [
   { id: 'confused', name: '迷茫', icon: 'confused', energy: 'low' },
 ];
 
+const MOOD_LABEL_TO_ID = MOOD_OPTIONS.reduce((map, item) => {
+  map[item.name] = item.id;
+  return map;
+}, {
+  兴奋: 'expectant',
+  尴尬: 'confused',
+});
+
+const MOOD_SCENE_BASE = '/pkgDailyCheckin/assets/trajectory';
+
+const MOOD_SCENE_MAP = {
+  happy: `${MOOD_SCENE_BASE}/happy.jpg`,
+  satisfied: `${MOOD_SCENE_BASE}/satisfied.jpg`,
+  expectant: `${MOOD_SCENE_BASE}/expectant.jpg`,
+  grateful: `${MOOD_SCENE_BASE}/grateful.jpg`,
+  calm: `${MOOD_SCENE_BASE}/calm.jpg`,
+  relaxed: `${MOOD_SCENE_BASE}/relaxed.jpg`,
+  secure: `${MOOD_SCENE_BASE}/secure.jpg`,
+  focused: `${MOOD_SCENE_BASE}/focused.jpg`,
+  sad: `${MOOD_SCENE_BASE}/sad.jpg`,
+  lost: `${MOOD_SCENE_BASE}/lost.jpg`,
+  wronged: `${MOOD_SCENE_BASE}/wronged.jpg`,
+  lonely: `${MOOD_SCENE_BASE}/lonely.jpg`,
+  anxious: `${MOOD_SCENE_BASE}/anxious.jpg`,
+  worried: `${MOOD_SCENE_BASE}/worried.jpg`,
+  irritable: `${MOOD_SCENE_BASE}/irritable.jpg`,
+  panicked: `${MOOD_SCENE_BASE}/panicked.jpg`,
+  angry: `${MOOD_SCENE_BASE}/angry.jpg`,
+  annoyed: `${MOOD_SCENE_BASE}/annoyed.jpg`,
+  unwilling: `${MOOD_SCENE_BASE}/unwilling.jpg`,
+  hurt: `${MOOD_SCENE_BASE}/hurt.jpg`,
+  tired: `${MOOD_SCENE_BASE}/tired.jpg`,
+  sleepy: `${MOOD_SCENE_BASE}/sleepy.jpg`,
+  numb: `${MOOD_SCENE_BASE}/numb.jpg`,
+  confused: `${MOOD_SCENE_BASE}/confused.jpg`,
+};
+
+const MOOD_TONE_MAP = {
+  happy: 'sun',
+  satisfied: 'sun',
+  expectant: 'sun',
+  grateful: 'sun',
+  calm: 'blue',
+  relaxed: 'green',
+  secure: 'cream',
+  focused: 'green',
+  sad: 'blue',
+  lost: 'violet',
+  wronged: 'violet',
+  lonely: 'night',
+  anxious: 'amber',
+  worried: 'blue',
+  irritable: 'amber',
+  panicked: 'amber',
+  angry: 'rose',
+  annoyed: 'rose',
+  unwilling: 'violet',
+  hurt: 'rose',
+  tired: 'violet',
+  sleepy: 'night',
+  numb: 'gray',
+  confused: 'violet',
+};
+
 function request(options) {
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
@@ -54,11 +118,10 @@ function normalizeImageUrl(url) {
   return `${API_BASE_URL}${url}`;
 }
 
-function buildReviewMoods(selectedId = '') {
-  return MOOD_OPTIONS.map(item => ({
-    ...item,
-    selected: item.id === selectedId || item.name === selectedId,
-  }));
+function normalizeMoodId(item) {
+  const raw = item.mood_id || item.mood_icon || item.mood || '';
+  if (MOOD_SCENE_MAP[raw]) return raw;
+  return MOOD_LABEL_TO_ID[item.mood] || MOOD_LABEL_TO_ID[raw] || 'calm';
 }
 
 Page({
@@ -70,14 +133,7 @@ Page({
     dateLabel: '',
     isToday: false,
     moments: [],
-    dailyReview: null,
-    hasReview: false,
-    reviewMoodIcon: '',
     trendText: '今天的心情并不是固定的一种，它在不同时间里轻轻变化。',
-    reviewFormVisible: false,
-    reviewMoods: buildReviewMoods('calm'),
-    reviewNote: '',
-    tomorrowNote: '',
   },
 
   onLoad(options) {
@@ -125,12 +181,8 @@ Page({
     try {
       const data = await request({ url: `/checkin/date/${this.data.targetDate}/timeline` });
       const moments = (data.moments || []).map(item => this.normalizeMoment(item));
-      const dailyReview = data.daily_review ? this.normalizeReview(data.daily_review) : null;
       this.setData({
         moments,
-        dailyReview,
-        hasReview: !!dailyReview,
-        reviewMoodIcon: dailyReview ? dailyReview.moodIcon : '',
         trendText: this.buildTrendText(moments),
       });
     } catch (error) {
@@ -144,20 +196,15 @@ Page({
     const tags = item.status_items && item.status_items.length
       ? item.status_items.map(status => status.label || status.name).filter(Boolean)
       : String(item.tags || '').split(',').filter(Boolean);
+    const moodId = normalizeMoodId(item);
     return {
       ...item,
-      moodIcon: item.mood_icon || item.mood_id || item.mood,
+      moodIcon: item.mood_icon || moodId,
+      moodScene: MOOD_SCENE_MAP[moodId] || MOOD_SCENE_MAP.calm,
+      moodTone: MOOD_TONE_MAP[moodId] || 'blue',
       localTime: item.local_time || this.formatTimeFromTimestamp(item.recorded_at || item.timestamp),
       tags,
       imageUrls: (item.image_urls || []).map(normalizeImageUrl),
-    };
-  },
-
-  normalizeReview(item) {
-    return {
-      ...item,
-      moodIcon: item.mood_icon || item.mood_id || item.mood,
-      localTime: item.local_time || this.formatTimeFromTimestamp(item.recorded_at || item.timestamp),
     };
   },
 
@@ -180,65 +227,6 @@ Page({
     if (energy === 'high') return 3;
     if (energy === 'medium') return 2;
     return 1;
-  },
-
-  openReviewForm() {
-    if (!this.data.isToday) return;
-    const review = this.data.dailyReview;
-    this.setData({
-      reviewFormVisible: true,
-      reviewMoods: buildReviewMoods(review ? (review.mood_id || review.mood) : 'calm'),
-      reviewNote: review ? (review.review_note || '') : '',
-      tomorrowNote: review ? (review.tomorrow_note || '') : '',
-    });
-  },
-
-  closeReviewForm() {
-    this.setData({ reviewFormVisible: false });
-  },
-
-  noop() {},
-
-  handleReviewMoodSelect(e) {
-    const { id } = e.currentTarget.dataset;
-    this.setData({ reviewMoods: buildReviewMoods(id) });
-  },
-
-  onReviewNoteInput(e) {
-    this.setData({ reviewNote: e.detail.value || '' });
-  },
-
-  onTomorrowNoteInput(e) {
-    this.setData({ tomorrowNote: e.detail.value || '' });
-  },
-
-  async submitReview() {
-    const selectedMood = this.data.reviewMoods.find(item => item.selected);
-    if (!selectedMood) {
-      wx.showToast({ title: '请选择一个心情', icon: 'none' });
-      return;
-    }
-    wx.showLoading({ title: '保存中...' });
-    try {
-      await request({
-        url: `/checkin/date/${this.data.targetDate}/review`,
-        method: 'PUT',
-        data: {
-          mood: selectedMood.name,
-          mood_id: selectedMood.id,
-          color: '#FFE08A',
-          review_note: this.data.reviewNote,
-          tomorrow_note: this.data.tomorrowNote,
-        },
-      });
-      wx.showToast({ title: '已完成回顾', icon: 'success' });
-      this.setData({ reviewFormVisible: false });
-      this.loadTimeline();
-    } catch (error) {
-      wx.showToast({ title: '保存回顾失败', icon: 'none' });
-    } finally {
-      wx.hideLoading();
-    }
   },
 
   previewImage(e) {

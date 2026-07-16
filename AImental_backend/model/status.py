@@ -123,8 +123,6 @@ class Checkin(Model):
     record_date = CharField(max_length=10, null=True, index=True)
     recorded_at = IntegerField(null=True)
     local_time = CharField(max_length=5, null=True)
-    review_note = EncryptedTextField(purpose="checkins.review_note", null=True)
-    tomorrow_note = EncryptedTextField(purpose="checkins.tomorrow_note", null=True)
     timestamp = IntegerField(default=lambda: int(time.time()))
     updated_at = IntegerField(default=lambda: int(time.time()))
 
@@ -159,8 +157,6 @@ class CheckinBaseModel(BaseModel):
     location_address: Optional[str] = None
     location_latitude: Optional[float] = None
     location_longitude: Optional[float] = None
-    review_note: Optional[str] = None
-    tomorrow_note: Optional[str] = None
 
 class CheckinModel(CheckinBaseModel):
     """The full Pydantic Model for a Checkin response."""
@@ -218,8 +214,6 @@ class CheckinTable:
             "record_date": "VARCHAR(10)",
             "recorded_at": "INTEGER",
             "local_time": "VARCHAR(5)",
-            "review_note": "TEXT",
-            "tomorrow_note": "TEXT",
         }
         for column_name, column_type in migrations.items():
             if column_name not in existing_columns:
@@ -414,8 +408,6 @@ class CheckinTable:
             "recorded_at": now_ts,
             "record_date": self._normalize_record_date(timestamp=now_ts),
             "local_time": self._normalize_local_time(timestamp=now_ts),
-            "review_note": None,
-            "tomorrow_note": None,
         })
         try:
             return Checkin.create(user_id=user_id, **self._prepare_checkin_payload(payload))
@@ -440,7 +432,7 @@ class CheckinTable:
                 .where(
                     (Checkin.user_id == user_id) &
                     date_filter &
-                    ((Checkin.record_type.is_null(True)) | (Checkin.record_type != "daily_review"))
+                    ((Checkin.record_type.is_null(True)) | (Checkin.record_type == "moment"))
                 )
                 .order_by(Checkin.timestamp.desc())
                 .first())
@@ -465,55 +457,17 @@ class CheckinTable:
             .order_by(Checkin.timestamp.asc())
         )
 
-    def get_daily_review_by_date(self, user_id: str, target_date_str: str) -> Optional[Checkin]:
-        return (Checkin
-            .select()
-            .where(
-                (Checkin.user_id == user_id) &
-                (Checkin.record_date == target_date_str) &
-                (Checkin.record_type == "daily_review")
-            )
-            .order_by(Checkin.updated_at.desc())
-            .first())
-
     def get_timeline_by_date(self, user_id: str, target_date_str: str) -> Dict[str, Any]:
         moments = [model_to_dict(item) for item in self.get_moments_by_date(user_id, target_date_str)]
-        daily_review = self.get_daily_review_by_date(user_id, target_date_str)
-        review_data = model_to_dict(daily_review) if daily_review else None
         return {
             "date": target_date_str,
             "moments": moments,
-            "daily_review": review_data,
             "summary": {
                 "moment_count": len(moments),
-                "has_review": review_data is not None,
                 "first_mood": moments[0]["mood"] if moments else None,
                 "last_mood": moments[-1]["mood"] if moments else None,
             }
         }
-
-    def upsert_daily_review(self, user_id: str, target_date_str: str, data: CheckinBaseModel) -> Optional[Checkin]:
-        now_ts = int(time.time())
-        payload = self._prepare_checkin_payload(data.model_dump(exclude_unset=True))
-        payload.update({
-            "record_type": "daily_review",
-            "record_date": target_date_str,
-            "recorded_at": now_ts,
-            "local_time": self._normalize_local_time(timestamp=now_ts),
-            "timestamp": now_ts,
-            "updated_at": now_ts,
-        })
-        existing = self.get_daily_review_by_date(user_id, target_date_str)
-        if existing:
-            rows = Checkin.update(payload).where(
-                (Checkin.id == existing.id) &
-                (Checkin.user_id == user_id)
-            ).execute()
-            return self.get_checkin_by_id(existing.id) if rows else None
-        try:
-            return Checkin.create(user_id=user_id, **payload)
-        except IntegrityError:
-            return None
 
     def get_checkins_by_month(self, user_id: str, year: int, month: int) -> Dict[str, Dict]:
         """
@@ -532,6 +486,7 @@ class CheckinTable:
 
         query = Checkin.select().where(
             (Checkin.user_id == user_id) &
+            ((Checkin.record_type.is_null(True)) | (Checkin.record_type == "moment")) &
             (
                 (
                     (Checkin.record_date >= start_date_str) &
@@ -557,29 +512,16 @@ class CheckinTable:
                 "date": record_date,
                 "has_moments": False,
                 "moment_count": 0,
-                "has_review": False,
-                "review_mood_id": None,
-                "review_mood_icon": None,
-                "review_mood": None,
                 "latest_mood_id": None,
                 "latest_mood_icon": None,
                 "latest_local_time": None,
                 "color": "transparent",
             })
-            if data.get("record_type") == "daily_review":
-                day_summary.update({
-                    "has_review": True,
-                    "review_mood_id": data.get("mood_id"),
-                    "review_mood_icon": data.get("mood_icon") or data.get("mood_id") or data.get("mood"),
-                    "review_mood": data.get("mood"),
-                    "color": data.get("color") or day_summary.get("color"),
-                })
-            else:
-                day_summary["has_moments"] = True
-                day_summary["moment_count"] += 1
-                day_summary["latest_mood_id"] = data.get("mood_id")
-                day_summary["latest_mood_icon"] = data.get("mood_icon") or data.get("mood_id") or data.get("mood")
-                day_summary["latest_local_time"] = data.get("local_time")
+            day_summary["has_moments"] = True
+            day_summary["moment_count"] += 1
+            day_summary["latest_mood_id"] = data.get("mood_id")
+            day_summary["latest_mood_icon"] = data.get("mood_icon") or data.get("mood_id") or data.get("mood")
+            day_summary["latest_local_time"] = data.get("local_time")
             
         return checkins_map
 
@@ -590,6 +532,7 @@ class CheckinTable:
         """
         query = Checkin.select().where(
             (Checkin.user_id == user_id) &
+            ((Checkin.record_type.is_null(True)) | (Checkin.record_type == "moment")) &
             (Checkin.timestamp >= start_timestamp) &
             (Checkin.timestamp < end_timestamp)
         ).order_by(Checkin.timestamp.asc())
@@ -772,8 +715,6 @@ def model_to_dict(model_instance: Model) -> Dict:
         "record_date": getattr(model_instance, "record_date", None) or datetime.datetime.fromtimestamp(model_instance.timestamp).strftime("%Y-%m-%d"),
         "recorded_at": getattr(model_instance, "recorded_at", None) or model_instance.timestamp,
         "local_time": getattr(model_instance, "local_time", None) or datetime.datetime.fromtimestamp(model_instance.timestamp).strftime("%H:%M"),
-        "review_note": getattr(model_instance, "review_note", None),
-        "tomorrow_note": getattr(model_instance, "tomorrow_note", None),
         "timestamp": model_instance.timestamp,
         "updated_at": model_instance.updated_at
     }

@@ -89,11 +89,6 @@
   background: #fff4e6;
 }
 
-.day-cell.has-review .day-content {
-  background: #fffaf3;
-  border: 2rpx solid #ffd49a;
-}
-
 .day-content {
   width: 90rpx;
   height: 90rpx;
@@ -107,19 +102,6 @@
 
 .day-cell:active .day-content {
     transform: scale(0.9);
-}
-
-.mood-icon {
-  width: 54rpx;
-  height: 54rpx;
-  position: absolute;
-  opacity: 0.9;
-  z-index: 1;
-}
-
-.review-icon {
-  width: 58rpx;
-  height: 58rpx;
 }
 
 .moment-check {
@@ -150,33 +132,6 @@
   text-align: center;
   font-weight: 800;
   box-sizing: border-box;
-}
-
-.moment-dot {
-  position: absolute;
-  right: 12rpx;
-  bottom: 10rpx;
-  width: 14rpx;
-  height: 14rpx;
-  border-radius: 50%;
-  background: #ff9d16;
-  z-index: 2;
-}
-
-.review-mark {
-  position: absolute;
-  left: 8rpx;
-  top: 8rpx;
-  width: 28rpx;
-  height: 28rpx;
-  border-radius: 50%;
-  background: #fff0d8;
-  color: #c96a18;
-  font-size: 18rpx;
-  line-height: 28rpx;
-  text-align: center;
-  font-weight: 800;
-  z-index: 2;
 }
 
 .day-number {

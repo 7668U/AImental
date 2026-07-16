@@ -8,7 +8,7 @@ const {
 } = require('../../utils/auth.js');
 
 const DAILY_CHECKIN_GUIDE_VERSION = 'v1';
-const DAILY_CHECKIN_GUIDE_ICON = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/daily-checkin/layout/calendar-card.png';
+const DAILY_CHECKIN_GUIDE_ICON = '/pages/daily-checkin/assets/calendar-card.png';
 
 // 从 ai-therapist 页面“借鉴”过来的网络请求函数，你也可以把它封装成公共模块
 function request(options) {
@@ -42,10 +42,8 @@ Page({
     hasCheckedInToday: false,
     todayDate: '',
     todayMomentCount: 0,
-    hasDailyReview: false,
     todayTrajectoryPreview: [],
     latestMomentTime: '',
-    reviewMoodIcon: '',
     trajectorySubtitle: '今天还没有留下心情记录',
     showCalendar: false,
     statusBarHeight: 0,
@@ -98,10 +96,8 @@ Page({
         hasCheckedInToday: false,
         todayDate: '',
         todayMomentCount: 0,
-        hasDailyReview: false,
         todayTrajectoryPreview: [],
         latestMomentTime: '',
-        reviewMoodIcon: '',
         trajectorySubtitle: '今天还没有留下心情记录',
         showCalendar: false
       });
@@ -200,15 +196,12 @@ Page({
         moodIcon: item.mood_icon || item.mood_id || item.mood,
         localTime: item.local_time || this.formatTimeFromTimestamp(item.recorded_at || item.timestamp),
       }));
-      const dailyReview = timeline.daily_review || null;
       this.setData({
         todayDate: serverDateStr,
         hasCheckedInToday: moments.length > 0,
         todayMomentCount: moments.length,
-        hasDailyReview: !!dailyReview,
         todayTrajectoryPreview: preview,
         latestMomentTime: preview.length ? preview[preview.length - 1].localTime : '',
-        reviewMoodIcon: dailyReview ? (dailyReview.mood_icon || dailyReview.mood_id || dailyReview.mood) : '',
         trajectorySubtitle: moments.length > 0 ? `今天已记录 ${moments.length} 次` : '今天还没有留下心情记录',
       });
 
@@ -217,10 +210,8 @@ Page({
       this.setData({
         hasCheckedInToday: false,
         todayMomentCount: 0,
-        hasDailyReview: false,
         todayTrajectoryPreview: [],
         latestMomentTime: '',
-        reviewMoodIcon: '',
         trajectorySubtitle: '今天还没有留下心情记录',
       });
     }

@@ -53,9 +53,7 @@ Component({
           isToday: isCurrentMonth && i === todayDate,
           checkin: null,
           hasMoments: false,
-          hasReview: false,
           momentCount: 0,
-          reviewMoodIcon: '',
         });
       }
       this.setData({ days });
@@ -92,9 +90,7 @@ Component({
             const summary = checkinData[dayObj.day];
             dayObj.checkin = summary;
             dayObj.hasMoments = !!summary.has_moments;
-            dayObj.hasReview = !!summary.has_review;
             dayObj.momentCount = summary.moment_count || 0;
-            dayObj.reviewMoodIcon = summary.review_mood_icon || summary.review_mood_id || summary.review_mood || '';
           }
         }
       });
@@ -128,7 +124,7 @@ Component({
       this.triggerEvent('daytap', {
         date: dateStr,
         hasCheckin: !!day.checkin,
-        hasTimeline: !!(day.hasMoments || day.hasReview),
+        hasTimeline: !!day.hasMoments,
       });
       this.hide(); // 点击后自动隐藏日历
     },
