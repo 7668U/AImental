@@ -944,30 +944,6 @@ Page({
     });
   },
 
-  requestWechatPayment(payload, purchaseType) {
-    wx.requestPayment({
-      ...payload,
-      success: () => {
-        if (purchaseType === 'addon') {
-          this.finishAddonPurchaseSuccess();
-          return;
-        }
-        this.fetchVipState().finally(() => {
-          this.setData({ purchaseLoading: false });
-          this.navigateToSuccessPage();
-        });
-      },
-      fail: (error) => {
-        this.setData({ purchaseLoading: false });
-        if (error && String(error.errMsg || '').includes('cancel')) {
-          wx.showToast({ title: '已取消支付', icon: 'none' });
-          return;
-        }
-        wx.showToast({ title: '支付未完成', icon: 'none' });
-      },
-    });
-  },
-
   finishAddonPurchaseSuccess() {
     this.setData({
       purchaseLoading: false,
