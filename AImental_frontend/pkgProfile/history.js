@@ -1,6 +1,6 @@
 // pages/profile/history.js
 
-const SERVER_BASE_URL = 'https://api.feelyourself.cn';
+const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 const ASSESSMENTS_API_URL = `${SERVER_BASE_URL}/api/v1/assessments`;
 const MOOD_ANALYSIS_HISTORY_API_URL = `${SERVER_BASE_URL}/api/v1/report/history`;
 const ASSESSMENT_ANALYSIS_HISTORY_API_URL = `${SERVER_BASE_URL}/api/v1/history-analysis/`;

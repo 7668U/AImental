@@ -1,7 +1,7 @@
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 const { getScaleDisplayMeta, getScaleDisplayName, getScaleIconName } = require('../utils/assessment-display.js');
 
-const SERVER_BASE_URL = 'https://api.feelyourself.cn';
+const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 const DEFAULT_GROUP = '心理健康';
 const DEFAULT_ICON_PATH = 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/assessment/default.png';
 

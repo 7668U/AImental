@@ -7,7 +7,7 @@ const {
 } = require('../utils/auth.js');
 // pages/assessment/test.js (兼容版)
 
-const API_BASE_URL = 'https://api.feelyourself.cn';
+const API_BASE_URL = 'http://127.0.0.1:8000';
 
 function hasAnswerValue(value) {
   return value !== '' && value !== null && value !== undefined;

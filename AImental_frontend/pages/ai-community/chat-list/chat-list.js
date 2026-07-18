@@ -1,6 +1,6 @@
 // pages/ai-community/chat-list/chat-list.js
 
-const SERVER_URL = 'https://api.feelyourself.cn';
+const SERVER_URL = 'http://127.0.0.1:8000';
 const COMMUNITY_GUIDE_VERSION = 'v2';
 const COMMUNITY_GUIDE_ICON = 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/community-redesign/chat-bg-pixel-cabin.png';
 const app = getApp();

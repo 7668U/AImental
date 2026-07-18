@@ -16,7 +16,7 @@ function request(options) {
     const token = wx.getStorageSync('token');
     wx.request({
       ...options,
-      url: `https://api.feelyourself.cn/api/v1${options.url}`,
+      url: `http://127.0.0.1:8000/api/v1${options.url}`,
       header: {
         ...options.header,
         'Authorization': `Bearer ${token}`
@@ -151,7 +151,7 @@ Page({
 
   performLogin() {
     wx.showLoading({ title: '登录中...' });
-    return loginWithBackend('https://api.feelyourself.cn/api/v1')
+    return loginWithBackend('http://127.0.0.1:8000/api/v1')
       .then((tokenRes) => {
         if (tokenRes.access_token) {
           wx.hideLoading();

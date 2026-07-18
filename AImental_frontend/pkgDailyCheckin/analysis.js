@@ -2,7 +2,7 @@
 import * as echarts from './components-ecanvas/ec-canvas/echarts';
 
 // --- 全局配置 ---
-const API_BASE_URL = 'https://api.feelyourself.cn';
+const API_BASE_URL = 'http://127.0.0.1:8000';
 
 const ANALYSIS_TYPE_MAP = {
   mood_distribution: 'mood',

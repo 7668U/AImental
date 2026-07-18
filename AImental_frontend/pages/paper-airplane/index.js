@@ -1,5 +1,5 @@
 // pages/paper-airplane/index.js
-const API_BASE_URL = 'https://api.feelyourself.cn/api/v1';
+const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 
 function request(options) {
   return new Promise((resolve, reject) => {

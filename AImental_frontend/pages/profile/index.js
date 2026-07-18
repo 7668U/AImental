@@ -1,7 +1,7 @@
 // index.js (正确分离的版本)
 
 // --- 配置 ---
-const SERVER_BASE_URL = 'https://api.feelyourself.cn';
+const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 const API_BASE_URL = `${SERVER_BASE_URL}/api/v1/users`; 
 const VIP_API_BASE_URL = `${SERVER_BASE_URL}/api/v1/vip`;
 const VIP_STATE_CACHE_KEY = 'vipStateCache';

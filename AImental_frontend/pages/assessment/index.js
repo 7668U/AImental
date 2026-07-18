@@ -1,7 +1,7 @@
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 // pages/assessment/index.js
 
-const SERVER_BASE_URL = 'https://api.feelyourself.cn';
+const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 const ASSESSMENT_DISCLAIMER_STORAGE_KEY = 'hasShownAssessmentDisclaimerV1';
 const ASSESSMENT_GROUPS = [
   {

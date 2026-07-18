@@ -1,4 +1,4 @@
-const SERVER_BASE_URL = 'https://api.feelyourself.cn';
+const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 const HISTORY_ANALYSIS_API_URL = `${SERVER_BASE_URL}/api/v1/history-analysis`;
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 

@@ -1,7 +1,7 @@
 // pages/inform/inform.js (终极方案版)
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 
-const SERVER_BASE_URL = 'https://api.feelyourself.cn/api/v1';
+const SERVER_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 const API_BASE_URL = `${SERVER_BASE_URL}/users`;
 const REQUEST_TIMEOUT = 8000;
 

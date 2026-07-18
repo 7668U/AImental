@@ -4,7 +4,7 @@ const {
   uploadPrivateImageDirect,
 } = require('../utils/private-media-upload.js');
 
-const API_BASE_URL = 'https://api.feelyourself.cn';
+const API_BASE_URL = 'http://127.0.0.1:8000';
 const MAX_PHOTOS = 3;
 
 const MOOD_OPTIONS = [
@@ -334,8 +334,8 @@ Page({
 
     // 优先按具体 moment 的 id 加载（心情轨迹点击进入）；否则回退到按日期取当天最新一条。
     const url = momentId
-      ? `https://api.feelyourself.cn/api/v1/checkin/moment/${momentId}`
-      : `https://api.feelyourself.cn/api/v1/checkin/date/${dateToFetch}`;
+      ? `http://127.0.0.1:8000/api/v1/checkin/moment/${momentId}`
+      : `http://127.0.0.1:8000/api/v1/checkin/date/${dateToFetch}`;
 
     wx.showLoading({ title: '加载中...' });
     wx.request({
@@ -580,7 +580,7 @@ Page({
 
   createCheckinRecord(data) {
     this.sendRequest({
-      url: 'https://api.feelyourself.cn/api/v1/checkin/moments',
+      url: 'http://127.0.0.1:8000/api/v1/checkin/moments',
       method: 'POST',
       data,
       successCallback: (res) => {
@@ -595,7 +595,7 @@ Page({
 
   updateCheckinRecord(data) {
     this.sendRequest({
-      url: `https://api.feelyourself.cn/api/v1/checkin/${this.data.checkinId}`,
+      url: `http://127.0.0.1:8000/api/v1/checkin/${this.data.checkinId}`,
       method: 'PUT',
       data,
       successCallback: () => {

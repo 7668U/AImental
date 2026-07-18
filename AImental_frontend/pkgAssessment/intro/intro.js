@@ -1,7 +1,7 @@
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 const { getScaleDisplayName, getScaleIconName } = require('../utils/assessment-display.js');
 
-const SERVER_BASE_URL = 'https://api.feelyourself.cn';
+const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 
 function request(options) {
   return new Promise((resolve, reject) => {
@@ -13,7 +13,7 @@ function request(options) {
 
     wx.request({
       ...options,
-      url: `https://api.feelyourself.cn/api/v1${options.url}`,
+      url: `http://127.0.0.1:8000/api/v1${options.url}`,
       header,
       success(res) {
         if (res.statusCode >= 200 && res.statusCode < 300) {

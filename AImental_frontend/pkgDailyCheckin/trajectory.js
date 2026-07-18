@@ -1,6 +1,6 @@
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 
-const API_BASE_URL = 'https://api.feelyourself.cn';
+const API_BASE_URL = 'http://127.0.0.1:8000';
 
 const MOOD_OPTIONS = [
   { id: 'happy', name: '开心', icon: 'happy', energy: 'high' },
