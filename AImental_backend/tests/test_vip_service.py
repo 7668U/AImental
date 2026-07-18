@@ -370,6 +370,55 @@ class VipServiceTestCase(unittest.TestCase):
             TEST_NOW + 90 * 24 * 60 * 60,
         )
 
+    def test_pending_order_can_close_expire_and_recover_after_payment(self):
+        order = self.service.create_order(
+            "pending-user",
+            "vip_light",
+            timestamp=TEST_NOW,
+        )
+        closed = self.service.close_pending_order(
+            order_id=order.id,
+            user_id="pending-user",
+            timestamp=TEST_NOW + 10,
+        )
+        self.assertEqual(closed.status, "closed")
+        self.assertEqual(
+            self.service.list_purchase_orders("pending-user"),
+            [],
+        )
+
+        recovered = self.service.mark_order_paid(
+            order_id=order.id,
+            user_id="pending-user",
+            transaction_id="late-wechat-payment",
+            timestamp=TEST_NOW + 20,
+        )
+        self.assertEqual(recovered.status, "fulfilled")
+
+        stale = self.service.create_order(
+            "expire-user",
+            "vip_light",
+            timestamp=TEST_NOW,
+        )
+        expired_count = self.service.expire_pending_orders(
+            "expire-user",
+            older_than_seconds=30 * 60,
+            timestamp=TEST_NOW + 30 * 60 + 1,
+        )
+        self.assertEqual(expired_count, 1)
+        self.assertEqual(VipOrder.get_by_id(stale.id).status, "closed")
+
+    def test_vip_api_can_cancel_pending_order(self):
+        created = vip_router_module.create_vip_order(
+            vip_router_module.CreateOrderRequest(product_code="vip_light"),
+            current_user_id="cancel-pending-api-user",
+        )
+        cancelled = vip_router_module.cancel_pending_vip_order(
+            created.order.id,
+            current_user_id="cancel-pending-api-user",
+        )
+        self.assertEqual(cancelled.status, "closed")
+
     def test_membership_purchase_and_same_plan_renewal(self):
         order = self.service.create_order(
             "member-user",

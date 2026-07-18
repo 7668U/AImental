@@ -741,9 +741,14 @@ class VipService:
                 raise VipOrderError("订单不存在。")
             if order.status == "fulfilled":
                 return order
-            if order.status not in {"pending", "paid", "fulfillment_pending"}:
+            if order.status not in {
+                "pending",
+                "closed",
+                "paid",
+                "fulfillment_pending",
+            }:
                 raise VipOrderError("当前订单状态无法支付。")
-            if order.status == "pending":
+            if order.status in {"pending", "closed"}:
                 order.status = "paid"
                 order.paid_at = timestamp
                 order.provider_transaction_id = transaction_id
@@ -762,6 +767,49 @@ class VipService:
             order.save()
             return order
 
+    def close_pending_order(
+        self,
+        *,
+        order_id: str,
+        user_id: str,
+        timestamp: Optional[int] = None,
+    ) -> VipOrder:
+        timestamp = timestamp or now_ts()
+        with self.db.atomic():
+            order = VipOrder.get_or_none(
+                (VipOrder.id == order_id) & (VipOrder.user_id == user_id)
+            )
+            if not order:
+                raise VipOrderError("订单不存在。")
+            if order.status != "pending":
+                return order
+            order.status = "closed"
+            order.updated_at = timestamp
+            order.save(only=[VipOrder.status, VipOrder.updated_at])
+            return order
+
+    def expire_pending_orders(
+        self,
+        user_id: str,
+        *,
+        older_than_seconds: int = 30 * 60,
+        timestamp: Optional[int] = None,
+    ) -> int:
+        timestamp = timestamp or now_ts()
+        cutoff = timestamp - max(int(older_than_seconds), 60)
+        return (
+            VipOrder.update(
+                status="closed",
+                updated_at=timestamp,
+            )
+            .where(
+                (VipOrder.user_id == user_id)
+                & (VipOrder.status == "pending")
+                & (VipOrder.created_at <= cutoff)
+            )
+            .execute()
+        )
+
     def get_order(self, user_id: str, order_id: str) -> VipOrder:
         order = VipOrder.get_or_none(
             (VipOrder.id == order_id) & (VipOrder.user_id == user_id)
@@ -774,6 +822,25 @@ class VipService:
         return list(
             VipOrder.select()
             .where(VipOrder.user_id == user_id)
+            .order_by(VipOrder.created_at.desc())
+            .limit(limit)
+        )
+
+    def list_purchase_orders(
+        self,
+        user_id: str,
+        limit: int = 50,
+    ) -> List[VipOrder]:
+        return list(
+            VipOrder.select()
+            .where(
+                (VipOrder.user_id == user_id)
+                & (
+                    VipOrder.status.in_(
+                        ["paid", "fulfillment_pending", "fulfilled", "refunded"]
+                    )
+                )
+            )
             .order_by(VipOrder.created_at.desc())
             .limit(limit)
         )

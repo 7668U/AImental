@@ -1,5 +1,19 @@
-<view class="vip-page {{isMemberView ? 'member-mode' : 'purchase-mode'}}">
-  <block wx:if="{{!isMemberView}}">
+<view class="vip-page {{!vipStateReady ? 'loading-mode' : (isMemberView ? 'member-mode' : 'purchase-mode')}}">
+  <block wx:if="{{!vipStateReady}}">
+    <view class="vip-loading-page">
+      <view class="status-spacer" style="height: {{statusBarHeight}}px;"></view>
+      <view class="nav-row">
+        <view class="back-button" bindtap="handleBack" aria-label="返回">
+          <text class="back-icon">‹</text>
+        </view>
+      </view>
+      <view class="vip-loading-center">
+        <view class="vip-loading-spinner"></view>
+      </view>
+    </view>
+  </block>
+
+  <block wx:elif="{{!isMemberView}}">
     <image
       class="page-background"
       src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/membership-background.jpg"

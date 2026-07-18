@@ -160,6 +160,7 @@ Page({
         success: (res) => {
           if (res.statusCode === 200 && res.data && Array.isArray(res.data.orders)) {
             const records = res.data.orders
+              .filter((order) => !['pending', 'closed'].includes(order.status))
               .map(normalizeOrder)
               .sort((left, right) => right.createdAt - left.createdAt);
             this.setData({ records, loading: false });

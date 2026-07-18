@@ -51,6 +51,7 @@ router = APIRouter(
 )
 logger = logging.getLogger(__name__)
 PENDING_RECONCILE_WINDOW_SECONDS = 7 * 24 * 60 * 60
+PENDING_ORDER_TTL_SECONDS = 30 * 60
 
 
 class CreateOrderRequest(BaseModel):
@@ -164,6 +165,10 @@ def get_my_vip_state(
     current_user_id: str = Depends(get_current_user_id),
 ):
     reconcile_recent_pending_orders(current_user_id)
+    vip_service.expire_pending_orders(
+        current_user_id,
+        older_than_seconds=PENDING_ORDER_TTL_SECONDS,
+    )
     summary = vip_service.get_summary(current_user_id)
     summary["test_tools_available"] = ENABLE_VIP_TEST_TOOLS
     return summary
@@ -392,6 +397,21 @@ def get_vip_order(
     return order_payload(order)
 
 
+@router.post("/orders/{order_id}/cancel", response_model=OrderResponse)
+def cancel_pending_vip_order(
+    order_id: str,
+    current_user_id: str = Depends(get_current_user_id),
+):
+    try:
+        order = vip_service.close_pending_order(
+            order_id=order_id,
+            user_id=current_user_id,
+        )
+    except VipError as exc:
+        raise vip_http_error(exc) from exc
+    return order_payload(order)
+
+
 @router.post("/orders/{order_id}/mock-pay", response_model=OrderResponse)
 def mock_pay_vip_order(
     order_id: str,
@@ -449,8 +469,16 @@ def get_vip_records(
     current_user_id: str = Depends(get_current_user_id),
 ):
     limit = min(max(limit, 1), 200)
+    reconcile_recent_pending_orders(current_user_id)
+    vip_service.expire_pending_orders(
+        current_user_id,
+        older_than_seconds=PENDING_ORDER_TTL_SECONDS,
+    )
     ledger = vip_service.list_ledger(current_user_id, limit=limit)
-    orders = vip_service.list_orders(current_user_id, limit=min(limit, 100))
+    orders = vip_service.list_purchase_orders(
+        current_user_id,
+        limit=min(limit, 100),
+    )
     return RecordsResponse(
         quota_events=[
             {

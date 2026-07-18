@@ -4,6 +4,7 @@
 const SERVER_BASE_URL = 'https://api.feelyourself.cn';
 const API_BASE_URL = `${SERVER_BASE_URL}/api/v1/users`; 
 const VIP_API_BASE_URL = `${SERVER_BASE_URL}/api/v1/vip`;
+const VIP_STATE_CACHE_KEY = 'vipStateCache';
 const defaultAvatarUrl = 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/default-avatar.png';
 const MEMBERSHIP_ICON_BY_PLAN = {
   light: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/member-badge-light.png',
@@ -191,6 +192,10 @@ Page({
             ? `${membership.plan_name || '当前会员'} · 查看当前额度`
             : '查看会员套餐与专属权益',
         });
+        wx.setStorageSync(VIP_STATE_CACHE_KEY, {
+          summary: res.data,
+          cachedAt: Date.now(),
+        });
       },
       fail: (err) => {
         console.error('fetchVipState failed:', err);
@@ -229,6 +234,7 @@ Page({
   clearLoginState: function() {
     wx.removeStorageSync('token');
     wx.removeStorageSync('userInfo');
+    wx.removeStorageSync(VIP_STATE_CACHE_KEY);
     this.setData({
       isLogin: false,
       isMember: false,

@@ -1,5 +1,6 @@
 const SERVER_BASE_URL = 'https://api.feelyourself.cn';
 const VIP_API_BASE_URL = `${SERVER_BASE_URL}/api/v1/vip`;
+const VIP_STATE_CACHE_KEY = 'vipStateCache';
 
 const FEATURE_PRESENTATION = {
   tree_hole: {
@@ -305,6 +306,7 @@ function canUseVirtualPayment() {
 Page({
   data: {
     statusBarHeight: 24,
+    vipStateReady: false,
     isMemberView: false,
     currentMember: null,
     usageItems: normalizeUsage(FALLBACK_ENTITLEMENTS),
@@ -329,6 +331,7 @@ Page({
   onLoad() {
     this.initLayout();
     this.applyProducts(FALLBACK_PRODUCTS);
+    this.restoreVipStateCache();
     this.fetchCatalog();
     this.fetchVipState();
   },
@@ -388,12 +391,8 @@ Page({
   fetchVipState() {
     const token = wx.getStorageSync('token');
     if (!token) {
-      this.setData({
-        isMemberView: false,
-        currentMember: null,
-        usageItems: normalizeUsage(FALLBACK_ENTITLEMENTS),
-      });
-      this.applyCurrentPlan('');
+      wx.removeStorageSync(VIP_STATE_CACHE_KEY);
+      this.applyVipSummary({}, false);
       return Promise.resolve();
     }
 
@@ -403,26 +402,57 @@ Page({
         method: 'GET',
         header: { Authorization: `Bearer ${token}` },
         success: (res) => {
-          const membership = res.statusCode === 200 && res.data
-            ? res.data.membership
-            : null;
-          const currentMember = normalizeMember(membership);
-          const currentPlanCode = currentMember ? currentMember.planCode : '';
-          this.setData({
-            isMemberView: Boolean(currentMember),
-            currentMember,
-            usageItems: normalizeUsage(res.data && res.data.entitlements),
-          });
-          this.applyCurrentPlan(currentPlanCode);
+          if (res.statusCode === 200 && res.data) {
+            this.applyVipSummary(res.data, true);
+          } else if (!this.data.vipStateReady) {
+            this.applyVipSummary({}, false);
+          }
           resolve();
         },
         fail: (error) => {
           console.error('fetchVipState failed:', error);
-          this.applyCurrentPlan('');
+          if (!this.data.vipStateReady) {
+            this.applyVipSummary({}, false);
+          }
           resolve();
         },
       });
     });
+  },
+
+  restoreVipStateCache() {
+    try {
+      const cached = wx.getStorageSync(VIP_STATE_CACHE_KEY);
+      const summary = cached && cached.summary ? cached.summary : cached;
+      if (summary && typeof summary === 'object' && summary.user_type) {
+        this.applyVipSummary(summary, false);
+      }
+    } catch (error) {
+      console.warn('restoreVipStateCache failed:', error);
+    }
+  },
+
+  applyVipSummary(summary, persist) {
+    const source = summary || {};
+    const currentMember = normalizeMember(source.membership);
+    const currentPlanCode = currentMember ? currentMember.planCode : '';
+    this.setData({
+      vipStateReady: true,
+      isMemberView: Boolean(currentMember),
+      currentMember,
+      usageItems: normalizeUsage(source.entitlements),
+    });
+    this.applyCurrentPlan(currentPlanCode);
+    if (persist) {
+      try {
+        wx.setStorageSync(VIP_STATE_CACHE_KEY, {
+          summary: source,
+          cachedAt: Date.now(),
+        });
+      } catch (error) {
+        console.warn('cacheVipState failed:', error);
+      }
+    }
   },
 
   applyCurrentPlan(currentPlanCode) {
@@ -675,7 +705,8 @@ Page({
       this.completeLocalVirtualPayment(
         payment.local_confirm_endpoint,
         token,
-        purchaseType
+        purchaseType,
+        orderId
       );
       return;
     }
@@ -697,6 +728,7 @@ Page({
       this.completeMockPayment(payment.legacy_mock_pay_endpoint, token, purchaseType);
       return;
     }
+    this.cancelPendingOrder(orderId, token);
     this.setData({ purchaseLoading: false });
     wx.showModal({
       title: '\u652f\u4ed8\u672a\u914d\u7f6e',
@@ -705,7 +737,7 @@ Page({
     });
   },
 
-  completeLocalVirtualPayment(endpoint, token, purchaseType) {
+  completeLocalVirtualPayment(endpoint, token, purchaseType, orderId) {
     wx.showModal({
       title: '\u672c\u5730\u865a\u62df\u652f\u4ed8',
       content: '\u5c06\u6a21\u62df wx.requestVirtualPayment \u6210\u529f\uff0c\u5e76\u8ba9\u540e\u7aef\u786e\u8ba4\u6743\u76ca\u5230\u8d26\u3002',
@@ -713,12 +745,14 @@ Page({
       cancelText: '\u53d6\u6d88',
       success: (modalRes) => {
         if (!modalRes.confirm) {
+          this.cancelPendingOrder(orderId, token);
           this.setData({ purchaseLoading: false });
           return;
         }
         this.confirmVirtualPayment(endpoint, token, purchaseType);
       },
       fail: () => {
+        this.cancelPendingOrder(orderId, token);
         this.setData({ purchaseLoading: false });
       },
     });
@@ -775,10 +809,25 @@ Page({
         this.setData({ purchaseLoading: false });
         const errCode = error && Number(error.errCode);
         if (errCode === -2 || String((error && error.errMsg) || '').includes('cancel')) {
+          this.cancelPendingOrder(orderId, token);
           wx.showToast({ title: '\u5df2\u53d6\u6d88\u652f\u4ed8', icon: 'none' });
           return;
         }
         wx.showToast({ title: '\u652f\u4ed8\u672a\u5b8c\u6210', icon: 'none' });
+      },
+    });
+  },
+
+  cancelPendingOrder(orderId, token) {
+    if (!orderId || !token) {
+      return;
+    }
+    wx.request({
+      url: `${VIP_API_BASE_URL}/orders/${orderId}/cancel`,
+      method: 'POST',
+      header: { Authorization: `Bearer ${token}` },
+      fail: (error) => {
+        console.warn('cancelPendingOrder failed:', error);
       },
     });
   },

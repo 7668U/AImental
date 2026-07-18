@@ -244,7 +244,11 @@ def find_order_for_callback(
         return None
     candidates = (
         VipOrder.select()
-        .where(VipOrder.status.in_(["pending", "paid", "fulfillment_pending"]))
+        .where(
+            VipOrder.status.in_(
+                ["pending", "closed", "paid", "fulfillment_pending"]
+            )
+        )
         .order_by(VipOrder.created_at.desc())
         .limit(500)
     )
