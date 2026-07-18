@@ -1,6 +1,15 @@
 // pages/ai-therapist/index.js
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
-const { loginWithBackend } = require('../../utils/auth.js');
+const {
+  confirmPrivacyAwareLogin,
+  loginWithBackend,
+  rejectPrivacyAwareLogin,
+  requestPrivacyAwareLogin
+} = require('../../utils/auth.js');
+const {
+  isVipQuotaExhaustedError,
+  showVipQuotaModal,
+} = require('../../utils/vip-quota.js');
 
 // --- 全局配置与网络请求封装 ---
 const API_BASE_URL = 'https://api.feelyourself.cn/api/v1';
@@ -24,6 +33,8 @@ function request(options) {
         } else {
           if (res.statusCode === 401) {
             console.error("请求未授权 (401)，token可能已失效。");
+          } else if (isVipQuotaExhaustedError(res)) {
+            // Let the caller restore optimistic UI and show the VIP guidance modal.
           } else {
             wx.showToast({ title: `请求错误: ${res.data.detail || res.statusCode}`, icon: 'none' });
           }
@@ -59,6 +70,7 @@ Page({
     emojiOptions: ['😊', '🙂', '😌', '🥰', '🤗', '😢', '😭', '😔', '😴', '😮', '😤', '✨', '🌙', '☀️', '🍀', '💛', '🧡', '👍'],
     // 【新增】控制温馨提示弹窗的显示/隐藏
     isDisclaimerVisible: false,
+    privacyVisible: false,
   },
 
   _isInitializingChat: false,
@@ -146,6 +158,10 @@ Page({
   },
 
   handleLogin() {
+    return requestPrivacyAwareLogin(this, this.performLogin);
+  },
+
+  performLogin() {
     wx.showLoading({ title: '登录中...' });
     return loginWithBackend(API_BASE_URL)
       .then(tokenRes => {
@@ -163,6 +179,14 @@ Page({
         console.error('登录失败', err);
         wx.showToast({ title: '登录失败，请重试', icon: 'none' });
       });
+  },
+
+  onPrivacyConfirm() {
+    return confirmPrivacyAwareLogin(this);
+  },
+
+  onPrivacyReject() {
+    rejectPrivacyAwareLogin(this);
   },
 
   async initializeChat() {
@@ -537,7 +561,7 @@ Page({
     }
 
     const isFirstUserMessage = this.data.messages.length <= 1;
-    this.addMessage('user', text);
+    const userMessageId = this.addMessage('user', text);
     this.syncActiveChatPreview(text);
     this.setData({ inputValue: '', isEmojiPanelVisible: false });
     const loadingMessageId = this.addMessage('ai', '', true);
@@ -550,6 +574,12 @@ Page({
       }
     } catch (error) {
       console.error("发送消息失败", error);
+      if (isVipQuotaExhaustedError(error)) {
+        this.removeMessages([userMessageId, loadingMessageId]);
+        this.setData({ inputValue: text, isEmojiPanelVisible: false });
+        showVipQuotaModal({ error, feature: 'tree_hole' });
+        return;
+      }
       this.updateMessage(loadingMessageId, "抱歉，出了一点问题，请稍后再试。");
     }
   },
@@ -566,6 +596,16 @@ Page({
     });
     this.setData({ messages, messageCounter: newMessageId, latestMessageId: `msg-${newMessageId}` });
     return newMessageId;
+  },
+
+  removeMessages(messageIds = []) {
+    const idSet = new Set(messageIds);
+    const messages = this.data.messages.filter((message) => !idSet.has(message.id));
+    const lastMessage = messages[messages.length - 1];
+    this.setData({
+      messages,
+      latestMessageId: lastMessage ? `msg-${lastMessage.id}` : '',
+    });
   },
 
   updateMessage(messageId, newText) {

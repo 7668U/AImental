@@ -18,6 +18,11 @@ from pydantic import BaseModel, Field
 # 假设您决定将AI社区相关的数据表放在 chat_db 中
 from db import chat_db 
 
+AI_CHARACTER_AVATAR_CDN_BASE = (
+    "https://assets.feelyourself.cn/miniprogram/assets/v1/backend/avatars"
+)
+DEFAULT_CHARACTER_AVATAR_URL = f"{AI_CHARACTER_AVATAR_CDN_BASE}/guyu.png"
+
 # ---------------------------------------------------
 # 1. Peewee 数据库模型 (Database Model)
 # ---------------------------------------------------
@@ -164,6 +169,10 @@ class AICharacterTable:
             # 1. 检查默认角色是否已经存在
             existing_char = self.get_character_by_name(DEFAULT_CHARACTER_NAME)
             if existing_char:
+                if existing_char.avatar_url != DEFAULT_CHARACTER_AVATAR_URL:
+                    existing_char.avatar_url = DEFAULT_CHARACTER_AVATAR_URL
+                    existing_char.save(only=[AICharacter.avatar_url])
+                    print(f"✅ 已更新默认角色 '{DEFAULT_CHARACTER_NAME}' 的 CDN 头像。")
                 print(f"✅ 默认角色 '{DEFAULT_CHARACTER_NAME}' 已存在，跳过创建。")
                 return
 
@@ -219,8 +228,7 @@ class AICharacterTable:
             # 3. 创建角色
             self.create_character(
                 name=DEFAULT_CHARACTER_NAME,
-                # 你可以准备一张默认头像放到 static/avatars/ 目录下
-                avatar_url="/static/avatars/guyu.png", 
+                avatar_url=DEFAULT_CHARACTER_AVATAR_URL,
                 profile=hoshino_yuu_profile
             )
             print(f"✅ 成功创建默认角色: {DEFAULT_CHARACTER_NAME}")
@@ -283,7 +291,13 @@ class AICharacterTable:
                 )
                 print(f"  ✅ 成功创建角色: {char_data['name']}")
             else:
-                print(f"  ℹ️ 跳过已存在的角色: {char_data['name']}")
+                expected_avatar_url = char_data['avatar_url']
+                if existing_char.avatar_url != expected_avatar_url:
+                    existing_char.avatar_url = expected_avatar_url
+                    existing_char.save(only=[AICharacter.avatar_url])
+                    print(f"  ✅ 已更新角色 CDN 头像: {char_data['name']}")
+                else:
+                    print(f"  ℹ️ 跳过已存在的角色: {char_data['name']}")
         print("角色播种完成！")
 
 

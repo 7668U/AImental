@@ -1,75 +1,205 @@
-<view class="chat-page" style="padding-top: calc({{statusBarHeight}}px + 70rpx);">
+<view class="chat-page" style="padding-top: {{topBarOffset}}px;">
+  <view class="custom-nav-bar" style="height: {{navBarHeight}}px;">
+    <view class="nav-action" bindtap="navigateBack">
+      <image class="back-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/left.png" mode="aspectFit"></image>
+    </view>
 
-<view class="custom-nav-bar">
-  <image class="back-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/left.png" bindtap="navigateBack"></image>
-  <view class="nav-title-container">
-    <view class="nav-title">{{aiName}}</view>
-    <view class="nav-status" wx:if="{{isAiTyping}}">对方正在输入...</view>
-    <view class="nav-status" wx:elif="{{aiCurrentStatus}}">{{aiCurrentStatus}}</view>
-  </view>
-</view>
-
-<scroll-view 
-  class="message-list" 
-  scroll-y="true" 
-  scroll-into-view="{{scrollToView}}"
-  scroll-with-animation="true"
-  enhanced="true" 
-  show-scrollbar="false"
->
-  <view class="message-item" wx:for="{{messageList}}" wx:key="id" id="msg-{{item.id}}">
-    <view class="message-row ai" wx:if="{{item.role === 'ai'}}">
-      <image class="avatar" src="{{aiAvatar}}"></image>
-      <view class="bubble-wrapper">
-        <view class="bubble">{{item.content}}</view>
-        <view class="message-time-ai">{{item.time}}</view>
+    <view class="nav-person" bindtap="showProfileCard">
+      <view class="nav-avatar-wrap">
+        <image class="nav-avatar" src="{{aiAvatar}}" mode="aspectFill"></image>
+        <view class="nav-presence-dot"></view>
+      </view>
+      <view class="nav-title-container">
+        <view class="nav-title">{{aiName}}</view>
+        <view class="nav-status nav-typing-status" wx:if="{{isAiTyping}}">
+          <text>对方正在输入</text>
+          <view class="nav-typing-dots" aria-hidden="true">
+            <view class="nav-typing-dot nav-typing-dot--1"></view>
+            <view class="nav-typing-dot nav-typing-dot--2"></view>
+            <view class="nav-typing-dot nav-typing-dot--3"></view>
+          </view>
+        </view>
+        <view class="nav-status" wx:elif="{{aiCurrentStatus}}">{{aiCurrentStatus}}</view>
       </view>
     </view>
-    
-    <view class="message-row user" wx:if="{{item.role === 'user'}}">
-      <view class="message-status">
-        <view class="status-unit" wx:if="{{item.status === 'sent'}}">
-          <image class="sent-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/send_successful.png"></image>
-          <text class="status-text">送达</text>
-        </view>
-        <view class="status-unit" wx:if="{{item.status === 'read'}}">
-          <image class="read-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/read.png"></image>
-          <text class="status-text">已读</text>
-        </view>
-        <image wx:if="{{item.status === 'sending'}}" class="sending-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/loading.gif"></image>
-        <image wx:if="{{item.status === 'failed'}}" class="failed-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/empty-state-dark.png"></image>
+
+    <view class="nav-affinity" wx:if="{{hasAffinityContext}}" bindtap="showProfileCard">
+      <image class="nav-affinity-heart" src="{{affinityHeartSrc}}" mode="aspectFit"></image>
+      <view class="nav-affinity-copy">
+        <text class="nav-affinity-score">{{affinityScoreText}}</text>
+        <text class="nav-affinity-unit">°</text>
       </view>
-      <view class="bubble-wrapper">
-        <view class="bubble">{{item.content}}</view>
-        <view class="message-time-user">{{item.time}}</view>
-      </view>
-      <image class="avatar" src="{{userAvatar}}"></image>
     </view>
   </view>
-</scroll-view>
 
-<view class="input-bar-wrapper">
-  <view class="input-bar">
-  <input 
-    class="input-field" 
-    value="{{inputValue}}" 
-    bindinput="onInput" 
-    placeholder="{{isMessageLimitReached ? '今天已经聊得够多啦~' : ''}}"
-    disabled="{{isMessageLimitReached}}"
-    maxlength="200"  ></input>
-  
-  <view 
-    class="send-btn {{isSendDisabled ? 'disabled' : ''}}" 
-    bindtap="sendMessage"
-  >发送</view>
+  <view class="message-area">
+    <image
+      class="chat-center-bg"
+      src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/community-redesign/chat-bg-pixel-cabin.png"
+      mode="aspectFit"
+    ></image>
+
+    <scroll-view
+      class="message-list"
+      scroll-y="true"
+      scroll-top="{{scrollTop}}"
+      scroll-with-animation="{{scrollWithAnimation}}"
+      enhanced="true"
+      bounces="{{true}}"
+      fast-deceleration="{{false}}"
+      show-scrollbar="false"
+    >
+      <view class="message-list-inner">
+      <view class="history-state" wx:if="{{isHistoryLoading}}">
+        <view class="history-loader"></view>
+        <view class="history-state-text">正在打开你们的故事</view>
+      </view>
+
+      <view class="history-state" wx:elif="{{isHistoryLoadFailed}}">
+        <view class="history-error-mark">!</view>
+        <view class="history-state-title">聊天记录没有加载出来</view>
+        <view class="history-state-text">轻触下方按钮，再试一次。</view>
+        <view class="history-retry" bindtap="retryInitialLoad">重新加载</view>
+      </view>
+
+      <view class="history-empty" wx:elif="{{!messageList.length}}">
+        <image
+          class="history-empty-illustration"
+          src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/community-redesign/community-empty-conversation.png"
+          mode="aspectFit"
+        ></image>
+        <view class="history-empty-title">和 {{aiName}} 的故事，从这里开始</view>
+        <view class="history-empty-note">不用想好开场白，真诚的一句问候就很好。</view>
+      </view>
+
+      <block wx:else>
+        <view class="message-item {{item.appearClass}}" wx:for="{{messageList}}" wx:key="id" id="msg-{{item.id}}">
+          <view class="message-row ai" wx:if="{{item.role === 'ai'}}">
+            <image class="avatar" src="{{aiAvatar}}" mode="aspectFill" bindtap="showProfileCard"></image>
+            <view class="bubble-wrapper">
+              <view class="bubble ai-bubble" catchlongpress="copyMessage" data-content="{{item.content}}">
+                {{item.content}}
+              </view>
+              <view class="message-meta message-meta-ai">{{item.time}}</view>
+            </view>
+          </view>
+
+          <view class="message-row user" wx:if="{{item.role === 'user'}}">
+            <view
+              class="message-send-failed"
+              wx:if="{{item.status === 'failed'}}"
+              catchtap="showRetryPrompt"
+              data-message-id="{{item.id}}"
+            >!</view>
+            <view class="bubble-wrapper">
+              <view class="bubble user-bubble" catchlongpress="copyMessage" data-content="{{item.content}}">
+                {{item.content}}
+              </view>
+              <view class="message-meta message-meta-user">
+                <text>{{item.time}}</text>
+                <text class="message-status-failed" wx:if="{{item.status === 'failed'}}"> · 未发送</text>
+              </view>
+            </view>
+            <image class="avatar" src="{{userAvatar}}" mode="aspectFill" binderror="onUserAvatarError"></image>
+          </view>
+        </view>
+      </block>
+
+      <view class="message-item message-item-fade-in" wx:if="{{isAiTyping && !isHistoryLoading}}">
+        <view class="message-row ai">
+          <image class="avatar" src="{{aiAvatar}}" mode="aspectFill"></image>
+          <view class="typing-bubble" aria-label="正在回复">
+            <view class="typing-dot typing-dot--1"></view>
+            <view class="typing-dot typing-dot--2"></view>
+            <view class="typing-dot typing-dot--3"></view>
+          </view>
+        </view>
+      </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="emoji-panel" wx:if="{{isEmojiPanelVisible}}" catchtap="noop">
+    <view
+      class="emoji-option"
+      wx:for="{{emojiOptions}}"
+      wx:key="*this"
+      data-emoji="{{item}}"
+      catchtap="selectEmoji"
+    >{{item}}</view>
+  </view>
+
+  <view class="input-bar-wrapper">
+    <view class="input-bar">
+      <view class="emoji-toggle {{isMessageLimitReached ? 'emoji-toggle-disabled' : ''}}" catchtap="toggleEmojiPanel">
+        <view class="emoji-face">
+          <view class="emoji-eye emoji-eye-left"></view>
+          <view class="emoji-eye emoji-eye-right"></view>
+          <view class="emoji-mouth"></view>
+        </view>
+      </view>
+
+      <view class="input-shell {{isMessageLimitReached ? 'input-shell-disabled' : ''}}">
+        <textarea
+          class="input-field"
+          value="{{inputValue}}"
+          bindinput="onInput"
+          bindfocus="onInputFocus"
+          disabled="{{isMessageLimitReached}}"
+          maxlength="200"
+          auto-height="{{true}}"
+          show-confirm-bar="{{false}}"
+          cursor-spacing="22"
+        ></textarea>
+      </view>
+
+      <view class="send-btn {{isSendDisabled ? 'disabled' : ''}}" bindtap="sendMessage">发送</view>
+    </view>
+  </view>
+
+  <view class="profile-overlay" wx:if="{{isProfileCardVisible}}" bindtap="hideProfileCard">
+    <view class="profile-card" catchtap="noop">
+      <view class="profile-card__hero">
+        <image class="profile-card__avatar" src="{{aiAvatar}}" mode="aspectFill"></image>
+        <view class="profile-card__intro">
+          <view class="profile-card__name">{{aiName}}</view>
+          <view class="profile-card__motto" wx:if="{{profileMotto}}">“{{profileMotto}}”</view>
+        </view>
+        <view class="profile-card__close" bindtap="hideProfileCard">×</view>
+      </view>
+
+      <view class="profile-card__tags" wx:if="{{profileTags.length}}">
+        <text class="profile-card__tag" wx:for="{{profileTags}}" wx:key="*this">{{item}}</text>
+      </view>
+
+      <scroll-view class="profile-card__body" scroll-y="true" enhanced="true" show-scrollbar="{{false}}">
+        <view
+          class="profile-card__row {{item.iconKey === 'mbti' ? 'profile-card__row--mbti' : ''}}"
+          wx:for="{{profileSections}}"
+          wx:key="label"
+        >
+          <view class="profile-card__icon-cell">
+            <image wx:if="{{item.iconSrc}}" class="profile-card__icon-img" src="{{item.iconSrc}}" mode="aspectFit"></image>
+            <view wx:else class="profile-card__icon profile-card__icon--{{item.iconKey}}"></view>
+          </view>
+          <text class="profile-card__label">{{item.label}}</text>
+          <view class="profile-card__value">{{item.value}}</view>
+        </view>
+      </scroll-view>
+
+      <view
+        class="profile-card__rewind-button {{isRewinding ? 'profile-card__rewind-button--disabled' : ''}}"
+        catchtap="showTimeRewindConfirm"
+      >
+        <text>{{isRewinding ? '回溯中...' : '时间回溯'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <custom-modal
+    show="{{showCustomModal}}"
+    title="{{modalTitle}}"
+    content="{{modalContent}}"
+    bind:confirm="onModalConfirm"
+  ></custom-modal>
 </view>
-</view>
-
-<custom-modal 
-  show="{{showCustomModal}}" 
-  title="{{modalTitle}}"
-  content="{{modalContent}}"
-  bind:confirm="onModalConfirm"
-></custom-modal>
-
-</view> 

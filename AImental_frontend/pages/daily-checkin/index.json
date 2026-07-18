@@ -1,6 +1,7 @@
 {
   "usingComponents": {
-    "calendar": "./calendar"
+    "calendar": "./calendar",
+    "privacy-consent": "/components/privacy-consent/privacy-consent"
   },
   "navigationStyle": "custom"
 }

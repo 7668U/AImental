@@ -1,6 +1,14 @@
 // pages/daily-checkin/index.js (修改后)
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
-const { loginWithBackend } = require('../../utils/auth.js');
+const {
+  confirmPrivacyAwareLogin,
+  loginWithBackend,
+  rejectPrivacyAwareLogin,
+  requestPrivacyAwareLogin
+} = require('../../utils/auth.js');
+
+const DAILY_CHECKIN_GUIDE_VERSION = 'v1';
+const DAILY_CHECKIN_GUIDE_ICON = 'https://assets.feelyourself.cn/miniprogram/assets/v1/pages/daily-checkin/assets/calendar-card.png';
 
 // 从 ai-therapist 页面“借鉴”过来的网络请求函数，你也可以把它封装成公共模块
 function request(options) {
@@ -32,10 +40,17 @@ Page({
   data: {
     isLoggedIn: false, // 新增：登录状态标志
     hasCheckedInToday: false,
+    todayDate: '',
+    todayMomentCount: 0,
+    todayTrajectoryPreview: [],
+    trajectorySubtitle: '今天还没有留下心情记录',
     showCalendar: false,
     statusBarHeight: 0,
     navBarHeight: 0,
     totalNavBarHeight: 0,
+    privacyVisible: false,
+    showDailyCheckinGuide: false,
+    dailyCheckinGuideIcon: DAILY_CHECKIN_GUIDE_ICON
   },
 
   onLoad(options) {},
@@ -57,6 +72,7 @@ Page({
           navBarHeight: navBarHeight,
           totalNavBarHeight: totalNavBarHeight
         });
+        this.showDailyCheckinGuideIfNeeded();
     
         // 模拟登录状态和打卡状态
         // this.setData({ isLoggedIn: true, hasCheckedInToday: false });
@@ -77,10 +93,39 @@ Page({
       this.setData({
         isLoggedIn: false,
         hasCheckedInToday: false,
+        todayDate: '',
+        todayMomentCount: 0,
+        todayTrajectoryPreview: [],
+        trajectorySubtitle: '今天还没有留下心情记录',
         showCalendar: false
       });
     }
   },
+
+  getDailyCheckinGuideStorageKey() {
+    const userInfo = wx.getStorageSync('userInfo') || {};
+    const userKey = userInfo.id || userInfo.user_id || userInfo.openid || 'default';
+    return `daily_checkin_guide_seen_${DAILY_CHECKIN_GUIDE_VERSION}_${userKey}`;
+  },
+
+  showDailyCheckinGuideIfNeeded() {
+    const storageKey = this.getDailyCheckinGuideStorageKey();
+    if (wx.getStorageSync(storageKey) || this._dailyCheckinGuideVisible) return;
+
+    this._dailyCheckinGuideVisible = true;
+    setTimeout(() => {
+      this.setData({ showDailyCheckinGuide: true });
+    }, 260);
+  },
+
+  handleConfirmDailyCheckinGuide() {
+    const storageKey = this.getDailyCheckinGuideStorageKey();
+    wx.setStorageSync(storageKey, true);
+    this._dailyCheckinGuideVisible = false;
+    this.setData({ showDailyCheckinGuide: false });
+  },
+
+  preventDailyCheckinGuideClose() {},
 
   promptLogin(content = '登录后可以继续使用这个功能。') {
     wx.showModal({
@@ -101,6 +146,10 @@ Page({
    * 新增：处理登录逻辑的函数，由需要账号的操作触发
    */
   handleLogin() {
+    return requestPrivacyAwareLogin(this, this.performLogin);
+  },
+
+  performLogin() {
     wx.showLoading({ title: '登录中...' });
     return loginWithBackend('https://api.feelyourself.cn/api/v1')
       .then((tokenRes) => {
@@ -120,20 +169,47 @@ Page({
       });
   },
 
+  onPrivacyConfirm() {
+    return confirmPrivacyAwareLogin(this);
+  },
+
+  onPrivacyReject() {
+    rejectPrivacyAwareLogin(this);
+  },
+
   /**
    * 修改：原 checkTodayStatus 函数，现在只负责获取业务数据
    * 我们把它重命名为 fetchCheckinData，更清晰
    */
   async fetchCheckinData() {
     try {
+      // 使用封装的 request 函数，代码更简洁
       const timeRes = await request({ url: '/system/time' });
       const serverDateStr = timeRes.server_date;
-      const [year, month, day] = serverDateStr.split('-');
-      const monthlyCheckins = await request({ url: `/checkin/month/${year}/${Number(month)}` });
-      this.setData({ hasCheckedInToday: !!monthlyCheckins[Number(day)] });
+      const timeline = await request({ url: `/checkin/date/${serverDateStr}/timeline` });
+      const moments = Array.isArray(timeline.moments) ? timeline.moments : [];
+      const preview = moments.map(item => ({
+        id: item.id,
+        mood: item.mood,
+        moodIcon: item.mood_icon || item.mood_id || item.mood,
+        localTime: item.local_time || this.formatTimeFromTimestamp(item.recorded_at || item.timestamp),
+      }));
+      this.setData({
+        todayDate: serverDateStr,
+        hasCheckedInToday: moments.length > 0,
+        todayMomentCount: moments.length,
+        todayTrajectoryPreview: preview,
+        trajectorySubtitle: moments.length > 0 ? `今天已记录 ${moments.length} 次` : '今天还没有留下心情记录',
+      });
 
     } catch (error) {
-      this.setData({ hasCheckedInToday: false });
+      // 任何请求失败都回到空状态，保持首页可继续记录。
+      this.setData({
+        hasCheckedInToday: false,
+        todayMomentCount: 0,
+        todayTrajectoryPreview: [],
+        trajectorySubtitle: '今天还没有留下心情记录',
+      });
     }
   },
 
@@ -143,15 +219,20 @@ Page({
    */
   goToRecord() {
     if (!this.data.isLoggedIn) {
-      this.promptLogin('登录后可以记录和保存你的今日心情。');
+      this.promptLogin('登录后可以记录和保存你的此刻心情。');
       return;
     }
 
-    let url = '/pkgDailyCheckin/record';
-    if (this.data.hasCheckedInToday) {
-      url = '/pkgDailyCheckin/record?mode=edit';
+    wx.navigateTo({ url: '/pkgDailyCheckin/record' });
+  },
+
+  goToTrajectory() {
+    if (!this.data.isLoggedIn) {
+      this.promptLogin('登录后可以查看你的心情轨迹。');
+      return;
     }
-    wx.navigateTo({ url: url });
+    const date = this.data.todayDate || this.getTodayString();
+    wx.navigateTo({ url: `/pkgDailyCheckin/trajectory?date=${date}` });
   },
   
   openCalendar() {
@@ -173,21 +254,20 @@ Page({
       return;
     }
 
-    const { date, hasCheckin } = e.detail;
+    const { date, hasCheckin, hasTimeline } = e.detail;
     
-    if (hasCheckin) {
-      const mode = this.isWithinRecentDays(date, 3) ? 'edit' : 'view';
+    if (hasTimeline || hasCheckin) {
       wx.navigateTo({
-        url: `/pkgDailyCheckin/record?mode=${mode}&date=${date}`
+        url: `/pkgDailyCheckin/trajectory?date=${date}`
       });
     } else {
-      if (this.isWithinRecentDays(date, 3)) {
-        wx.navigateTo({
-          url: `/pkgDailyCheckin/record?mode=create&date=${date}`
-        });
+      const todayStr = this.getTodayString();
+      
+      if (date === todayStr) {
+        wx.navigateTo({ url: '/pkgDailyCheckin/record' });
       } else {
         wx.showToast({
-          title: '只能补记最近3天哦~',
+          title: '那天没有记录哦~',
           icon: 'none'
         });
       }
@@ -202,6 +282,18 @@ Page({
     const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const diffDays = Math.floor((todayStart.getTime() - target.getTime()) / (24 * 60 * 60 * 1000));
     return diffDays >= 0 && diffDays < days;
+  },
+
+  getTodayString() {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  },
+
+  formatTimeFromTimestamp(timestamp) {
+    if (!timestamp) return '';
+    const date = new Date(Number(timestamp) * 1000);
+    if (Number.isNaN(date.getTime())) return '';
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
   },
 
   goToStatistics() {

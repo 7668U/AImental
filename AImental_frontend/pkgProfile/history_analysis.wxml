@@ -1,65 +1,67 @@
-<view class="container">
-  
-  <view class="page-header">
-    <text class="page-title">{{scaleName}} 分析报告</text>
-  </view>
+<view class="report-page">
+  <image class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgProfile/images/profile/profile-info-bg.png" mode="aspectFill"></image>
 
-  <view class="analysis-card">
-    <view class="card-title">
-      <image class="card-icon" src="/images/assessment/record.png"></image>
-      <text>测试记录</text>
-    </view>
-    <view class="record-list-wrapper">
-      <view class="history-item" wx:for="{{currentScaleRecords}}" wx:key="id">
-        <view class="item-left">
-          <view class="item-time">{{item.completed_at_formatted}}</view>
-          <view class="item-score">得分：{{item.final_score}}</view>
-        </view>
-        <view class="item-right">
-          <view class="item-result">{{item.result_level}}</view>
-        </view>
+  <view class="custom-nav-wrapper" style="padding-top: {{navTop}}px;">
+    <view class="custom-nav" style="height: {{navHeight}}px;">
+      <view class="nav-left" bindtap="navigateBack">
+        <view class="nav-back-icon"></view>
       </view>
+      <view class="nav-center">
+        <text class="nav-title">综合分析报告</text>
+      </view>
+      <view class="nav-right"></view>
     </view>
   </view>
 
-  <view class="analysis-card">
-    <view class="card-title">
-      <image class="card-icon" src="/images/assessment/history_analysis.png"></image>
-      <text>综合评估</text>
+  <scroll-view
+    class="report-scroll"
+    scroll-y
+    enhanced
+    show-scrollbar="{{false}}"
+    style="padding-top: {{navTop + navHeight}}px;"
+  >
+    <view wx:if="{{isLoading}}" class="status-state">
+      <text class="status-title">正在整理历史报告...</text>
+      <text class="status-description">稍等一下，你过去留下的测评记录正在回来。</text>
     </view>
-    <view class="card-content">
-      <text wx:if="{{isLoadingReport}}">报告生成中...</text>
-      <text wx:else>{{analysisReport.overall_assessment || '暂无数据'}}</text>
-    </view>
-  </view>
 
-  <view class="analysis-card">
-    <view class="card-title">
-      <image class="card-icon" src="/images/assessment/trend.png"></image>
-      <text>趋势分析</text>
+    <view wx:elif="{{errorText}}" class="status-state">
+      <text class="status-title">报告暂时没有加载出来</text>
+      <text class="status-description">{{errorText}}</text>
+      <button class="retry-button" bindtap="retryLoad">重新加载</button>
     </view>
-    <view class="chart-container">
-      <ec-canvas id="mychart-line" canvas-id="mychart-line" ec="{{ ec }}"></ec-canvas>
-    </view>
-    <view class="card-content">
-      <text wx:if="{{isLoadingReport}}">报告生成中...</text>
-      <text wx:else>{{analysisReport.trend_analysis || '暂无数据'}}</text>
-    </view>
-  </view>
 
-  <view class="analysis-card">
-    <view class="card-title">
-      <image class="card-icon" src="/images/assessment/suggestion.png"></image>
-      <text>个性化建议</text>
-    </view>
-    <view class="card-content">
-      <text wx:if="{{isLoadingReport}}">报告生成中...</text>
-      <text wx:else>{{analysisReport.recommendations || '暂无数据'}}</text>
-    </view>
-  </view>
+    <view wx:elif="{{report}}" class="report-content">
+      <view class="report-intro">
+        <text class="report-title">你的阶段性心理测评回顾</text>
+        <text class="report-meta">{{report.createdAtLabel}} · 综合 {{report.historyCount}} 次测评</text>
+      </view>
 
-  <view class="footer">
-    <view class="disclaimer">本报告由AI生成，仅供参考，不能代替专业心理咨询。</view>
-    <button class="confirm-btn" bindtap="handleConfirm">我知道了</button>
-  </view>
+      <view class="report-section">
+        <view class="section-heading">
+          <view class="section-dot section-dot-orange"></view>
+          <text>综合评估</text>
+        </view>
+        <text class="section-content">{{report.overall_assessment || '这份报告暂时没有综合评估内容。'}}</text>
+      </view>
+
+      <view class="report-section">
+        <view class="section-heading">
+          <view class="section-dot section-dot-blue"></view>
+          <text>趋势变化</text>
+        </view>
+        <text class="section-content">{{report.trend_analysis || '这份报告暂时没有趋势分析内容。'}}</text>
+      </view>
+
+      <view class="report-section">
+        <view class="section-heading">
+          <view class="section-dot section-dot-green"></view>
+          <text>个性化建议</text>
+        </view>
+        <text class="section-content">{{report.recommendations || '这份报告暂时没有个性化建议。'}}</text>
+      </view>
+
+      <text class="report-disclaimer">AI 分析仅用于自我观察，不替代专业心理咨询或医疗诊断。</text>
+    </view>
+  </scroll-view>
 </view>

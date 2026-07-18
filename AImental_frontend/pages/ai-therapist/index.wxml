@@ -149,7 +149,9 @@
       <view class="input-dock">
         <view class="input-shell">
           <view class="input-smile" catchtap="toggleEmojiPanel">
-            <image class="smile-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/smile-orange.png?v=20260705031056" mode="aspectFit"></image>
+            <view class="smile-eye smile-eye-left"></view>
+            <view class="smile-eye smile-eye-right"></view>
+            <view class="smile-mouth"></view>
           </view>
           <textarea
             class="input-field"
@@ -158,7 +160,7 @@
             placeholder="输入你想说的话..."
             placeholder-class="input-placeholder"
             auto-height="{{true}}"
-            maxlength="1000"
+            maxlength="500"
             show-confirm-bar="{{false}}"
             cursor-spacing="22"
           ></textarea>
@@ -168,4 +170,10 @@
         </view>
       </view>
   </view>
+
+  <privacy-consent
+    visible="{{privacyVisible}}"
+    bind:confirm="onPrivacyConfirm"
+    bind:reject="onPrivacyReject"
+  />
 </view>

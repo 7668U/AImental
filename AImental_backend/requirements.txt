@@ -9,6 +9,7 @@ python-dotenv==1.2.2
 python-jose[cryptography]==3.5.0
 python-multipart==0.0.32
 pytz==2026.2
+cos-python-sdk-v5==1.9.44
 redis==8.0.0
 requests==2.34.2
 uvicorn[standard]==0.49.0

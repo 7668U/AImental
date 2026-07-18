@@ -72,6 +72,9 @@ AImental_frontend/images/...
 AImental_frontend/pkgAssessment/images/...
 AImental_frontend/pkgDailyCheckin/images/...
 AImental_frontend/pkgProfile/images/...
+AImental_frontend/pages/daily-checkin/assets/...
+AImental_frontend/pkgDailyCheckin/assets/...
+AImental_backend/static/avatars/...
 ```
 
 2. Reference it through the CDN URL in mini-program code:
@@ -88,6 +91,15 @@ AImental_frontend/images/ai-therapist/plant-buddy.png
 
 AImental_frontend/pkgAssessment/images/category/health-hero.png
 -> https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/category/health-hero.png
+
+AImental_frontend/pages/daily-checkin/assets/calendar-hero-bg.png
+-> https://assets.feelyourself.cn/miniprogram/assets/v1/pages/daily-checkin/assets/calendar-hero-bg.png
+
+AImental_frontend/pkgDailyCheckin/assets/trajectory/calm.jpg
+-> https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/assets/trajectory/calm.jpg
+
+AImental_backend/static/avatars/default.png
+-> https://assets.feelyourself.cn/miniprogram/assets/v1/backend/avatars/default.png
 ```
 
 3. Rebuild the upload staging directory:
@@ -169,14 +181,34 @@ images/assessment
 images/daily-checkin
 images/icons
 images/paper-airplane
+images/privacy
+images/vip
 pkgAssessment/images
 pkgDailyCheckin/images
+pkgDailyCheckin/assets
 pkgProfile/images
+pages/daily-checkin/assets
 components/components-ecanvas
 pkgProfile/history_analysis.*
 ```
 
 Do not remove these ignore rules unless the corresponding resources are moved back into the mini-program package.
+
+The tabBar icon files remain local because WeChat requires local tabBar paths. This includes
+`images/tabbar/*`, `images/community.png`, and `images/community_selected.png`.
+
+## Public Asset Boundary
+
+Only public, application-owned static assets belong in this upload flow. Never stage or upload:
+
+- `.env` or credentials
+- databases and backups
+- `private_media`
+- user-uploaded photos or avatars
+- logs and generated user reports
+
+The staging script intentionally copies only the public frontend asset roots listed above.
+It also copies the built-in public AI character avatars from `AImental_backend/static/avatars`.
 
 ## Security
 

@@ -35,14 +35,6 @@
       },
       {
         "type": "folder",
-        "value": "pages/paper-airplane"
-      },
-      {
-        "type": "folder",
-        "value": "pkgDailyCheckin/paper-airplane"
-      },
-      {
-        "type": "folder",
         "value": "images/ai-therapist"
       },
       {
@@ -86,12 +78,32 @@
         "value": "images/cloud.png"
       },
       {
-        "type": "file",
-        "value": "images/community.png"
+        "type": "folder",
+        "value": "images/community-affinity"
+      },
+      {
+        "type": "folder",
+        "value": "images/community-premium"
+      },
+      {
+        "type": "folder",
+        "value": "images/community-profile"
+      },
+      {
+        "type": "folder",
+        "value": "images/community-redesign"
+      },
+      {
+        "type": "folder",
+        "value": "images/privacy"
+      },
+      {
+        "type": "folder",
+        "value": "images/vip"
       },
       {
         "type": "file",
-        "value": "images/community_selected.png"
+        "value": "images/community-profile-mbti.png"
       },
       {
         "type": "file",
@@ -120,14 +132,6 @@
       {
         "type": "file",
         "value": "images/paper_airplane.png"
-      },
-      {
-        "type": "file",
-        "value": "images/tabbar/paper_airplane_default.png"
-      },
-      {
-        "type": "file",
-        "value": "images/tabbar/paper_airplane_selected.png"
       },
       {
         "type": "file",
@@ -175,6 +179,14 @@
       },
       {
         "type": "folder",
+        "value": "pages/daily-checkin/assets"
+      },
+      {
+        "type": "folder",
+        "value": "pkgDailyCheckin/assets"
+      },
+      {
+        "type": "folder",
         "value": "pkgDailyCheckin/components-ecanvas/pages"
       },
       {
@@ -210,7 +222,16 @@
         "value": "pkgProfile/history_analysis.wxss"
       }
     ],
-    "include": []
+    "include": [
+      {
+        "type": "folder",
+        "value": "components/privacy-consent"
+      },
+      {
+        "type": "file",
+        "value": "utils/privacy.js"
+      }
+    ]
   },
   "appid": "wxd90fc334d65b9a0a",
   "editorSetting": {},

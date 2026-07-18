@@ -1,15 +1,15 @@
 <!-- pages/paper-airplane/index.wxml -->
 <view class="page-container">
   <view class="sky-bg">
-    <image src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/background.png?v=202607050210" class="sky-bg-img" mode="aspectFill"></image>
+    <image src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/background.png" class="sky-bg-img" mode="aspectFill"></image>
   </view>
 
   <view class="hero-copy">
-    <image class="title-image" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/title-fly-worries.png?v=202607050210" mode="widthFix"></image>
+    <image class="title-image" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/title-fly-worries.png" mode="widthFix"></image>
   </view>
 
   <view class="guide-row">
-    <image class="guide-image" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/guide-text.png?v=202607050210" mode="widthFix"></image>
+    <image class="guide-image" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/guide-text.png" mode="widthFix"></image>
   </view>
 
   <view class="airplane-container">
@@ -29,17 +29,17 @@
 
   <view class="actions-bar">
     <button class="throw-button-container" bindtap="onThrowClick">
-      <image src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/throw-button.png?v=202607050210" class="throw-button-image" mode="aspectFit"></image>
+      <image src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/throw-button.png" class="throw-button-image" mode="aspectFit"></image>
     </button>
   </view>
 
   <view class="basket-entry" bindtap="openBasket">
-    <image class="basket-image" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/basket.png?v=202607050210" mode="aspectFit"></image>
+    <image class="basket-image" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/basket.png" mode="aspectFit"></image>
   </view>
 
   <view class="modal-mask" wx:if="{{showWriteModal}}" bindtap="hideModals"></view>
   <view class="letter-modal write-letter-modal" wx:if="{{showWriteModal}}">
-    <image class="letter-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/letter-paper-bg-clean.png?v=202607050210" mode="aspectFit"></image>
+    <image class="letter-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/letter-paper-bg-clean.png" mode="aspectFit"></image>
     <view class="write-letter-close" bindtap="hideModals">×</view>
     <textarea
       class="letter-input"
@@ -58,11 +58,9 @@
 
   <view class="modal-mask" wx:if="{{showReadModal}}" bindtap="closeReadModal"></view>
   <view class="letter-modal" wx:if="{{showReadModal}}">
-    <image class="letter-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/letter-paper-bg-clean.png?v=202607050210" mode="aspectFit"></image>
-    <scroll-view scroll-y="true" scroll-x="false" class="letter-message-scroll">
-      <view class="letter-message-box">
-        <view class="letter-message">{{openedMessage}}</view>
-      </view>
+    <image class="letter-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/letter-paper-bg-clean.png" mode="aspectFit"></image>
+    <scroll-view scroll-y="true" class="letter-message-scroll">
+      <view class="letter-message">{{openedMessage}}</view>
     </scroll-view>
     <view wx:if="{{!openedFromBasket}}" class="letter-actions">
       <button wx:if="{{openedAirplaneId}}" class="letter-action letter-action-plain" bindtap="collectOpenedAirplane">
@@ -86,7 +84,7 @@
   <view class="basket-modal" wx:if="{{showBasketModal}}">
     <view class="basket-close" bindtap="hideModals">×</view>
     <view class="basket-emblem">
-      <image class="basket-emblem-plane" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/flying/paper_plane_02_01.png?v=202607050210" mode="aspectFit"></image>
+      <image class="basket-emblem-plane" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/flying/paper_plane_02_01.png" mode="aspectFit"></image>
     </view>
     <view class="basket-modal-title">
       <view class="basket-title-rule"></view>
@@ -111,7 +109,7 @@
         </view>
       </block>
       <view wx:else class="basket-empty">
-        <image class="basket-empty-plane" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/flying/paper_plane_06_01.png?v=202607050210" mode="aspectFit"></image>
+        <image class="basket-empty-plane" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/flying/paper_plane_06_01.png" mode="aspectFit"></image>
         <text>还没有收起的纸飞机</text>
       </view>
     </scroll-view>

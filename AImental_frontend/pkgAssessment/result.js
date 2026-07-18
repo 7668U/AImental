@@ -1,4 +1,9 @@
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
+const { getResultSectionTitles } = require('../utils/assessment-display.js');
+const {
+  isVipQuotaExhaustedError,
+  showVipQuotaModal,
+} = require('../utils/vip-quota.js');
 // pages/assessment/result.js (渐变条 + 文字标签最终版)
 
 const SERVER_BASE_URL = 'https://api.feelyourself.cn';
@@ -12,8 +17,18 @@ const SOUL_DRINK_RESULT_CARDS = {
   NTJ: `${DRINK_TI_ASSET_BASE}/result-cards/ntj-cold-brew-black-coffee.jpg`,
   NTP: `${DRINK_TI_ASSET_BASE}/result-cards/ntp-special-cocktail.jpg`,
   NFJ: `${DRINK_TI_ASSET_BASE}/result-cards/nfj-honey-grapefruit-tea.jpg`,
-  NFP: `${DRINK_TI_ASSET_BASE}/result-cards/nfp-colorful-fruit-tea.jpg`,
+  NFP: `${DRINK_TI_ASSET_BASE}/result-cards/nfp-colorful-fruit-tea.jpg`
 };
+const HEALTH_AI_SHORT_NAMES = new Set([
+  'SDS',
+  'BDI-II',
+  'SAS',
+  'BRMS',
+  'SAD',
+  'IAS',
+  'Lonely',
+  'DLS'
+]);
 
 Page({
   data: {
@@ -26,9 +41,13 @@ Page({
     pointerLabelAlign: 'center',
     scoreMarkers: [],
     aiAnalysis: null,
+    standardAnalysisSections: [],
     aiAnalysisSections: [],
-    analysisTitle: 'AI 分析',
-    analysisIsFallback: false,
+    analysisBlocks: [],
+    canGenerateAiAnalysis: false,
+    hasCachedAiAnalysis: false,
+    aiAnalysisLoaded: false,
+    isAiAnalysisLoading: false,
     primaryCareer: null,
     recommendedCareers: [],
     secondaryProfile: null,
@@ -88,9 +107,9 @@ Page({
     const soulDrinkResultCardUrl = isSoulDrinkResult
       ? this.getSoulDrinkResultCardUrl(normalizedResult)
       : '';
-    const aiAnalysis = this.normalizeAiAnalysis(resultData);
-    const aiSections = this.buildAiAnalysisSections(aiAnalysis);
-    const fallbackSections = aiSections.length > 0 ? [] : this.buildFallbackAnalysisSections(normalizedResult);
+    const cachedAiAnalysis = this.normalizeAiAnalysis(resultData);
+    const standardAnalysisSections = this.buildFallbackAnalysisSections(normalizedResult);
+    const canGenerateAiAnalysis = this.canGenerateAiAnalysisForResult(normalizedResult);
     const primaryCareer = normalizedResult?.result_details?.primary_career || null;
     const recommendedCareers = Array.isArray(normalizedResult?.result_details?.recommended_careers)
       ? normalizedResult.result_details.recommended_careers
@@ -113,10 +132,14 @@ Page({
       : null;
     this.setData({
       result: normalizedResult,
-      aiAnalysis: aiAnalysis,
-      aiAnalysisSections: aiSections.length > 0 ? aiSections : fallbackSections,
-      analysisTitle: aiSections.length > 0 ? 'AI 分析' : '结果分析',
-      analysisIsFallback: aiSections.length === 0,
+      aiAnalysis: cachedAiAnalysis,
+      standardAnalysisSections,
+      aiAnalysisSections: [],
+      analysisBlocks: this.buildAnalysisBlocks(standardAnalysisSections, []),
+      canGenerateAiAnalysis,
+      hasCachedAiAnalysis: !!cachedAiAnalysis,
+      aiAnalysisLoaded: false,
+      isAiAnalysisLoading: false,
       primaryCareer,
       recommendedCareers,
       secondaryProfile,
@@ -219,6 +242,26 @@ const scoreSegments = interpretations.map(interp => {
       normalized.result_level = '结果待确认';
     }
 
+    if (!normalized.scale_info && !normalized.scale_details) {
+      const assessmentType = normalized.final_score !== null && normalized.final_score !== undefined
+        ? 'scoring'
+        : 'categorical';
+      const legacyScale = {
+        id: normalized.scale_id || `legacy-${normalized.id || 'record'}`,
+        short_name: 'LEGACY',
+        name: '历史测评',
+        description: '该记录对应的量表定义已不在当前量表目录中。',
+        category: '历史记录',
+        assessment_type: assessmentType
+      };
+      normalized.scale_info = legacyScale;
+      normalized.scale_details = legacyScale;
+    } else if (!normalized.scale_details && normalized.scale_info) {
+      normalized.scale_details = normalized.scale_info;
+    } else if (!normalized.scale_info && normalized.scale_details) {
+      normalized.scale_info = normalized.scale_details;
+    }
+
     if (normalized.final_score !== null && normalized.final_score !== undefined) {
       const numericScore = Number(normalized.final_score);
       normalized.final_score = Number.isFinite(numericScore)
@@ -252,6 +295,103 @@ const scoreSegments = interpretations.map(interp => {
     return `${SERVER_BASE_URL}${normalizedUrl.startsWith('/') ? '' : '/'}${normalizedUrl}`;
   },
 
+  canGenerateAiAnalysisForResult(resultData) {
+    if (!resultData || !resultData.id) return false;
+    const scaleMeta = resultData.scale_details || resultData.scale_info || {};
+    return scaleMeta.category === '心理健康'
+      || scaleMeta.display_group === '心理健康'
+      || HEALTH_AI_SHORT_NAMES.has(scaleMeta.short_name);
+  },
+
+  buildAnalysisBlocks(standardSections, aiSections) {
+    const blocks = [];
+    if (Array.isArray(standardSections) && standardSections.length > 0) {
+      blocks.push({
+        key: 'standard',
+        title: '结果分析',
+        sections: standardSections
+      });
+    }
+    if (Array.isArray(aiSections) && aiSections.length > 0) {
+      blocks.push({
+        key: 'ai',
+        title: 'AI深度分析',
+        sections: aiSections
+      });
+    }
+    return blocks;
+  },
+
+  showAiAnalysis(aiAnalysis) {
+    const aiSections = this.buildAiAnalysisSections(aiAnalysis);
+    if (aiSections.length === 0) {
+      wx.showToast({ title: 'AI深度分析内容暂时为空', icon: 'none' });
+      return;
+    }
+
+    this.setData({
+      aiAnalysis,
+      aiAnalysisSections: aiSections,
+      analysisBlocks: this.buildAnalysisBlocks(this.data.standardAnalysisSections, aiSections),
+      hasCachedAiAnalysis: true,
+      aiAnalysisLoaded: true
+    });
+  },
+
+  handleGenerateAiAnalysis() {
+    if (this.data.isAiAnalysisLoading || !this.data.canGenerateAiAnalysis) return;
+
+    if (this.data.aiAnalysis) {
+      this.showAiAnalysis(this.data.aiAnalysis);
+      return;
+    }
+
+    const recordId = this.data.result?.id;
+    if (!recordId) {
+      wx.showToast({ title: '测评记录信息不完整', icon: 'none' });
+      return;
+    }
+
+    this.setData({ isAiAnalysisLoading: true });
+    const requestId = `assessment-ai-${recordId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    wx.request({
+      url: `${ASSESSMENTS_API_URL}/history/${recordId}/ai-analysis`,
+      method: 'POST',
+      timeout: 120000,
+      header: {
+        'Authorization': 'Bearer ' + wx.getStorageSync('token'),
+        'X-Request-ID': requestId
+      },
+      success: (res) => {
+        if (res.statusCode === 200 && res.data?.ai_analysis) {
+          this.showAiAnalysis(res.data.ai_analysis);
+          return;
+        }
+
+        const error = {
+          statusCode: res.statusCode,
+          data: res.data
+        };
+        if (isVipQuotaExhaustedError(error)) {
+          showVipQuotaModal({ error, feature: 'assessment_analysis' });
+          return;
+        }
+
+        const detail = res.data?.detail;
+        const message = typeof detail === 'string'
+          ? detail
+          : (detail?.message || 'AI深度分析生成失败，请稍后重试');
+        wx.showToast({ title: message, icon: 'none', duration: 3000 });
+      },
+      fail: () => {
+        wx.showToast({ title: '网络请求失败，请稍后重试', icon: 'none' });
+      },
+      complete: () => {
+        this.setData({ isAiAnalysisLoading: false });
+      }
+    });
+  },
+
   normalizeAiAnalysis(resultData) {
     const detailsAnalysis = resultData?.result_details?.ai_analysis;
     return resultData?.ai_analysis || detailsAnalysis || null;
@@ -272,33 +412,16 @@ const scoreSegments = interpretations.map(interp => {
       });
     }
 
-    const dimensions = Array.isArray(aiAnalysis.dimensions)
-      ? aiAnalysis.dimensions
-          .map(item => {
-            if (!item || typeof item !== 'object') return null;
-            const evidenceText = Array.isArray(item.evidence) ? item.evidence.join('、') : '';
-            const label = item.label ? String(item.label).trim() : '';
-            const level = item.level ? String(item.level).trim() : '';
-            const summary = item.summary ? String(item.summary).trim() : '';
-            return {
-              ...item,
-              label,
-              level,
-              summary,
-              evidenceText
-            };
-          })
-          .filter(Boolean)
-          .filter(item => item.label || item.level || item.summary || item.evidenceText)
-      : [];
-
-    if (dimensions.length > 0) {
+    if (Array.isArray(aiAnalysis.dimensions) && aiAnalysis.dimensions.length > 0) {
       sections.push({
         key: 'dimensions',
         title: '主要影响维度',
         type: 'dimensions',
         bgIcon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/section-ai.png',
-        dimensions
+        dimensions: aiAnalysis.dimensions.map(item => ({
+          ...item,
+          evidenceText: Array.isArray(item.evidence) ? item.evidence.join('、') : ''
+        }))
       });
     }
 
@@ -367,6 +490,10 @@ const scoreSegments = interpretations.map(interp => {
     if (!resultData) return [];
 
     const sections = [];
+    const sectionTitles = getResultSectionTitles(
+      resultData?.scale_details?.short_name,
+      resultData?.scale_details?.assessment_type
+    );
     const interpretation = typeof resultData.result_interpretation === 'string'
       ? resultData.result_interpretation.trim()
       : '';
@@ -388,7 +515,7 @@ const scoreSegments = interpretations.map(interp => {
     if (interpretation) {
       sections.push({
         key: 'interpretation',
-        title: '当前状态',
+        title: sectionTitles.interpretation,
         type: 'text',
         bgIcon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/section-ai.png',
         text: interpretation
@@ -398,7 +525,7 @@ const scoreSegments = interpretations.map(interp => {
     if (recommendation) {
       sections.push({
         key: 'recommendation',
-        title: '可以先试试',
+        title: sectionTitles.recommendation,
         type: 'text',
         bgIcon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/section-sun.png',
         text: recommendation
@@ -427,74 +554,71 @@ const scoreSegments = interpretations.map(interp => {
       return [];
     }
 
-    const hiddenKeys = {
-      ai_analysis: true,
-      image_url: true,
-      college: true,
-      college_motto: true,
-      title: true,
-      type_code: true,
-      condition: true,
-      primary_career: true,
-      recommended_careers: true,
-      secondary_title: true,
-      secondary_description: true,
-      secondary_recommendation: true,
-      secondary_in_relationships: true,
-      secondary_under_stress: true,
-      secondary_facing_change: true,
-      tendency_breakdown: true,
-      fortune_keyword: true,
-      fortune_window: true,
-      lucky_color: true,
-      lucky_action: true,
-      lucky_phrase: true,
-      emotional_anchor: true,
-      in_relationships: true,
-      under_stress: true,
-      facing_change: true
-    };
     const labelMap = {
       anxiety_score: '焦虑得分',
-      avoidance_score: '回避得分'
+      avoidance_score: '回避得分',
+      安全型: '安全型得分',
+      焦虑型: '焦虑型得分',
+      回避型: '回避型得分',
+      I: '内向倾向（I）',
+      E: '外向倾向（E）',
+      S: '感觉倾向（S）',
+      N: '直觉倾向（N）',
+      T: '思考倾向（T）',
+      F: '情感倾向（F）',
+      J: '判断倾向（J）',
+      P: '感知倾向（P）'
+    };
+    const allowedDimensionKeys = new Set([
+      'anxiety_score',
+      'avoidance_score',
+      '安全型',
+      '焦虑型',
+      '回避型',
+      'I',
+      'E',
+      'S',
+      'N',
+      'T',
+      'F',
+      'J',
+      'P'
+    ]);
+
+    const items = [];
+    const appendNumericItem = (key, value) => {
+      if (!allowedDimensionKeys.has(key)) return;
+      if (typeof value !== 'number' || !Number.isFinite(value)) return;
+
+      items.push({
+        label: labelMap[key] || key,
+        value: String(Math.round(value * 100) / 100)
+      });
     };
 
-    return Object.keys(resultDetails)
-      .filter(key => !hiddenKeys[key])
-      .map(key => {
-        const value = resultDetails[key];
-        if (value === null || value === undefined || typeof value === 'object' || typeof value === 'boolean') {
-          return null;
-        }
+    Object.entries(resultDetails.dimension_scores || {}).forEach(([key, value]) => {
+      appendNumericItem(key, value);
+    });
 
-        if (typeof value === 'string' && value.trim() === '') return null;
+    Object.entries(resultDetails).forEach(([key, value]) => {
+      if (key === 'dimension_scores') return;
+      appendNumericItem(key, value);
+    });
 
-        const numericValue = Number(value);
-        if (!Number.isFinite(numericValue)) return null;
-
-        const displayValue = String(Math.round(numericValue * 100) / 100);
-
-        if (!displayValue) return null;
-
-        return {
-          label: labelMap[key] || key,
-          value: displayValue
-        };
-      })
-      .filter(Boolean)
-      .slice(0, 6);
+    return items.slice(0, 8);
   },
 
   buildTalentRadarReport(resultData) {
     const details = resultData?.result_details || {};
-    const levelParts = this.splitTalentResultLevel(resultData?.result_level);
-    const summaryTitle = details.primary_title || levelParts[0] || resultData.result_level || '';
-    const summarySubtitle = details.secondary_title || levelParts[1] || '';
+    const breakdown = Array.isArray(details.tendency_breakdown) ? details.tendency_breakdown : [];
+    const scoreItems = breakdown.slice(0, 8).map(item => ({
+      label: item.title,
+      value: item.count,
+      ratio: Math.round((item.ratio || 0) * 100)
+    }));
 
     return {
-      summaryTitle,
-      summarySubtitle: summarySubtitle && summarySubtitle !== summaryTitle ? summarySubtitle : '',
-      primaryTitle: details.primary_title || summaryTitle,
+      primaryTitle: details.primary_title || resultData.result_level || '',
       primaryTagline: details.primary_tagline || '',
       primarySummary: details.primary_summary || '',
       primaryBestScene: details.primary_best_scene || '',
@@ -510,16 +634,9 @@ const scoreSegments = interpretations.map(interp => {
       stressTitle: details.stress_title || '',
       stressSummary: details.stress_summary || details.stress_description || '',
       radarSummary: details.radar_summary || '',
-      latentSummary: details.latent_summary || ''
+      latentSummary: details.latent_summary || '',
+      scoreItems
     };
-  },
-
-  splitTalentResultLevel(level) {
-    if (level === null || level === undefined) return [];
-    return String(level)
-      .split('×')
-      .map(part => part.trim())
-      .filter(Boolean);
   },
 
   buildFortuneReport(resultData) {

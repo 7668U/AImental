@@ -1,19 +1,35 @@
 <view class="profile-page">
-  <image class="profile-bg" src="/images/profile/profile-bg.jpg" mode="aspectFill"></image>
+  <view class="ambient ambient-left"></view>
+  <view class="ambient ambient-right"></view>
+  <view class="spark spark-one">✦</view>
+  <view class="spark spark-two">✦</view>
 
   <view class="top-safe" style="height: {{topSafeHeight}}px;"></view>
 
   <view class="profile-hero">
     <view class="avatar-ring">
-      <view class="avatar-orbit"></view>
-      <image class="avatar" src="{{userInfo.avatar_url || 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png?v=202607050210'}}" mode="aspectFill"></image>
-      <view class="avatar-heart">♥</view>
+      <image class="avatar" src="{{userInfo.avatar_url || 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png'}}" mode="aspectFill"></image>
+      <view wx:if="{{isMember && membershipAvatarIcon}}" class="membership-avatar-badge">
+        <image class="membership-avatar-icon" src="{{membershipAvatarIcon}}" mode="aspectFit"></image>
+      </view>
     </view>
     <view class="nickname">{{userInfo.nickname || '访客'}}</view>
-    <view class="profile-slogan"><text>⌁</text> 爱世界 爱自己 <text>⌁</text></view>
+    <view class="profile-slogan">愿你被温柔以待，也能温柔待人</view>
+    <view class="heart-mark">♥</view>
   </view>
 
   <view class="menu-card">
+    <view class="menu-item membership-menu-item" bindtap="goToVip">
+      <view class="menu-icon-wrap membership-icon-wrap">
+        <image class="membership-menu-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/membership-heart-line.png" mode="aspectFit"></image>
+      </view>
+      <view class="menu-copy">
+        <view class="menu-title">{{vipEntryTitle}}</view>
+        <view class="menu-desc">{{vipEntryDesc}}</view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+
     <view class="menu-item" bindtap="goToUserInfo">
       <view class="menu-icon-wrap">
         <image class="menu-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-user.png" mode="aspectFit"></image>
@@ -47,6 +63,17 @@
       <view class="menu-arrow">›</view>
     </view>
 
+    <view class="menu-item" bindtap="goToPrivacy">
+      <view class="menu-icon-wrap">
+        <image class="menu-icon menu-icon-privacy" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/privacy/privacy-shield-line.png" mode="aspectFit"></image>
+      </view>
+      <view class="menu-copy">
+        <view class="menu-title">隐私与数据</view>
+        <view class="menu-desc">查看保护方式、协议与同意状态</view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+
     <view class="menu-item" bindtap="goToAboutUs">
       <view class="menu-icon-wrap">
         <image class="menu-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-about.png" mode="aspectFit"></image>
@@ -60,6 +87,13 @@
   </view>
 
   <view class="action-btn-container">
+    <view
+      wx:if="{{isLogin && isMember && vipTestToolsAvailable}}"
+      class="action-btn cancel-vip-test-btn"
+      bindtap="cancelVipForTesting"
+    >
+      <text>{{cancelVipLoading ? '正在取消...' : '临时取消会员'}}</text>
+    </view>
     <view wx:if="{{isLogin}}" class="action-btn logout-btn" bindtap="logout">
       <text class="action-icon">↪</text>
       <text>退出登录</text>
@@ -70,3 +104,8 @@
     </view>
   </view>
 </view>
+<privacy-consent
+  visible="{{privacyVisible}}"
+  bind:confirm="onPrivacyConfirm"
+  bind:reject="onPrivacyReject"
+/>

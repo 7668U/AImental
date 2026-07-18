@@ -29,7 +29,7 @@
     <view
       wx:for="{{scaleList}}"
       wx:key="id"
-      class="scale-card"
+      class="scale-card {{groupMeta.key === 'interest' ? 'interest-card' : ''}}"
       bindtap="goToTest"
       data-id="{{item.id}}"
       data-title="{{item.displayTitle}}"
@@ -48,10 +48,15 @@
         <text class="scale-desc">{{item.displayDescription}}</text>
         <text wx:if="{{item.displaySubnote}}" class="scale-subnote">{{item.displaySubnote}}</text>
       </view>
-      <view class="test-action">
-        <text class="action-label">去测试</text>
-        <view class="action-chevron"></view>
-      </view>
+      <image class="test-action" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/assessment/common/go-test-button.png" mode="aspectFit" />
     </view>
+  </view>
+
+  <view wx:if="{{groupMeta.key === 'interest' && scaleList.length > 0}}" class="interest-tip">
+    <view>
+      <text class="tip-line">有些天赋一直在发光，</text>
+      <text class="tip-line">有些潜能正在等你点亮。</text>
+    </view>
+    <image class="tip-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/assessment/home/group-health.png" mode="aspectFit" />
   </view>
 </view>

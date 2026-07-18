@@ -16,7 +16,7 @@
   <view class="main-content" style="padding-top: {{navHeight + navTop}}px;">
     <view class="profile-hero">
       <view class="avatar-wrapper" bindtap="onChangeAvatar">
-        <image class="avatar" src="{{avatar_url || 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png?v=202607050210'}}" mode="aspectFill"></image>
+        <image class="avatar" src="{{avatar_url || 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png'}}" mode="aspectFill"></image>
       </view>
     </view>
 

@@ -8,6 +8,7 @@ from typing import Optional
 
 # 1. 导入共享的数据库连接实例和基础模型
 from .user import User
+from security.data_encryption import EncryptedTextField
 
 # --- Database Setup ---
 # 我们将纸飞机的数据存储在一个新的专用数据库中
@@ -24,7 +25,7 @@ class PaperAirplane(Model):
     """
     id = pw.AutoField()  # 自动增长的整数主键
     user = ForeignKeyField(User, backref='paper_airplanes', field='id', on_delete='CASCADE')
-    message = TextField()
+    message = EncryptedTextField(purpose="paper_airplanes.message")
     create_time = DateTimeField(default=datetime.now)
 
     class Meta:
@@ -314,7 +315,7 @@ class PaperAirplaneTable:
         print("Paper airplane database is empty. Checking for existing users to seed data...")
 
         # 2. 查找或创建系统用户
-        from .user import User, UserTable, user_db # Import UserTable and user_db
+        from .user import user_db, user_table
         SYSTEM_USER_OPENID = "system_paper_airplane_user"
         SYSTEM_USER_NICKNAME = "纸飞机系统"
 
@@ -322,17 +323,13 @@ class PaperAirplaneTable:
         if user_db.is_closed():
             user_db.connect()
 
-        system_user = User.get_or_none(User.openid == SYSTEM_USER_OPENID)
+        system_user = user_table.get_user_by_openid(SYSTEM_USER_OPENID)
         if not system_user:
             print(f"System user '{SYSTEM_USER_NICKNAME}' not found. Creating it...")
-            # Temporarily instantiate UserTable to create user
-            # This is a bit hacky, ideally UserTable methods would be static or passed
-            # But given the current structure, this is the most direct way.
-            temp_user_table = UserTable(user_db) 
-            system_user = temp_user_table.create_user(
+            system_user = user_table.create_user(
                 openid=SYSTEM_USER_OPENID,
                 nickname=SYSTEM_USER_NICKNAME,
-                avatar_url="/static/avatars/default.png" # Or a specific system avatar
+                avatar_url="https://assets.feelyourself.cn/miniprogram/assets/v1/backend/avatars/default.png" # Or a specific system avatar
             )
             if not system_user:
                 print("Failed to create system user. Cannot seed default airplanes.")

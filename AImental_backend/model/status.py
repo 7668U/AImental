@@ -6,7 +6,6 @@ import datetime
 import calendar
 import json
 import os
-import shutil
 from typing import Optional, List, Dict, Any
 
 # Import necessary types from peewee and pydantic
@@ -24,6 +23,7 @@ from .checkin_dimensions import (
     build_status_meta_from_tags,
     load_list,
 )
+from security.data_encryption import EncryptedFloatField, EncryptedTextField
 
 MAX_CHECKIN_IMAGES = 3
 
@@ -83,27 +83,46 @@ class Checkin(Model):
     """The Peewee Model for the 'checkins' table."""
     id = CharField(primary_key=True, max_length=36, default=lambda: str(uuid.uuid4()))
     user_id = CharField(max_length=36, index=True)
-    mood = CharField(max_length=50)
-    mood_id = CharField(max_length=50, null=True)
-    mood_family = CharField(max_length=50, null=True)
-    mood_valence = CharField(max_length=20, null=True)
-    mood_energy = CharField(max_length=20, null=True)
-    color = CharField(max_length=20) # e.g., "#RRGGBB"
-    color_id = CharField(max_length=50, null=True)
-    color_label = CharField(max_length=50, null=True)
-    color_group = CharField(max_length=50, null=True)
-    color_tone = CharField(max_length=20, null=True)
-    color_description = CharField(max_length=255, null=True)
-    tags = CharField(max_length=255, null=True) # Comma-separated tags
-    status_ids = TextField(null=True) # JSON list
-    status_families = TextField(null=True) # JSON list
-    text_content = TextField(null=True)
-    image_url = CharField(max_length=1024, null=True)
-    image_urls = TextField(null=True) # JSON list
-    location_name = CharField(max_length=255, null=True)
-    location_address = CharField(max_length=1024, null=True)
-    location_latitude = FloatField(null=True)
-    location_longitude = FloatField(null=True)
+    mood = EncryptedTextField(purpose="checkins.mood")
+    mood_id = EncryptedTextField(purpose="checkins.mood_id", null=True)
+    mood_family = EncryptedTextField(purpose="checkins.mood_family", null=True)
+    mood_valence = EncryptedTextField(purpose="checkins.mood_valence", null=True)
+    mood_energy = EncryptedTextField(purpose="checkins.mood_energy", null=True)
+    color = EncryptedTextField(purpose="checkins.color")
+    color_id = EncryptedTextField(purpose="checkins.color_id", null=True)
+    color_label = EncryptedTextField(purpose="checkins.color_label", null=True)
+    color_group = EncryptedTextField(purpose="checkins.color_group", null=True)
+    color_tone = EncryptedTextField(purpose="checkins.color_tone", null=True)
+    color_description = EncryptedTextField(
+        purpose="checkins.color_description",
+        null=True,
+    )
+    tags = EncryptedTextField(purpose="checkins.tags", null=True)
+    status_ids = EncryptedTextField(purpose="checkins.status_ids", null=True)
+    status_families = EncryptedTextField(
+        purpose="checkins.status_families",
+        null=True,
+    )
+    text_content = EncryptedTextField(purpose="checkins.text_content", null=True)
+    image_url = EncryptedTextField(purpose="checkins.image_url", null=True)
+    image_urls = EncryptedTextField(purpose="checkins.image_urls", null=True)
+    location_name = EncryptedTextField(purpose="checkins.location_name", null=True)
+    location_address = EncryptedTextField(
+        purpose="checkins.location_address",
+        null=True,
+    )
+    location_latitude = EncryptedFloatField(
+        purpose="checkins.location_latitude",
+        null=True,
+    )
+    location_longitude = EncryptedFloatField(
+        purpose="checkins.location_longitude",
+        null=True,
+    )
+    record_type = CharField(max_length=20, default="moment", index=True)
+    record_date = CharField(max_length=10, null=True, index=True)
+    recorded_at = IntegerField(null=True)
+    local_time = CharField(max_length=5, null=True)
     timestamp = IntegerField(default=lambda: int(time.time()))
     updated_at = IntegerField(default=lambda: int(time.time()))
 
@@ -119,7 +138,6 @@ class CheckinBaseModel(BaseModel):
     """Pydantic model for creating/updating a Checkin."""
     mood: str
     color: str
-    record_date: Optional[str] = None
     tags: Optional[str] = None
     text_content: Optional[str] = None
     image_url: Optional[str] = None
@@ -139,6 +157,8 @@ class CheckinBaseModel(BaseModel):
     location_address: Optional[str] = None
     location_latitude: Optional[float] = None
     location_longitude: Optional[float] = None
+    # 客户端可传入想要的“今天”时刻（HH:MM），用于时间戳微调；不传则用当前时间。
+    local_time: Optional[str] = None
 
 class CheckinModel(CheckinBaseModel):
     """The full Pydantic Model for a Checkin response."""
@@ -146,6 +166,10 @@ class CheckinModel(CheckinBaseModel):
     user_id: str
     timestamp: int
     updated_at: int
+    record_type: str = "moment"
+    record_date: Optional[str] = None
+    recorded_at: Optional[int] = None
+    local_time: Optional[str] = None
     mood_icon: Optional[str] = None
     status_items: List[Dict[str, Any]] = Field(default_factory=list)
     image_urls: List[str] = Field(default_factory=list)
@@ -188,12 +212,65 @@ class CheckinTable:
             "location_address": "VARCHAR(1024)",
             "location_latitude": "REAL",
             "location_longitude": "REAL",
+            "record_type": "VARCHAR(20)",
+            "record_date": "VARCHAR(10)",
+            "recorded_at": "INTEGER",
+            "local_time": "VARCHAR(5)",
         }
         for column_name, column_type in migrations.items():
             if column_name not in existing_columns:
                 self.db.execute_sql(
                     f"ALTER TABLE checkins ADD COLUMN {column_name} {column_type}"
                 )
+        self.db.execute_sql(
+            "UPDATE checkins SET record_type = 'moment' "
+            "WHERE record_type IS NULL OR record_type = '' OR record_type = 'record_type'"
+        )
+        self.db.execute_sql(
+            "UPDATE checkins SET recorded_at = timestamp "
+            "WHERE recorded_at IS NULL OR recorded_at = 'recorded_at'"
+        )
+        self.db.execute_sql(
+            "UPDATE checkins SET record_date = strftime('%Y-%m-%d', timestamp, 'unixepoch', 'localtime') "
+            "WHERE record_date IS NULL OR record_date = '' OR record_date = 'record_date'"
+        )
+        self.db.execute_sql(
+            "UPDATE checkins SET local_time = strftime('%H:%M', timestamp, 'unixepoch', 'localtime') "
+            "WHERE local_time IS NULL OR local_time = '' OR local_time = 'local_time'"
+        )
+
+    def _normalize_record_date(self, value: Optional[str] = None, timestamp: Optional[int] = None) -> str:
+        if value:
+            return value
+        ts = timestamp if timestamp is not None else int(time.time())
+        return datetime.datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
+
+    def _normalize_local_time(self, value: Optional[str] = None, timestamp: Optional[int] = None) -> str:
+        if value:
+            return value
+        ts = timestamp if timestamp is not None else int(time.time())
+        return datetime.datetime.fromtimestamp(ts).strftime("%H:%M")
+
+    def _resolve_today_timestamp(self, local_time: Optional[str]) -> int:
+        """
+        把用户想要的时刻（"HH:MM"）落在“服务器本地今天”这一天，返回时间戳。
+        规则：仅允许今天且不超过当前时刻；格式非法或超过现在则回退为当前时间。
+        始终锚定“今天”，天然禁止补记到过去或未来的日期。
+        """
+        now = datetime.datetime.now()
+        now_ts = int(now.timestamp())
+        if not local_time:
+            return now_ts
+        try:
+            parsed = datetime.datetime.strptime(local_time.strip(), "%H:%M").time()
+        except (ValueError, AttributeError):
+            return now_ts
+        candidate = datetime.datetime.combine(now.date(), parsed)
+        candidate_ts = int(candidate.timestamp())
+        # 不允许超过当前时刻（避免未来时间）。
+        if candidate_ts > now_ts:
+            return now_ts
+        return candidate_ts
         
     def create_dummy_data_for_month(self, user_id: str = "c959d470-64e7-45fe-8942-45ee05d0f153"):
         """
@@ -318,13 +395,8 @@ class CheckinTable:
             "month": target_month,
         }
 
-    def _prepare_checkin_payload(self, payload: Dict[str, Any], apply_record_date: bool = False) -> Dict[str, Any]:
-        record_date = payload.pop("record_date", None)
+    def _prepare_checkin_payload(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         data = enrich_checkin_payload(payload)
-        if apply_record_date and record_date:
-            record_day = datetime.date.fromisoformat(record_date)
-            record_dt = datetime.datetime.combine(record_day, datetime.time(12, 0))
-            data["timestamp"] = int(record_dt.timestamp())
         if "image_urls" in data or "image_url" in data:
             image_urls = normalize_image_urls(data.get("image_urls"), data.get("image_url"))
             data["image_urls"] = dump_image_urls(image_urls)
@@ -334,12 +406,36 @@ class CheckinTable:
     def create_checkin(self, user_id: str, data: CheckinBaseModel) -> Optional[Checkin]:
         """Creates a new checkin record."""
         try:
-            payload = self._prepare_checkin_payload(data.model_dump(exclude_unset=True), apply_record_date=True)
+            payload = self._prepare_checkin_payload(data.model_dump(exclude_unset=True))
+            now_ts = int(time.time())
+            payload.setdefault("record_type", "moment")
+            payload.setdefault("timestamp", now_ts)
+            payload.setdefault("recorded_at", payload.get("timestamp", now_ts))
+            payload.setdefault("record_date", self._normalize_record_date(timestamp=payload["recorded_at"]))
+            payload.setdefault("local_time", self._normalize_local_time(timestamp=payload["recorded_at"]))
             checkin = Checkin.create(
                 user_id=user_id,
                 **payload
             )
             return checkin
+        except IntegrityError:
+            return None
+
+    def create_moment(self, user_id: str, data: CheckinBaseModel) -> Optional[Checkin]:
+        """Creates a moment check-in without enforcing a per-day limit."""
+        payload = data.model_dump(exclude_unset=True)
+        # 用户可传入想要的今日时刻（HH:MM）微调时间戳；否则用当前时间。
+        requested_local_time = payload.pop("local_time", None)
+        ts = self._resolve_today_timestamp(requested_local_time)
+        payload.update({
+            "record_type": "moment",
+            "timestamp": ts,
+            "recorded_at": ts,
+            "record_date": self._normalize_record_date(timestamp=ts),
+            "local_time": self._normalize_local_time(timestamp=ts),
+        })
+        try:
+            return Checkin.create(user_id=user_id, **self._prepare_checkin_payload(payload))
         except IntegrityError:
             return None
 
@@ -349,22 +445,58 @@ class CheckinTable:
 
     def get_checkin_by_date(self, user_id: str, target_date_str: str) -> Optional[Checkin]:
         """
-        Gets the checkin for a specific user on a specific date.
+        Gets the latest moment checkin for a specific user on a specific date.
         """
         try:
-            query = Checkin.select().where(
-                (Checkin.user_id == user_id) &
-                (fn.strftime('%Y-%m-%d', Checkin.timestamp, 'unixepoch') == target_date_str)
-            ).first()
+            date_filter = (
+                (Checkin.record_date == target_date_str) |
+                (fn.strftime('%Y-%m-%d', Checkin.timestamp, 'unixepoch', 'localtime') == target_date_str)
+            )
+            query = (Checkin
+                .select()
+                .where(
+                    (Checkin.user_id == user_id) &
+                    date_filter &
+                    ((Checkin.record_type.is_null(True)) | (Checkin.record_type == "moment"))
+                )
+                .order_by(Checkin.timestamp.desc())
+                .first())
             return query
         except Exception as e:
             print(f"Error in get_checkin_by_date: {e}")
             return None
 
+    def get_moments_by_date(self, user_id: str, target_date_str: str) -> List[Checkin]:
+        date_filter = (
+            (Checkin.record_date == target_date_str) |
+            (fn.strftime('%Y-%m-%d', Checkin.timestamp, 'unixepoch', 'localtime') == target_date_str)
+        )
+        return list(
+            Checkin
+            .select()
+            .where(
+                (Checkin.user_id == user_id) &
+                date_filter &
+                ((Checkin.record_type.is_null(True)) | (Checkin.record_type == "moment"))
+            )
+            .order_by(Checkin.timestamp.asc())
+        )
+
+    def get_timeline_by_date(self, user_id: str, target_date_str: str) -> Dict[str, Any]:
+        moments = [model_to_dict(item) for item in self.get_moments_by_date(user_id, target_date_str)]
+        return {
+            "date": target_date_str,
+            "moments": moments,
+            "summary": {
+                "moment_count": len(moments),
+                "first_mood": moments[0]["mood"] if moments else None,
+                "last_mood": moments[-1]["mood"] if moments else None,
+            }
+        }
+
     def get_checkins_by_month(self, user_id: str, year: int, month: int) -> Dict[str, Dict]:
         """
-        Gets all checkins for a specific user in a given month and returns them
-        as a dictionary keyed by the day of the month.
+        Gets a monthly summary keyed by day of month.
         """
         start_date = datetime.datetime(year, month, 1)
         if month == 12:
@@ -374,18 +506,47 @@ class CheckinTable:
             
         start_timestamp = int(start_date.timestamp())
         end_timestamp = int(end_date.timestamp())
+        start_date_str = start_date.strftime("%Y-%m-%d")
+        end_date_str = end_date.strftime("%Y-%m-%d")
 
         query = Checkin.select().where(
             (Checkin.user_id == user_id) &
-            (Checkin.timestamp >= start_timestamp) &
-            (Checkin.timestamp < end_timestamp)
+            ((Checkin.record_type.is_null(True)) | (Checkin.record_type == "moment")) &
+            (
+                (
+                    (Checkin.record_date >= start_date_str) &
+                    (Checkin.record_date < end_date_str)
+                ) |
+                (
+                    (Checkin.timestamp >= start_timestamp) &
+                    (Checkin.timestamp < end_timestamp)
+                )
+            )
         ).order_by(Checkin.timestamp.asc())
         
         checkins_map = {}
         for checkin in query:
-            checkin_date = datetime.datetime.fromtimestamp(checkin.timestamp)
+            data = model_to_dict(checkin)
+            record_date = data.get("record_date") or datetime.datetime.fromtimestamp(checkin.timestamp).strftime("%Y-%m-%d")
+            try:
+                checkin_date = datetime.datetime.strptime(record_date, "%Y-%m-%d")
+            except ValueError:
+                checkin_date = datetime.datetime.fromtimestamp(checkin.timestamp)
             day_key = str(checkin_date.day)
-            checkins_map[day_key] = model_to_dict(checkin)
+            day_summary = checkins_map.setdefault(day_key, {
+                "date": record_date,
+                "has_moments": False,
+                "moment_count": 0,
+                "latest_mood_id": None,
+                "latest_mood_icon": None,
+                "latest_local_time": None,
+                "color": "transparent",
+            })
+            day_summary["has_moments"] = True
+            day_summary["moment_count"] += 1
+            day_summary["latest_mood_id"] = data.get("mood_id")
+            day_summary["latest_mood_icon"] = data.get("mood_icon") or data.get("mood_id") or data.get("mood")
+            day_summary["latest_local_time"] = data.get("local_time")
             
         return checkins_map
 
@@ -396,6 +557,7 @@ class CheckinTable:
         """
         query = Checkin.select().where(
             (Checkin.user_id == user_id) &
+            ((Checkin.record_type.is_null(True)) | (Checkin.record_type == "moment")) &
             (Checkin.timestamp >= start_timestamp) &
             (Checkin.timestamp < end_timestamp)
         ).order_by(Checkin.timestamp.asc())
@@ -404,7 +566,17 @@ class CheckinTable:
 
     def update_checkin(self, checkin_id: str, data: CheckinBaseModel) -> Optional[Checkin]:
         """Updates an existing checkin record."""
-        update_data = self._prepare_checkin_payload(data.model_dump(exclude_unset=True))
+        raw = data.model_dump(exclude_unset=True)
+        # 若传入 local_time，重算今天的时间戳并同步 timestamp/recorded_at/local_time，
+        # 保证轨迹按时间正确排序；record_date 仍固定为今天。
+        requested_local_time = raw.pop("local_time", None)
+        update_data = self._prepare_checkin_payload(raw)
+        if requested_local_time:
+            ts = self._resolve_today_timestamp(requested_local_time)
+            update_data["timestamp"] = ts
+            update_data["recorded_at"] = ts
+            update_data["record_date"] = self._normalize_record_date(timestamp=ts)
+            update_data["local_time"] = self._normalize_local_time(timestamp=ts)
         update_data['updated_at'] = int(time.time())
 
         query = Checkin.update(update_data).where(Checkin.id == checkin_id)
@@ -416,46 +588,41 @@ class CheckinTable:
 
     def delete_checkin(self, checkin_id: str) -> bool:
         """Deletes a checkin record by its ID."""
+        checkin = self.get_checkin_by_id(checkin_id)
+        if not checkin:
+            return False
+        image_urls = self.get_image_urls(checkin)
         query = Checkin.delete().where(Checkin.id == checkin_id)
         rows_affected = query.execute()
+        if rows_affected > 0 and image_urls:
+            from model.private_media import private_media_table
+
+            try:
+                private_media_table.delete_many(
+                    image_urls,
+                    owner_user_id=checkin.user_id,
+                )
+            except Exception as exc:
+                print(f"Error deleting check-in private media: {exc}")
         return rows_affected > 0
     
     def save_checkin_image(self, user_id: str, image_file: UploadFile) -> Optional[str]:
-        """
-        Saves an uploaded image for a check-in into a structured directory.
-        """
+        """Encrypt and store an uploaded check-in image outside the static root."""
         try:
-            base_upload_dir = "static/status"
-            today_str = datetime.datetime.now().strftime('%Y-%m-%d')
-            user_specific_dir = os.path.join(base_upload_dir, user_id, today_str)
-            os.makedirs(user_specific_dir, exist_ok=True)
-            file_extension = os.path.splitext(image_file.filename)[1]
-            new_filename = f"{int(time.time())}-{uuid.uuid4().hex[:8]}{file_extension}"
-            save_path = os.path.join(user_specific_dir, new_filename)
-            
-            # --- FIX: Perform the string replacement outside of the f-string ---
-            clean_path = save_path.replace('\\', '/')
-            web_path = f"/{clean_path}"
-            
-            with open(save_path, "wb") as buffer:
-                shutil.copyfileobj(image_file.file, buffer)
-            return web_path
-        except IOError as e:
-            print(f"Error saving check-in image: {e}")
+            from model.private_media import private_media_table
+
+            return private_media_table.store_upload(
+                owner_user_id=user_id,
+                media_type="checkin",
+                upload=image_file,
+            )
+        except Exception as exc:
+            print(f"Error saving private check-in image: {exc}")
             return None
-        finally:
-            image_file.file.close()
             
     def update_image_url(self, checkin_id: str, image_url: str) -> bool:
         """Updates only the image_url for a given check-in."""
-        image_urls = normalize_image_urls([image_url])
-        query = Checkin.update(
-            image_url=image_urls[0] if image_urls else None,
-            image_urls=dump_image_urls(image_urls),
-            updated_at=int(time.time()),
-        ).where(Checkin.id == checkin_id)
-        rows_affected = query.execute()
-        return rows_affected > 0
+        return self.set_image_urls(checkin_id, [image_url]) is not None
 
     def get_image_urls(self, checkin: Checkin) -> List[str]:
         return normalize_image_urls(
@@ -464,7 +631,11 @@ class CheckinTable:
         )
 
     def set_image_urls(self, checkin_id: str, image_urls: List[str]) -> Optional[Checkin]:
-        urls = normalize_image_urls(image_urls)
+        checkin = self.get_checkin_by_id(checkin_id)
+        if not checkin:
+            return None
+        previous_urls = self.get_image_urls(checkin)
+        urls = self._normalize_owned_image_urls(image_urls, checkin.user_id)
         if len(image_urls) > MAX_CHECKIN_IMAGES or len(urls) > MAX_CHECKIN_IMAGES:
             return None
         query = Checkin.update(
@@ -474,8 +645,45 @@ class CheckinTable:
         ).where(Checkin.id == checkin_id)
         rows_affected = query.execute()
         if rows_affected > 0:
+            from model.private_media import extract_media_id, private_media_table
+
+            retained_media_ids = {
+                media_id
+                for media_id in (extract_media_id(value) for value in urls)
+                if media_id
+            }
+            removed_urls = [
+                value
+                for value in previous_urls
+                if (
+                    extract_media_id(value)
+                    and extract_media_id(value) not in retained_media_ids
+                )
+            ]
+            if removed_urls:
+                try:
+                    private_media_table.delete_many(
+                        removed_urls,
+                        owner_user_id=checkin.user_id,
+                    )
+                except Exception as exc:
+                    print(f"Error deleting removed check-in media: {exc}")
             return self.get_checkin_by_id(checkin_id)
         return None
+
+    def _normalize_owned_image_urls(
+        self,
+        image_urls: List[str],
+        user_id: str,
+    ) -> List[str]:
+        from model.private_media import private_media_table
+
+        normalized = []
+        for value in normalize_image_urls(image_urls):
+            normalized.append(
+                private_media_table.normalize_owner_reference(value, user_id)
+            )
+        return normalize_image_urls(normalized)
 
     def append_image_urls(self, checkin_id: str, image_urls: List[str]) -> Optional[Checkin]:
         checkin = self.get_checkin_by_id(checkin_id)
@@ -531,6 +739,11 @@ def model_to_dict(model_instance: Model) -> Dict:
         getattr(model_instance, "image_urls", None),
         getattr(model_instance, "image_url", None),
     )
+    from model.private_media import private_media_table
+    signed_image_urls = [
+        private_media_table.signed_url(image_url)
+        for image_url in image_urls
+    ]
 
     return {
         "id": model_instance.id,
@@ -552,13 +765,16 @@ def model_to_dict(model_instance: Model) -> Dict:
         "status_families": status_families,
         "status_items": status_items,
         "text_content": model_instance.text_content,
-        "image_url": image_urls[0] if image_urls else None,
-        "image_urls": image_urls,
+        "image_url": signed_image_urls[0] if signed_image_urls else None,
+        "image_urls": signed_image_urls,
         "location_name": getattr(model_instance, "location_name", None),
         "location_address": getattr(model_instance, "location_address", None),
         "location_latitude": getattr(model_instance, "location_latitude", None),
         "location_longitude": getattr(model_instance, "location_longitude", None),
-        "record_date": datetime.datetime.fromtimestamp(model_instance.timestamp).strftime('%Y-%m-%d'),
+        "record_type": getattr(model_instance, "record_type", None) or "moment",
+        "record_date": getattr(model_instance, "record_date", None) or datetime.datetime.fromtimestamp(model_instance.timestamp).strftime("%Y-%m-%d"),
+        "recorded_at": getattr(model_instance, "recorded_at", None) or model_instance.timestamp,
+        "local_time": getattr(model_instance, "local_time", None) or datetime.datetime.fromtimestamp(model_instance.timestamp).strftime("%H:%M"),
         "timestamp": model_instance.timestamp,
         "updated_at": model_instance.updated_at
     }

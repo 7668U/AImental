@@ -8,6 +8,7 @@ from typing import Optional
 from db import chat_db  # 好友关系可以认为是用户核心数据的一部分
 from .ai_character import AICharacter
 from .user import User # 假设您的用户模型在这里
+from security.data_encryption import EncryptedTextField
 
 class Friendship(Model):
     """
@@ -23,7 +24,10 @@ class Friendship(Model):
     status = CharField(max_length=20, default='pending', index=True)
     
     # 用户发送的验证信息
-    verification_message = TextField(null=True)
+    verification_message = EncryptedTextField(
+        purpose="friendships.verification_message",
+        null=True,
+    )
     
     # 时间戳
     request_timestamp = DateTimeField(default=lambda: datetime.utcnow() + timedelta(hours=8))

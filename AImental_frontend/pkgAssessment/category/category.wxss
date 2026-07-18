@@ -63,9 +63,9 @@ page {
 }
 
 .category-interest .hero-art {
-  right: -24rpx;
-  width: 424rpx;
-  height: 282rpx;
+  right: -12rpx;
+  width: 356rpx;
+  height: 286rpx;
 }
 
 .hero-copy {
@@ -76,8 +76,8 @@ page {
 }
 
 .category-interest .hero-copy {
-  padding-top: 100rpx;
-  max-width: 430rpx;
+  padding-top: 82rpx;
+  max-width: 420rpx;
 }
 
 .hero-title {
@@ -88,7 +88,7 @@ page {
 }
 
 .category-interest .hero-title {
-  font-size: 64rpx;
+  font-size: 50rpx;
   color: #4a2b1c;
 }
 
@@ -98,12 +98,11 @@ page {
   font-size: 30rpx;
   line-height: 1.32;
   color: #7f858f;
-  white-space: pre-line;
 }
 
 .category-interest .hero-subtitle {
-  margin-top: 28rpx;
-  font-size: 30rpx;
+  margin-top: 22rpx;
+  font-size: 28rpx;
   color: #987c67;
 }
 
@@ -172,33 +171,50 @@ page {
 
 .test-action {
   flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10rpx;
-  width: 170rpx;
-  height: 66rpx;
+  width: 220rpx;
+  height: 96rpx;
   margin-left: 16rpx;
-  border-radius: 999rpx;
-  background: linear-gradient(135deg, #ffbd7c 0%, #ff8b3d 100%);
-  box-shadow: 0 10rpx 22rpx rgba(255, 132, 56, 0.26);
-  color: #ffffff;
-  font-weight: 900;
-  box-sizing: border-box;
 }
 
-.action-label {
-  font-size: 27rpx;
-  line-height: 1;
-  color: #ffffff;
+.interest-card {
+  align-items: center;
+  min-height: 238rpx;
+  padding: 36rpx 34rpx;
+  border-radius: 34rpx;
 }
 
-.action-chevron {
-  width: 14rpx;
-  height: 14rpx;
-  border-top: 4rpx solid #ffffff;
-  border-right: 4rpx solid #ffffff;
-  transform: rotate(45deg);
+.interest-card .scale-icon {
+  width: 150rpx;
+  height: 150rpx;
+  margin-right: 34rpx;
+  border-radius: 30rpx;
+}
+
+.interest-card .scale-content {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.interest-card .scale-title {
+  font-size: 31rpx;
+  line-height: 1.32;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.interest-card .scale-desc {
+  margin-top: 18rpx;
+  max-width: 320rpx;
+  font-size: 26rpx;
+  line-height: 1.55;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .scale-subnote {
@@ -207,6 +223,30 @@ page {
   font-size: 24rpx;
   line-height: 1.25;
   color: #a5958a;
+}
+
+.interest-tip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 34rpx;
+  padding: 28rpx 36rpx;
+  border-radius: 26rpx;
+  border: 2rpx dashed #f3d8c4;
+  background: rgba(255, 250, 245, 0.7);
+}
+
+.tip-line {
+  display: block;
+  font-size: 27rpx;
+  line-height: 1.6;
+  color: #9b7b67;
+}
+
+.tip-icon {
+  width: 86rpx;
+  height: 86rpx;
+  opacity: 0.82;
 }
 
 .feedback-container {

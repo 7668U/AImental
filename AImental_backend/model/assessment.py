@@ -11,6 +11,10 @@ from pydantic import BaseModel, Field
 
 from db import assessment_db
 from .user import User  # 假设 User 模型可以从 .user 导入
+from security.data_encryption import (
+    EncryptedFloatField,
+    EncryptedTextField,
+)
 
 # --- 静态配置 ---
 ASSESSMENT_DATA_DIR = "assessment_data/"
@@ -101,315 +105,6 @@ BDI_DIMENSIONS = {
     },
 }
 
-MENTAL_HEALTH_ANALYSIS_CONFIGS = {
-    "SAS": {
-        "analysis_name": "焦虑状态",
-        "score_min": 1,
-        "score_max": 4,
-        "reverse_items": {5, 9, 13, 17, 19},
-        "support_score": 60,
-        "urgent_score": 70,
-        "recording_focus": ["焦虑强度", "身体反应", "睡眠", "触发情境"],
-        "recording_text": "建议接下来持续记录焦虑强度、身体反应、睡眠和触发情境，看看焦虑通常在什么时候升高。",
-        "possible_causes": [
-            "近期可能存在持续压力、任务不确定感或安全感不足的情况。",
-            "当担心、身体紧绷和睡眠波动同时出现时，焦虑感容易被进一步放大。",
-        ],
-        "small_actions": [
-            "先做 3 轮缓慢呼吸：吸气 4 秒，停 1 秒，呼气 6 秒。",
-            "把今天最担心的事情写成一句话，再写下一个 10 分钟内能做的小动作。",
-            "减少临睡前的信息刺激，给身体一点从紧绷里退下来的时间。",
-        ],
-        "support_text": "如果焦虑持续影响睡眠、学习、工作或人际互动，建议考虑联系心理咨询师或精神科医生获得支持。",
-        "urgent_support_text": "如果焦虑已经明显影响日常生活，或伴随强烈惊恐、胸闷、失控感，建议尽快寻求专业支持。",
-        "dimensions": {
-            "worry": {
-                "label": "担忧与紧张",
-                "questions": [1, 2, 3, 4],
-                "evidence_labels": {1: "紧张着急", 2: "无故害怕", 3: "烦乱惊恐", 4: "失控担心"},
-                "stable": "担忧、害怕和惊恐感目前不明显。",
-                "mild": "紧张和担心有一些波动，可能偶尔让你不太踏实。",
-                "moderate": "担忧或惊恐感比较明显，可能正在占用不少注意力。",
-                "high": "担忧、害怕或失控感较强，需要被认真照顾。",
-            },
-            "body": {
-                "label": "身体唤起",
-                "questions": [6, 10, 11, 12, 14, 18],
-                "evidence_labels": {6: "手脚发抖", 10: "心跳加快", 11: "头晕", 12: "晕倒感", 14: "麻木刺痛", 18: "脸红发热"},
-                "stable": "身体紧绷、心跳和头晕等反应目前不突出。",
-                "mild": "身体偶尔会出现紧绷或不适，适合继续观察。",
-                "moderate": "身体层面的焦虑反应较明显，可能让你更难放松。",
-                "high": "身体唤起较强，心跳、发抖、头晕或麻木等反应需要重点关注。",
-            },
-            "fatigue_sleep": {
-                "label": "疲惫与睡眠",
-                "questions": [7, 8, 15, 16, 20, 19],
-                "evidence_labels": {7: "疼痛困扰", 8: "疲乏", 15: "胃部不适", 16: "尿频", 20: "噩梦", 19: "睡眠不安"},
-                "stable": "睡眠、精力和身体不适整体较稳定。",
-                "mild": "疲惫、睡眠或身体不适有一些波动。",
-                "moderate": "疲惫和睡眠相关困扰比较明显，可能影响恢复。",
-                "high": "睡眠、疲惫或身体不适较重，需要给身体更多支持。",
-            },
-            "calm": {
-                "label": "放松能力",
-                "questions": [5, 9, 13, 17],
-                "evidence_labels": {5: "难以安心", 9: "不易静坐", 13: "呼吸不顺", 17: "身体紧张"},
-                "stable": "你仍能在不少时候保持安静、放松和可恢复的状态。",
-                "mild": "放松能力有些起伏，压力上来时可能更难安定下来。",
-                "moderate": "放松和恢复变得不太容易，焦虑可能正在拖长。",
-                "high": "身心很难退回平静状态，建议优先安排恢复和支持。",
-            },
-        },
-    },
-    "BRMS": {
-        "analysis_name": "情绪活跃度",
-        "score_min": 0,
-        "score_max": 4,
-        "support_score": 15,
-        "urgent_score": 22,
-        "recording_focus": ["睡眠", "精力", "冲动", "消费或决策"],
-        "recording_text": "建议接下来记录睡眠时长、精力高峰、冲动行为和重要决策，观察状态是否持续升高。",
-        "possible_causes": [
-            "近期睡眠减少、压力变化或生活节奏过快，都可能让情绪和行动速度被推高。",
-            "当精力、表达和自我评价同时升高时，判断和边界感可能会受到影响。",
-        ],
-        "small_actions": [
-            "今晚先把睡眠放到第一优先级，减少咖啡因、酒精和熬夜刺激。",
-            "重要决定先延迟 24 小时，再找一个可信任的人一起确认。",
-            "如果发现自己停不下来，先暂停高刺激社交、消费或争论场景。",
-        ],
-        "support_text": "如果情绪高涨、睡眠减少或冲动行为已经影响生活，建议尽快咨询心理咨询师或精神科医生。",
-        "urgent_support_text": "如果近期几乎不睡、冲动明显、难以控制言行或严重影响生活，建议尽快联系精神科医生或前往医院评估。",
-        "risk_note": {
-            "threshold": 22,
-            "text": "这份结果提示近期情绪和行为活跃度较高。请优先保证睡眠与安全，避免独自做重大决定，并尽快寻求专业支持。",
-        },
-        "dimensions": {
-            "activation": {
-                "label": "活动与表达",
-                "questions": [1, 2, 4],
-                "evidence_labels": {1: "活动增多", 2: "话多", 4: "音量升高"},
-                "stable": "活动量、说话速度和表达强度目前较平稳。",
-                "mild": "活动和表达略有升高，可能比平时更活跃。",
-                "moderate": "活动量或表达强度比较明显，可能让人感觉难以慢下来。",
-                "high": "活动和表达强度较高，需要留意是否已经影响休息或互动。",
-            },
-            "thought_self": {
-                "label": "思维与自我评价",
-                "questions": [3, 7],
-                "evidence_labels": {3: "思绪跳跃", 7: "自我评价升高"},
-                "stable": "思路连贯性和自我评价目前较稳定。",
-                "mild": "思绪或自我评价有些升高，适合继续观察。",
-                "moderate": "思维速度或自我评价升高较明显，可能影响判断。",
-                "high": "思维跳跃或夸大感较强，建议尽快获得专业评估。",
-            },
-            "mood_control": {
-                "label": "心境与控制",
-                "questions": [5, 6],
-                "evidence_labels": {5: "急躁易怒", 6: "情绪高涨"},
-                "stable": "情绪高涨、急躁和控制感目前不突出。",
-                "mild": "情绪活跃度有些升高，偶尔可能更急或更兴奋。",
-                "moderate": "心境高涨或易激惹比较明显，需要留意人际影响。",
-                "high": "情绪高涨或冲动控制较困难，建议尽快寻求支持。",
-            },
-            "boundary": {
-                "label": "边界与冲动",
-                "questions": [8, 10],
-                "evidence_labels": {8: "支配他人", 10: "性兴趣增强"},
-                "stable": "人际边界和冲动相关变化目前较少。",
-                "mild": "边界感或冲动有轻微波动，适合提醒自己放慢。",
-                "moderate": "边界或冲动相关变化较明显，可能带来后续压力。",
-                "high": "冲动和边界风险较高，建议暂缓高风险决定并寻求支持。",
-            },
-            "sleep_function": {
-                "label": "睡眠与功能",
-                "questions": [9, 11],
-                "evidence_labels": {9: "睡眠减少", 11: "日常功能下降"},
-                "stable": "睡眠和日常功能目前比较稳定。",
-                "mild": "睡眠或日常效率有些变化，建议尽早调整。",
-                "moderate": "睡眠减少或功能受影响较明显，需要优先恢复节律。",
-                "high": "睡眠和功能受影响较重，建议尽快获得专业支持。",
-            },
-        },
-    },
-    "SAD": {
-        "analysis_name": "社交回避与苦恼",
-        "score_min": 0,
-        "score_max": 1,
-        "reverse_items": {17},
-        "support_score": 21,
-        "recording_focus": ["社交场景", "紧张程度", "回避行为", "自我评价"],
-        "recording_text": "建议记录让你想回避的社交场景、当时的紧张程度和事后真实结果，帮助你看见哪些担心被放大了。",
-        "possible_causes": [
-            "陌生场合、被关注或需要表达观点时，社交压力可能更容易升高。",
-            "如果长期把社交当成考试，自我评价压力会让回避变得更容易发生。",
-        ],
-        "small_actions": [
-            "先选一个低压力场景，完成一句问候或一个简短回应。",
-            "社交前准备 2 个轻松话题，降低临场空白感。",
-            "社交后写下一个实际发生的好结果，帮助大脑更新预期。",
-        ],
-        "support_text": "如果社交回避已经影响学习、工作、关系或生活范围，建议考虑心理咨询，循序渐进地练习应对。",
-        "dimensions": {
-            "avoidance": {
-                "label": "回避倾向",
-                "questions": [3, 9, 10, 15, 17],
-                "evidence_labels": {3: "回避聚会", 9: "回避陌生人", 10: "人群不自在", 15: "不喜欢社交", 17: "难以镇定"},
-                "stable": "你目前不太容易因为社交而明显回避。",
-                "mild": "某些社交场景会让你有一点想退开。",
-                "moderate": "回避倾向比较明显，可能限制了一些互动机会。",
-                "high": "社交回避较强，可能已经让生活范围变窄。",
-            },
-            "interaction_distress": {
-                "label": "互动紧张",
-                "questions": [1, 2, 4, 6, 7, 12, 18, 22, 23, 25, 26],
-                "evidence_labels": {1: "小组交谈困难", 2: "异性面前不自在", 4: "群体紧张", 6: "找不到话题", 7: "陌生人紧张", 12: "拘束", 18: "初见紧张", 22: "神经质", 23: "局促不安", 25: "不自在", 26: "交谈困难"},
-                "stable": "日常互动中的紧张感目前不突出。",
-                "mild": "互动时偶尔会紧张，但仍有可调整空间。",
-                "moderate": "互动紧张比较明显，可能消耗不少精力。",
-                "high": "人际互动带来的紧张较强，需要更温和地练习和支持。",
-            },
-            "attention_performance": {
-                "label": "被关注压力",
-                "questions": [5, 8, 13, 14, 27, 28],
-                "evidence_labels": {5: "被关注焦虑", 8: "表达信心不足", 13: "正式场合不自在", 14: "眼神回避", 27: "担心说错", 28: "容易窘迫"},
-                "stable": "被关注或正式表达时的压力目前较少。",
-                "mild": "被关注时会有一些紧张，属于可以练习的范围。",
-                "moderate": "被关注和表达压力比较明显，可能影响表现。",
-                "high": "被关注时的压力较强，容易引发明显退缩或自责。",
-            },
-            "self_connection": {
-                "label": "社交自我感",
-                "questions": [11, 19, 20, 21, 24],
-                "evidence_labels": {11: "结识新朋友困难", 19: "希望更会社交", 20: "社交比较低", 21: "不满意社交能力", 24: "在人群中孤单"},
-                "stable": "你对自己的社交能力和连接感整体较稳定。",
-                "mild": "社交自信有一些波动，偶尔会和别人比较。",
-                "moderate": "社交自我评价压力较明显，可能让你更难放松。",
-                "high": "社交自我感承压较重，需要减少苛责并获得支持。",
-            },
-        },
-    },
-    "IAS": {
-        "analysis_name": "互动焦虑",
-        "score_min": 1,
-        "score_max": 5,
-        "reverse_items": {3, 6, 10, 15},
-        "support_score": 50,
-        "urgent_score": 66,
-        "recording_focus": ["互动对象", "紧张程度", "身体反应", "事后评价"],
-        "recording_text": "建议记录不同互动对象带来的紧张程度、身体反应和事后评价，分辨哪些场景最容易触发焦虑。",
-        "possible_causes": [
-            "陌生人、权威人士、面试或电话沟通等高评价场景，可能更容易激活焦虑。",
-            "如果总担心被评价，互动前后的反复回想会让焦虑维持得更久。",
-        ],
-        "small_actions": [
-            "互动前先把目标降到“完成一次连接”，不用要求自己表现完美。",
-            "给不熟的人发消息或打电话前，先写下 1 句开场白。",
-            "互动后只复盘一个可改进点，也写下一个做得还可以的地方。",
-        ],
-        "support_text": "如果互动焦虑持续影响沟通、工作学习或亲密关系，心理咨询会很适合用来练习更稳定的互动方式。",
-        "urgent_support_text": "如果大多数互动都带来强烈焦虑并明显影响生活，建议尽快寻求专业支持。",
-        "dimensions": {
-            "group": {
-                "label": "群体场合",
-                "questions": [1, 2, 5, 15],
-                "evidence_labels": {1: "聚会紧张", 2: "陌生群体不自在", 5: "聚会焦虑", 15: "不同人群中难放松"},
-                "stable": "群体场合中的紧张感目前不突出。",
-                "mild": "群体互动有些紧张，但仍可逐步适应。",
-                "moderate": "群体场合的焦虑比较明显，可能让你提前消耗。",
-                "high": "群体互动压力较强，建议从更安全的小场景练习。",
-            },
-            "specific_interaction": {
-                "label": "具体互动",
-                "questions": [3, 7, 12, 13],
-                "evidence_labels": {3: "异性交谈不放松", 7: "同性陌生人紧张", 12: "吸引对象前紧张", 13: "电话紧张"},
-                "stable": "一对一或具体对象互动中的焦虑目前较少。",
-                "mild": "某些互动对象会带来轻微紧张。",
-                "moderate": "具体互动场景的紧张比较明显，可能影响表达。",
-                "high": "具体互动带来的压力较强，容易让你回避或过度准备。",
-            },
-            "authority_evaluation": {
-                "label": "评价压力",
-                "questions": [4, 8, 14],
-                "evidence_labels": {4: "老师或上司面前紧张", 8: "面试紧张", 14: "权威人士前紧张"},
-                "stable": "面对评价或权威时的压力目前较可控。",
-                "mild": "被评价时会有一些紧张，适度准备会有帮助。",
-                "moderate": "评价压力比较明显，可能影响临场发挥。",
-                "high": "评价场景带来的焦虑较强，建议更系统地练习应对。",
-            },
-            "self_confidence": {
-                "label": "社交自信",
-                "questions": [6, 9, 10, 11],
-                "evidence_labels": {6: "羞怯感", 9: "希望更自信", 10: "社交焦虑", 11: "害羞"},
-                "stable": "你对社交中的自己整体较有稳定感。",
-                "mild": "社交自信有一些波动，偶尔会怀疑表现。",
-                "moderate": "社交自信承压比较明显，可能让互动变得费力。",
-                "high": "社交自信压力较高，需要减少自责并获得更多支持。",
-            },
-        },
-    },
-    "Lonely": {
-        "analysis_name": "关系连接感",
-        "score_min": 0,
-        "score_max": 1,
-        "reverse_items": {1, 4, 7, 9, 11, 14, 17, 18, 21, 22, 23, 24, 29, 31, 36, 37, 39, 42, 45, 47, 48, 50, 52, 56, 59, 60},
-        "support_score": 31,
-        "urgent_score": 46,
-        "recording_focus": ["连接感", "支持来源", "主动联系", "孤独时刻"],
-        "recording_text": "建议记录哪些时刻最容易感到孤独、哪些人或场景能带来一点连接感，慢慢找到可依靠的关系入口。",
-        "possible_causes": [
-            "当友情、家庭、亲密关系或社群中的支持感不足时，孤独感会更容易累积。",
-            "长期缺少被理解和被回应的体验，可能会让人更难主动靠近别人。",
-        ],
-        "small_actions": [
-            "先选一个相对安全的人，发出一句具体、低压力的问候。",
-            "把“我需要被支持的地方”写成一句话，帮助自己更清楚地表达需求。",
-            "尝试加入一个低门槛的小活动，让连接从固定频率开始，而不是一次聊很深。",
-        ],
-        "support_text": "如果孤独感持续存在，并明显影响情绪、自我价值感或生活动力，建议考虑心理咨询或支持性小组。",
-        "urgent_support_text": "如果孤独感已经非常强烈，并伴随明显绝望、退缩或长期低落，建议尽快寻求专业支持。",
-        "dimensions": {
-            "family": {
-                "label": "家庭连接",
-                "questions": [1, 6, 10, 14, 20, 23, 25, 29, 32, 34, 36, 40, 42, 44, 47, 50, 54, 57, 59],
-                "evidence_labels": {6: "家庭相处不佳", 20: "不被家人理解", 25: "亲戚难以支持", 32: "不易开放", 40: "缺少交流", 44: "家人挑剔", 54: "联系较少", 57: "回避家人"},
-                "stable": "家庭关系中的支持和归属感整体较稳定。",
-                "mild": "家庭连接有一些距离感，压力大时可能更明显。",
-                "moderate": "家庭支持感不足比较明显，可能影响安全感。",
-                "high": "家庭连接承压较重，需要为自己寻找更安全的支持来源。",
-            },
-            "friendship": {
-                "label": "友情支持",
-                "questions": [3, 4, 7, 11, 13, 16, 19, 22, 24, 26, 30, 33, 39, 43, 46, 48, 51, 53, 55, 60],
-                "evidence_labels": {3: "被动等待邀约", 13: "交友受挫", 16: "朋友不多", 19: "难以求助朋友", 26: "少被理解", 30: "友谊失望", 43: "缺少坦诚朋友", 46: "可靠朋友少", 53: "难以邀约", 55: "担心朋友不长久"},
-                "stable": "友情中的理解、支持和陪伴整体较足。",
-                "mild": "友情连接有些空隙，适合用小互动慢慢补上。",
-                "moderate": "友情支持感不足比较明显，可能让你在需要时觉得孤单。",
-                "high": "友情连接承压较重，建议从一两个安全关系开始重建支持。",
-            },
-            "romance": {
-                "label": "亲密关系",
-                "questions": [5, 9, 15, 18, 21, 28, 31, 35, 41, 45, 52, 58],
-                "evidence_labels": {5: "缺少重要恋爱关系", 15: "表达爱困难", 28: "关系契合不足", 35: "难以信任爱意", 41: "缺少被理解关系", 58: "缺少情感安全"},
-                "stable": "亲密关系或亲密需求中的安全感整体较稳定。",
-                "mild": "亲密连接有一些缺口，可能偶尔让你失落。",
-                "moderate": "亲密关系中的理解和安全感不足比较明显。",
-                "high": "亲密连接承压较重，需要温和地照顾自己的依恋和安全感需求。",
-            },
-            "community": {
-                "label": "社群归属",
-                "questions": [2, 8, 12, 17, 27, 38, 49, 56],
-                "evidence_labels": {2: "身边人陌生", 8: "缺少团体支持", 12: "社区不关心", 27: "社区无人关心", 38: "团体满足少", 49: "邻里支持少"},
-                "stable": "社群、邻里或团体中的归属感整体较稳定。",
-                "mild": "社群归属有些薄弱，可以从低门槛活动开始增加连接。",
-                "moderate": "社群支持感不足比较明显，可能让你觉得缺少外部依靠。",
-                "high": "社群归属承压较重，需要寻找更稳定、更接纳的小群体。",
-            },
-        },
-    },
-    "DLS": "Lonely",
-}
-
 
 def get_assessment_display_meta(short_name: str) -> Dict[str, Any]:
     group, group_order, display_order = ASSESSMENT_DISPLAY_GROUPS.get(
@@ -429,16 +124,6 @@ def _level_from_average(score: float) -> str:
     if score < 1.5:
         return "有些波动"
     if score < 2.25:
-        return "需要关注"
-    return "明显承压"
-
-
-def _level_from_ratio(score: float) -> str:
-    if score < 0.25:
-        return "相对稳定"
-    if score < 0.5:
-        return "有些波动"
-    if score < 0.75:
         return "需要关注"
     return "明显承压"
 
@@ -479,13 +164,40 @@ class UserAssessment(Model):
     id = CharField(primary_key=True, max_length=36, default=lambda: str(uuid.uuid4()))
     user = ForeignKeyField(User, backref='assessments', field='id', on_delete='CASCADE')
     scale = ForeignKeyField(Scale, backref='attempts', field='id', on_delete='SET NULL', null=True)
-    answers = TextField(help_text="用户提交的答案详情 (JSON字符串)")
-    raw_score = FloatField(null=True, help_text="原始总分")
-    final_score = FloatField(null=True, help_text="最终标准分 (如果适用)")
-    result_level = CharField(max_length=255, null=True, help_text="结果等级或分类名, 如 '轻度抑郁' 或 '图书馆生态信息学'")
-    result_interpretation = TextField(null=True, help_text="对结果的详细文字解释")
-    result_recommendation = TextField(null=True, help_text="给用户的建议")
-    result_details = TextField(null=True, help_text="存储额外结果详情的JSON字符串")
+    answers = EncryptedTextField(
+        purpose="user_assessments.answers",
+        help_text="用户提交的答案详情 (JSON字符串)",
+    )
+    raw_score = EncryptedFloatField(
+        purpose="user_assessments.raw_score",
+        null=True,
+        help_text="原始总分",
+    )
+    final_score = EncryptedFloatField(
+        purpose="user_assessments.final_score",
+        null=True,
+        help_text="最终标准分 (如果适用)",
+    )
+    result_level = EncryptedTextField(
+        purpose="user_assessments.result_level",
+        null=True,
+        help_text="结果等级或分类名",
+    )
+    result_interpretation = EncryptedTextField(
+        purpose="user_assessments.result_interpretation",
+        null=True,
+        help_text="对结果的详细文字解释",
+    )
+    result_recommendation = EncryptedTextField(
+        purpose="user_assessments.result_recommendation",
+        null=True,
+        help_text="给用户的建议",
+    )
+    result_details = EncryptedTextField(
+        purpose="user_assessments.result_details",
+        null=True,
+        help_text="存储额外结果详情的JSON字符串",
+    )
     
     completed_at = DateTimeField(default=datetime.now, help_text="测评完成时间")
 
@@ -503,7 +215,6 @@ class ScaleInfoResponse(BaseModel):
     name: str
     description: str
     instructions: Optional[str] = None  # <--- 在这里添加 instructions 字段
-    cover_image_url: Optional[str] = None
     category: str
     assessment_type: str
     display_group: Optional[str] = None
@@ -647,7 +358,6 @@ class AssessmentTables:
             **display_meta,
             # 从解析后的JSON中提取 instructions
             "instructions": scale_info.get('instructions'),
-            "cover_image_url": scale_info.get('cover_image_url'),
             # 同时也可以把题目和选项带上，供测试页面使用
             "questions": full_data.get('questions', []),
             "choices": full_data.get('choices', [])
@@ -675,10 +385,6 @@ class AssessmentTables:
         # 兼容 "reverse_scoring_items" 和 "reverse_scored_items" 两种可能的拼写
         reverse_items = set(rules.get('reverse_scoring_items', []) + rules.get('reverse_scored_items', []))
         reverse_items.update(self._get_question_level_reverse_items(questions))
-        scale_short_name = scale_data.get('scale_info', {}).get('short_name')
-        analysis_config = self._get_mental_health_analysis_config(scale_short_name)
-        if isinstance(analysis_config, dict):
-            reverse_items.update(analysis_config.get("reverse_items", set()))
         
         # 新增：获取谎言量表题目，如果JSON中定义了的话
         lie_scale_items = set(rules.get('lie_scale_items', []))
@@ -706,9 +412,6 @@ class AssessmentTables:
                 
         # 5. 最终分数计算 (例如乘以系数等，当前用不上但保留)
         final_score = raw_score * rules.get('multiplier', 1)
-        post_action = rules.get('post_action')
-        if post_action in {"to_integer", "round"}:
-            final_score = round(final_score)
 
         result = {"raw_score": raw_score, "final_score": final_score, "result_details": None}
         
@@ -770,10 +473,6 @@ class AssessmentTables:
         rules = scale_data.get('scale_info', {}).get('scoring_rules', {})
         if rules.get('reverse_scoring_items') or rules.get('reverse_scored_items'):
             return True
-        scale_short_name = scale_data.get('scale_info', {}).get('short_name')
-        analysis_config = self._get_mental_health_analysis_config(scale_short_name)
-        if isinstance(analysis_config, dict) and analysis_config.get("reverse_items"):
-            return True
         return bool(self._get_question_level_reverse_items(scale_data.get('questions', [])))
 
     def ensure_scoring_result_for_record(self, record: UserAssessment) -> None:
@@ -786,7 +485,16 @@ class AssessmentTables:
         except json.JSONDecodeError:
             return
 
-        should_refresh = record.result_level is None or self._scale_uses_reverse_scoring(scale_data)
+        # Historical results are immutable once they have a stored level.
+        # Only repair records that were saved without a usable result.
+        should_refresh = (
+            record.result_level is None
+            or (
+                record.raw_score is None
+                and record.final_score is None
+                and record.result_interpretation is None
+            )
+        )
         if not should_refresh:
             return
 
@@ -796,17 +504,56 @@ class AssessmentTables:
             return
 
         result_data = self._calculate_scoring_result(answers, scale_data)
-        result_data = self._attach_ai_analysis(record.scale.short_name, answers, result_data)
-
+        next_raw_score = (
+            record.raw_score
+            if record.raw_score is not None
+            else result_data.get("raw_score")
+        )
+        next_final_score = (
+            record.final_score
+            if record.final_score is not None
+            else result_data.get("final_score")
+        )
+        next_result_level = (
+            record.result_level
+            if record.result_level is not None
+            else result_data.get("result_level")
+        )
+        next_interpretation = (
+            record.result_interpretation
+            if record.result_interpretation
+            else result_data.get("result_interpretation")
+        )
+        next_recommendation = (
+            record.result_recommendation
+            if record.result_recommendation
+            else result_data.get("result_recommendation")
+        )
         has_changes = (
-            record.raw_score != result_data.get("raw_score")
-            or record.final_score != result_data.get("final_score")
-            or record.result_level != result_data.get("result_level")
-            or record.result_interpretation != result_data.get("result_interpretation")
-            or record.result_recommendation != result_data.get("result_recommendation")
+            record.raw_score != next_raw_score
+            or record.final_score != next_final_score
+            or record.result_level != next_result_level
+            or record.result_interpretation != next_interpretation
+            or record.result_recommendation != next_recommendation
         )
 
-        next_details = result_data.get("result_details")
+        try:
+            existing_details = json.loads(record.result_details) if record.result_details else {}
+        except json.JSONDecodeError:
+            existing_details = {}
+        cached_ai_analysis = existing_details.get("ai_analysis") if isinstance(existing_details, dict) else None
+
+        calculated_details = result_data.get("result_details")
+        if not isinstance(calculated_details, dict):
+            calculated_details = {}
+        if isinstance(existing_details, dict) and existing_details:
+            next_details = dict(existing_details)
+            for key, value in calculated_details.items():
+                next_details.setdefault(key, value)
+        else:
+            next_details = dict(calculated_details)
+        if isinstance(cached_ai_analysis, dict):
+            next_details["ai_analysis"] = cached_ai_analysis
         next_details_json = json.dumps(next_details, ensure_ascii=False) if next_details else None
         if record.result_details != next_details_json:
             has_changes = True
@@ -814,11 +561,11 @@ class AssessmentTables:
         if not has_changes:
             return
 
-        record.raw_score = result_data.get("raw_score")
-        record.final_score = result_data.get("final_score")
-        record.result_level = result_data.get("result_level")
-        record.result_interpretation = result_data.get("result_interpretation")
-        record.result_recommendation = result_data.get("result_recommendation")
+        record.raw_score = next_raw_score
+        record.final_score = next_final_score
+        record.result_level = next_result_level
+        record.result_interpretation = next_interpretation
+        record.result_recommendation = next_recommendation
         record.result_details = next_details_json
         record.save()
 
@@ -961,172 +708,6 @@ class AssessmentTables:
             },
             "risk_note": risk_note,
         }
-
-    def _get_mental_health_analysis_config(self, scale_short_name: Optional[str]) -> Optional[Dict[str, Any]]:
-        config = MENTAL_HEALTH_ANALYSIS_CONFIGS.get(scale_short_name)
-        if isinstance(config, str):
-            return MENTAL_HEALTH_ANALYSIS_CONFIGS.get(config)
-        return config
-
-    def _normalize_answer_scores(
-        self,
-        request_answers: Dict[str, Any],
-        config: Dict[str, Any],
-    ) -> Dict[int, float]:
-        score_min = float(config.get("score_min", 0))
-        score_max = float(config.get("score_max", 1))
-        reverse_items = set(config.get("reverse_items", set()))
-        normalized_scores: Dict[int, float] = {}
-
-        for q_order_str, score_value in request_answers.items():
-            try:
-                q_order = int(q_order_str)
-                score = float(score_value)
-            except (ValueError, TypeError):
-                continue
-
-            if q_order in reverse_items:
-                score = score_min + score_max - score
-
-            normalized_scores[q_order] = score
-
-        return normalized_scores
-
-    def _build_configured_mental_health_analysis(
-        self,
-        scale_short_name: str,
-        request_answers: Dict[str, Any],
-        result_level: Optional[str],
-        final_score: Optional[float],
-    ) -> Optional[Dict[str, Any]]:
-        config = self._get_mental_health_analysis_config(scale_short_name)
-        if not config:
-            return None
-
-        numeric_answers = self._normalize_answer_scores(request_answers, config)
-        score_min = float(config.get("score_min", 0))
-        score_max = float(config.get("score_max", 1))
-        score_range = max(score_max - score_min, 1)
-
-        dimensions = []
-        elevated_labels = []
-        for key, dimension_config in config.get("dimensions", {}).items():
-            question_ids = dimension_config.get("questions", [])
-            scores = [numeric_answers.get(question_id, score_min) for question_id in question_ids]
-            average_score = sum(scores) / len(question_ids) if question_ids else score_min
-            ratio_score = (average_score - score_min) / score_range
-            level = _level_from_ratio(ratio_score)
-
-            if level == "相对稳定":
-                summary = dimension_config.get("stable", "")
-            elif level == "有些波动":
-                summary = dimension_config.get("mild", "")
-            elif level == "需要关注":
-                summary = dimension_config.get("moderate", "")
-            else:
-                summary = dimension_config.get("high", "")
-
-            evidence_labels = dimension_config.get("evidence_labels", {})
-            evidence = [
-                evidence_labels[question_id]
-                for question_id in question_ids
-                if question_id in evidence_labels and numeric_answers.get(question_id, score_min) > score_min
-            ][:4]
-
-            if level in {"需要关注", "明显承压"}:
-                elevated_labels.append(dimension_config.get("label", key))
-
-            dimensions.append({
-                "key": key,
-                "label": dimension_config.get("label", key),
-                "level": level,
-                "score": round(average_score, 2),
-                "summary": summary,
-                "evidence": evidence,
-            })
-
-        score = float(final_score) if final_score is not None else None
-        urgent_score = config.get("urgent_score")
-        support_score = config.get("support_score")
-        urgent_triggered = score is not None and urgent_score is not None and score >= urgent_score
-        support_recommended = urgent_triggered or (
-            score is not None and support_score is not None and score >= support_score
-        )
-
-        if urgent_triggered:
-            professional_support = {
-                "recommended": True,
-                "urgency": "urgent",
-                "text": config.get("urgent_support_text") or config.get("support_text") or "",
-            }
-        else:
-            professional_support = {
-                "recommended": bool(support_recommended),
-                "urgency": "suggested" if support_recommended else "optional",
-                "text": config.get("support_text") or "",
-            }
-
-        risk_config = config.get("risk_note", {})
-        risk_threshold = risk_config.get("threshold")
-        risk_triggered = score is not None and risk_threshold is not None and score >= risk_threshold
-        risk_note = {
-            "triggered": bool(risk_triggered),
-            "level": "high" if risk_triggered else "none",
-            "text": risk_config.get("text", "") if risk_triggered else "",
-        }
-
-        if risk_triggered:
-            state_summary = f"你的结果为{result_level or '当前状态'}，并出现需要优先关注的信号，请先保证安全和稳定支持。"
-        elif elevated_labels:
-            state_summary = f"你的结果为{result_level or '当前状态'}，主要需要关注{ '、'.join(elevated_labels[:3]) }相关变化。"
-        else:
-            analysis_name = config.get("analysis_name", "心理状态")
-            state_summary = f"你的结果为{result_level or '当前状态'}，目前{analysis_name}整体较平稳，可以继续观察近期变化。"
-
-        return {
-            "state_summary": state_summary,
-            "dimensions": dimensions,
-            "possible_causes": config.get("possible_causes", []),
-            "small_actions": config.get("small_actions", []),
-            "professional_support": professional_support,
-            "emotion_recording": {
-                "recommended": True,
-                "focus": config.get("recording_focus", ["心情", "睡眠", "触发事件"]),
-                "text": config.get("recording_text", "建议接下来持续记录情绪和触发事件，观察状态是否有规律。"),
-            },
-            "risk_note": risk_note,
-        }
-
-    def _attach_ai_analysis(
-        self,
-        scale_short_name: str,
-        request_answers: Dict[str, Any],
-        result_data: Dict[str, Any],
-    ) -> Dict[str, Any]:
-        if scale_short_name == "SDS":
-            ai_analysis = self._build_bdi_ai_analysis(
-                request_answers=request_answers,
-                result_level=result_data.get("result_level"),
-                final_score=result_data.get("final_score"),
-            )
-        else:
-            ai_analysis = self._build_configured_mental_health_analysis(
-                scale_short_name=scale_short_name,
-                request_answers=request_answers,
-                result_level=result_data.get("result_level"),
-                final_score=result_data.get("final_score"),
-            )
-
-        if not ai_analysis:
-            return result_data
-
-        result_details = result_data.get("result_details")
-        if not isinstance(result_details, dict):
-            result_details = {}
-        result_details["ai_analysis"] = ai_analysis
-        result_data["result_details"] = result_details
-        result_data["ai_analysis"] = ai_analysis
-        return result_data
 
     def _calculate_aglt_talent_radar_result(self, request_answers: Dict[str, str], scale_data: Dict) -> Dict:
         rules = scale_data.get('scale_info', {}).get('scoring_rules', {})
@@ -1520,7 +1101,7 @@ class AssessmentTables:
                     "image_url": final_result.get('image_url')
                 }
             }
-                
+
     def _calculate_soul_drink_result(self, request_answers: Dict[str, str], scale_data: Dict) -> Dict:
         """处理灵魂饮料测试的 S/N、T/F、J/P 三维组合计分。"""
         questions = {str(q.get('order')): q for q in scale_data.get('questions', [])}
@@ -1544,11 +1125,12 @@ class AssessmentTables:
                 continue
 
             for dimension, value in score_map.items():
-                if dimension in dim_counts:
-                    try:
-                        dim_counts[dimension] += int(value)
-                    except (TypeError, ValueError):
-                        continue
+                if dimension not in dim_counts:
+                    continue
+                try:
+                    dim_counts[dimension] += int(value)
+                except (TypeError, ValueError):
+                    continue
 
         result_type = ''
         result_type += 'S' if dim_counts['S'] > dim_counts['N'] else 'N'
@@ -1670,8 +1252,6 @@ class AssessmentTables:
         else:
             raise ValueError(f"Unsupported assessment type: {scale.assessment_type}")
 
-        result_data = self._attach_ai_analysis(scale.short_name, request_data.answers, result_data)
-        
         user_assessment = UserAssessment.create(
             user=user_id,
             scale=scale.id,
@@ -1698,21 +1278,9 @@ class AssessmentTables:
         self.ensure_scoring_result_for_record(record)
         return record
 
-    def ensure_ai_analysis_for_record(self, record: UserAssessment) -> Optional[Dict[str, Any]]:
-        """为历史心理健康记录补齐规则化分析，并返回分析对象。"""
-        if not record or not record.scale:
+    def get_cached_ai_analysis_for_record(self, record: UserAssessment) -> Optional[Dict[str, Any]]:
+        if not record:
             return None
-
-        supports_analysis = record.scale.short_name == "SDS" or bool(
-            self._get_mental_health_analysis_config(record.scale.short_name)
-        )
-        if not supports_analysis:
-            return None
-
-        try:
-            answers = json.loads(record.answers) if record.answers else {}
-        except json.JSONDecodeError:
-            answers = {}
 
         try:
             result_details = json.loads(record.result_details) if record.result_details else {}
@@ -1725,28 +1293,24 @@ class AssessmentTables:
         existing_analysis = result_details.get("ai_analysis")
         if isinstance(existing_analysis, dict):
             return existing_analysis
+        return None
 
-        if record.scale.short_name == "SDS":
-            ai_analysis = self._build_bdi_ai_analysis(
-                request_answers=answers,
-                result_level=record.result_level,
-                final_score=record.final_score,
-            )
-        else:
-            ai_analysis = self._build_configured_mental_health_analysis(
-                scale_short_name=record.scale.short_name,
-                request_answers=answers,
-                result_level=record.result_level,
-                final_score=record.final_score,
-            )
-
-        if not ai_analysis:
-            return None
-
+    def save_ai_analysis_for_record(
+        self,
+        record: UserAssessment,
+        ai_analysis: Dict[str, Any],
+    ) -> None:
+        if not record:
+            return
+        try:
+            result_details = json.loads(record.result_details) if record.result_details else {}
+        except json.JSONDecodeError:
+            result_details = {}
+        if not isinstance(result_details, dict):
+            result_details = {}
         result_details["ai_analysis"] = ai_analysis
         record.result_details = json.dumps(result_details, ensure_ascii=False)
         record.save()
-        return ai_analysis
 
     def delete_user_assessment(self, user_id: str, record_id: str) -> bool:
         """删除一条属于特定用户的测评记录"""

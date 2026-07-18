@@ -308,18 +308,6 @@ page {
   color: #8b5e3c;
 }
 
-.talent-summary-card .personality-major {
-  line-height: 1.25;
-}
-
-.talent-summary-subtitle {
-  margin-top: 14rpx;
-  color: #9a6a42;
-  font-size: 30rpx;
-  font-weight: 700;
-  line-height: 1.45;
-}
-
 .talent-hero-card {
   background: linear-gradient(180deg, rgba(255, 248, 238, 0.98) 0%, rgba(255, 239, 219, 0.95) 100%);
   border: 1rpx solid rgba(245, 180, 112, 0.52);
@@ -945,6 +933,45 @@ page {
   font-size: 30rpx;
   font-weight: 700;
   color: #F97316;
+}
+
+.ai-analysis-entry {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  margin: 0 0 20rpx;
+}
+
+.ai-analysis-btn {
+  gap: 10rpx;
+}
+
+.confirm-btn.ai-analysis-btn {
+  width: 100%;
+  height: 96rpx;
+  margin-top: 0;
+  border: 1rpx solid rgba(249, 115, 22, 0.38);
+  background-color: rgba(255, 255, 255, 0.96);
+  color: #ea6b14;
+  box-shadow: 0 8rpx 16rpx rgba(249, 115, 22, 0.1);
+}
+
+.confirm-btn.ai-analysis-btn::after {
+  border: none;
+}
+
+.confirm-btn.ai-analysis-btn:active {
+  background-color: #fff7ed;
+  color: #dd6b20;
+}
+
+.confirm-btn.ai-analysis-btn[disabled] {
+  opacity: 0.68;
+}
+
+.ai-analysis-btn-icon {
+  width: 42rpx;
+  height: 42rpx;
 }
 
 /* --- 底部确认按钮 --- */

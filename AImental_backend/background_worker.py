@@ -9,19 +9,18 @@ for stream in (sys.stdout, sys.stderr):
         pass
 
 import time
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 import random
 import json
-from typing import Optional
+import re
 
 # 导入 APScheduler
 from apscheduler.schedulers.background import BackgroundScheduler
 import pytz 
-import redis
 
 # --- 导入我们项目的所有组件 ---
 from db import chat_db, status_db, user_db
-from feature_flags import ENABLE_COMMUNITY_BACKEND
+from feature_flags import ENABLE_COMMUNITY_BACKEND, COMMUNITY_DEV_MODE
 # 导入我们全局配置好的日志记录器
 from logger_config import logger
 
@@ -30,40 +29,155 @@ if ENABLE_COMMUNITY_BACKEND:
     from model.ai_status import ai_status_table
     from model.ai_task import ai_task_table
     from model.friendship import friendship_table, Friendship
-    from model.chat_community import community_chat_table, ChatMessageModel
+    from model.chat_community import community_chat_table
+    from model.community_memory import community_memory_table
 
     # --- 导入AI能力生成器 ---
     from generate_ai_status import generate_daily_schedule
     # 【重要】从 generate_community_response 导入两个函数
-    from generate_community_response import generate_ai_response, generate_proactive_message
+    from generate_community_response import generate_ai_response, generate_proactive_message, build_night_reply_context
+    from generate_community_affinity import assess_community_affinity
     from generate_friend_response import generate_friend_request_decision
 
 # 定义北京时区
 BEIJING_TZ = pytz.timezone('Asia/Shanghai')
-
-# --- Redis 同步客户端 ---
-redis_client_sync = None
-if ENABLE_COMMUNITY_BACKEND:
-    try:
-        redis_client_sync = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
-        redis_client_sync.ping()
-        logger.info("✅ 后台工作进程已成功连接到Redis。")
-    except redis.exceptions.ConnectionError as e:
-        logger.error(f"❌ 后台工作进程无法连接到Redis: {e}")
+AFFINITY_UPDATE_INTERVAL = 20
+PROACTIVE_AFFINITY_THRESHOLD = 80.0
+PROACTIVE_MIN_MESSAGES = 40
+PROACTIVE_MIN_IDLE_AFTER_USER_MINUTES = 90
+PROACTIVE_MIN_IDLE_AFTER_AI_MINUTES = 360
+PROACTIVE_COOLDOWN_HOURS = 18
 
 # ---------------------------------------------------
 # 核心工作函数 (Jobs for the Scheduler)
 # ---------------------------------------------------
 
-def push_message_to_user_from_worker(user_id: str, character_id: str, message_content: str):
-    """
-    一个同步函数，负责将AI的回复存入数据库，然后打包一个包含“最新会话摘要”的
-    情报包，通过Redis发布出去。(此函数逻辑保持不变)
-    """
-    if not redis_client_sync:
-        logger.warning("Redis未连接，无法推送消息。")
-        return
+def build_response_status_context(
+    *,
+    current_status,
+    user_id: str,
+    character_id: str,
+    now: datetime,
+) -> dict:
+    """把角色日程转换成回复风格；日程不再阻断回复。"""
+    category = current_status.status_category if current_status else "在线"
+    status_text = current_status.status_text if current_status else "正在看消息"
+    focus_level = current_status.focus_level if current_status else "AVAILABLE"
 
+    is_night = now.hour >= 23 or now.hour < 7
+    looks_like_sleep = "睡" in category or "睡" in status_text or focus_level == "UNINTERRUPTIBLE"
+
+    response_mode = "normal"
+    response_guidance = "正常陪伴式回复。"
+    if is_night or looks_like_sleep:
+        response_mode = "night_soft"
+        response_guidance = build_night_reply_context(user_id, character_id, now)
+    elif focus_level == "HIGH":
+        response_mode = "focused"
+        response_guidance = "你手头原本有事，但已经看到用户消息。回复可以更短、更像从事情里抬头说话，但不能拒绝或暂停。"
+    elif focus_level == "LOW":
+        response_mode = "low_energy"
+        response_guidance = "你状态比较松弛，可以自然接话，不要表现得像客服。"
+
+    return {
+        "status_title": category,
+        "status_description": status_text,
+        "focus_level": focus_level,
+        "response_mode": response_mode,
+        "response_guidance": response_guidance,
+    }
+
+
+def extract_mbti(character_profile: dict) -> str:
+    raw = str(
+        (character_profile or {})
+        .get("personality_traits", {})
+        .get("mbti", "")
+    ).upper()
+    match = re.search(r"[IE][NS][FT][JP]", raw)
+    return match.group(0) if match else ""
+
+
+def affinity_speed_modifiers(character_profile: dict) -> dict:
+    """根据 MBTI 给关系升温、降温和主动概率一个温和倍率。"""
+    mbti = extract_mbti(character_profile)
+    warm = 1.0
+    cool = 1.0
+    proactive = 1.0
+
+    if not mbti:
+        return {"mbti": "", "warm": warm, "cool": cool, "proactive": proactive}
+
+    if mbti[0] == "E":
+        warm += 0.12
+        proactive += 0.18
+    else:
+        warm -= 0.06
+        proactive -= 0.14
+
+    if mbti[2] == "F":
+        warm += 0.12
+        cool -= 0.06
+        proactive += 0.08
+    else:
+        warm -= 0.04
+        cool += 0.08
+
+    if mbti[3] == "P":
+        warm += 0.04
+        cool -= 0.03
+        proactive += 0.06
+    else:
+        cool += 0.04
+        proactive -= 0.04
+
+    if mbti[1] == "N":
+        warm += 0.03
+
+    return {
+        "mbti": mbti,
+        "warm": max(0.75, min(1.32, warm)),
+        "cool": max(0.80, min(1.25, cool)),
+        "proactive": max(0.65, min(1.35, proactive)),
+    }
+
+
+def apply_affinity_delta(current_score: float, base_delta: float, character_profile: dict) -> float:
+    modifiers = affinity_speed_modifiers(character_profile)
+    if base_delta > 0:
+        adjusted = base_delta * modifiers["warm"]
+        if current_score >= 90:
+            adjusted *= 0.35
+        elif current_score >= 80:
+            adjusted *= 0.6
+        elif current_score >= 60:
+            adjusted *= 0.85
+        return min(3.0, adjusted)
+
+    if base_delta < 0:
+        adjusted = base_delta * modifiers["cool"]
+        if current_score <= 20:
+            adjusted *= 0.7
+        return max(-8.0, adjusted)
+
+    return 0.0
+
+
+def proactive_probability(score: float, character_profile: dict) -> float:
+    modifiers = affinity_speed_modifiers(character_profile)
+    base = 0.06 + max(0.0, score - PROACTIVE_AFFINITY_THRESHOLD) * 0.006
+    return max(0.03, min(0.22, base * modifiers["proactive"]))
+
+
+def parse_message_history(raw_history: str) -> list:
+    try:
+        history = json.loads(raw_history or "[]")
+        return history if isinstance(history, list) else []
+    except json.JSONDecodeError:
+        return []
+
+def save_ai_message_from_worker(user_id: str, character_id: str, message_content: str):
+    """后台任务生成的消息只写入数据库。"""
     new_msg_record = community_chat_table.add_message(
         user_id=user_id,
         character_id=character_id,
@@ -72,54 +186,10 @@ def push_message_to_user_from_worker(user_id: str, character_id: str, message_co
     )
 
     if not new_msg_record:
-        logger.error(f"保存来自角色 {character_id} 的消息失败，无法推送。")
+        logger.error(f"保存来自角色 {character_id} 的消息失败。")
         return
 
-    chat_summary_data = {
-        "character_id": new_msg_record.character.id,
-        "character_name": new_msg_record.character.name,
-        "character_avatar_url": new_msg_record.character.avatar_url,
-        "last_message_snippet": new_msg_record.last_message_snippet,
-        "last_message_timestamp": new_msg_record.last_message_timestamp,
-        "unread": not new_msg_record.user_has_peeked, 
-        "favorability": new_msg_record.favorability
-    }
-    
-    message_data = ChatMessageModel(
-        role='ai',
-        content=message_content,
-        timestamp=new_msg_record.last_message_timestamp
-    ).model_dump()
-    
-    payload = {
-        "type": "new_message",
-        "from_character_id": character_id,
-        "message": message_data,
-        "chat_summary": chat_summary_data
-    }
-    
-    channel = f"ws_channel:{user_id}"
-    redis_client_sync.publish(channel, json.dumps(payload))
-    logger.debug(f"已通过Redis频道 '{channel}' 发布了包含完整摘要的消息。")
-            
-def push_friend_request_result_from_worker(user_id: str, character_id: str, status: str, initial_message: Optional[str] = None):
-    """
-    将好友请求的结果通过Redis发布出去。(此函数逻辑保持不变)
-    """
-    if not redis_client_sync:
-        logger.warning("Redis未连接，无法推送好友请求结果。")
-        return
-
-    payload = {
-        "type": "friend_request_result",
-        "from_character_id": character_id,
-        "status": status,
-        "initial_message": initial_message
-    }
-    
-    channel = f"ws_channel:{user_id}"
-    redis_client_sync.publish(channel, json.dumps(payload))
-    logger.debug(f"已通过Redis频道 '{channel}' 发布好友请求结果")
+    logger.debug(f"已保存来自角色 {character_id} 的后台消息。")
     
 def schedule_daily_status_generation():
     """
@@ -129,7 +199,16 @@ def schedule_daily_status_generation():
         logger.info("JOB_STATUS_GEN: 心灵社区后端已下线，跳过角色日程生成。")
         return
 
-    target_date = date.today() + timedelta(days=1)
+    today_in_beijing = datetime.now(BEIJING_TZ).date()
+    target_date = today_in_beijing + timedelta(days=1)
+
+    # 开发模式：克隆历史日程作为测试数据，不调用 LLM。
+    if COMMUNITY_DEV_MODE:
+        logger.info(f"JOB_STATUS_GEN: 开发模式已开启，克隆历史日程作为 {target_date} 的测试数据（不调用 LLM）。")
+        from community_dev_mode import ensure_dev_schedules
+        ensure_dev_schedules(target_date)
+        return
+
     logger.info(f"JOB_STATUS_GEN: 开始为所有角色生成 {target_date} 的日程...")
 
     all_characters = ai_character_table.get_all_characters()
@@ -138,13 +217,14 @@ def schedule_daily_status_generation():
             logger.info(f"-> 正在处理角色: {character.name} ({character.id})")
             # a. 准备历史数据 (未来可扩展)
             recent_history = [
-                {"date": (date.today() - timedelta(days=1)).strftime('%Y-%m-%d'), "summary": "昨天似乎是休息的一天。"}
+                {"date": (today_in_beijing - timedelta(days=1)).strftime('%Y-%m-%d'), "summary": "昨天似乎是休息的一天。"}
             ]
             
             # b. 调用状态生成器
             daily_schedule = generate_daily_schedule(
                 character_profile=character.profile,
-                recent_history=recent_history
+                recent_history=recent_history,
+                target_date=target_date
             )
             
             # c. 将生成的日程写入数据库
@@ -207,15 +287,131 @@ def check_for_resumable_conversations():
         logger.info(f"   已为 AI({chat.character.id}) 创建主动聊天任务以回归对话。")
 
 
+def check_for_high_affinity_proactive_conversations():
+    """高好感关系的主动消息触发器，避免连续对话中突兀插话。"""
+    if not ENABLE_COMMUNITY_BACKEND:
+        logger.info("JOB_PROACTIVE_CHECK: 心灵社区后端已下线，跳过主动消息检查。")
+        return
+
+    now = datetime.now(BEIJING_TZ)
+    if now.hour >= 23 or now.hour < 8:
+        logger.debug("JOB_PROACTIVE_CHECK: 当前为夜间，跳过主动消息检查。")
+        return
+
+    conversations = community_chat_table.get_all_active_conversations()
+    if not conversations:
+        return
+
+    logger.info("JOB_PROACTIVE_CHECK: 开始检查高好感主动消息候选...")
+    cooldown_since = datetime.utcnow() + timedelta(hours=8) - timedelta(hours=PROACTIVE_COOLDOWN_HOURS)
+
+    for conversation in conversations:
+        try:
+            score = float(conversation.favorability or 0.0)
+            if score < PROACTIVE_AFFINITY_THRESHOLD:
+                continue
+
+            history = parse_message_history(conversation.messages_history)
+            if len(history) < PROACTIVE_MIN_MESSAGES:
+                continue
+
+            last_message = history[-1]
+            last_timestamp = int(last_message.get("timestamp") or 0)
+            if last_timestamp <= 0:
+                continue
+
+            idle_minutes = (int(now.timestamp()) - last_timestamp) / 60
+            last_role = last_message.get("role")
+            required_idle = (
+                PROACTIVE_MIN_IDLE_AFTER_USER_MINUTES
+                if last_role == "user"
+                else PROACTIVE_MIN_IDLE_AFTER_AI_MINUTES
+            )
+            if idle_minutes < required_idle:
+                continue
+
+            recent_ai_tail = 0
+            for message in reversed(history[-4:]):
+                if message.get("role") == "ai":
+                    recent_ai_tail += 1
+                else:
+                    break
+            if recent_ai_tail >= 2:
+                continue
+
+            user_id = conversation.user_id
+            character_id = conversation.character.id
+            if ai_task_table.has_pending_task(user_id, character_id, "proactive_chat"):
+                continue
+            if ai_task_table.has_pending_task(user_id, character_id, "reply"):
+                continue
+            if ai_task_table.has_recent_done_task(
+                user_id,
+                character_id,
+                "proactive_chat",
+                cooldown_since,
+            ):
+                continue
+
+            current_status = ai_status_table.get_current_status(character_id)
+            status_context = build_response_status_context(
+                current_status=current_status,
+                user_id=user_id,
+                character_id=character_id,
+                now=now,
+            )
+            if status_context.get("response_mode") == "night_soft":
+                continue
+            if status_context.get("focus_level") in {"HIGH", "UNINTERRUPTIBLE"}:
+                continue
+
+            character = ai_character_table.get_character_by_id(character_id)
+            if not character:
+                continue
+
+            chance = proactive_probability(score, character.profile)
+            roll = random.random()
+            if roll > chance:
+                logger.debug(
+                    "主动消息候选未触发 user=%s character=%s score=%.1f roll=%.3f chance=%.3f",
+                    user_id,
+                    character_id,
+                    score,
+                    roll,
+                    chance,
+                )
+                continue
+
+            execute_at = now + timedelta(minutes=random.randint(2, 10))
+            task = ai_task_table.create_task_if_needed(
+                user_id=user_id,
+                character_id=character_id,
+                task_type="proactive_chat",
+                execute_at=execute_at,
+            )
+            if task:
+                logger.info(
+                    "已创建高好感主动消息任务 user=%s character=%s score=%.1f idle=%.1fmin chance=%.3f",
+                    user_id,
+                    character_id,
+                    score,
+                    idle_minutes,
+                    chance,
+                )
+        except Exception:
+            logger.error(
+                "检查高好感主动消息候选失败 conversation=%s",
+                getattr(conversation, "id", None),
+                exc_info=True,
+            )
+
+
 def process_pending_tasks():
     """
     【已全面升级】处理所有到期任务的核心函数。
     """
     if not ENABLE_COMMUNITY_BACKEND:
         logger.info("JOB_TASK_PROC: 心灵社区后端已下线，跳过任务队列处理。")
-        return
-
-    if not redis_client_sync:
         return
 
     due_tasks = ai_task_table.get_due_tasks(limit=10)
@@ -235,95 +431,210 @@ def process_pending_tasks():
                     logger.info(f"-> 正在处理任务 {task.id} (类型: {task.task_type})")
 
                     # --- 任务类型分发 ---
-                    if task.task_type == 'reply' or task.task_type == 'proactive_chat':
-                        # 1. 获取上下文
-                        character = ai_character_table.get_character_by_id(task.character_id)
-                        current_status = ai_status_table.get_current_status(task.character_id)
-                        history = community_chat_table.get_conversation_history(task.user_id, task.character_id, limit=30)
-                        # 【核心新增】获取今天的完整日程
-                        today = datetime.now(BEIJING_TZ).date()
-                        full_day_schedule = ai_status_table.get_schedule_for_date(task.character_id, today)
-                    if task.task_type == 'reply':
-                        # --- 【哨兵日志 1】检查上下文获取 ---
+                    if task.task_type in ('reply', 'proactive_chat'):
                         logger.debug(f"任务 {task.id}: 步骤1 - 开始获取上下文...")
+                        now = datetime.now(BEIJING_TZ)
+                        today = now.date()
                         character = ai_character_table.get_character_by_id(task.character_id)
+                        if task.task_type == 'reply':
+                            ai_status_table.clear_transient_offline_status(task.character_id)
                         current_status = ai_status_table.get_current_status(task.character_id)
-                        history = community_chat_table.get_conversation_history(task.user_id, task.character_id, limit=30)
-                        
-                        # ========================= 【核心调试修改】 =========================
-                        if not all([character, current_status, history is not None]):
-                            # 创建一个详细的错误诊断消息
+                        history = community_chat_table.get_conversation_history(task.user_id, task.character_id, limit=50)
+                        memory_context = community_memory_table.get_prompt_context(task.user_id, task.character_id)
+                        full_day_schedule = ai_status_table.get_schedule_for_date(task.character_id, today)
+
+                        if not character or history is None:
                             error_details = []
                             if not character:
                                 error_details.append(f"角色(character)未找到 (ID: {task.character_id})")
-                            if not current_status:
-                                error_details.append(f"当前状态(current_status)未找到 (角色ID: {task.character_id})，可能是日程未生成或已过期")
                             if history is None:
                                 error_details.append("聊天历史(history)查询失败，可能存在数据库错误")
-                            
-                            # 记录包含了具体原因的警告
                             logger.warning(f"任务 {task.id} 失败: 获取上下文不完整。缺失或错误的部分: {', '.join(error_details)}")
-                            
                             ai_task_table.update_task_status(task.id, 'failed')
                             continue
-                        # =================================================================
 
                         logger.debug(f"任务 {task.id}: 步骤1 - 上下文获取成功。")
-                        
-                        # 2. 调用AI生成回复
-                        status_context = {
-                            "status_description": current_status.status_text,
-                            "focus_level": current_status.focus_level
-                        }
-                        
+
+                        status_context = build_response_status_context(
+                            current_status=current_status,
+                            user_id=task.user_id,
+                            character_id=task.character_id,
+                            now=now,
+                        )
+
+                        if task.task_type == 'proactive_chat' and status_context.get("response_mode") == "night_soft":
+                            logger.info(f"任务 {task.id}: 当前为夜间/睡眠模式，跳过主动消息，避免打扰用户。")
+                            community_chat_table.update_conversation_state(
+                                user_id=task.user_id,
+                                character_id=task.character_id,
+                                state='CONTINUOUS',
+                                resumes_at=None
+                            )
+                            ai_task_table.update_task_status(task.id, 'done')
+                            continue
+
                         if task.task_type == 'reply':
                             structured_response = generate_ai_response(
                                 character_profile=character.profile,
                                 current_ai_status=status_context,
                                 conversation_history=history,
-                                full_day_schedule=full_day_schedule
+                                full_day_schedule=full_day_schedule,
+                                current_beijing_time=now,
+                                memory_context=memory_context,
                             )
                         else: # proactive_chat
                             structured_response = generate_proactive_message(
                                 character_profile=character.profile,
                                 current_ai_status=status_context,
-                                conversation_history=history
+                                conversation_history=history,
+                                memory_context=memory_context,
                             )
 
                         if not (structured_response and structured_response.messages):
                             logger.warning(f"任务 {task.id} 失败: AI模型返回了空内容。")
+                            if task.task_type == 'reply':
+                                try:
+                                    ai_status_table.mark_character_offline(task.character_id, now=now)
+                                except Exception:
+                                    logger.error(
+                                        f"任务 {task.id}: 标记角色 {task.character_id} 为短时离线失败。",
+                                        exc_info=True,
+                                    )
                             ai_task_table.update_task_status(task.id, 'failed')
                             continue
                         
-                        # 3. 推送消息
+                        # 3. 保存消息
                         for msg in structured_response.messages:
-                            push_message_to_user_from_worker(task.user_id, task.character_id, msg)
+                            save_ai_message_from_worker(task.user_id, task.character_id, msg)
                             time.sleep(random.uniform(1.0, 2.5))
 
-                        # 4. 【核心】根据AI指令更新对话微观状态
-                        control = structured_response.control
-                        delay_minutes = control.next_delay_minutes
-                        
-                        # 【硬规则】延迟上限器
-                        if current_status.focus_level == 'HIGH' and delay_minutes > 20:
-                            logger.warning(f"AI为HIGH专注状态请求了过长延迟({delay_minutes}分钟)，系统强制修正为10分钟。")
-                            delay_minutes = 10
-                        
-                        if control.next_state == 'PAUSE_CHAT':
-                            resume_time = datetime.now(BEIJING_TZ) + timedelta(minutes=delay_minutes)
-                            community_chat_table.update_conversation_state(
-                                user_id=task.user_id, character_id=task.character_id,
-                                state='PAUSED', resumes_at=resume_time
+                        # 4. 日程只影响回复风格，不再允许暂停对话。
+                        community_chat_table.update_conversation_state(
+                            user_id=task.user_id,
+                            character_id=task.character_id,
+                            state='CONTINUOUS',
+                            resumes_at=None
+                        )
+
+                        try:
+                            queued = community_memory_table.queue_memory_update_if_needed(
+                                task.user_id,
+                                task.character_id,
+                                ai_task_table,
                             )
-                            logger.info(f"任务 {task.id}: AI决定暂停对话，预计在 {resume_time} 回归。")
-                        else: # CONTINUE_CHAT
-                            community_chat_table.update_conversation_state(
-                                user_id=task.user_id, character_id=task.character_id,
-                                state='CONTINUOUS', resumes_at=None
+                            if queued:
+                                logger.info(f"已为任务 {task.id} 后续排队记忆更新任务。")
+                        except Exception:
+                            logger.error(
+                                f"任务 {task.id} 排队记忆更新任务失败。",
+                                exc_info=True,
                             )
+
+                        if task.task_type == 'reply':
+                            try:
+                                affinity_queued = community_chat_table.queue_favorability_update_if_needed(
+                                    task.user_id,
+                                    task.character_id,
+                                    ai_task_table,
+                                )
+                                if affinity_queued:
+                                    logger.info(f"已为任务 {task.id} 后续排队好感度更新任务。")
+                            except Exception:
+                                logger.error(
+                                    f"任务 {task.id} 排队好感度更新任务失败。",
+                                    exc_info=True,
+                                )
                         
                         ai_task_table.update_task_status(task.id, 'done')
                         logger.info(f"✅ 聊天任务 {task.id} 处理成功。")
+
+                    elif task.task_type == 'affinity_update':
+                        character = ai_character_table.get_character_by_id(task.character_id)
+                        conversation = community_chat_table.get_conversation(task.user_id, task.character_id)
+                        if not character or not conversation:
+                            logger.warning(f"任务 {task.id} 失败: 缺少角色或会话，无法更新好感度。")
+                            ai_task_table.update_task_status(task.id, 'failed')
+                            continue
+
+                        all_messages = parse_message_history(conversation.messages_history)
+                        message_count = len(all_messages)
+                        last_count = community_chat_table.get_last_favorability_update_message_count(conversation)
+                        if message_count - last_count < AFFINITY_UPDATE_INTERVAL:
+                            logger.info(f"任务 {task.id}: 消息数未满 {AFFINITY_UPDATE_INTERVAL}，跳过好感度更新。")
+                            ai_task_table.update_task_status(task.id, 'done')
+                            continue
+
+                        recent_block = all_messages[last_count:message_count]
+                        if not any(message.get("role") == "user" for message in recent_block):
+                            logger.info(f"任务 {task.id}: 本批消息没有用户消息，跳过好感度更新。")
+                            ai_task_table.update_task_status(task.id, 'done')
+                            continue
+
+                        memory_context = community_memory_table.get_prompt_context(task.user_id, task.character_id)
+                        favorability_history = community_chat_table.get_favorability_history(
+                            task.user_id,
+                            task.character_id,
+                        )
+                        assessment = assess_community_affinity(
+                            character_profile=character.profile,
+                            current_score=float(conversation.favorability or 0.0),
+                            recent_messages=recent_block,
+                            favorability_history=favorability_history,
+                            memory_context=memory_context,
+                        )
+                        delta = apply_affinity_delta(
+                            float(conversation.favorability or 0.0),
+                            assessment.base_delta,
+                            character.profile,
+                        )
+                        new_score = max(0.0, min(100.0, float(conversation.favorability or 0.0) + delta))
+                        modifiers = affinity_speed_modifiers(character.profile)
+                        reason = f"{assessment.reason}（MBTI {modifiers['mbti'] or '未知'} 倍率后变化 {delta:+.1f}）"
+                        community_chat_table.update_favorability(
+                            conversation.id,
+                            new_score,
+                            reason,
+                            delta=delta,
+                            base_delta=assessment.base_delta,
+                            message_count=message_count,
+                            analysis=assessment.analysis,
+                            affinity_note=assessment.affinity_note,
+                            interaction_quality=assessment.interaction_quality,
+                            proactive_hint=assessment.proactive_hint,
+                        )
+                        community_memory_table.update_profile_affinity_note(
+                            task.user_id,
+                            task.character_id,
+                            assessment.affinity_note,
+                        )
+                        ai_task_table.update_task_status(task.id, 'done')
+                        logger.info(
+                            "✅ 好感度任务 %s 处理成功。score %.1f -> %.1f, delta %.1f",
+                            task.id,
+                            conversation.favorability,
+                            new_score,
+                            delta,
+                        )
+
+                    elif task.task_type == 'memory_update':
+                        character = ai_character_table.get_character_by_id(task.character_id)
+                        if not character:
+                            logger.warning(f"任务 {task.id} 失败: 角色不存在，无法更新记忆。")
+                            ai_task_table.update_task_status(task.id, 'failed')
+                            continue
+
+                        profile_updated, summaries_updated = community_memory_table.update_memory_for_conversation(
+                            user_id=task.user_id,
+                            character_id=task.character_id,
+                            character_profile=character.profile,
+                        )
+                        ai_task_table.update_task_status(task.id, 'done')
+                        logger.info(
+                            "✅ 记忆任务 %s 处理成功。profile=%s summaries=%s",
+                            task.id,
+                            profile_updated,
+                            summaries_updated,
+                        )
 
                     elif task.task_type == 'friend_request_response':
                         # (好友请求处理逻辑保持不变)
@@ -350,10 +661,6 @@ def process_pending_tasks():
                                 community_chat_table.add_message(user_id=task.user_id, character_id=task.character_id, role='user', content=friend_request.verification_message)
                                 community_chat_table.add_message(user_id=task.user_id, character_id=task.character_id, role='ai', content=initial_msg)
                             
-                            push_friend_request_result_from_worker(
-                                user_id=task.user_id, character_id=task.character_id,
-                                status=new_status, initial_message=initial_msg
-                            )
                             ai_task_table.update_task_status(task.id, 'done')
                             logger.info(f"✅ 好友请求任务 {task.id} 处理完成。")
                         else:
@@ -415,6 +722,14 @@ if __name__ == "__main__":
         trigger='interval',
         minutes=1,
         id='resume_conversation_job',
+        replace_existing=True
+    )
+    # 任务4：高好感关系在冷却后有概率主动发起自然问候
+    scheduler.add_job(
+        check_for_high_affinity_proactive_conversations,
+        trigger='interval',
+        minutes=30,
+        id='high_affinity_proactive_job',
         replace_existing=True
     )
     # --- ---------------------------------------------------- ---

@@ -1,5 +1,8 @@
 {
-  "usingComponents": {},
+  "usingComponents": {
+    "privacy-consent": "/components/privacy-consent/privacy-consent"
+  },
   "navigationBarTitleText": "我的",
-  "navigationStyle": "custom"
+  "navigationStyle": "custom",
+  "disableScroll": true
 }

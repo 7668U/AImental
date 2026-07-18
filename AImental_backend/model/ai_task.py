@@ -140,9 +140,48 @@ class AITaskTable:
 
     def update_task_status(self, task_id: str, status: str) -> bool:
         """更新指定任务的状态。"""
-        query = AITask.update({AITask.status: status}).where(AITask.id == task_id)
+        query = AITask.update({
+            AITask.status: status,
+            AITask.updated_at: datetime.utcnow() + timedelta(hours=8),
+        }).where(AITask.id == task_id)
         rows_updated = query.execute()
         return rows_updated > 0
+
+    def clear_for_conversation(self, user_id: str, character_id: str) -> int:
+        """删除单个用户与角色之间所有历史和待处理社区任务。"""
+        return (
+            AITask.delete()
+            .where(
+                (AITask.user_id == user_id)
+                & (AITask.character_id == character_id)
+            )
+            .execute()
+        )
+
+    def has_pending_task(self, user_id: str, character_id: str, task_type: str) -> bool:
+        """检查是否已经有同类型待处理任务。"""
+        return AITask.select().where(
+            (AITask.user_id == user_id)
+            & (AITask.character_id == character_id)
+            & (AITask.task_type == task_type)
+            & (AITask.status == 'pending')
+        ).exists()
+
+    def has_recent_done_task(
+        self,
+        user_id: str,
+        character_id: str,
+        task_type: str,
+        since: datetime,
+    ) -> bool:
+        """检查指定时间后是否已经完成过某类任务，用于主动消息冷却。"""
+        return AITask.select().where(
+            (AITask.user_id == user_id)
+            & (AITask.character_id == character_id)
+            & (AITask.task_type == task_type)
+            & (AITask.status == 'done')
+            & (AITask.updated_at >= since)
+        ).exists()
 
 # ---------------------------------------------------
 # 4. 实例化 (Instantiation)

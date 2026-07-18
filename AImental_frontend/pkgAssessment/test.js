@@ -1,5 +1,10 @@
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
-const { loginWithBackend } = require('../utils/auth.js');
+const {
+  confirmPrivacyAwareLogin,
+  loginWithBackend,
+  rejectPrivacyAwareLogin,
+  requestPrivacyAwareLogin
+} = require('../utils/auth.js');
 // pages/assessment/test.js (兼容版)
 
 const API_BASE_URL = 'https://api.feelyourself.cn';
@@ -80,6 +85,7 @@ Page({
     navBarHeight: 56,
     isAnswerCardOpen: false,
     answerCardItems: [],
+    privacyVisible: false,
   },
 
   onLoad(options) {
@@ -323,10 +329,14 @@ Page({
       confirmColor: '#ff6b16',
       success: (res) => {
         if (res.confirm) {
-          this.loginAndSubmitAssessment();
+          this.handleLogin();
         }
       }
     });
+  },
+
+  handleLogin() {
+    return requestPrivacyAwareLogin(this, this.loginAndSubmitAssessment);
   },
 
   async loginAndSubmitAssessment() {
@@ -346,6 +356,14 @@ Page({
       console.error('测评提交前登录失败:', error);
       wx.showToast({ title: '登录失败，请重试', icon: 'none' });
     }
+  },
+
+  onPrivacyConfirm() {
+    return confirmPrivacyAwareLogin(this);
+  },
+
+  onPrivacyReject() {
+    rejectPrivacyAwareLogin(this);
   },
 
   submitAssessment() {

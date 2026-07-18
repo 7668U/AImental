@@ -1,4 +1,8 @@
 // components/login-prompt/login-prompt.js
+const {
+  hasCurrentPrivacyConsent
+} = require('../../utils/privacy.js');
+
 Component({
   /**
    * 组件的属性列表
@@ -19,7 +23,7 @@ Component({
    * 组件的初始数据
    */
   data: {
-    // 组件内部数据
+    privacyVisible: false
   },
 
   /**
@@ -28,8 +32,24 @@ Component({
   methods: {
     // 当用户点击 "微信授权登录" 按钮时触发
     onLoginTap() {
-      // 触发一个自定义事件，通知使用该组件的页面：“用户要登录了！”
-      this.triggerEvent('loginevent'); 
+      if (hasCurrentPrivacyConsent()) {
+        this.triggerEvent('loginevent');
+        return;
+      }
+      this.setData({ privacyVisible: true });
+    },
+
+    onPrivacyConfirm() {
+      this.setData({ privacyVisible: false });
+      this.triggerEvent('loginevent');
+    },
+
+    onPrivacyReject() {
+      this.setData({ privacyVisible: false });
+      wx.showToast({
+        title: '同意隐私协议后才能登录',
+        icon: 'none'
+      });
     }
   }
 })

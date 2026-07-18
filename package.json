@@ -1,6 +1,6 @@
 {
   "name": "feelyourself-frontend-tooling",
-  "version": "3.0.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Frontend design and image generation tooling for the Feel Yourself mini program.",
   "scripts": {

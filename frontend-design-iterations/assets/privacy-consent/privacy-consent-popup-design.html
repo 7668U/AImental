@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Feel Yourself 隐私弹窗设计稿</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; min-height: 100%; }
+    body {
+      display: grid;
+      place-items: start;
+      background: #ebe6df;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: #3f342d;
+    }
+    .phone {
+      position: relative;
+      width: 750px;
+      height: 1334px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 16% 18%, rgba(255, 205, 132, .5), rgba(255, 205, 132, 0) 28%),
+        radial-gradient(circle at 88% 42%, rgba(178, 220, 199, .38), rgba(178, 220, 199, 0) 30%),
+        linear-gradient(180deg, #fff3d9 0%, #fffaf4 52%, #ffffff 100%);
+    }
+    .page-hint {
+      position: absolute;
+      left: 70px;
+      right: 70px;
+      top: 118px;
+      opacity: .48;
+    }
+    .avatar {
+      width: 132px;
+      height: 132px;
+      margin: 0 auto 34px;
+      border-radius: 50%;
+      background: #ffd699;
+      box-shadow: 0 18px 40px rgba(151, 92, 37, .14);
+    }
+    .ghost-line {
+      height: 24px;
+      margin: 0 auto 22px;
+      border-radius: 8px;
+      background: rgba(109, 84, 66, .16);
+    }
+    .ghost-line.title { width: 250px; height: 38px; }
+    .ghost-line.copy { width: 370px; }
+    .ghost-card {
+      height: 390px;
+      margin-top: 80px;
+      border-radius: 36px;
+      background: rgba(255,255,255,.72);
+      box-shadow: 0 20px 50px rgba(113, 81, 52, .08);
+    }
+    .scrim {
+      position: absolute;
+      inset: 0;
+      background: rgba(62, 48, 40, .48);
+      backdrop-filter: blur(5px);
+    }
+    .modal {
+      position: absolute;
+      left: 58px;
+      right: 58px;
+      top: 178px;
+      padding: 0 46px 42px;
+      border: 1px solid rgba(255, 255, 255, .7);
+      border-radius: 38px;
+      background: #fffdf9;
+      box-shadow: 0 34px 90px rgba(55, 38, 28, .24);
+    }
+    .close {
+      position: absolute;
+      right: 26px;
+      top: 24px;
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #907e72;
+      background: #f7f1eb;
+      font-size: 30px;
+      line-height: 1;
+    }
+    .illustration {
+      position: relative;
+      width: 260px;
+      height: 210px;
+      margin: -66px auto 4px;
+    }
+    .generated-illustration {
+      position: absolute;
+      left: 10px;
+      top: -18px;
+      width: 240px;
+      height: 240px;
+      object-fit: contain;
+    }
+    .illustration > div { display: none; }
+    .sun {
+      position: absolute;
+      left: 66px;
+      top: 32px;
+      width: 132px;
+      height: 132px;
+      border-radius: 50%;
+      background: #ffe1a8;
+    }
+    .leaf {
+      position: absolute;
+      width: 56px;
+      height: 86px;
+      border-radius: 80% 10% 80% 10%;
+      background: #9bc8b5;
+      transform: rotate(-34deg);
+    }
+    .leaf.left { left: 22px; bottom: 14px; }
+    .leaf.right { right: 18px; bottom: 18px; transform: scaleX(-1) rotate(-34deg); background: #c6ddbe; }
+    .shield {
+      position: absolute;
+      left: 75px;
+      top: 30px;
+      width: 118px;
+      height: 146px;
+      border: 9px solid #ff9a50;
+      border-radius: 58px 58px 70px 70px;
+      background: #fffaf2;
+      box-shadow: 0 15px 30px rgba(236, 122, 48, .18);
+      clip-path: polygon(50% 0, 100% 16%, 92% 72%, 50% 100%, 8% 72%, 0 16%);
+    }
+    .heart {
+      position: absolute;
+      left: 109px;
+      top: 81px;
+      color: #ff7d55;
+      font-size: 53px;
+      line-height: 1;
+    }
+    .spark {
+      position: absolute;
+      color: #f5b95f;
+      font-size: 28px;
+    }
+    .spark.one { left: 35px; top: 33px; }
+    .spark.two { right: 30px; top: 62px; }
+    .eyebrow {
+      margin-top: -2px;
+      color: #c27a3e;
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+    }
+    h1 {
+      margin: 12px 0 12px;
+      font-size: 40px;
+      line-height: 1.18;
+      text-align: center;
+      letter-spacing: 0;
+    }
+    .lead {
+      margin: 0 auto;
+      max-width: 500px;
+      color: #786a61;
+      font-size: 24px;
+      line-height: 1.65;
+      text-align: center;
+    }
+    .promise-list {
+      margin: 28px 0 22px;
+      padding: 6px 24px;
+      border: 1px solid #f0e6dc;
+      border-radius: 22px;
+      background: #fffaf5;
+    }
+    .promise {
+      min-height: 88px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #eee3d9;
+    }
+    .promise:last-child { border-bottom: 0; }
+    .icon {
+      flex: 0 0 auto;
+      width: 48px;
+      height: 48px;
+      margin-right: 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      color: #4e7969;
+      background: #e6f2ec;
+      font-size: 24px;
+      font-weight: 800;
+    }
+    .promise:nth-child(2) .icon { color: #b47538; background: #fff0d8; }
+    .promise:nth-child(3) .icon { color: #7d6ea8; background: #eee9f6; }
+    .promise strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 24px;
+      line-height: 1.2;
+    }
+    .promise span {
+      display: block;
+      color: #8c8078;
+      font-size: 19px;
+      line-height: 1.35;
+    }
+    .agreement {
+      display: flex;
+      align-items: flex-start;
+      padding: 0 4px;
+      color: #756960;
+      font-size: 20px;
+      line-height: 1.55;
+    }
+    .check {
+      flex: 0 0 auto;
+      width: 30px;
+      height: 30px;
+      margin: 1px 13px 0 0;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      color: #fff;
+      background: #ff8d45;
+      font-size: 19px;
+      font-weight: 900;
+    }
+    .link { color: #d56e28; font-weight: 700; }
+    .primary {
+      height: 84px;
+      margin-top: 25px;
+      display: grid;
+      place-items: center;
+      border-radius: 28px;
+      color: #fff;
+      background: linear-gradient(135deg, #ffad58, #ff7c2c);
+      box-shadow: 0 17px 32px rgba(238, 119, 40, .28);
+      font-size: 27px;
+      font-weight: 800;
+    }
+    .secondary {
+      padding-top: 22px;
+      color: #9b8e85;
+      font-size: 21px;
+      text-align: center;
+    }
+    .safe-note {
+      margin-top: 22px;
+      color: #ae9f94;
+      font-size: 17px;
+      line-height: 1.5;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <main class="phone">
+    <section class="page-hint">
+      <div class="avatar"></div>
+      <div class="ghost-line title"></div>
+      <div class="ghost-line copy"></div>
+      <div class="ghost-card"></div>
+    </section>
+    <div class="scrim"></div>
+    <section class="modal">
+      <div class="close">×</div>
+      <div class="illustration">
+        <img class="generated-illustration" src="privacy-shield-v2.png" alt="">
+        <div class="sun"></div>
+        <div class="leaf left"></div>
+        <div class="leaf right"></div>
+        <div class="shield"></div>
+        <div class="heart">♥</div>
+        <div class="spark one">✦</div>
+        <div class="spark two">✦</div>
+      </div>
+      <div class="eyebrow">PRIVACY FIRST</div>
+      <h1>你的心事，只属于你</h1>
+      <p class="lead">登录前，请花一点时间了解我们如何使用并保护你的信息。</p>
+      <div class="promise-list">
+        <div class="promise">
+          <div class="icon">锁</div>
+          <div><strong>敏感数据加密保存</strong><span>情绪记录、测评与聊天内容均采用认证加密</span></div>
+        </div>
+        <div class="promise">
+          <div class="icon">简</div>
+          <div><strong>只收集功能所必需的信息</strong><span>未使用对应功能时，不主动收集相关内容</span></div>
+        </div>
+        <div class="promise">
+          <div class="icon">控</div>
+          <div><strong>你的数据由你掌控</strong><span>可以查询、更正、删除，也可以随时撤回同意</span></div>
+        </div>
+      </div>
+      <div class="agreement">
+        <div class="check">✓</div>
+        <div>我已阅读并同意 <span class="link">《用户隐私保护协议》</span>，并理解 AI 内容不替代专业医疗或心理咨询。</div>
+      </div>
+      <div class="primary">同意并继续登录</div>
+      <div class="secondary">暂不同意</div>
+      <div class="safe-note">我们会持续采用与数据敏感程度相匹配的安全措施保护你的隐私。</div>
+    </section>
+  </main>
+</body>
+</html>

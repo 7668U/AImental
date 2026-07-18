@@ -1,47 +1,40 @@
 <view class="calendar-popup" wx:if="{{show}}">
   <view class="calendar-overlay" bind:tap="hide"></view>
   <view class="calendar-container">
+    <image class="calendar-hero-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pages/daily-checkin/assets/calendar-hero-bg.png" mode="aspectFill"></image>
 
-    <view class="calendar-header">
-      <image class="nav-arrow" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/left.png" bind:tap="handleMonthChange" data-direction="{{-1}}"></image>
-      <view class="current-date">{{currentYear}}年 {{currentMonth}}月</view>
-      <image class="nav-arrow" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/right.png" bind:tap="handleMonthChange" data-direction="{{1}}"></image>
-    </view>
+    <view class="calendar-content">
+      <view class="calendar-header">
+        <image class="nav-arrow" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/left.png" bind:tap="handleMonthChange" data-direction="{{-1}}"></image>
+        <view class="current-date">{{currentYear}}年 {{currentMonth}}月</view>
+        <image class="nav-arrow" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/right.png" bind:tap="handleMonthChange" data-direction="{{1}}"></image>
+      </view>
 
-    <block wx:if="{{hasCheckinsThisMonth}}">
       <view class="week-header">
         <view class="week-day" wx:for="{{['日', '一', '二', '三', '四', '五', '六']}}" wx:key="*this">{{item}}</view>
       </view>
 
       <view class="date-grid">
-        <view 
-          wx:for="{{days}}" 
-          wx:key="index" 
-          class="day-cell {{item.isToday ? 'is-today' : ''}} {{item.day > 0 ? '' : 'is-placeholder'}}"
+        <view
+          wx:for="{{days}}"
+          wx:key="index"
+          class="day-cell {{item.isToday ? 'is-today' : ''}} {{item.day > 0 ? '' : 'is-placeholder'}} {{item.hasMoments ? 'has-moments' : ''}}"
           bind:tap="handleDayTap"
           data-day="{{item}}"
         >
-          <view 
-            class="day-content" 
-            style="background-color: {{item.checkin ? item.checkin.color : 'transparent'}};"
-          >
-            <image 
-              wx:if="{{item.checkin}}" 
-              class="mood-icon" 
-              src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/mood24/{{item.checkin.mood_icon || item.checkin.mood_id || item.checkin.mood}}.png"
-            ></image>
-            <text wx:if="{{!item.checkin}}" class="day-number">{{item.day > 0 ? item.day : ''}}</text>
+          <view class="day-content">
+            <block wx:if="{{item.hasMoments}}">
+              <text class="moment-check">✓</text>
+            </block>
+            <text wx:else class="day-number">{{item.day > 0 ? item.day : ''}}</text>
           </view>
         </view>
       </view>
-    </block>
 
-    <block wx:else>
-      <view class="empty-state">
-          <image class="empty-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/daily-checkin/blank.png" mode="aspectFit"></image>
-          <view class="empty-text">这个月还没有记录哦</view>
+      <view wx:if="{{!hasCheckinsThisMonth}}" class="empty-state">
+        <image class="empty-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/daily-checkin/blank.png" mode="aspectFit"></image>
+        <view class="empty-text">这个月还没有记录哦</view>
       </view>
-    </block>
-    
+    </view>
   </view>
 </view>

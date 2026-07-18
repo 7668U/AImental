@@ -5,7 +5,13 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 
 # 1. 从项目其他文件中导入
-from model.promotion import promotion_table, soul_drink_table, test_data, TestResultResponseModel
+from model.promotion import (
+    SOUL_DRINK_SCORE_MAP,
+    promotion_table,
+    soul_drink_table,
+    test_data,
+    TestResultResponseModel,
+)
 from .auth import get_current_user_id # 用于保护需要登录的接口
 
 # ---------------------------------------------------
@@ -188,7 +194,10 @@ def save_soul_drink_progress(request: SoulDrinkProgressRequest):
 def complete_soul_drink_test(request: SoulDrinkCompleteRequest):
     if len(request.answers) != 15:
         raise HTTPException(status_code=400, detail="请完成全部 15 题")
-    if any(answer not in {"A", "B"} for answer in request.answers):
+    if any(
+        answer not in SOUL_DRINK_SCORE_MAP[index]
+        for index, answer in enumerate(request.answers)
+    ):
         raise HTTPException(status_code=400, detail="答案格式无效")
 
     record = soul_drink_table.complete(

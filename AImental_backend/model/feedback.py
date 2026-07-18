@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 # 2. 导入数据库连接实例
 from db import feedback_db
+from security.data_encryption import EncryptedTextField
 
 # ---------------------------------------------------
 # Peewee & Pydantic Models
@@ -24,7 +25,7 @@ class Feedback(Model):
     # optimization: 优化意见, bug: 功能异常
     feedback_type = CharField(max_length=50, default='optimization')
     
-    content = TextField()
+    content = EncryptedTextField(purpose="feedbacks.content")
     created_at = DateTimeField(default=datetime.now)
 
     class Meta:

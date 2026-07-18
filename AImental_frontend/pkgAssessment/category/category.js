@@ -2,7 +2,6 @@ const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 const { getScaleDisplayMeta, getScaleDisplayName, getScaleIconName } = require('../../utils/assessment-display.js');
 
 const SERVER_BASE_URL = 'https://api.feelyourself.cn';
-const DRINK_TI_ASSET_BASE = 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti';
 const DEFAULT_GROUP = '心理健康';
 const DEFAULT_ICON_PATH = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/assessment/default.png';
 
@@ -24,16 +23,16 @@ const GROUPS = {
   '亲密关系': {
     key: 'relationship',
     title: '亲密关系',
-    subtitle: '理解人际关系，建立\n深度联结',
+    subtitle: '理解人际关系，建立深度联结',
     hero: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/category/relationship-hero.png',
     order: ['AAS', 'ECR', 'LAMT', 'LDCT']
   },
   '趣味探索': {
     key: 'interest',
     title: '趣味探索',
-    subtitle: '轻松探索兴趣、天赋与好运',
+    subtitle: '轻松有趣，发现更多可能的自己',
     hero: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/category/interest-hero.png',
-    order: ['TPS', 'ICI', 'REAL-MAJOR-V1', 'AGLT', 'RFLT', 'SOUL-DRINK']
+    order: ['TPS', 'ICI', 'REAL-MAJOR-V1', 'AGLT', 'RFLT']
   }
 };
 
@@ -63,7 +62,6 @@ const LOCAL_ASSESSMENT_GROUPS = {
   'REAL-MAJOR-V1': ['趣味探索', 3],
   AGLT: ['趣味探索', 4],
   RFLT: ['趣味探索', 5],
-  'SOUL-DRINK': ['趣味探索', 6],
 };
 
 function request(options) {
@@ -156,21 +154,12 @@ Page({
       displayDescription: displayMeta.description || scale.description || '',
       displaySubnote: displayMeta.subnote || '',
       tagTone: displayMeta.tagTone || 'orange',
-      iconPath: this.getScaleIconPath(scale.short_name, scale)
+      iconPath: this.getScaleIconPath(scale.short_name)
     };
   },
 
-  getScaleIconPath(shortName, scale = {}) {
-    if (shortName === 'SOUL-DRINK') {
-      return this.resolveAssetUrl(scale.cover_image_url || `${DRINK_TI_ASSET_BASE}/cover/drink-ti-cover-reference.png`);
-    }
+  getScaleIconPath(shortName) {
     return `https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/scale-icons/${getScaleIconName(shortName)}.png`;
-  },
-
-  resolveAssetUrl(url) {
-    if (!url) return '';
-    if (/^https?:\/\//i.test(url)) return url;
-    return `${SERVER_BASE_URL}${url.startsWith('/') ? url : `/${url}`}`;
   },
 
   goBack() {

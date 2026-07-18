@@ -38,6 +38,13 @@ cabinet_db = pw.SqliteDatabase(os.path.join(DB_DIRECTORY, 'cabinet.db'))
 # 假设 airplane_db 和 note_db 也是独立的
 airplane_db = pw.SqliteDatabase(os.path.join(DB_DIRECTORY, 'airplane.db'))
 note_db = pw.SqliteDatabase(os.path.join(DB_DIRECTORY, 'note.db'))
+vip_db = pw.SqliteDatabase(
+    os.path.join(DB_DIRECTORY, 'vip.db'),
+    pragmas={
+        'journal_mode': 'wal',
+        'foreign_keys': 1,
+    },
+)
 
 
 # --- 统一管理列表 ---
@@ -52,7 +59,8 @@ all_dbs = [
     promotion_db, 
     cabinet_db,
     airplane_db,
-    note_db
+    note_db,
+    vip_db,
 ]
 
 print("db.py: All database connection objects created.")

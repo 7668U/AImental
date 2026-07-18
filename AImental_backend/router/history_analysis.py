@@ -1,8 +1,9 @@
 # router/history_analysis.py
 
 import json
-from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List, Optional
+from datetime import datetime
+from fastapi import APIRouter, Depends, Header, HTTPException, status
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 # 1. 导入项目模块
@@ -13,6 +14,12 @@ from model.history_analysis import (
     HistoryAnalysisCreateRequest
 )
 from LLM import generate_assessment_synthesis_report
+from vip_access import (
+    confirm_reservation,
+    release_reservation,
+    reserve_feature_or_http,
+)
+from vip_catalog import FEATURE_ASSESSMENT_ANALYSIS
 
 
 # ✅ 【修改】将Pydantic模型定义移到Router文件顶部，保持一致性
@@ -22,6 +29,45 @@ class SynthesisReportResponse(BaseModel):
     recommendations: str = Field(..., description="个性化建议")
     # ✅ 【新增字段】告诉前端这次结果是来自缓存还是新生成的
     from_cache: bool = Field(default=False, description="结果是否来自缓存")
+
+
+class HistoryAnalysisListItem(BaseModel):
+    id: str
+    history_count: int
+    overall_assessment: str
+    created_at: datetime
+
+
+class HistoryAnalysisDetailResponse(BaseModel):
+    id: str
+    analyzed_history_ids: List[str]
+    overall_assessment: str
+    trend_analysis: str
+    recommendations: str
+    created_at: datetime
+
+
+def _parse_history_analysis(record) -> Dict[str, Any]:
+    try:
+        history_ids = json.loads(record.analyzed_history_ids)
+    except (TypeError, json.JSONDecodeError):
+        history_ids = []
+    try:
+        content = json.loads(record.content)
+    except (TypeError, json.JSONDecodeError):
+        content = {}
+    if not isinstance(history_ids, list):
+        history_ids = []
+    if not isinstance(content, dict):
+        content = {}
+    return {
+        "id": record.id,
+        "analyzed_history_ids": [str(item) for item in history_ids],
+        "overall_assessment": content.get("comprehensive_evaluation", ""),
+        "trend_analysis": content.get("trend_analysis", ""),
+        "recommendations": content.get("personalized_recommendations", ""),
+        "created_at": record.created_at,
+    }
 
 
 # ---------------------------------------------------
@@ -44,7 +90,8 @@ router = APIRouter(
 )
 def synthesize_assessment_report(
     request: HistoryAnalysisCreateRequest,
-    current_user_id: str = Depends(get_current_user_id)
+    current_user_id: str = Depends(get_current_user_id),
+    x_request_id: Optional[str] = Header(None, alias="X-Request-ID"),
 ):
     """
     接收历史记录ID列表，优先从数据库查找已有的分析。
@@ -70,33 +117,81 @@ def synthesize_assessment_report(
             from_cache=True # 告知前端这是缓存数据
         )
 
-    # 3. 【缓存未命中】调用LLM生成新报告
-    print(f"❌ Cache miss for signature: {signature[:10]}... Generating new report.")
-    report_dict = generate_assessment_synthesis_report(
+    reservation = reserve_feature_or_http(
         user_id=current_user_id,
-        history_ids=request.history_ids
+        feature=FEATURE_ASSESSMENT_ANALYSIS,
+        supplied_request_id=x_request_id or signature,
     )
-
-    if not report_dict:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to generate AI analysis report. Please try again later."
+    try:
+        print(f"❌ Cache miss for signature: {signature[:10]}... Generating new report.")
+        report_dict = generate_assessment_synthesis_report(
+            user_id=current_user_id,
+            history_ids=request.history_ids
         )
 
-    # 4. 【关键步骤】将新生成的报告存入数据库
-    history_analysis_tables.save_new_analysis(
-        user_id=current_user_id,
-        history_ids=request.history_ids,
-        signature=signature,
-        report_content=report_dict
-    )
+        if not report_dict:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={
+                    "code": "model_generation_failed",
+                    "message": "AI 测评分析生成失败，请稍后重试。",
+                },
+            )
 
-    # 5. 返回新生成的报告
-    return SynthesisReportResponse(
-        overall_assessment=report_dict.get('comprehensive_evaluation', 'AI未能生成评估内容。'),
-        trend_analysis=report_dict.get('trend_analysis', 'AI未能生成趋势分析。'),
-        recommendations=report_dict.get('personalized_recommendations', 'AI未能生成建议。'),
-        from_cache=False # 告知前端这是新数据
-    )
+        history_analysis_tables.save_new_analysis(
+            user_id=current_user_id,
+            history_ids=request.history_ids,
+            signature=signature,
+            report_content=report_dict
+        )
+        confirm_reservation(reservation)
+        return SynthesisReportResponse(
+            overall_assessment=report_dict.get('comprehensive_evaluation', 'AI未能生成评估内容。'),
+            trend_analysis=report_dict.get('trend_analysis', 'AI未能生成趋势分析。'),
+            recommendations=report_dict.get('personalized_recommendations', 'AI未能生成建议。'),
+            from_cache=False
+        )
+    except Exception:
+        release_reservation(reservation)
+        raise
 
-# ... (旧的 /、/{analysis_id}、DELETE 等路由可以保留，如果你还需要通过ID来管理单个报告的话) ...
+
+@router.get(
+    "/",
+    response_model=List[HistoryAnalysisListItem],
+    summary="获取当前用户的历史测评综合分析列表",
+)
+def list_history_analyses(
+    current_user_id: str = Depends(get_current_user_id),
+):
+    records = history_analysis_tables.get_analyses_by_user(current_user_id)
+    result = []
+    for record in records:
+        payload = _parse_history_analysis(record)
+        result.append(
+            {
+                "id": payload["id"],
+                "history_count": len(payload["analyzed_history_ids"]),
+                "overall_assessment": payload["overall_assessment"],
+                "created_at": payload["created_at"],
+            }
+        )
+    return result
+
+
+@router.get(
+    "/{analysis_id}",
+    response_model=HistoryAnalysisDetailResponse,
+    summary="获取单条历史测评综合分析",
+)
+def get_history_analysis_detail(
+    analysis_id: str,
+    current_user_id: str = Depends(get_current_user_id),
+):
+    record = history_analysis_tables.get_analysis_by_id(analysis_id)
+    if not record or record.user_id != current_user_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="History analysis not found.",
+        )
+    return _parse_history_analysis(record)

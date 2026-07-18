@@ -64,7 +64,7 @@
     </block>
 
     <block wx:elif="{{result.scale_details.assessment_type === 'categorical'}}">
-      <view class="result-card personality-card" wx:if="{{!talentRadarReport && !fortuneReport}}">
+      <view class="result-card personality-card" wx:if="{{!fortuneReport}}">
         <view class="personality-image-container" wx:if="{{result.result_details.image_url}}">
           <image class="personality-image" src="{{result.result_details.image_url}}" mode="aspectFit" />
         </view>
@@ -84,18 +84,6 @@
       </view>
 
       <block wx:if="{{talentRadarReport}}">
-        <view class="result-card personality-card talent-summary-card">
-          <view class="personality-major">{{talentRadarReport.summaryTitle}}</view>
-
-          <view class="talent-summary-subtitle" wx:if="{{talentRadarReport.summarySubtitle}}">
-            辅助天赋：{{talentRadarReport.summarySubtitle}}
-          </view>
-
-          <view class="personality-motto" wx:if="{{result.result_details.college_motto}}">
-            “{{result.result_details.college_motto}}”
-          </view>
-        </view>
-
         <view class="result-card talent-hero-card">
           <view class="talent-badge">显性天赋</view>
           <view class="talent-hero-title">{{talentRadarReport.primaryTitle}}</view>
@@ -105,7 +93,7 @@
 
         <view class="result-card detail-card" wx:if="{{talentRadarReport.radarSummary || talentRadarReport.pairSummary || talentRadarReport.primaryBestScene || talentRadarReport.primaryGrowthFocus}}">
           <view class="card-title">
-            <image class="card-icon" src="/images/icons/icon-report.png"></image>
+            <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
             <text>你的雷达主线</text>
           </view>
           <view class="analysis-list">
@@ -150,7 +138,7 @@
 
         <view class="result-card detail-card" wx:if="{{talentRadarReport.stressTitle || talentRadarReport.stressSummary}}">
           <view class="card-title">
-            <image class="card-icon" src="/images/icons/icon-report.png"></image>
+            <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
             <text>压力下的底牌</text>
           </view>
           <view class="analysis-list">
@@ -161,6 +149,19 @@
             <view class="analysis-list-item" wx:if="{{talentRadarReport.stressSummary}}">
               <text class="list-dot"></text>
               <text class="list-text">{{talentRadarReport.stressSummary}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="result-card detail-card" wx:if="{{talentRadarReport.scoreItems.length > 0}}">
+          <view class="card-title">
+            <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
+            <text>八维天赋分布</text>
+          </view>
+          <view class="detail-pair-list">
+            <view class="detail-pair-item" wx:for="{{talentRadarReport.scoreItems}}" wx:key="label">
+              <text class="detail-pair-label">{{item.label}}</text>
+              <text class="detail-pair-value">{{item.value}} 题 · {{item.ratio}}%</text>
             </view>
           </view>
         </view>
@@ -205,7 +206,7 @@
 
         <view class="result-card detail-card" wx:if="{{fortuneReport.recommendation || fortuneReport.relationship || fortuneReport.stress || fortuneReport.change}}">
           <view class="card-title">
-            <image class="card-icon" src="/images/icons/icon-report.png"></image>
+            <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
             <text>接住这波好运</text>
           </view>
           <view class="analysis-list">
@@ -237,9 +238,8 @@
 
       <view class="result-card detail-card" wx:if="{{!talentRadarReport && !fortuneReport && (result.result_details.in_relationships || result.result_details.under_stress || result.result_details.facing_change)}}">
         <view class="card-title">
-          <image class="card-icon" src="/images/icons/icon-report.png"></image>
-          <text wx:if="{{result.result_details.profile_title}}">{{result.result_details.profile_title}}</text>
-          <text wx:else>你的潜意识画像</text>
+          <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
+          <text>你的潜意识画像</text>
         </view>
         <view class="analysis-list">
           <view class="analysis-list-item" wx:if="{{result.result_details.in_relationships}}">
@@ -259,7 +259,7 @@
 
       <view class="result-card detail-card" wx:if="{{secondaryProfile && !talentRadarReport && !fortuneReport && (secondaryProfile.inRelationships || secondaryProfile.underStress || secondaryProfile.facingChange)}}">
         <view class="card-title">
-          <image class="card-icon" src="/images/icons/icon-report.png"></image>
+          <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
           <text>副原型会在哪出现</text>
         </view>
         <view class="analysis-list">
@@ -288,7 +288,7 @@
 
       <view class="result-card career-list-card" wx:if="{{recommendedCareers.length > 0 && !talentRadarReport && !fortuneReport}}">
         <view class="card-title">
-          <image class="card-icon" src="/images/icons/icon-report.png"></image>
+          <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
           <text>更多适合你的职业</text>
         </view>
         <view class="career-list">
@@ -304,62 +304,77 @@
       </view>
     </block>
 
-    <view class="result-card ai-card" wx:if="{{!isSoulDrinkResult && aiAnalysisSections.length > 0}}">
-      <view class="card-title">
-        <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
-        <text>{{analysisTitle}}</text>
-      </view>
+    <block wx:for="{{analysisBlocks}}" wx:for-item="analysisBlock" wx:key="key">
+      <view class="result-card ai-card" wx:if="{{!isSoulDrinkResult && analysisBlock.sections.length > 0}}">
+        <view class="card-title">
+          <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
+          <text>{{analysisBlock.title}}</text>
+        </view>
 
-      <view class="ai-section {{item.type === 'risk' ? 'risk-section' : ''}} {{item.bgIcon ? 'has-section-icon' : ''}}" wx:for="{{aiAnalysisSections}}" wx:key="key">
-        <image wx:if="{{item.bgIcon}}" class="section-bg-icon section-bg-{{item.key}}" src="{{item.bgIcon}}" mode="aspectFit"></image>
-        <view class="ai-section-body">
-          <view class="ai-section-title">{{item.title}}</view>
+        <view
+          class="ai-section {{section.type === 'risk' ? 'risk-section' : ''}} {{section.bgIcon ? 'has-section-icon' : ''}}"
+          wx:for="{{analysisBlock.sections}}"
+          wx:for-item="section"
+          wx:key="key"
+        >
+          <image wx:if="{{section.bgIcon}}" class="section-bg-icon section-bg-{{section.key}}" src="{{section.bgIcon}}" mode="aspectFit"></image>
+          <view class="ai-section-body">
+            <view class="ai-section-title">{{section.title}}</view>
 
-          <view wx:if="{{item.type === 'text' || item.type === 'risk' || item.type === 'support' || item.type === 'recording'}}" class="ai-section-text">
-            {{item.text}}
-          </view>
+            <view wx:if="{{section.type === 'text' || section.type === 'risk' || section.type === 'support' || section.type === 'recording'}}" class="ai-section-text">
+              {{section.text}}
+            </view>
 
-          <view wx:if="{{item.type === 'recording' && item.focusText}}" class="focus-line">
-            重点观察：{{item.focusText}}
-          </view>
+            <view wx:if="{{section.type === 'recording' && section.focusText}}" class="focus-line">
+              重点观察：{{section.focusText}}
+            </view>
 
-          <view wx:if="{{item.type === 'dimensions'}}" class="dimension-list">
-            <view class="dimension-item" wx:for="{{item.dimensions}}" wx:for-item="dimension" wx:key="key">
-              <view class="dimension-heading">
-                <text class="dimension-label">{{dimension.label}}</text>
-                <text class="dimension-level">{{dimension.level}}</text>
-              </view>
-              <view class="dimension-summary">{{dimension.summary}}</view>
-              <view class="dimension-evidence" wx:if="{{dimension.evidenceText}}">
-                相关表现：{{dimension.evidenceText}}
+            <view wx:if="{{section.type === 'dimensions'}}" class="dimension-list">
+              <view class="dimension-item" wx:for="{{section.dimensions}}" wx:for-item="dimension" wx:key="key">
+                <view class="dimension-heading">
+                  <text class="dimension-label">{{dimension.label}}</text>
+                  <text class="dimension-level">{{dimension.level}}</text>
+                </view>
+                <view class="dimension-summary">{{dimension.summary}}</view>
+                <view class="dimension-evidence" wx:if="{{dimension.evidenceText}}">
+                  相关表现：{{dimension.evidenceText}}
+                </view>
               </view>
             </view>
-          </view>
 
-          <view wx:if="{{item.type === 'details' && item.detailItems.length > 0}}" class="detail-pair-list">
-            <view class="detail-pair-item" wx:for="{{item.detailItems}}" wx:for-item="detail" wx:key="label">
-              <text class="detail-pair-label">{{detail.label}}</text>
-              <text class="detail-pair-value">{{detail.value}}</text>
+            <view wx:if="{{section.type === 'details' && section.detailItems.length > 0}}" class="detail-pair-list">
+              <view class="detail-pair-item" wx:for="{{section.detailItems}}" wx:for-item="detail" wx:key="label">
+                <text class="detail-pair-label">{{detail.label}}</text>
+                <text class="detail-pair-value">{{detail.value}}</text>
+              </view>
             </view>
-          </view>
 
-          <view wx:if="{{item.type === 'list'}}" class="analysis-list">
-            <view class="analysis-list-item" wx:for="{{item.list}}" wx:for-item="line" wx:key="*this">
-              <text class="list-dot"></text>
-              <text class="list-text">{{line}}</text>
+            <view wx:if="{{section.type === 'list'}}" class="analysis-list">
+              <view class="analysis-list-item" wx:for="{{section.list}}" wx:for-item="line" wx:key="*this">
+                <text class="list-dot"></text>
+                <text class="list-text">{{line}}</text>
+              </view>
             </view>
           </view>
         </view>
       </view>
-    </view>
+    </block>
 
-    <view class="result-card ai-empty-card" wx:elif="{{!isSoulDrinkResult}}">
-      <image class="empty-bg-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/section-ai.png" mode="aspectFit"></image>
-      <view class="card-title">
-        <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
-        <text>分析结果</text>
-      </view>
-      <view class="card-content">本次结果已生成，暂未获得可展示的分析内容。请稍后从历史测评中再次查看。</view>
+    <view class="ai-analysis-entry" wx:if="{{!isSoulDrinkResult && canGenerateAiAnalysis && !aiAnalysisLoaded}}">
+      <button
+        class="confirm-btn ai-analysis-btn"
+        bindtap="handleGenerateAiAnalysis"
+        loading="{{isAiAnalysisLoading}}"
+        disabled="{{isAiAnalysisLoading}}"
+      >
+        <image
+          wx:if="{{!isAiAnalysisLoading}}"
+          class="ai-analysis-btn-icon"
+          src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/robot.png"
+          mode="aspectFit"
+        ></image>
+        <text>AI深度分析</text>
+      </button>
     </view>
 
     <button class="confirm-btn" bindtap="handleConfirm">我知道了</button>

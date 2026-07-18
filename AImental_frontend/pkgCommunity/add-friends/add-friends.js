@@ -223,7 +223,7 @@ Page({
       title: '这是一个分享测试',
       // 推荐加上 path，指向当前页面，保证用户点击后能回到正确的地方
       path: '/pkgCommunity/add-friends/add-friends',
-      imageUrl: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/share-cover.png?v=20260705165959' // 【关键】这里就是分享图片的路径
+      imageUrl: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/share-cover.png' // 【关键】这里就是分享图片的路径
     }
   },
 

@@ -7,6 +7,7 @@ from typing import List, Dict, Any, Optional # 引入 Optional
 
 from peewee import Model, CharField, TextField, IntegerField, CompositeKey
 from pydantic import BaseModel, Field
+from security.data_encryption import EncryptedTextField
 
 # 导入数据库连接
 try:
@@ -27,6 +28,7 @@ class MoodDistributionItem(BaseModel):
 
 class MoodAnalysisContent(BaseModel):
     total_checkins: int
+    recorded_days: Optional[int] = None
     dominant_mood: str
     mood_distribution: List[MoodDistributionItem]
     dominant_mood_family: Optional[str] = None
@@ -84,7 +86,7 @@ class Analysis(Model):
     user_id = CharField(max_length=36, index=True)
     period_key = CharField(max_length=50, index=True)
     analysis_type = CharField(max_length=50)
-    content = TextField()
+    content = EncryptedTextField(purpose="analyses.content")
     created_at = IntegerField(default=lambda: int(time.time()))
     updated_at = IntegerField(default=lambda: int(time.time()))
 
@@ -108,6 +110,20 @@ class AnalysisTable:
             (Analysis.user_id == user_id) &
             (Analysis.period_key == period_key) &
             (Analysis.analysis_type == analysis_type)
+        )
+
+    def list_ai_report_history(self, user_id: str, limit: int = 100) -> List[Analysis]:
+        return list(
+            Analysis.select()
+            .where(
+                (Analysis.user_id == user_id) &
+                (
+                    (Analysis.analysis_type.contains("_ai_report_")) |
+                    (Analysis.analysis_type.startswith("ai_report_"))
+                )
+            )
+            .order_by(Analysis.updated_at.desc())
+            .limit(limit)
         )
 
     def save_analysis(self, user_id: str, period_key: str, analysis_type: str, content_model: BaseModel) -> Analysis:

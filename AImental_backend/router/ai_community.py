@@ -1,32 +1,40 @@
 # routers/ai_community.py
 
-from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect,status
-from typing import List, Optional, Dict, Any
-from datetime import datetime, timedelta
+from fastapi import APIRouter, Depends, Header, HTTPException, status
+from typing import List, Dict, Any, Optional
+from datetime import date, datetime, timedelta
 import asyncio
 import json
-import random
-import redis # 【新增】导入redis库
+import os
+from redis.backoff import NoBackoff
+from redis.retry import Retry
 # --- 导入所有需要的组件 ---
 
 # 认证
 from .auth import get_current_user_id
 
 # Pydantic模型
-from model.friendship import friendship_table
 from model.friendship import Friendship
-from model.chat_community import ChatListSummaryModel, ChatMessageModel, community_chat_table
-from model.ai_character import AICharacterModel,AICharacter, ai_character_table
+from model.chat_community import ChatListSummaryModel, community_chat_table
+from model.ai_character import AICharacterModel, AICharacter, ai_character_table
 from model.ai_status import ai_status_table
 from model.ai_task import ai_task_table
+from model.community_memory import community_memory_table
+from db import chat_db
 from redis import asyncio as aioredis
 from pydantic import BaseModel, Field
 import pytz
-from .auth import get_current_user_id # 导入你实际的认证依赖项
 import traceback
 from logger_config import logger
-
-from datetime import datetime, date # 【修改】导入 date
+from generate_community_response import generate_ai_response, build_night_reply_context
+from vip_access import (
+    confirm_reservation,
+    release_reservation,
+    reserve_feature_or_http,
+    validate_ai_input,
+)
+from vip_catalog import FEATURE_COMMUNITY
+from vip_service import vip_service
 # ---------------------------------------------------
 # Router 设置
 # ---------------------------------------------------
@@ -38,15 +46,88 @@ router = APIRouter(
 # 定义北京时区
 BEIJING_TZ = pytz.timezone('Asia/Shanghai')
 
+def _build_response_status_context(
+    *,
+    current_status,
+    user_id: str,
+    character_id: str,
+    now: datetime,
+) -> Dict[str, str]:
+    """把角色日程转换成回复风格。日程只影响语气，不再阻断回复。"""
+    category = current_status.status_category if current_status else "在线"
+    status_text = current_status.status_text if current_status else "正在看消息"
+    focus_level = current_status.focus_level if current_status else "AVAILABLE"
+
+    is_night = now.hour >= 23 or now.hour < 7
+    looks_like_sleep = "睡" in category or "睡" in status_text or focus_level == "UNINTERRUPTIBLE"
+
+    response_mode = "normal"
+    response_guidance = "正常陪伴式回复。"
+    if is_night or looks_like_sleep:
+        response_mode = "night_soft"
+        response_guidance = build_night_reply_context(user_id, character_id, now)
+    elif focus_level == "HIGH":
+        response_mode = "focused"
+        response_guidance = "你手头原本有事，但已经看到用户消息。回复可以更短、更像从事情里抬头说话，但不能拒绝或暂停。"
+    elif focus_level == "LOW":
+        response_mode = "low_energy"
+        response_guidance = "你状态比较松弛，可以自然接话，不要表现得像客服。"
+
+    return {
+        "status_title": category,
+        "status_description": status_text,
+        "focus_level": focus_level,
+        "response_mode": response_mode,
+        "response_guidance": response_guidance,
+    }
+
+def _save_ai_messages_and_build_payload(
+    user_id: str,
+    character_id: str,
+    messages: List[str],
+) -> List[Dict[str, Any]]:
+    saved_messages = []
+    for content in messages[:5]:
+        cleaned_content = str(content).strip()
+        if not cleaned_content:
+            continue
+        conversation = community_chat_table.add_message(
+            user_id=user_id,
+            character_id=character_id,
+            role="ai",
+            content=cleaned_content,
+        )
+        if not conversation:
+            continue
+        try:
+            history = json.loads(conversation.messages_history)
+            if history:
+                saved_messages.append(history[-1])
+        except json.JSONDecodeError:
+            logger.warning("AI消息已保存，但解析 messages_history 失败。")
+    if saved_messages:
+        community_chat_table.mark_as_peeked(user_id, character_id)
+    return saved_messages
+
 # ===================================================
-# --- 0. Redis 及 WebSocket 实时通信管理 ---
+# --- 0. Redis 每日计数 ---
 # ===================================================
 
 redis_client = None
+active_reply_sessions: set[str] = set()
+
+
+def _reply_lock_key(user_id: str, character_id: str) -> str:
+    return f"{user_id}:{character_id}"
+
+
+def _reply_in_progress(user_id: str, character_id: str) -> bool:
+    return _reply_lock_key(user_id, character_id) in active_reply_sessions
+
 
 @router.on_event("startup")
 async def startup_event():
-    """应用启动时，创建aioredis连接池。"""
+    """应用启动时，创建 Redis 连接池，用于每日消息计数。"""
     global redis_client
     try:
         redis_client = aioredis.from_url(
@@ -54,98 +135,24 @@ async def startup_event():
             # 如果你是本地运行，请使用 "redis://localhost"
             encoding="utf-8", 
             decode_responses=True,
-            socket_connect_timeout=2,
-            socket_timeout=2
+            socket_connect_timeout=0.5,
+            socket_timeout=0.5,
+            retry_on_timeout=False,
+            retry=Retry(NoBackoff(), 0),
+            health_check_interval=0,
         )
         await redis_client.ping()
-        logger.info("✅ Router 'ai_community' 已成功连接到 aioredis。")
+        logger.info("✅ Router 'ai_community' 已成功连接到 Redis。")
     except Exception as e:
-        logger.error(f"❌ Router 'ai_community' 无法连接到 aioredis: {e}")
+        logger.warning(f"Router 'ai_community' 未连接到 Redis，将跳过每日消息计数: {e}")
         redis_client = None
 
 @router.on_event("shutdown")
 async def shutdown_event():
-    """应用关闭时，关闭aioredis连接池。"""
+    """应用关闭时，关闭 Redis 连接池。"""
     if redis_client:
         await redis_client.close()
-        logger.info("🔌 Router 'ai_community' 的 aioredis 连接已关闭。")
-
-
-@router.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, token: str):
-    """WebSocket端点，用于实时消息推送。"""
-    try:
-        user_id = get_current_user_id(token)
-        if not user_id or not redis_client:
-            await websocket.close(code=1008)
-            return
-    except Exception:
-        await websocket.close(code=1008)
-        return
-
-    await websocket.accept()
-    logger.info(f"WebSocket connected for user: {user_id}")
-    
-    channel = f"ws_channel:{user_id}"
-    
-    async def client_message_handler(ws: WebSocket):
-        """处理来自客户端的消息（如心跳包）。"""
-        try:
-            while True:
-                await ws.receive_text() # 只接收，不处理，维持连接
-        except WebSocketDisconnect:
-            logger.info(f"Client {user_id} disconnected.")
-
-    async def redis_listener(ws: WebSocket):
-        """监听Redis频道并将消息推送给客户端。"""
-        async with redis_client.pubsub() as pubsub:
-            await pubsub.subscribe(channel)
-            logger.info(f"User {user_id} subscribed to Redis channel '{channel}'")
-            try:
-                # 使用异步迭代器，这是一个非阻塞的循环
-                async for message in pubsub.listen():
-                    if message["type"] == "message":
-                        message_data = json.loads(message["data"])
-                        await ws.send_json(message_data)
-            except Exception as e:
-                logger.error(f"Redis listener error for {user_id}: {e}")
-
-    # 并发运行两个任务
-    listener_task = asyncio.create_task(redis_listener(websocket))
-    handler_task = asyncio.create_task(client_message_handler(websocket))
-    
-    done, pending = await asyncio.wait(
-        [listener_task, handler_task], return_when=asyncio.FIRST_COMPLETED
-    )
-    for task in pending:
-        task.cancel()
-    logger.info(f"WebSocket session ended for user: {user_id}")
-
-
-# --- 【保留】您原始文件中的辅助函数 ---
-async def redis_message_handler(websocket: WebSocket, pubsub):
-    """一个独立的协程，专门用来监听Redis频道的消息并推送给前端。"""
-    while True:
-        message = pubsub.get_message(ignore_subscribe_messages=True, timeout=60)
-        if message:
-            try:
-                message_data = json.loads(message["data"])
-                await websocket.send_json(message_data)
-                print(f"Sent message from Redis to WebSocket: {message_data}")
-            except Exception as e:
-                print(f"Error processing message from Redis: {e}")
-                break
-        await asyncio.sleep(0.01)
-
-
-async def client_message_handler(websocket: WebSocket, user_id: str):
-    """一个独立的协程，专门用来接收来自前端的消息（如心跳包）。"""
-    while True:
-        try:
-            data = await websocket.receive_text()
-        except WebSocketDisconnect:
-            print(f"Client {user_id} disconnected.")
-            break
+        logger.info("🔌 Router 'ai_community' 的 Redis 连接已关闭。")
 
 
 # ===================================================
@@ -160,42 +167,18 @@ def send_friend_request(
     form: FriendRequestForm,
     current_user_id: str = Depends(get_current_user_id),
 ):
-    status = friendship_table.get_friendship_status(current_user_id, character_id)
-    if status in ['accepted', 'pending']:
-        raise HTTPException(status_code=400, detail="请求已发送或你们已是好友")
-
-    friendship_table.create_request(
-        user_id=current_user_id,
-        character_id=character_id,
-        message=form.verification_message
-    )
-    
-    random_delay_seconds = random.randint(0, 120) 
-    
-    # 使用这个随机秒数来创建延迟
-    delay = timedelta(seconds=random_delay_seconds)
-    execute_at = datetime.now(BEIJING_TZ) + delay
-    
-    ai_task_table.create_task_if_needed(
-        user_id=current_user_id,
-        character_id=character_id,
-        task_type='friend_request_response',
-        execute_at=execute_at
-    )
-    
-    return {"message": "好友请求已发送"}
+    raise HTTPException(status_code=status.HTTP_410_GONE, detail="好友申请机制已下线")
 
 @router.get("/friendship/requests", summary="获取我发送的好友请求列表")
 def get_my_friend_requests(current_user_id: str = Depends(get_current_user_id)):
-    return {"message": "功能待实现"}
+    raise HTTPException(status_code=status.HTTP_410_GONE, detail="好友申请机制已下线")
 
 @router.get("/friendship/status/{character_id}", summary="查询与某个AI的好友状态")
 def check_friendship_status(
     character_id: str,
     current_user_id: str = Depends(get_current_user_id)
 ):
-    status = friendship_table.get_friendship_status(current_user_id, character_id)
-    return {"status": status}
+    return {"status": "open"}
 
 
 # ===================================================
@@ -203,7 +186,7 @@ def check_friendship_status(
 # ===================================================
 
 @router.get("/characters", response_model=List[AICharacterModel], summary="获取可添加的AI角色列表")
-def list_discoverable_characters(current_user_id: str = Depends(get_current_user_id)):
+def list_discoverable_characters():
     return ai_character_table.get_all_characters()
 
 
@@ -211,9 +194,13 @@ def list_discoverable_characters(current_user_id: str = Depends(get_current_user
 # --- 3. 聊天核心 (Chat Core) 相关接口 ---
 # ===================================================
 
-@router.get("/chats", response_model=List[ChatListSummaryModel], summary="获取用户的聊天会话列表")
+@router.get("/chats", response_model=List[ChatListSummaryModel], summary="获取所有AI角色聊天入口")
 def get_chat_list(current_user_id: str = Depends(get_current_user_id)):
-    return community_chat_table.get_chat_list_for_user(current_user_id)
+    chat_list = community_chat_table.get_chat_list_for_user(current_user_id)
+    for item in chat_list:
+        current_status = ai_status_table.get_current_status(item["character_id"])
+        item["current_status"] = current_status.status_category if current_status else "在线"
+    return chat_list
 
 @router.get("/chats/{character_id}", summary="获取与指定AI的聊天历史记录")
 def get_chat_history(
@@ -226,113 +213,294 @@ def get_chat_history(
     return history
 
 class MessageForm(BaseModel):
-    content: str
+    content: str = Field(..., min_length=1, max_length=200)
+
+class SendMessageResponse(BaseModel):
+    message: str
+    daily_count: int = -1
+    limit: int = -1
+    remaining: int = -1
+    ai_messages: List[Dict[str, Any]] = Field(default_factory=list)
+    character_status: str = "在线"
+
+class TimeRewindResponse(BaseModel):
+    message: str
+    history: List[Dict[str, Any]] = Field(default_factory=list)
+    favorability_context: Dict[str, Any] = Field(default_factory=dict)
+
+@router.post(
+    "/chats/{character_id}/rewind",
+    response_model=TimeRewindResponse,
+    summary="清空指定角色的聊天与关系数据并回到初遇",
+)
+def rewind_chat_relationship(
+    character_id: str,
+    current_user_id: str = Depends(get_current_user_id),
+):
+    character = ai_character_table.get_character_by_id(character_id)
+    if not character:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="角色不存在。",
+        )
+
+    reply_lock_key = _reply_lock_key(current_user_id, character_id)
+    if _reply_in_progress(current_user_id, character_id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="对方正在回复，请等待当前回复结束后再进行时间回溯。",
+        )
+
+    try:
+        with chat_db.atomic():
+            history = community_chat_table.rewind_conversation(
+                current_user_id,
+                character_id,
+            )
+            memory_result = community_memory_table.clear_for_conversation(
+                current_user_id,
+                character_id,
+            )
+            deleted_tasks = ai_task_table.clear_for_conversation(
+                current_user_id,
+                character_id,
+            )
+
+        ai_status_table.clear_transient_offline_status(character_id)
+        logger.info(
+            f"用户 {current_user_id} 对角色 {character_id} 执行时间回溯："
+            f"memory={memory_result['memories']}, "
+            f"summaries={memory_result['summaries']}, tasks={deleted_tasks}"
+        )
+        return TimeRewindResponse(
+            message="已回到初遇时刻。",
+            history=history,
+            favorability_context=community_chat_table.get_favorability_context(
+                current_user_id,
+                character_id,
+            ),
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error(
+            f"用户 {current_user_id} 对角色 {character_id} 执行时间回溯失败: {exc}",
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="时间回溯失败，请稍后重试。",
+        ) from exc
+
 @router.post("/chats/{character_id}/messages", summary="用户向AI发送消息")
 async def send_message(
     character_id: str,
     form: MessageForm,
-    current_user_id: str = Depends(get_current_user_id)
+    current_user_id: str = Depends(get_current_user_id),
+    x_request_id: Optional[str] = Header(None, alias="X-Request-ID"),
 ):
     """
     【最终升级版】
     处理用户发送的消息。
-    集成了每日消息数量限制、好友状态校验、AI睡眠状态拦截以及动态延迟响应。
+    集成每日消息数量限制，并同步返回AI的分段回复。
     """
-    # --- 【新增校验 1：每日消息数量限制】 ---
-    if not redis_client:
-         # 如果Redis连接失败，记录错误但暂时允许通过，避免核心功能中断
-         logger.error("Redis client is not available. Skipping daily message limit check.")
-    else:
-        daily_count = await get_today_message_count(current_user_id)
-        if daily_count >= MESSAGE_LIMIT_PER_DAY:
+    character = ai_character_table.get_character_by_id(character_id)
+    if not character:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="角色不存在")
+
+    reply_lock_key = _reply_lock_key(current_user_id, character_id)
+    if _reply_in_progress(current_user_id, character_id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="对方正在回复您哦~稍后再发吧"
+        )
+
+    content = validate_ai_input(
+        form.content,
+        max_chars=200,
+        max_bytes=800,
+        max_tokens=512,
+    )
+    reservation = None
+    active_reply_sessions.add(reply_lock_key)
+    try:
+        # Redis 仅保留异常安全阈值，真实可用额度由 VIP 月度权益控制。
+        if not redis_client:
+            logger.warning("Redis client is not available. Skipping daily abuse check.")
+        else:
+            daily_count = await get_today_message_count(current_user_id)
+            if daily_count >= COMMUNITY_DAILY_SAFETY_LIMIT:
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail={
+                        "code": "community_daily_safety_limit",
+                        "message": "今日请求频率异常，请稍后再试。",
+                    },
+                )
+
+        reservation = reserve_feature_or_http(
+            user_id=current_user_id,
+            feature=FEATURE_COMMUNITY,
+            supplied_request_id=x_request_id,
+        )
+        now = datetime.now(BEIJING_TZ)
+        ai_status_table.clear_transient_offline_status(character_id)
+        current_status = ai_status_table.get_current_status(character_id)
+        full_day_schedule = ai_status_table.get_schedule_for_date(character_id, now.date())
+        history = community_chat_table.get_conversation_history(current_user_id, character_id, limit=50)
+        generation_history = [
+            *history,
+            {
+                "role": "user",
+                "content": content,
+                "timestamp": now.timestamp(),
+            },
+        ]
+        memory_context = community_memory_table.get_prompt_context(current_user_id, character_id)
+        status_context = _build_response_status_context(
+            current_status=current_status,
+            user_id=current_user_id,
+            character_id=character_id,
+            now=now,
+        )
+
+        structured_response = await asyncio.to_thread(
+            generate_ai_response,
+            character_profile=character.profile,
+            current_ai_status=status_context,
+            conversation_history=generation_history,
+            full_day_schedule=full_day_schedule,
+            current_beijing_time=now,
+            memory_context=memory_context,
+        )
+
+        reply_messages = [
+            str(message).strip()
+            for message in (structured_response.messages if structured_response else [])
+            if str(message).strip()
+        ]
+        if not reply_messages:
+            logger.warning(
+                f"角色 {character_id} 未生成可保存的AI回复，本次消息不落库并返回可重试错误。"
+            )
             raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail=f"您今天发送的总消息条数已经达到{MESSAGE_LIMIT_PER_DAY}条限额啦~明天再来玩吧~"
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="回复生成失败，请稍后重新发送。",
             )
 
-    # --- 【原始校验 2：好友关系检查】 ---
-    friend_status = friendship_table.get_friendship_status(current_user_id, character_id)
-    if friend_status != 'accepted':
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="你们还不是好友")
+        try:
+            with chat_db.atomic():
+                saved_user_message = community_chat_table.add_message(
+                    user_id=current_user_id,
+                    character_id=character_id,
+                    role="user",
+                    content=content,
+                )
+                if not saved_user_message:
+                    raise RuntimeError("Failed to persist user message.")
 
-    # --- 【原始校验 3：AI睡眠拦截器】 ---
-    current_status = ai_status_table.get_current_status(character_id)
-    if current_status and current_status.focus_level == 'UNINTERRUPTIBLE':
-        community_chat_table.add_message(
-            user_id=current_user_id, character_id=character_id,
-            role='user', content=form.content
-        )
-        logger.info(f"AI({character_id}) 处于不可打扰状态，消息已存储，但不创建回复任务。")
-        # 注意：即使AI在睡眠，用户的消息也算在每日额度内
+                ai_messages = _save_ai_messages_and_build_payload(
+                    current_user_id,
+                    character_id,
+                    reply_messages,
+                )
+                if not ai_messages:
+                    raise RuntimeError("Failed to persist AI reply messages.")
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.error(
+                f"保存用户 {current_user_id} 与角色 {character_id} 的聊天消息失败: {exc}",
+                exc_info=True,
+            )
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="消息保存失败，请稍后重新发送。",
+            ) from exc
+
+        final_count = -1
         if redis_client:
-            today_str = date.today().isoformat()
-            redis_key = f"daily_message_count:{current_user_id}:{today_str}"
-            new_count = await redis_client.incr(redis_key)
-            if new_count == 1: # 如果是今天第一条，设置过期时间
-                await redis_client.expire(redis_key, timedelta(days=1))
-        return {"message": "消息已发送"}
+            try:
+                today_str = date.today().isoformat()
+                redis_key = f"daily_message_count:{current_user_id}:{today_str}"
+                new_count = await redis_client.incr(redis_key)
+                if new_count == 1:
+                    await redis_client.expire(redis_key, timedelta(days=1))
 
-    # --- 所有校验通过后，执行核心逻辑 ---
+                logger.info(
+                    f"User({current_user_id}) sent a message. "
+                    f"Today's count is now: {new_count}/"
+                    f"{COMMUNITY_DAILY_SAFETY_LIMIT} safety limit"
+                )
+                final_count = new_count
+            except Exception:
+                logger.warning(
+                    "Redis daily message counter failed after chat persistence; "
+                    "the chat response will still be returned.",
+                    exc_info=True,
+                )
 
-    # 1. 【新增】更新Redis中的消息计数
-    if redis_client:
-        today_str = date.today().isoformat()
-        redis_key = f"daily_message_count:{current_user_id}:{today_str}"
-        # 使用 INCR 原子地增加计数
-        new_count = await redis_client.incr(redis_key)
-        # 如果这是今天的第一条消息 (INCR后的值为1)，则设置24小时的过期时间
-        if new_count == 1:
-            await redis_client.expire(redis_key, timedelta(days=1))
-        
-        # 可选的日志记录
-        logger.info(f"User({current_user_id}) sent a message. Today's count is now: {new_count}/{MESSAGE_LIMIT_PER_DAY}")
+        community_chat_table.update_conversation_state(
+            user_id=current_user_id,
+            character_id=character_id,
+            state="CONTINUOUS",
+            resumes_at=None,
+        )
 
-    # 2. 【原始逻辑】正常保存用户的消息
-    community_chat_table.add_message(
-        user_id=current_user_id, character_id=character_id,
-        role='user', content=form.content
-    )
-    
-    # 3. 【原始逻辑】核心动态延迟决策
-    conversation = community_chat_table.get_conversation(current_user_id, character_id)
-    current_conv_state = conversation.conversation_state if conversation else 'CONTINUOUS'
+        try:
+            queued = community_memory_table.queue_memory_update_if_needed(
+                current_user_id,
+                character_id,
+                ai_task_table,
+            )
+            if queued:
+                logger.info(f"已为用户 {current_user_id} 与角色 {character_id} 排队记忆更新任务。")
+        except Exception:
+            logger.error(
+                f"为用户 {current_user_id} 与角色 {character_id} 排队记忆更新任务失败。",
+                exc_info=True,
+            )
 
-    delay = timedelta(seconds=0)
-    if current_conv_state == 'CONTINUOUS':
-        # 如果是连续对话状态，AI应该“秒回”
-        delay = timedelta(seconds=random.randint(8, 25))
-        logger.info(f"连续对话模式，为AI({character_id})设置短延迟: {delay.seconds}秒")
-    else: # PAUSED
-        # 如果对话已暂停，参考AI的宏观状态（日程）
-        # base_delay_minutes = current_status.reply_delay_minutes if current_status else 2
-        
-        # # 硬规则：非睡眠状态下，长延迟上限为10分钟
-        # capped_delay_minutes = min(base_delay_minutes, 10)
-        # if base_delay_minutes > 10:
-        #     logger.info(f"AI({character_id})原计划延迟 {base_delay_minutes} 分钟，系统上限为10分钟，已修正为 {capped_delay_minutes} 分钟。")
+        try:
+            affinity_queued = community_chat_table.queue_favorability_update_if_needed(
+                current_user_id,
+                character_id,
+                ai_task_table,
+            )
+            if affinity_queued:
+                logger.info(f"已为用户 {current_user_id} 与角色 {character_id} 排队好感度更新任务。")
+        except Exception:
+            logger.error(
+                f"为用户 {current_user_id} 与角色 {character_id} 排队好感度更新任务失败。",
+                exc_info=True,
+            )
 
-        # delay = timedelta(minutes=capped_delay_minutes) + timedelta(seconds=random.randint(0, 59))
-        
-        delay = timedelta(seconds=3)
-        logger.info(f"对话已暂停，但用户再次发言，触发快速响应机制，强制延迟为 {delay.seconds} 秒。")
-        # logger.info(f"非连续对话模式，为AI({character_id})根据日程状态设置长延迟: {delay.total_seconds() / 60:.1f}分钟")
-    
-    execute_at = datetime.now(BEIJING_TZ) + delay
-    
-    ai_task_table.create_task_if_needed(
-        user_id=current_user_id,
-        character_id=character_id,
-        task_type='reply',
-        execute_at=execute_at
-    )
-    
-    # 【可选优化】在返回中告知前端最新的计数值
-    final_count = await get_today_message_count(current_user_id) if redis_client else -1
-    return {"message": "消息已发送", "daily_count": final_count}
+        entitlement = vip_service.get_summary(current_user_id)[
+            "entitlements"
+        ][FEATURE_COMMUNITY]
+        safe_daily_count = max(final_count, 0)
+        response = SendMessageResponse(
+            message="消息已发送",
+            daily_count=final_count,
+            limit=safe_daily_count + entitlement["remaining"],
+            remaining=entitlement["remaining"],
+            ai_messages=ai_messages,
+            character_status=status_context.get("status_title", "在线"),
+        )
+        confirm_reservation(reservation)
+        return response
+    except Exception:
+        release_reservation(reservation)
+        raise
+    finally:
+        active_reply_sessions.discard(reply_lock_key)
 # --- 【核心升级点】 ---
 class ChatDetailsResponse(BaseModel):
     history: List[Dict[str, Any]] = Field(..., description="聊天历史记录列表")
     character_status: str = Field(..., description="AI角色当前的实时状态文本")
+    character: AICharacterModel = Field(..., description="AI角色资料卡信息")
+    favorability_context: Dict[str, Any] = Field(default_factory=dict, description="当前关系温度上下文")
+    reply_in_progress: bool = Field(False, description="当前角色是否正在为该用户生成回复")
 
 @router.get(
     "/chats/{character_id}/details", 
@@ -345,7 +513,11 @@ def get_chat_details(
     limit: int = 50,
 ):
     # --- 【调试日志 1】: 打印函数的入口和收到的参数 ---
-    logger.info(f"--- [GET /details DEBUG] 1. 函数开始执行，收到请求，角色ID: {character_id}")
+    logger.debug(f"--- [GET /details DEBUG] 1. 函数开始执行，收到请求，角色ID: {character_id}")
+
+    character = ai_character_table.get_character_by_id(character_id)
+    if not character:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="角色不存在")
 
     community_chat_table.mark_as_peeked(current_user_id, character_id)
     history = community_chat_table.get_conversation_history(
@@ -355,87 +527,55 @@ def get_chat_details(
     )
 
     # --- 【调试日志 2】: 打印即将调用的关键函数 ---
-    logger.info(f"--- [GET /details DEBUG] 2. 准备调用 ai_status_table.get_current_status...")
+    logger.debug(f"--- [GET /details DEBUG] 2. 准备调用 ai_status_table.get_current_status...")
     
     current_status_obj = ai_status_table.get_current_status(character_id)
 
     # --- 【调试日志 3】: 打印关键函数的返回结果，这是最重要的一步！---
-    logger.info(f"--- [GET /details DEBUG] 3. get_current_status 调用完成，返回的对象是: {current_status_obj}")
+    logger.debug(f"--- [GET /details DEBUG] 3. get_current_status 调用完成，返回的对象是: {current_status_obj}")
 
     # --- 【调试日志 4】: 根据返回结果，记录将要执行的逻辑分支 ---
     if current_status_obj:
-        logger.info(f"--- [GET /details DEBUG] 4. 对象不为空，将使用 status_category: '{current_status_obj.status_category}'")
+        logger.debug(f"--- [GET /details DEBUG] 4. 对象不为空，将使用 status_category: '{current_status_obj.status_category}'")
         character_status_text = current_status_obj.status_category
     else:
         logger.warning(f"--- [GET /details DEBUG] 4. 对象为空 (None)，将使用默认状态 '在线'")
         character_status_text = "在线"
 
     # --- 【调试日志 5】: 打印最终要返回给前端的数据 ---
-    logger.info(f"--- [GET /details DEBUG] 5. 最终返回给前端的状态文本是: '{character_status_text}' ---")
+    logger.debug(f"--- [GET /details DEBUG] 5. 最终返回给前端的状态文本是: '{character_status_text}' ---")
     
     return ChatDetailsResponse(
         history=history,
-        character_status=character_status_text
+        character_status=character_status_text,
+        character=character,
+        favorability_context=community_chat_table.get_favorability_context(current_user_id, character_id),
+        reply_in_progress=_reply_in_progress(current_user_id, character_id),
     )
 
-# ===================================================
-# --- 4. 【保留】实时推送逻辑 ---
-# ===================================================
-# 注意：这些函数在您的原始代码中存在，但并未在此文件内被调用。
-# 它们可能是为了被 background_worker.py 导入而存在。为保持一致性，予以保留。
 
-def push_message_to_user(user_id: str, character_id: str, message_content: str):
-    """
-    【重构】当AI生成回复后，通过Redis发布消息。
-    """
-    if not redis_client:
-        print("Redis is not connected. Cannot push message.")
-        return
-        
-    new_msg_record = community_chat_table.add_message(
-        user_id=user_id,
-        character_id=character_id,
-        role='ai',
-        content=message_content
+class ChatReplyStatusResponse(BaseModel):
+    reply_in_progress: bool = Field(..., description="当前角色是否正在为该用户生成回复")
+
+
+@router.get(
+    "/chats/{character_id}/reply-status",
+    response_model=ChatReplyStatusResponse,
+    summary="获取指定角色当前是否正在生成回复",
+)
+def get_chat_reply_status(
+    character_id: str,
+    current_user_id: str = Depends(get_current_user_id),
+):
+    character = ai_character_table.get_character_by_id(character_id)
+    if not character:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="角色不存在")
+
+    return ChatReplyStatusResponse(
+        reply_in_progress=_reply_in_progress(current_user_id, character_id),
     )
-    
-    message_data = ChatMessageModel(
-        role='ai',
-        content=message_content,
-        timestamp=new_msg_record.last_message_timestamp
-    ).model_dump()
-    
-    payload = {
-        "type": "new_message",
-        "from_character_id": character_id,
-        "message": message_data
-    }
-    
-    channel = f"ws_channel:{user_id}"
-    # redis_client.publish(channel, json.dumps(payload))
-    print(f"Published message to Redis channel '{channel}' for user {user_id}")
-
-def push_friend_request_result(user_id: str, character_id: str, status: str, initial_message: Optional[str] = None):
-    """
-    【重构】当好友请求被处理后，通过Redis发布结果。
-    """
-    if not redis_client:
-        print("Redis is not connected. Cannot push friend request result.")
-        return
-
-    payload = {
-        "type": "friend_request_result",
-        "from_character_id": character_id,
-        "status": status,
-        "initial_message": initial_message
-    }
-    channel = f"ws_channel:{user_id}"
-    # redis_client.publish(channel, json.dumps(payload))
-    print(f"Published friend request result to Redis channel '{channel}' for user {user_id}")
 
 
-    
-    
 # --- Pydantic模型 (保持不变) ---
 class FriendshipHistoryItem(BaseModel):
     """ 定义单条好友申请历史记录的数据结构 """
@@ -515,7 +655,7 @@ async def user_peek_at_chat(
     """
     success = community_chat_table.mark_as_peeked(user_id, character_id)
     if not success:
-        print(f"警告: 标记用户 {user_id} 窥视角色 {character_id} 的操作未找到记录或失败。")
+        logger.debug(f"用户 {user_id} 正在查看尚未开始的角色会话 {character_id}。")
     return {"message": "Peek status updated"}
 
 # ===================================================
@@ -524,9 +664,13 @@ async def user_peek_at_chat(
 
 class ChatStatusResponse(BaseModel):
     daily_count: int = Field(..., description="用户今日已发送消息数")
-    limit: int = Field(..., description="每日消息上限")
+    limit: int = Field(..., description="兼容旧前端的可用额度上界")
+    remaining: int = Field(..., description="当前社区剩余额度")
+    reset_at: Optional[int] = Field(None, description="最早到期或重置时间")
 
-MESSAGE_LIMIT_PER_DAY = 50
+COMMUNITY_DAILY_SAFETY_LIMIT = int(
+    os.getenv("VIP_COMMUNITY_DAILY_SAFETY_LIMIT", "300")
+)
 
 async def get_today_message_count(user_id: str) -> int:
     """【新增】从Redis获取用户今日发送的消息数"""
@@ -544,11 +688,23 @@ async def get_today_message_count(user_id: str) -> int:
 )
 async def get_user_chat_status(current_user_id: str = Depends(get_current_user_id)):
     """
-    返回用户今天的消息发送计数和每日上限。
-    前端可以在进入聊天页时调用此接口来初始化UI状态。
+    返回社区剩余额度，并兼容旧前端的 daily_count/limit 计算方式。
     """
     daily_count = await get_today_message_count(current_user_id)
-    return ChatStatusResponse(daily_count=daily_count, limit=MESSAGE_LIMIT_PER_DAY)
+    entitlement = vip_service.get_summary(current_user_id)[
+        "entitlements"
+    ][FEATURE_COMMUNITY]
+    reset_candidates = [
+        source["expires_at"]
+        for source in entitlement["sources"]
+        if source["remaining"] > 0
+    ]
+    return ChatStatusResponse(
+        daily_count=daily_count,
+        limit=daily_count + entitlement["remaining"],
+        remaining=entitlement["remaining"],
+        reset_at=min(reset_candidates) if reset_candidates else None,
+    )
 
 
 # 确保导入了你的 User 模型
@@ -647,7 +803,7 @@ def debug_check_schedule_exists(
         ..., 
         alias="date",
         description="要查询的日期，格式必须为 YYYY-MM-DD",
-        example="2025-08-18"
+        examples=["2025-08-18"]
     ),
     current_user_id: str = Depends(get_current_user_id)
 ):

@@ -1,8 +1,10 @@
 {
   "usingComponents": {
-    "login-prompt": "/components/login-prompt/login-prompt"
+    "privacy-consent": "/components/privacy-consent/privacy-consent"
   },
-  "navigationBarTitleText": "心灵社区",
+  "navigationBarTitleText": "",
   "enablePullDownRefresh": true,
-  "navigationStyle": "custom"
+  "navigationStyle": "custom",
+  "backgroundColor": "#fff7ef",
+  "backgroundTextStyle": "dark"
 }

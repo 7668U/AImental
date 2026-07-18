@@ -1,5 +1,9 @@
 // pages/daily-checkin/record.js
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
+const {
+  isDirectUploadUnavailable,
+  uploadPrivateImageDirect,
+} = require('../utils/private-media-upload.js');
 
 const API_BASE_URL = 'https://api.feelyourself.cn';
 const MAX_PHOTOS = 3;
@@ -194,7 +198,7 @@ function buildServerPhotos(data) {
 
 Page({
   data: {
-    navTitle: '今日心情记录',
+    navTitle: '记录此刻心情',
     statusBarHeight: 0,
     navBarHeight: 44,
     totalNavBarHeight: 44,
@@ -221,40 +225,38 @@ Page({
     isLocked: false,
     checkinId: null,
     pageDate: null,
+
+    recordTime: '',      // 当前选择的时刻 HH:MM
+    maxTime: '23:59',    // 允许选择的最晚时刻（今天当前时刻）
+    canPickTime: true,   // 是否允许点击微调时间（仅今天可编辑时为 true）
   },
 
   onLoad(options) {
     this.updateNavMetrics();
 
-    if (options.mode === 'create') {
-      const dateStr = options.date || this.getTodayString();
-      const canEdit = this.isWithinRecentDays(dateStr, 3);
-      this.setData({
-        isEditMode: false,
-        isLocked: !canEdit,
-        pageDate: dateStr,
-        dateLabel: this.formatDateLabel(dateStr),
-        navTitle: canEdit ? (dateStr === this.getTodayString() ? '今日心情记录' : '补记心情记录') : '历史心情记录',
-      });
-      wx.setNavigationBarTitle({ title: canEdit ? '补记心情记录' : '查看历史心情' });
-    } else if (options.mode === 'edit' || options.mode === 'view') {
+    if (options.mode === 'edit' || options.mode === 'view') {
       const dateStr = options.date || this.getTodayString();
       this.setData({
         isEditMode: true,
         pageDate: dateStr,
+        maxTime: this.getCurrentTimeString(),
         dateLabel: this.formatDateLabel(dateStr),
       });
-      this.loadCheckinData(dateStr);
+      this.loadCheckinData(dateStr, options.id);
     } else {
       const today = this.getTodayString();
+      const nowTime = this.getCurrentTimeString();
       this.setData({
         isEditMode: false,
         isLocked: false,
+        canPickTime: true,
         pageDate: today,
-        dateLabel: this.formatDateLabel(today),
-        navTitle: '今日心情记录',
+        recordTime: nowTime,
+        maxTime: nowTime,
+        dateLabel: this.formatMomentLabelWithTime(nowTime),
+        navTitle: '记录此刻心情',
       });
-      wx.setNavigationBarTitle({ title: '记录今日心情' });
+      wx.setNavigationBarTitle({ title: '记录此刻心情' });
     }
   },
 
@@ -312,23 +314,29 @@ Page({
     wx.navigateBack({ delta: 1 });
   },
 
-  loadCheckinData(dateToFetch) {
-    const isToday = dateToFetch === this.getTodayString();
-    const canEdit = this.isWithinRecentDays(dateToFetch, 3);
+  loadCheckinData(dateToFetch, momentId) {
+    // 只允许修改今天的记录，过去的记录只读回看。
+    const canEdit = dateToFetch === this.getTodayString();
     this.setData({
       isLocked: !canEdit,
-      navTitle: isToday ? '今日心情记录' : (canEdit ? '修改近期心情' : '历史心情记录'),
+      canPickTime: canEdit,
+      navTitle: canEdit ? '修改此刻心情' : '回看此刻心情',
       dateLabel: this.formatDateLabel(dateToFetch),
     });
 
-    wx.setNavigationBarTitle({ title: canEdit ? '修改心情记录' : '查看历史心情' });
+    wx.setNavigationBarTitle({ title: canEdit ? '修改此刻心情' : '回看此刻心情' });
 
     const token = wx.getStorageSync('token');
     if (!token) return;
 
+    // 优先按具体 moment 的 id 加载（心情轨迹点击进入）；否则回退到按日期取当天最新一条。
+    const url = momentId
+      ? `https://api.feelyourself.cn/api/v1/checkin/moment/${momentId}`
+      : `https://api.feelyourself.cn/api/v1/checkin/date/${dateToFetch}`;
+
     wx.showLoading({ title: '加载中...' });
     wx.request({
-      url: `https://api.feelyourself.cn/api/v1/checkin/date/${dateToFetch}`,
+      url,
       method: 'GET',
       header: { 'Authorization': `Bearer ${token}` },
       success: (res) => {
@@ -336,6 +344,13 @@ Page({
           const checkinData = res.data;
           this.setData({ checkinId: checkinData.id });
           this.populateForm(checkinData);
+          const loadedTime = checkinData.local_time || this.getCurrentTimeString();
+          this.setData({
+            recordTime: loadedTime,
+            dateLabel: canEdit
+              ? this.formatMomentLabelWithTime(loadedTime)
+              : `${this.formatDateLabel(dateToFetch)} ${loadedTime}`,
+          });
         } else {
           wx.showToast({ title: '加载记录失败', icon: 'none' });
         }
@@ -346,6 +361,20 @@ Page({
       complete: () => {
         wx.hideLoading();
       }
+    });
+  },
+
+  onTimeChange(e) {
+    if (this.data.isLocked || !this.data.canPickTime) return;
+    let picked = e.detail.value || this.data.recordTime;
+    // 不允许超过当前时刻。
+    if (picked > this.data.maxTime) {
+      picked = this.data.maxTime;
+      wx.showToast({ title: '不能选择未来的时间哦', icon: 'none' });
+    }
+    this.setData({
+      recordTime: picked,
+      dateLabel: this.formatMomentLabelWithTime(picked),
     });
   },
 
@@ -537,7 +566,7 @@ Page({
       tags: selectedStatuses.map(item => item.name).join(','),
       color: selectedColor.value,
       text_content: this.data.textContent,
-      record_date: this.data.pageDate || this.getTodayString(),
+      local_time: this.data.recordTime || this.getCurrentTimeString(),
     };
 
     wx.showLoading({ title: '正在保存...' });
@@ -551,7 +580,7 @@ Page({
 
   createCheckinRecord(data) {
     this.sendRequest({
-      url: 'https://api.feelyourself.cn/api/v1/checkin/',
+      url: 'https://api.feelyourself.cn/api/v1/checkin/moments',
       method: 'POST',
       data,
       successCallback: (res) => {
@@ -581,7 +610,7 @@ Page({
   uploadImageForCheckin(checkinId, filePath, imageIndex) {
     const token = wx.getStorageSync('token');
     return new Promise((resolve, reject) => {
-      wx.uploadFile({
+      this.uploadCheckinImageFile({
         url: `${API_BASE_URL}/api/v1/checkin/${checkinId}/images/${imageIndex}`,
         filePath,
         name: 'image',
@@ -602,6 +631,31 @@ Page({
         fail: reject
       });
     });
+  },
+
+  uploadCheckinImageFile(options) {
+    const token = wx.getStorageSync('token');
+    uploadPrivateImageDirect({
+      apiBaseUrl: API_BASE_URL,
+      token,
+      mediaType: 'checkin',
+      filePath: options.filePath,
+      bindUrl: `${options.url}/direct`,
+      bindMethod: 'PUT',
+    })
+      .then((data) => {
+        options.success({
+          statusCode: 200,
+          data: JSON.stringify(data),
+        });
+      })
+      .catch((error) => {
+        if (isDirectUploadUnavailable(error)) {
+          wx.uploadFile(options);
+          return;
+        }
+        options.fail(error);
+      });
   },
 
   syncPhotosForCheckin(checkinId, successCallback) {
@@ -710,6 +764,20 @@ Page({
     if (Number.isNaN(date.getTime())) return '';
     const weekNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
     return `${date.getMonth() + 1}月${date.getDate()}日 ${weekNames[date.getDay()]}`;
+  },
+
+  formatCurrentMomentLabel() {
+    const now = new Date();
+    return `今天 ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  },
+
+  getCurrentTimeString() {
+    const now = new Date();
+    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  },
+
+  formatMomentLabelWithTime(timeStr) {
+    return `今天 ${timeStr || this.getCurrentTimeString()}`;
   },
 
   onShareAppMessage() {

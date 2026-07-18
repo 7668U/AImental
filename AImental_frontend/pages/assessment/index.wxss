@@ -37,18 +37,23 @@ page {
 
 .hero-title {
   display: block;
-  font-size: 48rpx;
-  line-height: 1.18;
-  font-weight: 800;
-  color: #2f3338;
+  font-family: 'LXGWWenKaiHome', "STKaiti", "KaiTi", "Songti SC", "PingFang SC", serif;
+  font-size: 60rpx;
+  line-height: 1.12;
+  font-weight: 400;
+  color: #4b2c1b;
+  letter-spacing: 0;
 }
 
 .hero-subtitle {
   display: block;
-  margin-top: 18rpx;
+  margin-top: 16rpx;
+  font-family: 'LXGWWenKaiHome', "STKaiti", "KaiTi", "Songti SC", "PingFang SC", serif;
   font-size: 28rpx;
-  line-height: 1.22;
-  color: #96989c;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #806d61;
+  letter-spacing: 0;
 }
 
 .hero-subtitle + .hero-subtitle {
@@ -119,33 +124,9 @@ page {
 
 .group-action {
   flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10rpx;
-  width: 170rpx;
-  height: 66rpx;
+  width: 220rpx;
+  height: 96rpx;
   margin-left: 16rpx;
-  border-radius: 999rpx;
-  background: linear-gradient(135deg, #ffbd7c 0%, #ff8b3d 100%);
-  box-shadow: 0 10rpx 22rpx rgba(255, 132, 56, 0.26);
-  color: #ffffff;
-  font-weight: 900;
-  box-sizing: border-box;
-}
-
-.action-label {
-  font-size: 27rpx;
-  line-height: 1;
-  color: #ffffff;
-}
-
-.action-chevron {
-  width: 14rpx;
-  height: 14rpx;
-  border-top: 4rpx solid #ffffff;
-  border-right: 4rpx solid #ffffff;
-  transform: rotate(45deg);
 }
 
 .login-wrapper {
@@ -154,7 +135,7 @@ page {
   justify-content: center;
   width: 100%;
   height: 100vh;
-  background: #fffaf2;
+  background: linear-gradient(180deg, #fff7ee 0%, #f9f6f0 100%);
 }
 
 .assessment-disclaimer-modal {
@@ -191,13 +172,11 @@ page {
 
 .assessment-disclaimer-icon {
   position: absolute;
-  left: 34rpx;
-  top: 24rpx;
+  left: 38rpx;
+  top: 46rpx;
   z-index: 1;
-  width: 66rpx;
-  height: 66rpx;
-  border-radius: 18rpx;
-  box-shadow: 0 10rpx 18rpx rgba(255, 133, 105, 0.16);
+  width: 76rpx;
+  height: 76rpx;
 }
 
 .assessment-disclaimer-title {
