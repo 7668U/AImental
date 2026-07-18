@@ -1,6 +1,7 @@
 import os
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from dotenv import load_dotenv
 from fastapi import HTTPException
@@ -26,6 +27,7 @@ from vip_catalog import (
 )
 from vip_service import VipQuotaExceeded, VipService, add_months
 from vip_access import validate_ai_input
+from vip_virtual_payment import _virtual_payment_app_key
 from router import vip as vip_router_module
 
 
@@ -73,6 +75,24 @@ class VipServiceTestCase(unittest.TestCase):
             VipMembership,
         ):
             model.delete().execute()
+
+    def test_virtual_payment_selects_app_key_by_environment(self):
+        with patch.dict(
+            os.environ,
+            {
+                "WECHAT_VIRTUAL_PAY_APP_KEY": "production-key",
+                "WECHAT_VIRTUAL_PAY_SANDBOX_APP_KEY": "sandbox-key",
+            },
+            clear=False,
+        ):
+            self.assertEqual(
+                _virtual_payment_app_key(0),
+                "production-key",
+            )
+            self.assertEqual(
+                _virtual_payment_app_key(1),
+                "sandbox-key",
+            )
 
     def test_free_monthly_quotas_are_created(self):
         summary = self.service.get_summary("free-user", timestamp=TEST_NOW)
