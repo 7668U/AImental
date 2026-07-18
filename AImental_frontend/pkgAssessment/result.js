@@ -1,5 +1,5 @@
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
-const { getResultSectionTitles } = require('../utils/assessment-display.js');
+const { getResultSectionTitles } = require('./utils/assessment-display.js');
 const {
   isVipQuotaExhaustedError,
   showVipQuotaModal,

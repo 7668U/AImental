@@ -1,5 +1,5 @@
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
-const { getScaleDisplayName, getScaleIconName } = require('../../utils/assessment-display.js');
+const { getScaleDisplayName, getScaleIconName } = require('../utils/assessment-display.js');
 
 const SERVER_BASE_URL = 'https://api.feelyourself.cn';
 
