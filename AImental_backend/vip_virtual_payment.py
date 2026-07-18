@@ -24,6 +24,20 @@ def _env_int(name: str, default: int) -> int:
         return default
 
 
+def _virtual_payment_env() -> int:
+    return _env_int("WECHAT_VIRTUAL_PAY_ENV", 1)
+
+
+def _virtual_payment_app_key(env: Optional[int] = None) -> str:
+    selected_env = _virtual_payment_env() if env is None else env
+    key_name = (
+        "WECHAT_VIRTUAL_PAY_APP_KEY"
+        if selected_env == 0
+        else "WECHAT_VIRTUAL_PAY_SANDBOX_APP_KEY"
+    )
+    return os.getenv(key_name, "").strip()
+
+
 def _json_dumps(payload: Dict[str, Any]) -> str:
     return json.dumps(
         payload,
@@ -119,7 +133,7 @@ def _build_payload(
 def real_virtual_payment_ready(user: Any) -> bool:
     return bool(
         os.getenv("WECHAT_VIRTUAL_PAY_OFFER_ID", "").strip()
-        and os.getenv("WECHAT_VIRTUAL_PAY_APP_KEY", "").strip()
+        and _virtual_payment_app_key()
         and getattr(user, "wechat_session_key", None)
     )
 
@@ -147,7 +161,8 @@ def build_virtual_payment(
         }
 
     offer_id = os.getenv("WECHAT_VIRTUAL_PAY_OFFER_ID", "").strip()
-    app_key = os.getenv("WECHAT_VIRTUAL_PAY_APP_KEY", "").strip()
+    payment_env = _virtual_payment_env()
+    app_key = _virtual_payment_app_key(payment_env)
     if is_local:
         offer_id = offer_id or LOCAL_OFFER_ID
         app_key = app_key or LOCAL_APP_KEY
@@ -158,7 +173,7 @@ def build_virtual_payment(
         offer_id=offer_id,
         app_key=app_key,
         session_key=session_key,
-        env=_env_int("WECHAT_VIRTUAL_PAY_ENV", 1),
+        env=payment_env,
     )
     local_confirm_endpoint = (
         f"{api_prefix}/vip/orders/{order.id}/virtual-pay/local-confirm"
