@@ -8,7 +8,7 @@
 
     <image
       class="privacy-illustration"
-      src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/privacy/privacy-shield.png"
+      src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/privacy/privacy-shield.png"
       mode="aspectFit"
     />
 
@@ -19,7 +19,7 @@
     <view class="privacy-promises">
       <view class="privacy-promise">
         <view class="promise-icon-shell">
-          <image class="promise-icon-image" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/privacy/privacy-lock-line.png" mode="aspectFit"></image>
+          <image class="promise-icon-image" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/privacy/privacy-lock-line.png" mode="aspectFit"></image>
         </view>
         <view class="promise-copy">
           <view class="promise-title">敏感数据加密保存</view>
@@ -28,7 +28,7 @@
       </view>
       <view class="privacy-promise">
         <view class="promise-icon-shell">
-          <image class="promise-icon-image" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/privacy/privacy-minimal-line.png" mode="aspectFit"></image>
+          <image class="promise-icon-image" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/privacy/privacy-minimal-line.png" mode="aspectFit"></image>
         </view>
         <view class="promise-copy">
           <view class="promise-title">只收集功能所必需的信息</view>
@@ -37,7 +37,7 @@
       </view>
       <view class="privacy-promise">
         <view class="promise-icon-shell">
-          <image class="promise-icon-image" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/privacy/privacy-control-line.png" mode="aspectFit"></image>
+          <image class="promise-icon-image" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/privacy/privacy-control-line.png" mode="aspectFit"></image>
         </view>
         <view class="promise-copy">
           <view class="promise-title">你的数据由你掌控</view>
@@ -78,7 +78,7 @@
       <scroll-view class="detail-scroll" scroll-y="true" enhanced="true">
         <view class="detail-meta">版本 {{policy.version}} · 生效日期 {{policy.effectiveDate}}</view>
         <view class="detail-summary">
-          <image class="detail-summary-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/privacy/privacy-shield-line.png" mode="aspectFit"></image>
+          <image class="detail-summary-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/privacy/privacy-shield-line.png" mode="aspectFit"></image>
           <view class="detail-summary-copy">{{policy.summary}}</view>
         </view>
         <view

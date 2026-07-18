@@ -1,5 +1,5 @@
 <view class="page-container">
-  <image class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgProfile/images/profile/profile-info-bg.png" mode="aspectFill"></image>
+  <image class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgProfile/images/profile/profile-info-bg.png" mode="aspectFill"></image>
 
   <view class="custom-nav-wrapper" style="padding-top: {{navTop}}px;">
     <view class="custom-nav" style="height: {{navHeight}}px;">
@@ -16,13 +16,13 @@
   <view class="main-content" style="padding-top: {{navHeight + navTop}}px;">
     <view class="profile-hero">
       <view class="avatar-wrapper" bindtap="onChangeAvatar">
-        <image class="avatar" src="{{avatar_url || 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png'}}" mode="aspectFill"></image>
+        <image class="avatar" src="{{avatar_url || 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/default-avatar.png'}}" mode="aspectFill"></image>
       </view>
     </view>
 
     <view class="info-section">
       <view class="info-item">
-        <image class="info-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgProfile/images/profile/profile-info-cat.png" mode="aspectFit"></image>
+        <image class="info-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgProfile/images/profile/profile-info-cat.png" mode="aspectFit"></image>
         <text class="label">昵称</text>
         <view class="value-container">
           <input 
@@ -42,7 +42,7 @@
 
       <picker bindchange="bindGenderChange" value="{{genderIndex}}" range="{{genderRange}}">
         <view class="info-item">
-          <image class="info-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgProfile/images/profile/profile-info-heart.png" mode="aspectFit"></image>
+          <image class="info-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgProfile/images/profile/profile-info-heart.png" mode="aspectFit"></image>
           <text class="label">性别</text>
           <view class="value-container">
             <text class="user-info-text">{{genderRange[genderIndex]}}</text>
@@ -53,7 +53,7 @@
 
       <picker mode="date" value="{{birthday}}" start="1920-01-01" end="{{currentDate}}" bindchange="bindBirthdayChange">
         <view class="info-item">
-          <image class="info-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgProfile/images/profile/profile-info-cake.png" mode="aspectFit"></image>
+          <image class="info-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgProfile/images/profile/profile-info-cake.png" mode="aspectFit"></image>
           <text class="label">生日</text>
           <view class="value-container">
             <text class="user-info-text">{{birthday}}</text>

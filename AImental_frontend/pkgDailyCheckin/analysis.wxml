@@ -3,7 +3,7 @@
 <view class="custom-nav-wrapper" style="padding-top: {{navTop}}px;">
   <view class="custom-nav" style="height: {{navHeight}}px;">
     <view class="nav-left" bindtap="navigateBack">
-      <image class="nav-back-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/left.png"></image>
+      <image class="nav-back-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/left.png"></image>
     </view>
     <view class="nav-center">
       <text class="nav-title"></text>
@@ -82,10 +82,10 @@
             <view class="chart-container" wx:if="{{!item.skipped && !item.error && item.chartData}}">
               <view class="chart-header">
                 <view class="chart-title-wrap">
-                  <image class="leaf-mark" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-leaf.png" mode="aspectFit"></image>
+                  <image class="leaf-mark" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/report-leaf.png" mode="aspectFit"></image>
                   <text class="chart-title">{{item.chartTitle}}</text>
                 </view>
-                <image class="chart-star" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-star.png" mode="aspectFit"></image>
+                <image class="chart-star" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/report-star.png" mode="aspectFit"></image>
               </view>
               <view class="chart-canvas-wrap">
                 <ec-canvas id="{{item.chartId}}" canvas-id="{{item.chartId}}" ec="{{ ec }}"></ec-canvas>
@@ -108,7 +108,7 @@
 
             <view class="result-card skip-card" wx:if="{{item.skipped || item.error}}">
               <view class="card-title">
-                <image class="heart-mark" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-heart.png" mode="aspectFit"></image>
+                <image class="heart-mark" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/report-heart.png" mode="aspectFit"></image>
                 <text>{{item.title}}</text>
               </view>
               <text class="card-content">{{item.skipMessage}}</text>
@@ -116,18 +116,18 @@
 
             <block wx:else>
               <view class="result-card interpretation-card">
-                <image class="interpretation-deco" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-sun-cloud.png" mode="aspectFit"></image>
+                <image class="interpretation-deco" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/report-sun-cloud.png" mode="aspectFit"></image>
                 <view class="card-title">
-                  <image class="heart-mark" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-heart.png" mode="aspectFit"></image>
+                  <image class="heart-mark" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/report-heart.png" mode="aspectFit"></image>
                   <text>{{item.title}}解读</text>
                 </view>
                 <view class="card-divider"></view>
                 <text class="card-content" user-select="{{true}}">{{item.interpretation}}</text>
               </view>
               <view class="result-card ai-card">
-                <image class="ai-deco" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-ai-deco.png" mode="aspectFit"></image>
+                <image class="ai-deco" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/report-ai-deco.png" mode="aspectFit"></image>
                 <view class="card-title">
-                  <image class="ai-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/robot.png" mode="aspectFit"></image>
+                  <image class="ai-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/robot.png" mode="aspectFit"></image>
                   <text>{{item.title}}报告</text>
                 </view>
                 <text class="card-content" user-select="{{true}}">{{item.aiReport}}</text>
@@ -167,10 +167,10 @@
           <view class="chart-container" wx:if="{{!activeReport.skipped && !activeReport.error && isChartReady}}">
             <view class="chart-header">
               <view class="chart-title-wrap">
-                <image class="leaf-mark" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-leaf.png" mode="aspectFit"></image>
+                <image class="leaf-mark" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/report-leaf.png" mode="aspectFit"></image>
                 <text class="chart-title">{{activeReport.chartTitle}}</text>
               </view>
-              <image class="chart-star" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-star.png" mode="aspectFit"></image>
+              <image class="chart-star" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/report-star.png" mode="aspectFit"></image>
             </view>
             <view class="chart-canvas-wrap">
               <ec-canvas id="analysis-chart" canvas-id="analysis-chart" ec="{{ ec }}"></ec-canvas>
@@ -193,7 +193,7 @@
 
           <view class="result-card skip-card" wx:if="{{activeReport.skipped || activeReport.error}}">
             <view class="card-title">
-              <image class="heart-mark" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-heart.png" mode="aspectFit"></image>
+              <image class="heart-mark" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/report-heart.png" mode="aspectFit"></image>
               <text>{{activeReport.title}}</text>
             </view>
             <text class="card-content">{{activeReport.skipMessage}}</text>
@@ -201,18 +201,18 @@
 
           <block wx:else>
             <view class="result-card interpretation-card">
-              <image class="interpretation-deco" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-sun-cloud.png" mode="aspectFit"></image>
+              <image class="interpretation-deco" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/report-sun-cloud.png" mode="aspectFit"></image>
               <view class="card-title">
-                <image class="heart-mark" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-heart.png" mode="aspectFit"></image>
+                <image class="heart-mark" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/report-heart.png" mode="aspectFit"></image>
                 <text>{{activeReport.title}}解读</text>
               </view>
               <view class="card-divider"></view>
               <text class="card-content" user-select="{{true}}">{{activeReport.interpretation}}</text>
             </view>
             <view class="result-card ai-card">
-              <image class="ai-deco" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-ai-deco.png" mode="aspectFit"></image>
+              <image class="ai-deco" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/report-ai-deco.png" mode="aspectFit"></image>
               <view class="card-title">
-                <image class="ai-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/robot.png" mode="aspectFit"></image>
+                <image class="ai-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/robot.png" mode="aspectFit"></image>
                 <text>{{activeReport.title}}报告</text>
               </view>
               <text class="card-content" user-select="{{true}}">{{activeReport.aiReport}}</text>

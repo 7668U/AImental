@@ -3,7 +3,7 @@
   <view class="warm-bg warm-bg-bottom"></view>
   <view class="bg-dot bg-dot-one"></view>
   <view class="bg-dot bg-dot-two"></view>
-  <image class="sparkle-img bg-sparkle-one" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
+  <image class="sparkle-img bg-sparkle-one" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
 
   <view class="test-nav" style="padding-top: {{statusBarHeight}}px; height: {{navBarHeight}}px;">
     <view class="nav-back" bindtap="goBack">
@@ -28,8 +28,8 @@
                   <view class="question-index">第 {{item.order}} 题</view>
                   <view class="index-line"></view>
                 </view>
-                <image class="sparkle-img question-sparkle-one" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
-                <image class="sparkle-img question-sparkle-two" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
+                <image class="sparkle-img question-sparkle-one" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
+                <image class="sparkle-img question-sparkle-two" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
                 <view class="question-text">{{item.text}}</view>
               </view>
 
@@ -39,7 +39,7 @@
                     <label class="option-row {{answers[item.order] == option.score ? 'selected' : ''}}" wx:for="{{item.choices}}" wx:key="score" wx:for-item="option">
                       <view class="option-dot {{answers[item.order] == option.score ? 'selected' : ''}}"></view>
                       <view class="option-text">{{option.text}}</view>
-                      <image class="sparkle-img option-sparkle" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
+                      <image class="sparkle-img option-sparkle" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
                       <radio class="option-radio-hidden" value="{{option.score}}" checked="{{answers[item.order] == option.score}}"></radio>
                     </label>
                   </block>
@@ -48,7 +48,7 @@
                     <label class="option-row {{answers[item.order] == option.id ? 'selected' : ''}}" wx:for="{{item.choices}}" wx:key="id" wx:for-item="option">
                       <view class="option-dot {{answers[item.order] == option.id ? 'selected' : ''}}"></view>
                       <view class="option-text">{{option.text}}</view>
-                      <image class="sparkle-img option-sparkle" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
+                      <image class="sparkle-img option-sparkle" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
                       <radio class="option-radio-hidden" value="{{option.id}}" checked="{{answers[item.order] == option.id}}"></radio>
                     </label>
                   </block>
@@ -64,7 +64,7 @@
       <view class="answer-card-toggle" bindtap="toggleAnswerCard">
         <image
           class="answer-card-toggle-icon"
-          src="{{isAnswerCardOpen ? 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-arrow-down.png' : 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-arrow-up.png'}}"
+          src="{{isAnswerCardOpen ? 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-arrow-down.png' : 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-arrow-up.png'}}"
           mode="aspectFit"
         ></image>
       </view>
@@ -91,7 +91,7 @@
             <view class="progress-track">
               <view class="progress-fill" style="width: {{progress}}%;"></view>
             </view>
-            <image class="runner-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/test/runner.png" style="left: {{progress}}%;"></image>
+            <image class="runner-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgAssessment/images/test/runner.png" style="left: {{progress}}%;"></image>
           </view>
           <view class="progress-text">{{answeredCount}}/{{totalQuestions}}</view>
         </view>
@@ -102,10 +102,10 @@
             <text>上一题</text>
           </view>
           <view class="next-btn {{isSubmitting ? 'disabled' : ''}}" bindtap="nextQuestion">
-            <image class="sparkle-img btn-sparkle-one" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
+            <image class="sparkle-img btn-sparkle-one" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
             <text>{{currentIndex === totalQuestions - 1 ? '查看结果' : '下一题'}}</text>
             <text class="btn-chevron">›</text>
-            <image class="sparkle-img btn-sparkle-two" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
+            <image class="sparkle-img btn-sparkle-two" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgAssessment/images/test/sparkle.png" mode="aspectFit"></image>
           </view>
         </view>
       </view>

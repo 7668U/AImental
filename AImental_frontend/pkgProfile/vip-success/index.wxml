@@ -2,7 +2,7 @@
   <view class="hero-section">
     <image
       class="hero-bg"
-      src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/membership-success-hero-bg.png"
+      src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/membership-success-hero-bg.png"
       mode="aspectFill"
     ></image>
 
@@ -27,13 +27,13 @@
         <view class="plan-icon-stage">
           <image
             class="leaf-decor leaf-left"
-            src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/membership-success-leaf-left.png"
+            src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/membership-success-leaf-left.png"
             mode="aspectFit"
           ></image>
           <image class="plan-icon" src="{{plan.image}}" mode="aspectFit"></image>
           <image
             class="leaf-decor leaf-right"
-            src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/membership-success-leaf-left.png"
+            src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/membership-success-leaf-left.png"
             mode="aspectFit"
           ></image>
         </view>

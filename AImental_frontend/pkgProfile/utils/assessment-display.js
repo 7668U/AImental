@@ -105,6 +105,9 @@ const SCALE_DISPLAY_META = {
     subnote: '近期好运签',
     tagTone: 'orange',
     iconKey: 'rflt'
+  },
+  'SOUL-DRINK': {
+    iconKey: 'soul-drink-v2'
   }
 };
 

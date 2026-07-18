@@ -1,9 +1,9 @@
 <view class="page-container">
-  <image class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/ai-therapist/chat-bg-window.png" mode="aspectFill"></image>
+  <image class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/ai-therapist/chat-bg-window.png" mode="aspectFill"></image>
 
   <view class="disclaimer-modal" wx:if="{{isDisclaimerVisible}}">
     <view class="disclaimer-content" catchtap="preventClose">
-      <image class="disclaimer-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/ai-therapist/plant-buddy.png" mode="aspectFit"></image>
+      <image class="disclaimer-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/ai-therapist/plant-buddy.png" mode="aspectFit"></image>
       <view class="disclaimer-body">
         <view class="disclaimer-title">温馨提示</view>
         <view class="disclaimer-text">
@@ -37,7 +37,7 @@
           <text>新建</text>
         </view>
         <view class="history-setting-button" catchtap="toggleSettings">
-          <image class="history-setting-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/setting.png"></image>
+          <image class="history-setting-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/setting.png"></image>
         </view>
       </view>
       <view class="sidebar-rule"></view>
@@ -97,7 +97,7 @@
       >
         <view id="chatTopAnchor" class="chat-top-anchor"></view>
         <view class="intro-row">
-          <image class="intro-plant" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/ai-therapist/plant-buddy.png" mode="aspectFit"></image>
+          <image class="intro-plant" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/ai-therapist/plant-buddy.png" mode="aspectFit"></image>
           <view class="intro-pill">
             <text class="intro-spark">✦</text>
             <text class="intro-text">和Polaris聊天，尝试感受自己的情绪吧！</text>
@@ -126,7 +126,7 @@
           <image
             wx:if="{{item.sender === 'user'}}"
             class="message-plane"
-            src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/ai-therapist/paper-plane.png"
+            src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/ai-therapist/paper-plane.png"
             mode="aspectFit"
           ></image>
         </view>

@@ -19,9 +19,9 @@ from pydantic import BaseModel, Field
 from db import chat_db 
 
 AI_CHARACTER_AVATAR_CDN_BASE = (
-    "https://assets.feelyourself.cn/miniprogram/assets/v1/backend/avatars"
+    "https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/backend/avatars/v2"
 )
-DEFAULT_CHARACTER_AVATAR_URL = f"{AI_CHARACTER_AVATAR_CDN_BASE}/guyu.png"
+DEFAULT_CHARACTER_AVATAR_URL = f"{AI_CHARACTER_AVATAR_CDN_BASE}/guyu.jpg"
 
 # ---------------------------------------------------
 # 1. Peewee 数据库模型 (Database Model)

@@ -1,9 +1,9 @@
 // pages/ai-community/chat-interface/chat-interface.js
 const API_BASE_URL = 'https://api.feelyourself.cn/api/v1/community';
 const SERVER_BASE_URL = API_BASE_URL.replace('/api/v1/community', '');
-const CDN_ASSET_BASE_URL = 'https://assets.feelyourself.cn/miniprogram/assets/v1';
+const CDN_ASSET_BASE_URL = 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1';
 const DEFAULT_USER_AVATAR = `${CDN_ASSET_BASE_URL}/images/default-avatar.png`;
-const COMMUNITY_PROFILE_MBTI_ICON = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/community-profile-mbti.png';
+const COMMUNITY_PROFILE_MBTI_ICON = 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/community-profile-mbti.png';
 const REPLY_STATUS_POLL_INTERVAL_MS = 1500;
 const app = getApp();
 

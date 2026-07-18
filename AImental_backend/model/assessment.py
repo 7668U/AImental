@@ -1144,7 +1144,7 @@ class AssessmentTables:
             'JP': {'J': dim_counts['J'], 'P': dim_counts['P'], 'winner': result_type[2]},
         }
         result_card_base_url = (
-            'https://assets.feelyourself.cn/miniprogram/assets/v1/'
+            'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/'
             'pkgAssessment/images/drink-ti/result-cards'
         )
         result_card_map = {

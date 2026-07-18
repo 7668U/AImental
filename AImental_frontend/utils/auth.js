@@ -14,6 +14,37 @@ function getDevUserId() {
   return wx.getStorageSync('devUserId') || DEFAULT_LOCAL_USER_ID;
 }
 
+function isPrivacyConsentRequiredResponse(res) {
+  return Boolean(
+    res &&
+    res.statusCode === 428 &&
+    res.data &&
+    res.data.detail &&
+    res.data.detail.code === 'privacy_consent_required'
+  );
+}
+
+function handlePrivacyConsentRequiredResponse(page, res) {
+  if (!isPrivacyConsentRequiredResponse(res)) {
+    return false;
+  }
+
+  clearPrivacyConsent();
+  wx.removeStorageSync('token');
+  wx.removeStorageSync('userInfo');
+
+  if (page && typeof page.setData === 'function') {
+    page._pendingPrivacyLogin =
+      typeof page.performLogin === 'function' ? page.performLogin : null;
+    page.setData({
+      isLoggedIn: false,
+      privacyVisible: true
+    });
+  }
+
+  return true;
+}
+
 function loginWithBackend(apiBaseUrl) {
   return new Promise((resolve, reject) => {
     const privacyPayload = getPrivacyLoginPayload();
@@ -27,12 +58,7 @@ function loginWithBackend(apiBaseUrl) {
         resolve(res.data);
         return;
       }
-      if (
-        res.statusCode === 428 &&
-        res.data &&
-        res.data.detail &&
-        res.data.detail.code === 'privacy_consent_required'
-      ) {
+      if (isPrivacyConsentRequiredResponse(res)) {
         clearPrivacyConsent();
         reject(createPrivacyConsentRequiredError(res.data.detail.message));
         return;
@@ -109,6 +135,7 @@ function rejectPrivacyAwareLogin(page) {
 
 module.exports = {
   confirmPrivacyAwareLogin,
+  handlePrivacyConsentRequiredResponse,
   loginWithBackend,
   rejectPrivacyAwareLogin,
   requestPrivacyAwareLogin

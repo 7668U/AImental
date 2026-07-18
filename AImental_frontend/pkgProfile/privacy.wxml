@@ -8,7 +8,7 @@
 
   <scroll-view class="privacy-scroll" scroll-y="true" enhanced="true">
     <view class="privacy-hero">
-      <image class="hero-shield" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/privacy/privacy-shield.png" mode="aspectFit"></image>
+      <image class="hero-shield" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/privacy/privacy-shield.png" mode="aspectFit"></image>
       <view class="hero-title">认真守护每一份信任</view>
       <view class="hero-copy">你的情绪、测评与聊天记录属于高度私密的信息。我们从存储、查询到读取都按最小必要原则保护。</view>
     </view>
@@ -16,21 +16,21 @@
     <view class="protection-band">
       <view class="protection-item">
         <view class="protection-mark">
-          <image class="protection-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/privacy/privacy-lock-line.png" mode="aspectFit"></image>
+          <image class="protection-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/privacy/privacy-lock-line.png" mode="aspectFit"></image>
         </view>
         <view class="protection-title">认证加密</view>
         <view class="protection-copy">敏感字段和上传图片均加密保存</view>
       </view>
       <view class="protection-item">
         <view class="protection-mark">
-          <image class="protection-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/privacy/privacy-minimal-line.png" mode="aspectFit"></image>
+          <image class="protection-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/privacy/privacy-minimal-line.png" mode="aspectFit"></image>
         </view>
         <view class="protection-title">最小必要</view>
         <view class="protection-copy">只处理完成对应功能所需的信息</view>
       </view>
       <view class="protection-item">
         <view class="protection-mark">
-          <image class="protection-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/privacy/privacy-control-line.png" mode="aspectFit"></image>
+          <image class="protection-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/privacy/privacy-control-line.png" mode="aspectFit"></image>
         </view>
         <view class="protection-title">用户可控</view>
         <view class="protection-copy">支持更正、删除和撤回同意</view>
@@ -53,7 +53,7 @@
 
     <view class="policy-card">
       <view class="policy-title-row">
-        <image class="policy-heading-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/privacy/privacy-shield-line.png" mode="aspectFit"></image>
+        <image class="policy-heading-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/privacy/privacy-shield-line.png" mode="aspectFit"></image>
         <view class="policy-heading-copy">
           <view class="policy-heading">{{policy.title}}</view>
           <view class="policy-meta">版本 {{policy.version}} · 生效日期 {{policy.effectiveDate}}</view>

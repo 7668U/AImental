@@ -8,7 +8,7 @@
 
   <view class="profile-hero">
     <view class="avatar-ring">
-      <image class="avatar" src="{{userInfo.avatar_url || 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png'}}" mode="aspectFill"></image>
+      <image class="avatar" src="{{userInfo.avatar_url || 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/default-avatar.png'}}" mode="aspectFill"></image>
       <view wx:if="{{isMember && membershipAvatarIcon}}" class="membership-avatar-badge">
         <image class="membership-avatar-icon" src="{{membershipAvatarIcon}}" mode="aspectFit"></image>
       </view>
@@ -21,7 +21,7 @@
   <view class="menu-card">
     <view class="menu-item membership-menu-item" bindtap="goToVip">
       <view class="menu-icon-wrap membership-icon-wrap">
-        <image class="membership-menu-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/membership-heart-line.png" mode="aspectFit"></image>
+        <image class="membership-menu-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/membership-heart-line.png" mode="aspectFit"></image>
       </view>
       <view class="menu-copy">
         <view class="menu-title">{{vipEntryTitle}}</view>
@@ -32,7 +32,7 @@
 
     <view class="menu-item" bindtap="goToUserInfo">
       <view class="menu-icon-wrap">
-        <image class="menu-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-user.png" mode="aspectFit"></image>
+        <image class="menu-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-user.png" mode="aspectFit"></image>
       </view>
       <view class="menu-copy">
         <view class="menu-title">个人信息</view>
@@ -43,7 +43,7 @@
 
     <view class="menu-item" bindtap="goToReports">
       <view class="menu-icon-wrap">
-        <image class="menu-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png" mode="aspectFit"></image>
+        <image class="menu-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-report.png" mode="aspectFit"></image>
       </view>
       <view class="menu-copy">
         <view class="menu-title">测试历史</view>
@@ -54,7 +54,7 @@
 
     <view class="menu-item" bindtap="goToFeedback">
       <view class="menu-icon-wrap">
-        <image class="menu-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-feedback.png" mode="aspectFit"></image>
+        <image class="menu-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-feedback.png" mode="aspectFit"></image>
       </view>
       <view class="menu-copy">
         <view class="menu-title">意见反馈</view>
@@ -65,7 +65,7 @@
 
     <view class="menu-item" bindtap="goToPrivacy">
       <view class="menu-icon-wrap">
-        <image class="menu-icon menu-icon-privacy" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/privacy/privacy-shield-line.png" mode="aspectFit"></image>
+        <image class="menu-icon menu-icon-privacy" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/privacy/privacy-shield-line.png" mode="aspectFit"></image>
       </view>
       <view class="menu-copy">
         <view class="menu-title">隐私与数据</view>
@@ -76,7 +76,7 @@
 
     <view class="menu-item" bindtap="goToAboutUs">
       <view class="menu-icon-wrap">
-        <image class="menu-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-about.png" mode="aspectFit"></image>
+        <image class="menu-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-about.png" mode="aspectFit"></image>
       </view>
       <view class="menu-copy">
         <view class="menu-title">关于我们</view>

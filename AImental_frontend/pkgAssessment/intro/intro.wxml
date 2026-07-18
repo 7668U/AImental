@@ -35,14 +35,14 @@
     <view class="card-zone">
       <view class="info-card primary-card">
         <view class="mini-icon-wrap">
-          <image class="mini-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/intro/intro-heart.png" mode="aspectFit" />
+          <image class="mini-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgAssessment/images/intro/intro-heart.png" mode="aspectFit" />
         </view>
         <view class="card-copy strong-copy">{{scale.coverSummary}}</view>
       </view>
 
       <view class="info-card">
         <view class="mini-icon-wrap note-icon">
-          <image class="mini-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/intro/intro-note.png" mode="aspectFit" />
+          <image class="mini-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgAssessment/images/intro/intro-note.png" mode="aspectFit" />
         </view>
         <view class="card-copy muted-copy">{{scale.coverInstruction}}</view>
       </view>

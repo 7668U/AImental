@@ -204,22 +204,6 @@
       {
         "type": "file",
         "value": "pkgDailyCheckin/components-ecanvas/ISSUE_TEMPLATE.md"
-      },
-      {
-        "type": "file",
-        "value": "pkgProfile/history_analysis.js"
-      },
-      {
-        "type": "file",
-        "value": "pkgProfile/history_analysis.json"
-      },
-      {
-        "type": "file",
-        "value": "pkgProfile/history_analysis.wxml"
-      },
-      {
-        "type": "file",
-        "value": "pkgProfile/history_analysis.wxss"
       }
     ],
     "include": [

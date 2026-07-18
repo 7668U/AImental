@@ -329,7 +329,7 @@ class PaperAirplaneTable:
             system_user = user_table.create_user(
                 openid=SYSTEM_USER_OPENID,
                 nickname=SYSTEM_USER_NICKNAME,
-                avatar_url="https://assets.feelyourself.cn/miniprogram/assets/v1/backend/avatars/default.png" # Or a specific system avatar
+                avatar_url="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/backend/avatars/default.png" # Or a specific system avatar
             )
             if not system_user:
                 print("Failed to create system user. Cannot seed default airplanes.")

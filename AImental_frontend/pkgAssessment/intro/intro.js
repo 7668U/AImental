@@ -29,7 +29,7 @@ function request(options) {
   });
 }
 
-const DEFAULT_ICON_PATH = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/assessment/default.png';
+const DEFAULT_ICON_PATH = 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/assessment/default.png';
 
 const SCALE_INTRO_COPY = {
   SDS: {
@@ -154,7 +154,7 @@ Page({
       const displayName = this.data.passedDisplayTitle || getScaleDisplayName(scaleData.short_name, scaleData.name);
       scaleData.name = displayName;
       scaleData.displayName = displayName;
-      scaleData.iconPath = `https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/scale-icons/${getScaleIconName(scaleData.short_name)}.png`;
+      scaleData.iconPath = `https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgAssessment/images/scale-icons/${getScaleIconName(scaleData.short_name)}.png`;
       scaleData.coverImagePath = this.resolveAssetUrl(scaleData.cover_image_url);
       scaleData.coverSummary = shortCopy.summary;
       scaleData.coverInstruction = shortCopy.instruction;

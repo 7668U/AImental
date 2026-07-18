@@ -177,7 +177,7 @@ def build_virtual_payment(
     )
     local_confirm_endpoint = (
         f"{api_prefix}/vip/orders/{order.id}/virtual-pay/local-confirm"
-        if local_virtual_payment_ready()
+        if is_local
         else None
     )
     return {

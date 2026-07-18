@@ -29,7 +29,7 @@ Page({
   onUnload: function () { if (this.data.isEditingNickname) { this.saveNickname(); } },
 
   setNavSize() {
-    const sysInfo = wx.getSystemInfoSync();
+    const sysInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
     const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
     this.setData({
       navTop: sysInfo.statusBarHeight,

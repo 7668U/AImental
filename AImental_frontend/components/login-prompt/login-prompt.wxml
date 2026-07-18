@@ -1,5 +1,5 @@
 <view class="login-prompt-container">
-    <image class="login-avatar" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/ai_avatar.png"></image>
+    <image class="login-avatar" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/ai_avatar.png"></image>
     <view class="login-title">{{ title }}</view>
     <view class="login-subtitle">{{ subtitle }}</view>
     <button class="login-btn" bindtap="onLoginTap">

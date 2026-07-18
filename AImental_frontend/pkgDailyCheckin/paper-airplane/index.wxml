@@ -3,14 +3,14 @@
   <!-- 背景元素 -->
   <view class="sky-bg">
     <!-- 云朵 -->
-    <image src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/cloud.png" class="cloud cloud-1"></image>
+    <image src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/cloud.png" class="cloud cloud-1"></image>
   </view>
 
   <!-- 纸飞机容器 -->
   <view class="airplane-container">
     <!-- 动态生成的纸飞机 -->
     <image wx:for="{{airplanes}}" wx:key="id"
-           src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper_airplane.png"
+           src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/paper_airplane.png"
            class="airplane"
            style="top: {{item.top}}%; left: {{item.left}}%; transform: rotate({{item.rotate}}deg);"
            data-id="{{item.id}}"
@@ -21,7 +21,7 @@
   <!-- 底部操作区: 修改为 button 元素以确保点击事件的响应 -->
   <view class="actions-bar">
     <button class="throw-button-container" bindtap="onThrowClick">
-      <image src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/send_airplane.png" class="throw-button-img"></image>
+      <image src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/send_airplane.png" class="throw-button-img"></image>
       <text class="throw-button-text">扔一个</text>
     </button>
   </view>
@@ -30,7 +30,7 @@
   <view class="modal-mask" wx:if="{{showWriteModal}}" bindtap="hideModals"></view>
   <view class="modal-content write-modal" wx:if="{{showWriteModal}}">
     <!-- 弹窗右上角的取消按钮 -->
-    <image src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/cancle.png" class="modal-cancel-btn" bindtap="hideModals"></image>
+    <image src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/cancle.png" class="modal-cancel-btn" bindtap="hideModals"></image>
     
     <textarea class="message-input" placeholder="把你的心事写在纸上，然后让它飞远吧..." maxlength="500" value="{{newMessage}}" bindinput="onMessageInput"></textarea>
     <view class="modal-button" bindtap="sendAirplane">飞出去</view>
@@ -40,7 +40,7 @@
   <view class="modal-mask" wx:if="{{showReadModal}}" bindtap="hideModals"></view>
   <view class="modal-content read-modal" wx:if="{{showReadModal}}">
      <!-- 弹窗右上角的取消按钮 -->
-    <image src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/cancle.png" class="modal-cancel-btn" bindtap="hideModals"></image>
+    <image src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/cancle.png" class="modal-cancel-btn" bindtap="hideModals"></image>
     
     <scroll-view scroll-y="true" class="message-display">
       <text>{{openedMessage}}</text>

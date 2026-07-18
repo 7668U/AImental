@@ -60,7 +60,7 @@ const PAPER_PLANE_ICONS = [
   'paper_plane_06_04.png',
 ].map((name, index) => ({
   number: `P${String(index + 1).padStart(2, '0')}`,
-  path: `https://assets.feelyourself.cn/miniprogram/assets/v1/images/paper-airplane/flying/${name}`
+  path: `https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/paper-airplane/flying/${name}`
 }));
 
 const AIRPLANE_SAFE_SLOTS = [

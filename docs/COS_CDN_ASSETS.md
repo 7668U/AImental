@@ -9,19 +9,19 @@ https://assets.feelyourself.cn
 The current asset prefix is:
 
 ```text
-miniprogram/assets/v1
+miniprogram/assets/releases/20260718-1
 ```
 
 So an asset stored in COS as:
 
 ```text
-miniprogram/assets/v1/images/share-cover.png
+miniprogram/assets/releases/20260718-1/images/share-cover.png
 ```
 
 is referenced in the mini-program as:
 
 ```text
-https://assets.feelyourself.cn/miniprogram/assets/v1/images/share-cover.png
+https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/share-cover.png
 ```
 
 ## Why This Exists
@@ -33,7 +33,8 @@ Current package strategy:
 - Keep `AImental_frontend/images/tabbar` local for tabBar icons.
 - Upload large image assets to COS/CDN.
 - Ignore CDN-backed local image folders through `AImental_frontend/project.config.json`.
-- Keep code paths stable by using the CDN URL prefix above.
+- Publish each release under a new immutable prefix. Never overwrite an existing
+  release prefix after clients may have cached it.
 
 ## Local Env
 
@@ -48,7 +49,7 @@ COS_REGION=ap-beijing
 COS_BUCKET=feelyourself-assets-1369598469
 COS_UPLOAD_ROOT=output/cos-assets
 COS_CDN_BASE_URL=https://assets.feelyourself.cn
-COS_ASSET_PREFIX=miniprogram/assets/v1
+COS_ASSET_PREFIX=miniprogram/assets/releases/20260718-1
 ```
 
 Do not commit real credentials. `.env.example` contains placeholders for future setup.
@@ -80,26 +81,26 @@ AImental_backend/static/avatars/...
 2. Reference it through the CDN URL in mini-program code:
 
 ```text
-https://assets.feelyourself.cn/miniprogram/assets/v1/...
+https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/...
 ```
 
 Examples:
 
 ```text
 AImental_frontend/images/ai-therapist/plant-buddy.png
--> https://assets.feelyourself.cn/miniprogram/assets/v1/images/ai-therapist/plant-buddy.png
+-> https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/ai-therapist/plant-buddy.png
 
 AImental_frontend/pkgAssessment/images/category/health-hero.png
--> https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/category/health-hero.png
+-> https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgAssessment/images/category/health-hero.png
 
 AImental_frontend/pages/daily-checkin/assets/calendar-hero-bg.png
--> https://assets.feelyourself.cn/miniprogram/assets/v1/pages/daily-checkin/assets/calendar-hero-bg.png
+-> https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pages/daily-checkin/assets/calendar-hero-bg.png
 
 AImental_frontend/pkgDailyCheckin/assets/trajectory/calm.jpg
--> https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/assets/trajectory/calm.jpg
+-> https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/assets/trajectory/calm.jpg
 
 AImental_backend/static/avatars/default.png
--> https://assets.feelyourself.cn/miniprogram/assets/v1/backend/avatars/default.png
+-> https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/backend/avatars/default.png
 ```
 
 3. Rebuild the upload staging directory:
@@ -111,28 +112,43 @@ python tools/stage_cos_assets.py
 This creates:
 
 ```text
-output/cos-assets/miniprogram/assets/v1/...
+output/cos-assets/miniprogram/assets/releases/20260718-1/...
 ```
 
-4. Dry-run the upload:
+4. Audit every runtime image reference, staged file, manifest hash, and image
+   decoder result:
 
 ```bash
-python tools/upload_cos_assets.py --dry-run
+python tools/audit_frontend_assets.py
 ```
 
-5. Upload to COS and verify a few CDN URLs:
+5. Dry-run the upload:
 
 ```bash
-python tools/upload_cos_assets.py
+python tools/upload_cos_assets.py --dry-run --verify 0
 ```
 
-The script reads `.env`, uploads everything under `COS_UPLOAD_ROOT`, and verifies the first few files through `COS_CDN_BASE_URL`.
+6. Upload to COS and fully download every CDN object to compare its length and
+   SHA-256 hash:
 
-To verify more URLs:
+```bash
+python tools/upload_cos_assets.py --verify all
+```
+
+The script reads `.env`, uploads everything under `COS_UPLOAD_ROOT`, enables
+upload MD5 checking, and writes `Cache-Control: public, max-age=31536000,
+immutable`.
+
+For a quick targeted check during development:
 
 ```bash
 python tools/upload_cos_assets.py --verify 10
 ```
+
+Before the next asset release, choose a new `COS_ASSET_PREFIX`, update runtime
+references to the same prefix, and run the full flow again. Reusing an existing
+prefix can leave CDN edge nodes with stale bodies or byte ranges and may cause
+`ERR_CONTENT_LENGTH_MISMATCH`.
 
 ## Current WeChat Domain Setup
 
@@ -153,8 +169,8 @@ The CDN domain only needs to be in `downloadFile合法域名` for image loading.
 Useful checks:
 
 ```bash
-curl -I https://assets.feelyourself.cn/miniprogram/assets/v1/images/share-cover.png
-curl -I https://feelyourself-assets-1369598469.cos.ap-beijing.myqcloud.com/miniprogram/assets/v1/images/share-cover.png
+curl -I https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/share-cover.png
+curl -I https://feelyourself-assets-1369598469.cos.ap-beijing.myqcloud.com/miniprogram/assets/releases/20260718-1/images/share-cover.png
 ```
 
 Expected CDN result:

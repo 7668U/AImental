@@ -1,8 +1,11 @@
 import json
+import logging
+import time
 import uuid
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import PlainTextResponse, Response
 from pydantic import BaseModel, Field
 
 from feature_flags import (
@@ -21,7 +24,23 @@ from vip_service import (
     VipQuotaExceeded,
     vip_service,
 )
-from vip_virtual_payment import build_virtual_payment
+from vip_payment_sync import (
+    VipPaymentSyncError,
+    callback_failure_response,
+    callback_success_response,
+    find_order_for_callback,
+    parse_callback_body,
+    reconcile_order,
+    verify_message_signature,
+)
+from vip_virtual_payment import (
+    _product_id,
+    _unit_price,
+    _virtual_payment_env,
+    build_virtual_payment,
+    real_virtual_payment_ready,
+    virtual_out_trade_no,
+)
 
 from .auth import get_current_user_id
 
@@ -30,6 +49,8 @@ router = APIRouter(
     prefix="/vip",
     tags=["VIP - 会员与额度"],
 )
+logger = logging.getLogger(__name__)
+PENDING_RECONCILE_WINDOW_SECONDS = 7 * 24 * 60 * 60
 
 
 class CreateOrderRequest(BaseModel):
@@ -56,6 +77,12 @@ class CreateOrderResponse(BaseModel):
     payment: Dict[str, Any]
 
 
+class ReconcileOrderResponse(BaseModel):
+    order: OrderResponse
+    paid: bool
+    provider_status: int
+
+
 class RecordsResponse(BaseModel):
     quota_events: List[Dict[str, Any]]
     orders: List[OrderResponse]
@@ -75,6 +102,32 @@ def order_payload(order: VipOrder) -> OrderResponse:
         paid_at=order.paid_at,
         fulfilled_at=order.fulfilled_at,
     )
+
+
+def reconcile_recent_pending_orders(user_id: str) -> None:
+    user = user_table.get_user_by_id(user_id)
+    if not user or not real_virtual_payment_ready(user):
+        return
+    cutoff = int(time.time()) - PENDING_RECONCILE_WINDOW_SECONDS
+    pending_orders = (
+        VipOrder.select()
+        .where(
+            (VipOrder.user_id == user_id)
+            & (VipOrder.status.in_(["pending", "paid", "fulfillment_pending"]))
+            & (VipOrder.created_at >= cutoff)
+        )
+        .order_by(VipOrder.created_at.desc())
+        .limit(5)
+    )
+    for order in pending_orders:
+        try:
+            reconcile_order(order, user, vip_service)
+        except (VipError, VipPaymentSyncError):
+            logger.warning(
+                "Could not reconcile pending VIP order %s while loading state.",
+                order.id,
+                exc_info=True,
+            )
 
 
 def vip_http_error(exc: VipError) -> HTTPException:
@@ -110,6 +163,7 @@ def get_vip_catalog():
 def get_my_vip_state(
     current_user_id: str = Depends(get_current_user_id),
 ):
+    reconcile_recent_pending_orders(current_user_id)
     summary = vip_service.get_summary(current_user_id)
     summary["test_tools_available"] = ENABLE_VIP_TEST_TOOLS
     return summary
@@ -153,6 +207,165 @@ def create_vip_order(
     if ENABLE_VIP_MOCK_PAYMENT:
         payment["legacy_mock_pay_endpoint"] = f"/api/v1/vip/orders/{order.id}/mock-pay"
     return CreateOrderResponse(order=serialized, payment=payment)
+
+
+@router.post(
+    "/orders/{order_id}/reconcile",
+    response_model=ReconcileOrderResponse,
+)
+def reconcile_vip_order(
+    order_id: str,
+    current_user_id: str = Depends(get_current_user_id),
+):
+    try:
+        order = vip_service.get_order(current_user_id, order_id)
+        if order.status == "fulfilled":
+            return ReconcileOrderResponse(
+                order=order_payload(order),
+                paid=True,
+                provider_status=4,
+            )
+        user = user_table.get_user_by_id(current_user_id)
+        if not user:
+            raise VipOrderError("User does not exist.")
+        reconciled_order, paid, provider_status = reconcile_order(
+            order,
+            user,
+            vip_service,
+        )
+    except VipError as exc:
+        raise vip_http_error(exc) from exc
+    except VipPaymentSyncError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail={
+                "code": exc.code,
+                "message": str(exc),
+            },
+        ) from exc
+    return ReconcileOrderResponse(
+        order=order_payload(reconciled_order),
+        paid=paid,
+        provider_status=provider_status,
+    )
+
+
+@router.get("/wechat/callback", response_class=PlainTextResponse)
+def verify_wechat_callback(request: Request):
+    params = request.query_params
+    if not verify_message_signature(
+        signature=params.get("signature", ""),
+        timestamp=params.get("timestamp", ""),
+        nonce=params.get("nonce", ""),
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid WeChat callback signature.",
+        )
+    return params.get("echostr", "")
+
+
+@router.post("/wechat/callback")
+async def receive_wechat_callback(request: Request):
+    params = request.query_params
+    if not verify_message_signature(
+        signature=params.get("signature", ""),
+        timestamp=params.get("timestamp", ""),
+        nonce=params.get("nonce", ""),
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid WeChat callback signature.",
+        )
+
+    fmt = "json"
+    try:
+        payload, fmt = parse_callback_body(await request.body())
+        if payload.get("Event") != "xpay_goods_deliver_notify":
+            raise VipPaymentSyncError(
+                "Unsupported WeChat callback event.",
+                code="wechat_callback_event_unsupported",
+            )
+
+        goods_info = payload.get("GoodsInfo") or {}
+        payment_info = payload.get("WeChatPayInfo") or {}
+        order = find_order_for_callback(
+            attach=str(goods_info.get("Attach") or ""),
+            out_trade_no=str(payload.get("OutTradeNo") or ""),
+        )
+        if not order:
+            raise VipPaymentSyncError(
+                "The callback order does not exist.",
+                code="wechat_callback_order_missing",
+            )
+
+        expected_out_trade_no = virtual_out_trade_no(order)
+        if str(payload.get("OutTradeNo") or "") != expected_out_trade_no:
+            raise VipPaymentSyncError(
+                "The callback order number does not match.",
+                code="wechat_callback_order_mismatch",
+            )
+        if int(payload.get("Env") or 0) != _virtual_payment_env():
+            raise VipPaymentSyncError(
+                "The callback payment environment does not match.",
+                code="wechat_callback_environment_mismatch",
+            )
+
+        user = user_table.get_user_by_id(order.user_id)
+        callback_openid = str(payload.get("OpenId") or "")
+        if callback_openid and (not user or callback_openid != user.openid):
+            raise VipPaymentSyncError(
+                "The callback user does not match the order.",
+                code="wechat_callback_user_mismatch",
+            )
+
+        snapshot = json.loads(order.product_snapshot_json or "{}")
+        expected_quantity = max(int(snapshot.get("quantity") or 1), 1)
+        callback_quantity = int(goods_info.get("Quantity") or 0)
+        if callback_quantity and callback_quantity != expected_quantity:
+            raise VipPaymentSyncError(
+                "The callback quantity does not match the order.",
+                code="wechat_callback_quantity_mismatch",
+            )
+        callback_product_id = str(goods_info.get("ProductId") or "")
+        if callback_product_id and callback_product_id != _product_id(order):
+            raise VipPaymentSyncError(
+                "The callback product does not match the order.",
+                code="wechat_callback_product_mismatch",
+            )
+        expected_unit_price = _unit_price(order, snapshot)
+        callback_orig_price = int(goods_info.get("OrigPrice") or 0)
+        if callback_orig_price and callback_orig_price not in {
+            expected_unit_price,
+            order.amount_fen,
+        }:
+            raise VipPaymentSyncError(
+                "The callback amount does not match the order.",
+                code="wechat_callback_amount_mismatch",
+            )
+
+        transaction_id = (
+            payment_info.get("TransactionId")
+            or payment_info.get("MchOrderNo")
+            or f"wechat-{expected_out_trade_no}"
+        )
+        paid_at = int(payment_info.get("PaidTime") or 0) or None
+        vip_service.mark_order_paid(
+            order_id=order.id,
+            user_id=order.user_id,
+            transaction_id=str(transaction_id),
+            timestamp=paid_at,
+        )
+        body, content_type = callback_success_response(fmt)
+        return Response(content=body, media_type=content_type)
+    except (VipError, VipPaymentSyncError, ValueError, TypeError) as exc:
+        logger.exception("WeChat virtual payment callback failed")
+        body, content_type = callback_failure_response(str(exc), fmt)
+        return Response(
+            content=body,
+            media_type=content_type,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
 
 @router.get("/orders", response_model=List[OrderResponse])

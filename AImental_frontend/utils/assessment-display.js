@@ -211,6 +211,7 @@ const SCALE_DISPLAY_META = {
     }
   },
   'SOUL-DRINK': {
+    iconKey: 'soul-drink-v2',
     resultSectionTitles: {
       interpretation: '灵魂风味画像',
       recommendation: '生活提示'

@@ -51,15 +51,20 @@ Page({
           rejected: { text: '已拒绝', className: 'rejected' },
         };
 
-        const processedList = data.map(item => ({
-          character_id: item.character_id,
-          name: item.character_name,
-          avatar: this.data.serverUrl + item.character_avatar_url,
-          verification_message: item.verification_message,
-          status_info: statusMap[item.status] || { text: '未知', className: 'unknown' },
-          // 格式化时间戳为"YYYY-MM-DD"
-          request_date: new Date(item.request_timestamp).toLocaleDateString().replace(/\//g, '-')
-        }));
+        const processedList = data.map(item => {
+          const avatarUrl = item.character_avatar_url || '';
+          return {
+            character_id: item.character_id,
+            name: item.character_name,
+            avatar: avatarUrl.startsWith('http')
+              ? avatarUrl
+              : this.data.serverUrl + avatarUrl,
+            verification_message: item.verification_message,
+            status_info: statusMap[item.status] || { text: '未知', className: 'unknown' },
+            // 格式化时间戳为"YYYY-MM-DD"
+            request_date: new Date(item.request_timestamp).toLocaleDateString().replace(/\//g, '-')
+          };
+        });
 
         this.setData({
           requestList: processedList,

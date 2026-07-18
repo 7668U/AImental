@@ -48,7 +48,7 @@
         <text class="scale-desc">{{item.displayDescription}}</text>
         <text wx:if="{{item.displaySubnote}}" class="scale-subnote">{{item.displaySubnote}}</text>
       </view>
-      <image class="test-action" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/assessment/common/go-test-button.png" mode="aspectFit" />
+      <image class="test-action" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/assessment/common/go-test-button.png" mode="aspectFit" />
     </view>
   </view>
 
@@ -57,6 +57,6 @@
       <text class="tip-line">有些天赋一直在发光，</text>
       <text class="tip-line">有些潜能正在等你点亮。</text>
     </view>
-    <image class="tip-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/assessment/home/group-health.png" mode="aspectFit" />
+    <image class="tip-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/assessment/home/group-health.png" mode="aspectFit" />
   </view>
 </view>

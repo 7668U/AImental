@@ -1,4 +1,4 @@
-﻿// pages/daily-checkin/analysis.js
+// pages/daily-checkin/analysis.js
 import * as echarts from './components-ecanvas/ec-canvas/echarts';
 
 // --- 全局配置 ---
@@ -25,7 +25,7 @@ const ANALYSIS_MODULES = [
     title: '心情频次',
     chartTitle: '心情频次总览',
     chartId: 'chart_mood_distribution',
-    icon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-mood-distribution.png'
+    icon: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/report-mood-distribution.png'
   },
   {
     frontendType: 'tag_correlation',
@@ -33,7 +33,7 @@ const ANALYSIS_MODULES = [
     title: '状态关联',
     chartTitle: '状态关联总览',
     chartId: 'chart_tag_correlation',
-    icon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-status-correlation.png'
+    icon: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/report-status-correlation.png'
   },
   {
     frontendType: 'word_cloud',
@@ -41,7 +41,7 @@ const ANALYSIS_MODULES = [
     title: '文字分析',
     chartTitle: '文字分析总览',
     chartId: 'chart_word_cloud',
-    icon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-text-analysis.png'
+    icon: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/report-text-analysis.png'
   },
   {
     frontendType: 'color_palette',
@@ -49,7 +49,7 @@ const ANALYSIS_MODULES = [
     title: '情绪色卡',
     chartTitle: '情绪色卡总览',
     chartId: 'chart_color_palette',
-    icon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-color-card.png'
+    icon: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/report-color-card.png'
   }
 ];
 
@@ -109,7 +109,7 @@ Page({
   },
 // --- 新增：为适配自定义导航栏新增的函数 ---
 setNavSize() {
-  const sysInfo = wx.getSystemInfoSync();
+  const sysInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
   const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
   this.setData({
     navTop: sysInfo.statusBarHeight,
@@ -365,10 +365,21 @@ navigateBack() {
       selectedAnalysis: '',
       isChartReady: false,
       colorCardResult: null,
-      colorCardError: '',
+    colorCardError: '',
     });
 
     try {
+      let historyEligibility = {};
+      try {
+        const eligibilityRes = await this.fetchApiData(
+          `/api/v1/report/eligibility/range/${this.data.rangeStartDate}/${this.data.rangeEndDate}`,
+          token
+        );
+        historyEligibility = eligibilityRes.data || {};
+      } catch (eligibilityError) {
+        console.warn('history report eligibility unavailable:', eligibilityError);
+      }
+
       const reports = await Promise.all(
         ANALYSIS_MODULES.map(async (module) => {
           const stored = (historyReport.reports || {})[module.frontendType];
@@ -377,6 +388,22 @@ navigateBack() {
               ...module,
               error: true,
               skipMessage: '这份历史报告没有保存该分析模块。',
+            };
+          }
+
+          if (
+            module.backendType === 'word-cloud'
+            && historyEligibility.can_word_analysis === false
+          ) {
+            return {
+              ...module,
+              chartData: null,
+              chartUnavailable: true,
+              interpretation: stored.summary_text || '',
+              aiReport: stored.report_text || '',
+              aiLoaded: true,
+              aiLoading: false,
+              aiError: false,
             };
           }
 

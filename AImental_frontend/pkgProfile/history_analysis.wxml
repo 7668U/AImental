@@ -1,5 +1,5 @@
 <view class="report-page">
-  <image class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgProfile/images/profile/profile-info-bg.png" mode="aspectFill"></image>
+  <image class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgProfile/images/profile/profile-info-bg.png" mode="aspectFill"></image>
 
   <view class="custom-nav-wrapper" style="padding-top: {{navTop}}px;">
     <view class="custom-nav" style="height: {{navHeight}}px;">

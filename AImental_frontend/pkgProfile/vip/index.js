@@ -5,28 +5,28 @@ const FEATURE_PRESENTATION = {
   tree_hole: {
     name: '心情树洞',
     shortName: '树洞',
-    icon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/feature-tree-hole.png',
+    icon: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/feature-tree-hole.png',
     color: '#ff8a24',
     description: '陪你倾诉，温暖每一次心事',
   },
   community: {
     name: '心灵社区',
     shortName: '社区',
-    icon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/feature-community.png',
+    icon: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/feature-community.png',
     color: '#6fc3a5',
     description: '更多陪伴，更多温柔回应',
   },
   mood_analysis: {
     name: '心情分析',
     shortName: '心情分析',
-    icon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/feature-mood-analysis.png',
+    icon: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/feature-mood-analysis.png',
     color: '#ef7369',
     description: '看见情绪背后的线索',
   },
   assessment_analysis: {
     name: '测评分析',
     shortName: '测评分析',
-    icon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/feature-assessment-analysis.png',
+    icon: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/feature-assessment-analysis.png',
     color: '#77b9e7',
     description: '解读测评，获得更清晰的自己',
   },
@@ -42,18 +42,18 @@ const FEATURE_ORDER = [
 const PLAN_PRESENTATION = {
   light: {
     name: '轻语会员',
-    image: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-light.png',
-    memberBadge: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-light.png',
+    image: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/member-badge-light.png',
+    memberBadge: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/member-badge-light.png',
   },
   knowing: {
     name: '相知会员',
-    image: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-knowing.png',
-    memberBadge: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-knowing.png',
+    image: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/member-badge-knowing.png',
+    memberBadge: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/member-badge-knowing.png',
   },
   companion: {
     name: '长伴会员',
-    image: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-companion.png',
-    memberBadge: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-companion.png',
+    image: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/member-badge-companion.png',
+    memberBadge: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/member-badge-companion.png',
   },
 };
 
@@ -333,6 +333,10 @@ Page({
     this.fetchVipState();
   },
 
+  onShow() {
+    this.fetchVipState();
+  },
+
   onPullDownRefresh() {
     Promise.all([
       this.fetchCatalog(),
@@ -538,22 +542,6 @@ Page({
 
         const payment = res.data.payment || {};
         this.handleVirtualPayment(payment, token, 'membership', res.data.order);
-        return;
-        if (payment.mode === 'mock' && payment.mock_pay_endpoint) {
-          this.completeMockPayment(payment.mock_pay_endpoint, token, 'membership');
-          return;
-        }
-        if (payment.mode === 'wechat' && payment.payload) {
-          this.requestWechatPayment(payment.payload, 'membership');
-          return;
-        }
-
-        this.setData({ purchaseLoading: false });
-        wx.showModal({
-          title: '支付暂未开放',
-          content: '订单能力已经接通，但微信支付参数尚未配置，本次不会扣款。',
-          showCancel: false,
-        });
       },
       fail: () => {
         this.finishPurchaseWithError('网络异常，请稍后重试');
@@ -668,22 +656,6 @@ Page({
 
         const payment = res.data.payment || {};
         this.handleVirtualPayment(payment, token, 'addon', res.data.order);
-        return;
-        if (payment.mode === 'mock' && payment.mock_pay_endpoint) {
-          this.completeMockPayment(payment.mock_pay_endpoint, token, 'addon');
-          return;
-        }
-        if (payment.mode === 'wechat' && payment.payload) {
-          this.requestWechatPayment(payment.payload, 'addon');
-          return;
-        }
-
-        this.setData({ purchaseLoading: false });
-        wx.showModal({
-          title: '支付暂未开放',
-          content: '订单能力已经接通，但微信支付参数尚未配置，本次不会扣款。',
-          showCancel: false,
-        });
       },
       fail: () => {
         this.finishPurchaseWithError('网络异常，请稍后重试');
@@ -777,6 +749,18 @@ Page({
       this.finishPurchaseWithError('\u5f53\u524d\u5fae\u4fe1\u7248\u672c\u4e0d\u652f\u6301\u865a\u62df\u652f\u4ed8');
       return;
     }
+    const deviceInfo = wx.getDeviceInfo
+      ? wx.getDeviceInfo()
+      : wx.getSystemInfoSync();
+    if (deviceInfo.platform === 'devtools') {
+      this.setData({ purchaseLoading: false });
+      wx.showModal({
+        title: '\u8bf7\u4f7f\u7528\u771f\u673a\u8c03\u8bd5',
+        content: '\u5f00\u53d1\u8005\u5de5\u5177\u6a21\u62df\u5668\u65e0\u6cd5\u7a33\u5b9a\u52a0\u8f7d\u5fae\u4fe1\u865a\u62df\u652f\u4ed8 SDK\u3002\u8bf7\u70b9\u51fb\u5f00\u53d1\u8005\u5de5\u5177\u7684\u300c\u771f\u673a\u8c03\u8bd5\u300d\uff0c\u5728 Android \u5fae\u4fe1\u4e2d\u5b8c\u6210\u6c99\u7bb1\u652f\u4ed8\u3002',
+        showCancel: false,
+      });
+      return;
+    }
     wx.requestVirtualPayment({
       ...payload,
       success: () => {
@@ -784,9 +768,10 @@ Page({
           this.confirmVirtualPayment(localConfirmEndpoint, token, purchaseType);
           return;
         }
-        this.pollOrderFulfilled(orderId, token, purchaseType);
+        this.reconcileVirtualOrder(orderId, token, purchaseType);
       },
       fail: (error) => {
+        console.error('requestVirtualPayment failed', error);
         this.setData({ purchaseLoading: false });
         const errCode = error && Number(error.errCode);
         if (errCode === -2 || String((error && error.errMsg) || '').includes('cancel')) {
@@ -798,7 +783,45 @@ Page({
     });
   },
 
-  pollOrderFulfilled(orderId, token, purchaseType, retries = 8) {
+  reconcileVirtualOrder(orderId, token, purchaseType, retries = 10) {
+    if (!orderId) {
+      this.finishPurchaseWithError('\u8ba2\u5355\u72b6\u6001\u786e\u8ba4\u5931\u8d25');
+      return;
+    }
+    wx.request({
+      url: `${VIP_API_BASE_URL}/orders/${orderId}/reconcile`,
+      method: 'POST',
+      header: { Authorization: `Bearer ${token}` },
+      success: (res) => {
+        if (res.statusCode === 200 && res.data) {
+          if (res.data.paid || (res.data.order && res.data.order.status === 'fulfilled')) {
+            this.finishPurchaseSuccess(purchaseType);
+            return;
+          }
+          if (retries > 0) {
+            setTimeout(() => {
+              this.reconcileVirtualOrder(orderId, token, purchaseType, retries - 1);
+            }, 1500);
+            return;
+          }
+          this.setData({ purchaseLoading: false });
+          this.fetchVipState();
+          wx.showModal({
+            title: '\u652f\u4ed8\u786e\u8ba4\u4e2d',
+            content: '\u652f\u4ed8\u5df2\u5b8c\u6210\uff0c\u4f1a\u5458\u6743\u76ca\u6b63\u5728\u540c\u6b65\u3002\u8bf7\u7a0d\u540e\u8fd4\u56de\u4f1a\u5458\u4e2d\u5fc3\u67e5\u770b\u3002',
+            showCancel: false,
+          });
+          return;
+        }
+        this.pollOrderFulfilled(orderId, token, purchaseType);
+      },
+      fail: () => {
+        this.pollOrderFulfilled(orderId, token, purchaseType);
+      },
+    });
+  },
+
+  pollOrderFulfilled(orderId, token, purchaseType, retries = 20) {
     if (!orderId) {
       this.finishPurchaseWithError('\u8ba2\u5355\u72b6\u6001\u786e\u8ba4\u5931\u8d25');
       return;
@@ -836,8 +859,10 @@ Page({
       this.finishAddonPurchaseSuccess();
       return;
     }
-    this.setData({ purchaseLoading: false });
-    this.navigateToSuccessPage();
+    this.fetchVipState().finally(() => {
+      this.setData({ purchaseLoading: false });
+      this.navigateToSuccessPage();
+    });
   },
 
   completeMockPayment(endpoint, token, purchaseType) {
@@ -859,8 +884,10 @@ Page({
           this.finishAddonPurchaseSuccess();
           return;
         }
-        this.setData({ purchaseLoading: false });
-        this.navigateToSuccessPage();
+        this.fetchVipState().finally(() => {
+          this.setData({ purchaseLoading: false });
+          this.navigateToSuccessPage();
+        });
       },
       fail: () => {
         this.finishPurchaseWithError('模拟支付请求失败');
@@ -876,8 +903,10 @@ Page({
           this.finishAddonPurchaseSuccess();
           return;
         }
-        this.setData({ purchaseLoading: false });
-        this.navigateToSuccessPage();
+        this.fetchVipState().finally(() => {
+          this.setData({ purchaseLoading: false });
+          this.navigateToSuccessPage();
+        });
       },
       fail: (error) => {
         this.setData({ purchaseLoading: false });
@@ -898,14 +927,13 @@ Page({
       addonQuantity: 1,
       addonAgreementChecked: false,
     });
-    wx.showModal({
-      title: '购买成功',
-      content: '加量包权益已到账。',
-      showCancel: false,
-      confirmText: '完成',
-      success: () => {
-        this.fetchVipState();
-      },
+    this.fetchVipState().finally(() => {
+      wx.showModal({
+        title: '购买成功',
+        content: '加量包权益已到账。',
+        showCancel: false,
+        confirmText: '完成',
+      });
     });
   },
 

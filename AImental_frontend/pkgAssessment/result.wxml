@@ -1,5 +1,5 @@
 <view class="container">
-  <image class="result-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/result/result-bg.png" mode="aspectFill"></image>
+  <image class="result-bg" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgAssessment/images/result/result-bg.png" mode="aspectFill"></image>
   <view class="result-bg-soften"></view>
 
   <view wx:if="{{isLoading}}" class="loading-container">
@@ -19,7 +19,7 @@
         />
         <view wx:else class="result-card ai-empty-card">
           <view class="card-title">
-            <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
+            <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-report.png"></image>
             <text>结果图加载失败</text>
           </view>
           <view class="card-content">本次结果已生成，但暂时没有找到对应的结果图。</view>
@@ -93,7 +93,7 @@
 
         <view class="result-card detail-card" wx:if="{{talentRadarReport.radarSummary || talentRadarReport.pairSummary || talentRadarReport.primaryBestScene || talentRadarReport.primaryGrowthFocus}}">
           <view class="card-title">
-            <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
+            <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-report.png"></image>
             <text>你的雷达主线</text>
           </view>
           <view class="analysis-list">
@@ -138,7 +138,7 @@
 
         <view class="result-card detail-card" wx:if="{{talentRadarReport.stressTitle || talentRadarReport.stressSummary}}">
           <view class="card-title">
-            <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
+            <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-report.png"></image>
             <text>压力下的底牌</text>
           </view>
           <view class="analysis-list">
@@ -155,7 +155,7 @@
 
         <view class="result-card detail-card" wx:if="{{talentRadarReport.scoreItems.length > 0}}">
           <view class="card-title">
-            <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
+            <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-report.png"></image>
             <text>八维天赋分布</text>
           </view>
           <view class="detail-pair-list">
@@ -206,7 +206,7 @@
 
         <view class="result-card detail-card" wx:if="{{fortuneReport.recommendation || fortuneReport.relationship || fortuneReport.stress || fortuneReport.change}}">
           <view class="card-title">
-            <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
+            <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-report.png"></image>
             <text>接住这波好运</text>
           </view>
           <view class="analysis-list">
@@ -238,7 +238,7 @@
 
       <view class="result-card detail-card" wx:if="{{!talentRadarReport && !fortuneReport && (result.result_details.in_relationships || result.result_details.under_stress || result.result_details.facing_change)}}">
         <view class="card-title">
-          <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
+          <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-report.png"></image>
           <text>你的潜意识画像</text>
         </view>
         <view class="analysis-list">
@@ -259,7 +259,7 @@
 
       <view class="result-card detail-card" wx:if="{{secondaryProfile && !talentRadarReport && !fortuneReport && (secondaryProfile.inRelationships || secondaryProfile.underStress || secondaryProfile.facingChange)}}">
         <view class="card-title">
-          <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
+          <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-report.png"></image>
           <text>副原型会在哪出现</text>
         </view>
         <view class="analysis-list">
@@ -288,7 +288,7 @@
 
       <view class="result-card career-list-card" wx:if="{{recommendedCareers.length > 0 && !talentRadarReport && !fortuneReport}}">
         <view class="card-title">
-          <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
+          <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-report.png"></image>
           <text>更多适合你的职业</text>
         </view>
         <view class="career-list">
@@ -307,7 +307,7 @@
     <block wx:for="{{analysisBlocks}}" wx:for-item="analysisBlock" wx:key="key">
       <view class="result-card ai-card" wx:if="{{!isSoulDrinkResult && analysisBlock.sections.length > 0}}">
         <view class="card-title">
-          <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-report.png"></image>
+          <image class="card-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-report.png"></image>
           <text>{{analysisBlock.title}}</text>
         </view>
 
@@ -370,7 +370,7 @@
         <image
           wx:if="{{!isAiAnalysisLoading}}"
           class="ai-analysis-btn-icon"
-          src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/robot.png"
+          src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/analysis/robot.png"
           mode="aspectFit"
         ></image>
         <text>AI深度分析</text>

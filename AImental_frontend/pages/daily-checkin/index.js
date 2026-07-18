@@ -8,7 +8,7 @@ const {
 } = require('../../utils/auth.js');
 
 const DAILY_CHECKIN_GUIDE_VERSION = 'v1';
-const DAILY_CHECKIN_GUIDE_ICON = 'https://assets.feelyourself.cn/miniprogram/assets/v1/pages/daily-checkin/assets/calendar-card.png';
+const DAILY_CHECKIN_GUIDE_ICON = 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pages/daily-checkin/assets/calendar-card.png';
 
 // 从 ai-therapist 页面“借鉴”过来的网络请求函数，你也可以把它封装成公共模块
 function request(options) {

@@ -20,7 +20,7 @@ from security.data_encryption import (
     blind_index,
 )
 
-DEFAULT_AVATAR_URL = "https://assets.feelyourself.cn/miniprogram/assets/v1/backend/avatars/default.png"
+DEFAULT_AVATAR_URL = "https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/backend/avatars/default.png"
 
 class User(Model):
     """The Peewee Model for the 'users' table."""

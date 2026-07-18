@@ -1,7 +1,7 @@
 <view class="chat-page" style="padding-top: {{topBarOffset}}px;">
   <view class="custom-nav-bar" style="height: {{navBarHeight}}px;">
     <view class="nav-action" bindtap="navigateBack">
-      <image class="back-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/left.png" mode="aspectFit"></image>
+      <image class="back-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/left.png" mode="aspectFit"></image>
     </view>
 
     <view class="nav-person" bindtap="showProfileCard">
@@ -35,7 +35,7 @@
   <view class="message-area">
     <image
       class="chat-center-bg"
-      src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/community-redesign/chat-bg-pixel-cabin.png"
+      src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/community-redesign/chat-bg-pixel-cabin.png"
       mode="aspectFit"
     ></image>
 
@@ -65,7 +65,7 @@
       <view class="history-empty" wx:elif="{{!messageList.length}}">
         <image
           class="history-empty-illustration"
-          src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/community-redesign/community-empty-conversation.png"
+          src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/community-redesign/community-empty-conversation.png"
           mode="aspectFit"
         ></image>
         <view class="history-empty-title">和 {{aiName}} 的故事，从这里开始</view>

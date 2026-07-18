@@ -1,13 +1,13 @@
 <view class="calendar-popup" wx:if="{{show}}">
   <view class="calendar-overlay" bind:tap="hide"></view>
   <view class="calendar-container">
-    <image class="calendar-hero-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pages/daily-checkin/assets/calendar-hero-bg.png" mode="aspectFill"></image>
+    <image class="calendar-hero-bg" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pages/daily-checkin/assets/calendar-hero-bg.png" mode="aspectFill"></image>
 
     <view class="calendar-content">
       <view class="calendar-header">
-        <image class="nav-arrow" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/left.png" bind:tap="handleMonthChange" data-direction="{{-1}}"></image>
+        <image class="nav-arrow" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/left.png" bind:tap="handleMonthChange" data-direction="{{-1}}"></image>
         <view class="current-date">{{currentYear}}年 {{currentMonth}}月</view>
-        <image class="nav-arrow" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/right.png" bind:tap="handleMonthChange" data-direction="{{1}}"></image>
+        <image class="nav-arrow" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/right.png" bind:tap="handleMonthChange" data-direction="{{1}}"></image>
       </view>
 
       <view class="week-header">
@@ -32,7 +32,7 @@
       </view>
 
       <view wx:if="{{!hasCheckinsThisMonth}}" class="empty-state">
-        <image class="empty-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/daily-checkin/blank.png" mode="aspectFit"></image>
+        <image class="empty-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/daily-checkin/blank.png" mode="aspectFit"></image>
         <view class="empty-text">这个月还没有记录哦</view>
       </view>
     </view>

@@ -3,35 +3,35 @@ const { getScaleDisplayMeta, getScaleDisplayName, getScaleIconName } = require('
 
 const SERVER_BASE_URL = 'https://api.feelyourself.cn';
 const DEFAULT_GROUP = '心理健康';
-const DEFAULT_ICON_PATH = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/assessment/default.png';
+const DEFAULT_ICON_PATH = 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/assessment/default.png';
 
 const GROUPS = {
   '心理健康': {
     key: 'health',
     title: '心理健康',
     subtitle: '关注情绪状态，关爱内心健康',
-    hero: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/category/health-hero.png',
+    hero: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgAssessment/images/category/health-hero.png',
     order: ['SDS', 'BDI-II', 'SAS', 'BRMS', 'SAD', 'IAS', 'Lonely']
   },
   '自我人格': {
     key: 'personality',
     title: '自我人格',
     subtitle: '探索性格特质，认识独特的自己',
-    hero: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/category/personality-hero.png',
+    hero: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgAssessment/images/category/personality-hero.png',
     order: ['SES', 'APS', 'CLT', 'mbti-93']
   },
   '亲密关系': {
     key: 'relationship',
     title: '亲密关系',
     subtitle: '理解人际关系，建立深度联结',
-    hero: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/category/relationship-hero.png',
+    hero: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgAssessment/images/category/relationship-hero.png',
     order: ['AAS', 'ECR', 'LAMT', 'LDCT']
   },
   '趣味探索': {
     key: 'interest',
     title: '趣味探索',
     subtitle: '轻松有趣，发现更多可能的自己',
-    hero: 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/category/interest-hero.png',
+    hero: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgAssessment/images/category/interest-hero.png',
     order: ['TPS', 'ICI', 'REAL-MAJOR-V1', 'AGLT', 'RFLT']
   }
 };
@@ -101,7 +101,7 @@ Page({
   },
 
   onLoad(options) {
-    const systemInfo = wx.getSystemInfoSync();
+    const systemInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
     const decodedGroup = options.group ? decodeURIComponent(options.group) : DEFAULT_GROUP;
     const groupName = GROUPS[decodedGroup] ? decodedGroup : DEFAULT_GROUP;
     this.setData({
@@ -159,7 +159,7 @@ Page({
   },
 
   getScaleIconPath(shortName) {
-    return `https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/scale-icons/${getScaleIconName(shortName)}.png`;
+    return `https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgAssessment/images/scale-icons/${getScaleIconName(shortName)}.png`;
   },
 
   goBack() {

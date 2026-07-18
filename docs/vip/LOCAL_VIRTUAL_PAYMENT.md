@@ -47,7 +47,9 @@ WECHAT_VIRTUAL_PAY_PRODUCT_IDS={"vip_light":"微信后台道具ID"}
 ## 上线前必须处理
 
 - 将 `ENABLE_VIP_LOCAL_VIRTUAL_PAYMENT=false`。
-- 接入微信虚拟支付发货通知，并由通知驱动 `mark_order_paid`。
+- 配置 `WECHAT_VIRTUAL_PAY_CALLBACK_TOKEN`，并在微信小程序后台将消息推送 URL 配置为：
+  `https://api.feelyourself.cn/api/v1/vip/wechat/callback`
+- 后端已接入 `xpay_goods_deliver_notify` 发货通知，也会在读取 `/vip/me` 和支付成功后主动调用微信 `query_order` 做补偿核验。
 - 真实支付成功页必须以后端订单状态 `fulfilled` 为准。
 - 道具价格、`productId`、订单号和发货通知都要做服务端校验。
 

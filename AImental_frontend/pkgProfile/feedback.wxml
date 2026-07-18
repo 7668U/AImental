@@ -1,5 +1,5 @@
 <view class="feedback-page">
-  <image class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgProfile/images/profile/feedback-bg.png" mode="scaleToFill"></image>
+  <image class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgProfile/images/profile/feedback-bg.png" mode="scaleToFill"></image>
 
   <view class="custom-nav-wrapper" style="padding-top: {{navTop}}px;">
     <view class="custom-nav" style="height: {{navHeight}}px;">

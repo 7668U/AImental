@@ -2,6 +2,7 @@
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 const {
   confirmPrivacyAwareLogin,
+  handlePrivacyConsentRequiredResponse,
   loginWithBackend,
   rejectPrivacyAwareLogin,
   requestPrivacyAwareLogin
@@ -31,6 +32,10 @@ function request(options) {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve(res.data);
         } else {
+          if (handlePrivacyConsentRequiredResponse(getCurrentPages().pop(), res)) {
+            reject(res);
+            return;
+          }
           if (res.statusCode === 401) {
             console.error("请求未授权 (401)，token可能已失效。");
           } else if (isVipQuotaExhaustedError(res)) {

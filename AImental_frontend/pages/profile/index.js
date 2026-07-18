@@ -1,17 +1,17 @@
 // index.js (正确分离的版本)
 
 // --- 配置 ---
-const SERVER_BASE_URL = 'https://api.feelyourself.cn'; 
+const SERVER_BASE_URL = 'https://api.feelyourself.cn';
 const API_BASE_URL = `${SERVER_BASE_URL}/api/v1/users`; 
 const VIP_API_BASE_URL = `${SERVER_BASE_URL}/api/v1/vip`;
-const defaultAvatarUrl = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png';
+const defaultAvatarUrl = 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/default-avatar.png';
 const MEMBERSHIP_ICON_BY_PLAN = {
-  light: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-light.png',
-  knowing: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-knowing.png',
-  companion: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-companion.png',
-  vip_light: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-light.png',
-  vip_knowing: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-knowing.png',
-  vip_companion: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-companion.png',
+  light: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/member-badge-light.png',
+  knowing: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/member-badge-knowing.png',
+  companion: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/member-badge-companion.png',
+  vip_light: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/member-badge-light.png',
+  vip_knowing: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/member-badge-knowing.png',
+  vip_companion: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/vip/member-badge-companion.png',
 };
 
 function getMembershipIcon(planCode) {
@@ -114,6 +114,7 @@ Page({
           const token = apiRes.access_token;
           wx.setStorageSync('token', token);
           this.fetchUserProfile(token);
+          this.fetchVipState(token);
           wx.showToast({ title: '登录成功', icon: 'success' });
         } else {
           console.error('登录 API 返回异常:', apiRes);

@@ -329,7 +329,7 @@ class TestResultResponseModel(BaseModel):
 
 
 SOUL_DRINK_ASSET_BASE = (
-    "https://assets.feelyourself.cn/miniprogram/assets/v1/"
+    "https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/"
     "pkgAssessment/images/drink-ti"
 )
 

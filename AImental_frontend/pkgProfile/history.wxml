@@ -1,5 +1,5 @@
 <view class="history-page">
-  <image class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgProfile/images/profile/profile-info-bg.png" mode="aspectFill"></image>
+  <image class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgProfile/images/profile/profile-info-bg.png" mode="aspectFill"></image>
 
   <view class="custom-nav-wrapper" style="padding-top: {{navTop}}px;">
     <view class="custom-nav" style="height: {{navHeight}}px;">
@@ -58,7 +58,7 @@
         </view>
 
         <view wx:if="{{groupedHistory.length === 0 && assessmentAnalysisHistory.length === 0 && !isAssessmentAnalysisLoading}}" class="empty-container">
-          <image class="empty-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-no-data.png" mode="aspectFit"></image>
+          <image class="empty-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-no-data.png" mode="aspectFit"></image>
           <text class="empty-text">暂无心理测评记录</text>
           <text class="empty-subtext">去完成一次测评，回顾自己的心灵足迹吧</text>
         </view>
@@ -109,7 +109,7 @@
 
       <block wx:else>
         <view wx:if="{{moodAnalysisHistory.length === 0}}" class="empty-container">
-          <image class="empty-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-no-data.png" mode="aspectFit"></image>
+          <image class="empty-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-no-data.png" mode="aspectFit"></image>
           <text class="empty-text">暂无心情分析历史</text>
           <text class="empty-subtext">生成一次心情分析后，报告会保存在这里</text>
         </view>

@@ -2,7 +2,7 @@
 
 const SERVER_URL = 'https://api.feelyourself.cn';
 const COMMUNITY_GUIDE_VERSION = 'v2';
-const COMMUNITY_GUIDE_ICON = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/community-redesign/chat-bg-pixel-cabin.png';
+const COMMUNITY_GUIDE_ICON = 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/community-redesign/chat-bg-pixel-cabin.png';
 const app = getApp();
 
 // --- 统一网络请求函数 ---
@@ -29,6 +29,8 @@ function request(options) {
       success(res) {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve(res.data);
+        } else if (handlePrivacyConsentRequiredResponse(getCurrentPages().pop(), res)) {
+          reject(res);
         } else if (res.statusCode === 401 && options.requiresAuth !== false) {
           // Token失效，获取当前页面实例并调用清理函数
           const currentPage = getCurrentPages().pop();
@@ -50,6 +52,7 @@ function request(options) {
 const { getShareInfo, getTimelineInfo } = require('../../../utils/share.js');
 const {
   confirmPrivacyAwareLogin,
+  handlePrivacyConsentRequiredResponse,
   loginWithBackend,
   rejectPrivacyAwareLogin,
   requestPrivacyAwareLogin
@@ -223,7 +226,7 @@ Page({
         const profile = item.profile || {};
         const identity = profile.identity_core || {};
         const traits = profile.personality_traits || {};
-        const avatarUrl = item.avatar_url || 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png';
+        const avatarUrl = item.avatar_url || 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/default-avatar.png';
 
         return {
           id: item.id,
@@ -275,7 +278,7 @@ Page({
 
       const formattedList = (data || []).map(item => {
         const affinityDisplay = this.buildAffinityDisplay(item.favorability);
-        const avatarUrl = item.character_avatar_url || 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png';
+        const avatarUrl = item.character_avatar_url || 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/default-avatar.png';
 
         return {
           id: item.character_id,

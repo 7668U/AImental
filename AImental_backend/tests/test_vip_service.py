@@ -1,6 +1,7 @@
 import os
 import tempfile
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from dotenv import load_dotenv
@@ -27,7 +28,16 @@ from vip_catalog import (
 )
 from vip_service import VipQuotaExceeded, VipService, add_months
 from vip_access import validate_ai_input
-from vip_virtual_payment import _virtual_payment_app_key
+from vip_virtual_payment import (
+    _virtual_payment_app_key,
+    build_virtual_payment,
+)
+from vip_payment_sync import (
+    _ACCESS_TOKEN_CACHE,
+    parse_callback_body,
+    reconcile_order,
+    verify_message_signature,
+)
 from router import vip as vip_router_module
 
 
@@ -93,6 +103,158 @@ class VipServiceTestCase(unittest.TestCase):
                 _virtual_payment_app_key(1),
                 "sandbox-key",
             )
+
+    def test_real_virtual_payment_never_exposes_local_confirm_endpoint(self):
+        order = self.service.create_order(
+            "real-payment-user",
+            "vip_light",
+            timestamp=TEST_NOW,
+        )
+        with patch.dict(
+            os.environ,
+            {
+                "WECHAT_VIRTUAL_PAY_OFFER_ID": "offer-id",
+                "WECHAT_VIRTUAL_PAY_APP_KEY": "production-key",
+                "WECHAT_VIRTUAL_PAY_ENV": "0",
+            },
+            clear=False,
+        ):
+            payment = build_virtual_payment(
+                order=order,
+                user=SimpleNamespace(wechat_session_key="session-key"),
+            )
+
+        self.assertEqual(payment["mode"], "wechat_virtual")
+        self.assertIsNone(payment["local_confirm_endpoint"])
+
+    def test_virtual_payment_reconcile_fulfills_paid_membership_order(self):
+        order = self.service.create_order(
+            "reconcile-member-user",
+            "vip_light",
+            timestamp=TEST_NOW,
+        )
+        access_token_response = SimpleNamespace(
+            raise_for_status=lambda: None,
+            json=lambda: {
+                "access_token": "wechat-access-token",
+                "expires_in": 7200,
+            },
+        )
+        order_response = SimpleNamespace(
+            raise_for_status=lambda: None,
+            json=lambda: {
+                "errcode": 0,
+                "errmsg": "ok",
+                "order": {
+                    "status": 2,
+                    "order_fee": order.amount_fen,
+                    "paid_time": TEST_NOW + 30,
+                    "wxpay_order_id": "wxpay-reconcile-transaction",
+                },
+            },
+        )
+        _ACCESS_TOKEN_CACHE.update({"value": "", "expires_at": 0})
+        with patch.dict(
+            os.environ,
+            {
+                "WECHAT_APP_ID": "test-app-id",
+                "WECHAT_APP_SECRET": "test-app-secret",
+                "WECHAT_VIRTUAL_PAY_APP_KEY": "production-key",
+                "WECHAT_VIRTUAL_PAY_ENV": "0",
+            },
+            clear=False,
+        ), patch(
+            "vip_payment_sync.requests.get",
+            return_value=access_token_response,
+        ), patch(
+            "vip_payment_sync.requests.post",
+            return_value=order_response,
+        ):
+            fulfilled, paid, provider_status = reconcile_order(
+                order,
+                SimpleNamespace(openid="user-openid"),
+                self.service,
+            )
+
+        self.assertTrue(paid)
+        self.assertEqual(provider_status, 2)
+        self.assertEqual(fulfilled.status, "fulfilled")
+        summary = self.service.get_summary(
+            "reconcile-member-user",
+            timestamp=TEST_NOW + 30,
+        )
+        self.assertEqual(summary["user_type"], "member")
+        self.assertEqual(summary["membership"]["plan_code"], "light")
+
+    def test_virtual_payment_callback_parser_and_signature(self):
+        token = "callback-token"
+        timestamp = "1784380800"
+        nonce = "nonce-value"
+        import hashlib
+
+        signature = hashlib.sha1(
+            "".join(sorted((token, timestamp, nonce))).encode("utf-8")
+        ).hexdigest()
+        self.assertTrue(
+            verify_message_signature(
+                signature=signature,
+                timestamp=timestamp,
+                nonce=nonce,
+                token=token,
+            )
+        )
+
+        payload, fmt = parse_callback_body(
+            b'{"Event":"xpay_goods_deliver_notify","OutTradeNo":"order123"}'
+        )
+        self.assertEqual(fmt, "json")
+        self.assertEqual(payload["Event"], "xpay_goods_deliver_notify")
+
+    def test_loading_vip_state_recovers_recent_paid_pending_order(self):
+        order = self.service.create_order(
+            "recover-member-user",
+            "vip_light",
+            timestamp=TEST_NOW,
+        )
+        fake_user = SimpleNamespace(
+            id="recover-member-user",
+            openid="recover-openid",
+            wechat_session_key="recover-session-key",
+        )
+
+        def fake_reconcile(pending_order, user, service):
+            fulfilled = service.mark_order_paid(
+                order_id=pending_order.id,
+                user_id=pending_order.user_id,
+                transaction_id="wxpay-recovered-transaction",
+                timestamp=TEST_NOW + 10,
+            )
+            return fulfilled, True, 2
+
+        with patch.object(
+            vip_router_module.user_table,
+            "get_user_by_id",
+            return_value=fake_user,
+        ), patch.object(
+            vip_router_module,
+            "real_virtual_payment_ready",
+            return_value=True,
+        ), patch.object(
+            vip_router_module,
+            "reconcile_order",
+            side_effect=fake_reconcile,
+        ), patch.object(
+            vip_router_module.time,
+            "time",
+            return_value=TEST_NOW + 20,
+        ):
+            state = vip_router_module.get_my_vip_state(
+                current_user_id="recover-member-user"
+            )
+
+        self.assertEqual(order.get().status, "fulfilled")
+        self.assertEqual(state["user_type"], "member")
+        self.assertEqual(state["membership"]["plan_code"], "light")
 
     def test_free_monthly_quotas_are_created(self):
         summary = self.service.get_summary("free-user", timestamp=TEST_NOW)

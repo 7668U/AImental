@@ -131,6 +131,9 @@ Page({
 
           const characterList = data.characters.map((item) => ({
             ...item,
+            avatar_url: item.avatar_url && item.avatar_url.startsWith('http')
+              ? item.avatar_url
+              : SERVER_URL + (item.avatar_url || ''),
             tags: item.profile?.personality_traits?.personality_tags?.slice(0, 3) || [],
             animationClass: 'inactive',
             isLocked: false 
@@ -223,7 +226,7 @@ Page({
       title: '这是一个分享测试',
       // 推荐加上 path，指向当前页面，保证用户点击后能回到正确的地方
       path: '/pkgCommunity/add-friends/add-friends',
-      imageUrl: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/share-cover.png' // 【关键】这里就是分享图片的路径
+      imageUrl: 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/share-cover.png' // 【关键】这里就是分享图片的路径
     }
   },
 

@@ -1,5 +1,5 @@
 <view class="page-container">
-  <image class="trajectory-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/assets/trajectory/trajectory-bg.jpg" mode="aspectFill"></image>
+  <image class="trajectory-bg" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/assets/trajectory/trajectory-bg.jpg" mode="aspectFill"></image>
   <view class="trajectory-nav" style="padding-top: {{statusBarHeight}}px; height: {{totalNavBarHeight}}px;">
     <view class="nav-row" style="height: {{navBarHeight}}px;">
       <view class="nav-button nav-back" bindtap="goBack">‹</view>
@@ -13,7 +13,7 @@
       <view class="date-header">
         <view class="date-title-row">
           <view class="date-title">{{dateLabel}}</view>
-          <image class="title-leaf" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/assets/trajectory/leaf-title.png" mode="aspectFit"></image>
+          <image class="title-leaf" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/assets/trajectory/leaf-title.png" mode="aspectFit"></image>
         </view>
         <view wx:if="{{moments.length > 0}}" class="date-subtitle">{{isToday ? '今天的心情正在流动' : '回看这一天的心情变化'}}</view>
       </view>
@@ -22,7 +22,7 @@
         <scroll-view class="sequence-scroll" scroll-x="true" show-scrollbar="false">
           <view class="sequence-list">
             <view wx:for="{{moments}}" wx:key="id" class="sequence-node">
-              <image class="sequence-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/mood24/{{item.moodIcon}}.png" mode="aspectFit"></image>
+              <image class="sequence-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/record/mood24/{{item.moodIcon}}.png" mode="aspectFit"></image>
               <view class="sequence-time">{{item.localTime}}</view>
             </view>
           </view>
@@ -32,7 +32,7 @@
       <view wx:if="{{moments.length === 0}}" class="trajectory-empty-state">
         <image
           class="trajectory-empty-image"
-          src="https://assets.feelyourself.cn/miniprogram/assets/v1/pages/daily-checkin/assets/trajectory-empty-transparent.png"
+          src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pages/daily-checkin/assets/trajectory-empty-transparent.png"
           mode="aspectFill"
         ></image>
         <view class="empty-text">{{isToday ? '今天还没有心情记录，把这一刻轻轻记下来吧' : '这一天没有留下心情记录，也安静地经过了'}}</view>
@@ -61,7 +61,7 @@
               <image class="timeline-scene" src="{{item.moodScene}}" mode="aspectFill"></image>
               <view class="timeline-scene-fade"></view>
               <view class="timeline-card-main">
-                <image class="timeline-mood-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/record/mood24/{{item.moodIcon}}.png" mode="aspectFit"></image>
+                <image class="timeline-mood-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/images/record/mood24/{{item.moodIcon}}.png" mode="aspectFit"></image>
                 <view class="timeline-copy">
                   <view class="timeline-mood">{{item.mood}}</view>
                   <view class="tag-row">

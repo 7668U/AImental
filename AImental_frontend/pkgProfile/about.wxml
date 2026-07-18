@@ -1,5 +1,5 @@
 <view class="about-page">
-  <image class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgProfile/images/profile/about-bg.png" mode="scaleToFill"></image>
+  <image class="page-bg" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgProfile/images/profile/about-bg.png" mode="scaleToFill"></image>
 
   <view class="custom-nav-wrapper" style="padding-top: {{navTop}}px;">
     <view class="custom-nav" style="height: {{navHeight}}px;">
@@ -20,7 +20,7 @@
       <view class="info-card">
         <view class="info-item">
           <view class="item-left">
-            <image class="item-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-about.png" mode="aspectFit"></image>
+            <image class="item-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-about.png" mode="aspectFit"></image>
             <text class="item-label">版本信息</text>
           </view>
           <text class="item-value">{{version}}</text>
@@ -28,7 +28,7 @@
 
         <view class="info-item clickable" bindtap="copyContact">
           <view class="item-left">
-            <image class="item-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-feedback.png" mode="aspectFit"></image>
+            <image class="item-icon" src="https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/images/icons/icon-feedback.png" mode="aspectFit"></image>
             <text class="item-label">联系我们</text>
           </view>
           <text class="item-value contact-value">{{contactInfo}}</text>

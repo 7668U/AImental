@@ -37,7 +37,7 @@ const MOOD_LABEL_TO_ID = MOOD_OPTIONS.reduce((map, item) => {
   尴尬: 'confused',
 });
 
-const MOOD_SCENE_BASE = 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/assets/trajectory';
+const MOOD_SCENE_BASE = 'https://assets.feelyourself.cn/miniprogram/assets/releases/20260718-1/pkgDailyCheckin/assets/trajectory';
 
 const MOOD_SCENE_MAP = {
   happy: `${MOOD_SCENE_BASE}/happy.jpg`,
