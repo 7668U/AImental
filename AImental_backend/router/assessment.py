@@ -1,6 +1,7 @@
 # router/assessment.py (图片URL拼接最终版)
 
 import json
+import os
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi import Header
@@ -24,10 +25,10 @@ from assessment_ai import generate_assessment_ai_analysis, is_health_assessment
 from vip_access import confirm_reservation, release_reservation, reserve_feature_or_http
 from vip_catalog import FEATURE_ASSESSMENT_ANALYSIS
 
-# ✅ 【第 1 步】: 在这里定义您的服务器基地址
-# 部署时请务必替换为您的实际公网域名和端口
-# 例如: "https://www.your-domain.com"
-SERVER_BASE_URL = "http://127.0.0.1:8000"
+SERVER_BASE_URL = os.getenv(
+    "PUBLIC_BASE_URL",
+    "https://api.feelyourself.cn",
+).rstrip("/")
 
 # ---------------------------------------------------
 # Router 设置
