@@ -1,7 +1,6 @@
 // pages/daily-checkin/record.js
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
 const {
-  isDirectUploadUnavailable,
   uploadPrivateImageDirect,
 } = require('../utils/private-media-upload.js');
 
@@ -87,9 +86,13 @@ const STATUS_LABEL_ALIAS = {
 };
 
 function buildStatusList(selectedNames = ['学习']) {
+  const selectedName = selectedNames
+    .map(normalizeStatusLabel)
+    .find(name => STATUS_OPTIONS.some(item => item.name === name));
+
   return STATUS_OPTIONS.map(item => ({
     ...item,
-    selected: selectedNames.includes(item.name),
+    selected: item.name === selectedName,
   }));
 }
 
@@ -422,12 +425,9 @@ Page({
     const list = this.data[type];
 
     if (type === 'statuses') {
-      const selectedCount = list.filter(item => item.selected).length;
-      if (!list[index].selected && selectedCount >= 3) {
-        wx.showToast({ title: '状态最多选 3 个', icon: 'none' });
-        return;
-      }
-      list[index].selected = !list[index].selected;
+      if (list[index].selected) return;
+      list.forEach(item => item.selected = false);
+      list[index].selected = true;
     } else {
       if (list[index].selected) return;
       list.forEach(item => item.selected = false);
@@ -553,7 +553,7 @@ Page({
     const selectedStatuses = this.data.statuses.filter(item => item.selected);
     const selectedColor = this.data.colors.find(item => item.selected);
 
-    if (!selectedMood || selectedStatuses.length === 0 || selectedStatuses.length > 3 || !selectedColor) {
+    if (!selectedMood || selectedStatuses.length !== 1 || !selectedColor) {
       wx.showToast({ title: '请完成所有选择', icon: 'none' });
       return;
     }
@@ -650,11 +650,8 @@ Page({
         });
       })
       .catch((error) => {
-        if (isDirectUploadUnavailable(error)) {
-          wx.uploadFile(options);
-          return;
-        }
-        options.fail(error);
+        console.warn('Direct COS upload failed, falling back to backend upload.', error);
+        wx.uploadFile(options);
       });
   },
 

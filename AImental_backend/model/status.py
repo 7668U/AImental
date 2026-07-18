@@ -728,13 +728,17 @@ def model_to_dict(model_instance: Model) -> Dict:
     status_items = build_status_meta_from_tags(
         model_instance.tags,
         getattr(model_instance, "status_ids", None),
-    )
+    )[:1]
     status_ids = load_list(getattr(model_instance, "status_ids", None))
-    if not status_ids and status_items:
-        status_ids = [item["id"] for item in status_items]
+    if status_items:
+        status_ids = [status_items[0]["id"]]
+    else:
+        status_ids = status_ids[:1]
     status_families = load_list(getattr(model_instance, "status_families", None))
-    if not status_families and status_items:
-        status_families = list(dict.fromkeys(item["family"] for item in status_items))
+    if status_items:
+        status_families = [status_items[0]["family"]]
+    else:
+        status_families = status_families[:1]
     image_urls = normalize_image_urls(
         getattr(model_instance, "image_urls", None),
         getattr(model_instance, "image_url", None),
@@ -760,7 +764,7 @@ def model_to_dict(model_instance: Model) -> Dict:
         "color_group": getattr(model_instance, "color_group", None) or color_meta.get("group"),
         "color_tone": getattr(model_instance, "color_tone", None) or color_meta.get("tone"),
         "color_description": getattr(model_instance, "color_description", None) or color_meta.get("description"),
-        "tags": model_instance.tags,
+        "tags": status_items[0]["label"] if status_items else model_instance.tags,
         "status_ids": status_ids,
         "status_families": status_families,
         "status_items": status_items,
