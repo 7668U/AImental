@@ -1,53 +1,113 @@
-// pages/profile/history_analysis.js
+const SERVER_BASE_URL = 'http://127.0.0.1:8000';
+const HISTORY_ANALYSIS_API_URL = `${SERVER_BASE_URL}/api/v1/history-analysis`;
 const { getShareInfo, getTimelineInfo } = require('../utils/share.js');
-import * as echarts from './components-ecanvas/ec-canvas/echarts';
-
-let chart = null;
-
-function initChart(canvas, width, height, dpr) {
-  chart = echarts.init(canvas, null, {
-    width: width,
-    height: height,
-    devicePixelRatio: dpr
-  });
-  canvas.setChart(chart);
-  return chart;
-}
 
 Page({
   data: {
-    scaleName: '分析报告',
-    isLoadingReport: false,
-    currentScaleRecords: [],
-    analysisReport: {},
-    ec: {
-      onInit: initChart
-    }
+    navTop: 0,
+    navHeight: 0,
+    analysisId: '',
+    isLoading: true,
+    errorText: '',
+    report: null
   },
 
   onLoad(options) {
-    const id = options.id;
-    // 伪造一些数据用于展示
+    this.setNavSize();
+    const analysisId = options && options.id ? decodeURIComponent(options.id) : '';
+    if (!analysisId) {
+      this.setData({
+        isLoading: false,
+        errorText: '报告信息不完整，暂时无法打开。'
+      });
+      return;
+    }
+    this.setData({ analysisId });
+    this.fetchAnalysisReport();
+  },
+
+  setNavSize() {
+    const fallback = { statusBarHeight: 24 };
+    let sysInfo = fallback;
+    let menuButtonInfo = null;
+    try {
+      sysInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
+      menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+    } catch (error) {
+      menuButtonInfo = null;
+    }
+    const statusBarHeight = sysInfo.statusBarHeight || fallback.statusBarHeight;
+    const navHeight = menuButtonInfo
+      ? menuButtonInfo.height + (menuButtonInfo.top - statusBarHeight) * 2
+      : 44;
     this.setData({
-      analysisId: id,
-      report: {
-        title: "关于近期情绪波动的深度分析",
-        date: "2023年10月27日",
-        summary: "报告显示，您近期的情绪状态整体稳定，但存在轻微的焦虑迹象，主要与工作压力和睡眠质量有关。积极情绪如“开心”和“放松”占据主导，但“疲惫”和“迷茫”也频繁出现。",
-        suggestions: [
-          "建议增加晚间放松活动，如冥想或阅读，以改善睡眠。",
-          "尝试将大型工作任务分解为更小的部分，减轻压力感。",
-          "与朋友或家人沟通，分享您的感受，有助于缓解焦虑情绪。"
-        ]
+      navTop: statusBarHeight,
+      navHeight
+    });
+  },
+
+  fetchAnalysisReport() {
+    this.setData({ isLoading: true, errorText: '' });
+    wx.request({
+      url: `${HISTORY_ANALYSIS_API_URL}/${encodeURIComponent(this.data.analysisId)}`,
+      method: 'GET',
+      header: {
+        'Authorization': 'Bearer ' + wx.getStorageSync('token')
+      },
+      timeout: 8000,
+      success: (res) => {
+        if (res.statusCode === 200 && res.data) {
+          const payload = res.data;
+          this.setData({
+            report: {
+              ...payload,
+              createdAtLabel: this.formatDateTime(payload.created_at),
+              historyCount: Array.isArray(payload.analyzed_history_ids)
+                ? payload.analyzed_history_ids.length
+                : 0
+            }
+          });
+          return;
+        }
+        this.setData({
+          errorText: (res.data && res.data.detail) || '报告加载失败，请稍后重试。'
+        });
+      },
+      fail: () => {
+        this.setData({ errorText: '网络连接失败，请稍后重试。' });
+      },
+      complete: () => {
+        this.setData({ isLoading: false });
       }
     });
   },
 
-  onShareAppMessage: function () {
+  formatDateTime(value) {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hour}:${minute}`;
+  },
+
+  navigateBack() {
+    wx.navigateBack({ delta: 1 });
+  },
+
+  retryLoad() {
+    if (!this.data.analysisId) return;
+    this.fetchAnalysisReport();
+  },
+
+  onShareAppMessage() {
     return getShareInfo();
   },
 
-  onShareTimeline: function () {
+  onShareTimeline() {
     return getTimelineInfo();
   }
 });

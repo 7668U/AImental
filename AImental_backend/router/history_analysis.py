@@ -1,8 +1,9 @@
 # router/history_analysis.py
 
 import json
+from datetime import datetime
 from fastapi import APIRouter, Depends, Header, HTTPException, status
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 # 1. 导入项目模块
@@ -28,6 +29,45 @@ class SynthesisReportResponse(BaseModel):
     recommendations: str = Field(..., description="个性化建议")
     # ✅ 【新增字段】告诉前端这次结果是来自缓存还是新生成的
     from_cache: bool = Field(default=False, description="结果是否来自缓存")
+
+
+class HistoryAnalysisListItem(BaseModel):
+    id: str
+    history_count: int
+    overall_assessment: str
+    created_at: datetime
+
+
+class HistoryAnalysisDetailResponse(BaseModel):
+    id: str
+    analyzed_history_ids: List[str]
+    overall_assessment: str
+    trend_analysis: str
+    recommendations: str
+    created_at: datetime
+
+
+def _parse_history_analysis(record) -> Dict[str, Any]:
+    try:
+        history_ids = json.loads(record.analyzed_history_ids)
+    except (TypeError, json.JSONDecodeError):
+        history_ids = []
+    try:
+        content = json.loads(record.content)
+    except (TypeError, json.JSONDecodeError):
+        content = {}
+    if not isinstance(history_ids, list):
+        history_ids = []
+    if not isinstance(content, dict):
+        content = {}
+    return {
+        "id": record.id,
+        "analyzed_history_ids": [str(item) for item in history_ids],
+        "overall_assessment": content.get("comprehensive_evaluation", ""),
+        "trend_analysis": content.get("trend_analysis", ""),
+        "recommendations": content.get("personalized_recommendations", ""),
+        "created_at": record.created_at,
+    }
 
 
 # ---------------------------------------------------
@@ -115,4 +155,43 @@ def synthesize_assessment_report(
         release_reservation(reservation)
         raise
 
-# ... (旧的 /、/{analysis_id}、DELETE 等路由可以保留，如果你还需要通过ID来管理单个报告的话) ...
+
+@router.get(
+    "/",
+    response_model=List[HistoryAnalysisListItem],
+    summary="获取当前用户的历史测评综合分析列表",
+)
+def list_history_analyses(
+    current_user_id: str = Depends(get_current_user_id),
+):
+    records = history_analysis_tables.get_analyses_by_user(current_user_id)
+    result = []
+    for record in records:
+        payload = _parse_history_analysis(record)
+        result.append(
+            {
+                "id": payload["id"],
+                "history_count": len(payload["analyzed_history_ids"]),
+                "overall_assessment": payload["overall_assessment"],
+                "created_at": payload["created_at"],
+            }
+        )
+    return result
+
+
+@router.get(
+    "/{analysis_id}",
+    response_model=HistoryAnalysisDetailResponse,
+    summary="获取单条历史测评综合分析",
+)
+def get_history_analysis_detail(
+    analysis_id: str,
+    current_user_id: str = Depends(get_current_user_id),
+):
+    record = history_analysis_tables.get_analysis_by_id(analysis_id)
+    if not record or record.user_id != current_user_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="History analysis not found.",
+        )
+    return _parse_history_analysis(record)

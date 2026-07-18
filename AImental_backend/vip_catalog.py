@@ -17,7 +17,7 @@ FEATURES: Dict[str, Dict[str, str]] = {
         "unit": "次",
     },
     FEATURE_MOOD_ANALYSIS: {
-        "name": "单项心情分析",
+        "name": "心情分析",
         "unit": "次",
     },
     FEATURE_ASSESSMENT_ANALYSIS: {
@@ -120,7 +120,7 @@ ADDON_PRODUCTS: Dict[str, Dict[str, Any]] = {
         "code": "addon_mood_50",
         "product_type": "addon",
         "name": "心情分析包",
-        "description": "增加 50 次单项心情分析额度",
+        "description": "增加 50 次心情分析额度",
         "feature": FEATURE_MOOD_ANALYSIS,
         "amount": 50,
         "price_fen": 99,

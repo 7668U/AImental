@@ -33,7 +33,31 @@
       </view>
 
       <block wx:else>
-        <view wx:if="{{groupedHistory.length === 0}}" class="empty-container">
+        <view wx:if="{{assessmentAnalysisHistory.length > 0}}" class="synthesis-history">
+          <view class="synthesis-heading">
+            <view>
+              <text class="synthesis-title">综合分析报告</text>
+              <text class="synthesis-subtitle">基于多次测评生成的阶段性回顾</text>
+            </view>
+            <text class="synthesis-count">{{assessmentAnalysisHistory.length}}份</text>
+          </view>
+          <view
+            class="synthesis-report-row"
+            wx:for="{{assessmentAnalysisHistory}}"
+            wx:for-index="analysisIndex"
+            wx:key="id"
+            bindtap="goToAssessmentAnalysisReport"
+            data-index="{{analysisIndex}}"
+          >
+            <view class="synthesis-report-main">
+              <text class="synthesis-report-date">{{item.created_at_formatted}}</text>
+              <text class="synthesis-report-meta">综合 {{item.history_count}} 次测评</text>
+            </view>
+            <view class="synthesis-report-arrow"></view>
+          </view>
+        </view>
+
+        <view wx:if="{{groupedHistory.length === 0 && assessmentAnalysisHistory.length === 0 && !isAssessmentAnalysisLoading}}" class="empty-container">
           <image class="empty-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/icons/icon-no-data.png" mode="aspectFit"></image>
           <text class="empty-text">暂无心理测评记录</text>
           <text class="empty-subtext">去完成一次测评，回顾自己的心灵足迹吧</text>
@@ -57,23 +81,9 @@
 
           <view class="history-list {{group.is_expanded ? 'expanded' : ''}}">
             <view class="history-item" wx:for="{{group.records}}" wx:for-item="record" wx:for-index="recordIndex" wx:key="id">
-              <view class="delete-action">
-                <view
-                  class="delete-btn"
-                  catchtap="handleConfirmDelete"
-                  data-group-index="{{groupIndex}}"
-                  data-record-index="{{recordIndex}}"
-                  data-record-id="{{record.id}}">
-                  <text class="delete-text">删除</text>
-                </view>
-              </view>
-
               <view
                 class="history-item-content"
-                style="transform: translateX({{record.x_offset || 0}}px) translateZ(0);"
-                bindtouchstart="handleTouchStart"
-                bindtouchmove="handleTouchMove"
-                bindtouchend="handleTouchEnd"
+                catchlongpress="handleLongPressDelete"
                 bindtap="goToResultDetail"
                 data-record="{{record}}"
                 data-group-index="{{groupIndex}}"
@@ -107,23 +117,17 @@
         <view
           class="mood-report-card"
           wx:for="{{moodAnalysisHistory}}"
+          wx:for-index="reportIndex"
           wx:key="id"
           bindtap="goToMoodAnalysisReport"
-          data-record="{{item}}"
+          data-index="{{reportIndex}}"
         >
-          <view class="mood-report-header">
-            <view class="mood-report-meta">
-              <view class="mood-report-type">{{item.analysis_title}}</view>
-              <view class="mood-report-updated" wx:if="{{item.updated_at_formatted}}">生成于 {{item.updated_at_formatted}}</view>
-            </view>
-            <view class="mood-report-arrow"></view>
-          </view>
           <view class="mood-report-period">
             <text>{{item.start_date}}</text>
             <text class="mood-report-period-separator">至</text>
             <text>{{item.end_date}}</text>
+            <view class="mood-report-arrow"></view>
           </view>
-          <view class="mood-report-hint">点击查看这段时间的分析报告</view>
         </view>
       </block>
     </block>

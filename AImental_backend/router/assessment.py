@@ -1,7 +1,9 @@
 # router/assessment.py (图片URL拼接最终版)
 
 import json
+import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import Header
 from typing import List, Dict, Any, Optional
 
 # 1. 导入项目模块
@@ -18,6 +20,9 @@ from model.assessment import (
     SubmitAnswersRequest,
     UserAssessmentResponse
 )
+from assessment_ai import generate_assessment_ai_analysis, is_health_assessment
+from vip_access import confirm_reservation, release_reservation, reserve_feature_or_http
+from vip_catalog import FEATURE_ASSESSMENT_ANALYSIS
 
 # ✅ 【第 1 步】: 在这里定义您的服务器基地址
 # 部署时请务必替换为您的实际公网域名和端口
@@ -60,6 +65,31 @@ def _build_scale_info(scale_obj, include_json_data: bool = False) -> Optional[Di
     return scale_info
 
 
+def _build_record_scale_info(record, include_json_data: bool = False) -> Dict[str, Any]:
+    scale_info = _build_scale_info(record.scale, include_json_data=include_json_data)
+    if scale_info:
+        return scale_info
+
+    # Keep old records visible even if their historical scale definition was
+    # removed from the current scale catalog.
+    assessment_type = (
+        "scoring"
+        if record.raw_score is not None or record.final_score is not None
+        else "categorical"
+    )
+    return {
+        "id": str(record.scale_id or f"legacy-{record.id}"),
+        "short_name": "LEGACY",
+        "name": "历史测评",
+        "description": "该记录对应的量表定义已不在当前量表目录中。",
+        "category": "历史记录",
+        "assessment_type": assessment_type,
+        "display_group": "历史记录",
+        "display_group_order": 99,
+        "display_order": 99,
+    }
+
+
 def _normalize_result_details(result_details: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     if not isinstance(result_details, dict):
         return result_details
@@ -75,11 +105,6 @@ def _build_assessment_response(record, include_scale_json: bool = False) -> Dict
     ai_analysis = None
     if isinstance(result_details, dict):
         ai_analysis = result_details.get("ai_analysis")
-    if not ai_analysis:
-        ai_analysis = assessment_tables.ensure_ai_analysis_for_record(record)
-        if ai_analysis:
-            result_details = json.loads(record.result_details) if record.result_details else None
-
     response_dict = {
         "id": record.id,
         "user_id": record.user_id,
@@ -93,8 +118,8 @@ def _build_assessment_response(record, include_scale_json: bool = False) -> Dict
         "result_details": _normalize_result_details(result_details),
         "ai_analysis": ai_analysis,
         "completed_at": record.completed_at,
-        "scale_info": _build_scale_info(record.scale) if record.scale else None,
-        "scale_details": _build_scale_info(record.scale, include_json_data=include_scale_json) if record.scale else None,
+        "scale_info": _build_record_scale_info(record, include_json_data=False),
+        "scale_details": _build_record_scale_info(record, include_json_data=include_scale_json),
     }
     return response_dict
     
@@ -192,5 +217,68 @@ def get_single_assessment_record(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Record not found")
 
     return _build_assessment_response(record, include_scale_json=True)
+
+
+@router.post(
+    "/history/{record_id}/ai-analysis",
+    response_model=Dict[str, Any],
+    summary="按需生成单条测评的 AI 分析",
+)
+def generate_single_assessment_ai_analysis(
+    record_id: str,
+    current_user_id: str = Depends(get_current_user_id),
+    x_request_id: Optional[str] = Header(None, alias="X-Request-ID"),
+):
+    record = assessment_tables.get_assessment_by_id(record_id)
+    if not record or record.user_id != current_user_id or not record.scale:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Record not found")
+
+    if not is_health_assessment(record.scale.short_name, record.scale.category or ""):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"code": "assessment_ai_not_available", "message": "该问卷暂不支持单次 AI 分析。"},
+        )
+
+    cached_analysis = assessment_tables.get_cached_ai_analysis_for_record(record)
+    if cached_analysis:
+        return {"ai_analysis": cached_analysis, "from_cache": True}
+
+    reservation = reserve_feature_or_http(
+        user_id=current_user_id,
+        feature=FEATURE_ASSESSMENT_ANALYSIS,
+        supplied_request_id=x_request_id or f"assessment:{record_id}:{uuid.uuid4()}",
+    )
+    try:
+        try:
+            answers = json.loads(record.answers) if record.answers else {}
+            scale_data = json.loads(record.scale.json_data)
+        except (TypeError, json.JSONDecodeError):
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={"code": "assessment_data_invalid", "message": "测评数据暂时无法读取。"},
+            )
+
+        result_data = {
+            "result_level": record.result_level,
+            "final_score": record.final_score,
+            "result_interpretation": record.result_interpretation,
+            "result_recommendation": record.result_recommendation,
+        }
+        ai_analysis = generate_assessment_ai_analysis(scale_data, result_data, answers)
+        if not ai_analysis:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={
+                    "code": "model_generation_failed",
+                    "message": "AI 分析暂时生成失败，请稍后重试。",
+                },
+            )
+
+        assessment_tables.save_ai_analysis_for_record(record, ai_analysis)
+        confirm_reservation(reservation)
+        return {"ai_analysis": ai_analysis, "from_cache": False}
+    except Exception:
+        release_reservation(reservation)
+        raise
 
 

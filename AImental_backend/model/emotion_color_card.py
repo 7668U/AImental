@@ -18,6 +18,7 @@ from security.data_encryption import EncryptedTextField
 
 from db import status_db
 from model.checkin_dimensions import get_color_meta
+from model.private_media import extract_media_id, private_media_table
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -27,6 +28,7 @@ load_dotenv(PROJECT_ROOT / "emotion-color-palette-lab" / ".env", override=False)
 CARD_CACHE_VERSION = "ai-color-card-v1"
 GENERATED_DIR = Path("static") / "emotion-color-cards"
 RAW_GENERATED_DIR = GENERATED_DIR / "raw"
+EMOTION_COLOR_CARD_MEDIA_OWNER = "system-emotion-color-card"
 HEX_RE = re.compile(r"^#?[0-9a-fA-F]{6}$")
 
 
@@ -322,8 +324,6 @@ Visual requirements:
 def _call_images_api(
     *,
     prompt: str,
-    output_path: Path,
-    raw_path: Path,
 ) -> dict[str, Any]:
     config = _image_api_config()
     if not config["api_key"] or not config["model"]:
@@ -375,30 +375,42 @@ def _call_images_api(
             "error": _sanitize_error(str(exc), config["model"]),
         }
 
-    RAW_GENERATED_DIR.mkdir(parents=True, exist_ok=True)
-    raw_path.write_text(response_text, encoding="utf-8")
-
     data = json.loads(response_text)
     item = (data.get("data") or [{}])[0]
-    GENERATED_DIR.mkdir(parents=True, exist_ok=True)
     if item.get("b64_json"):
-        output_path.write_bytes(b64decode(item["b64_json"]))
+        image_bytes = b64decode(item["b64_json"])
     elif item.get("url"):
         with request.urlopen(item["url"], timeout=240) as image_response:
-            output_path.write_bytes(image_response.read())
+            image_bytes = image_response.read()
     else:
         return {
             "background_image_url": None,
             "local_path": None,
-            "raw_path": str(raw_path).replace("\\", "/"),
+            "raw_path": None,
             "source": "fallback",
             "error": "Images API returned no image.",
         }
 
+    try:
+        media_url = private_media_table.store_image_bytes(
+            owner_user_id=EMOTION_COLOR_CARD_MEDIA_OWNER,
+            media_type="emotion_color_card",
+            content_type="image/png",
+            data=image_bytes,
+        )
+    except Exception as exc:
+        return {
+            "background_image_url": None,
+            "local_path": None,
+            "raw_path": None,
+            "source": "fallback",
+            "error": _sanitize_error(str(exc), config["model"]),
+        }
+
     return {
-        "background_image_url": f"/static/emotion-color-cards/{output_path.name}",
-        "local_path": str(output_path).replace("\\", "/"),
-        "raw_path": str(raw_path).replace("\\", "/"),
+        "background_image_url": media_url,
+        "local_path": None,
+        "raw_path": None,
         "source": config["source"],
         "error": f"model={data.get('model') or config['model']}; quality={data.get('quality')}; size={data.get('size')}",
     }
@@ -407,6 +419,8 @@ def _call_images_api(
 def _cache_file_is_available(record: EmotionColorCardCache) -> bool:
     if not record.background_image_url:
         return False
+    if extract_media_id(record.background_image_url):
+        return private_media_table.exists(record.background_image_url)
     if not record.local_path:
         return True
     return Path(record.local_path).exists()
@@ -426,7 +440,9 @@ def _record_to_payload(record: EmotionColorCardCache, *, cached: bool) -> dict[s
             "source": "local",
         },
         "image_result": {
-            "background_image_url": record.background_image_url,
+            "background_image_url": private_media_table.signed_url(
+                record.background_image_url
+            ),
             "source": record.source,
             "cached": cached,
             "prompt": record.prompt,
@@ -454,12 +470,13 @@ class EmotionColorCardCacheTable:
         selected_colors = palette["selected_colors"]
         naming_result = fallback_color_name(mixed_color)
         prompt = build_image_prompt(mixed_color, naming_result, selected_colors)
-        output_path = GENERATED_DIR / f"emotion-color-card-{palette['palette_key']}.png"
-        raw_path = RAW_GENERATED_DIR / f"emotion-color-card-{palette['palette_key']}.json"
+        previous_background_url = (
+            cached.background_image_url
+            if cached
+            else None
+        )
         image_result = _call_images_api(
             prompt=prompt,
-            output_path=output_path,
-            raw_path=raw_path,
         )
 
         defaults = {
@@ -489,6 +506,18 @@ class EmotionColorCardCacheTable:
         ).execute()
 
         record = EmotionColorCardCache.get(EmotionColorCardCache.palette_key == palette["palette_key"])
+        if (
+            previous_background_url
+            and previous_background_url != record.background_image_url
+            and extract_media_id(previous_background_url)
+        ):
+            try:
+                private_media_table.delete(
+                    previous_background_url,
+                    owner_user_id=EMOTION_COLOR_CARD_MEDIA_OWNER,
+                )
+            except Exception as exc:
+                print(f"Error deleting replaced emotion color card: {exc}")
         return _record_to_payload(record, cached=False)
 
 

@@ -1,0 +1,55 @@
+<view class="records-page">
+  <view class="records-head">
+    <view class="status-spacer" style="height: {{statusBarHeight}}px;"></view>
+
+    <view class="records-nav">
+      <view class="back-button" bindtap="handleBack" aria-label="返回">
+        <text class="back-icon">‹</text>
+      </view>
+      <view class="records-title">购买记录</view>
+      <view class="nav-placeholder"></view>
+    </view>
+
+    <view class="tabs">
+      <view
+        wx:for="{{tabs}}"
+        wx:key="key"
+        class="tab-item {{activeTab === item.key ? 'active' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="switchTab"
+      >
+        <text>{{item.label}}</text>
+      </view>
+    </view>
+  </view>
+
+  <scroll-view class="records-scroll" scroll-y refresher-enabled="{{false}}">
+    <view style="height: {{statusBarHeight}}px;"></view>
+    <view class="records-head-spacer"></view>
+
+    <view class="records-list" wx:if="{{filteredRecords.length}}">
+      <view wx:for="{{filteredRecords}}" wx:key="id" class="record-row">
+        <view class="record-icon-wrap">
+          <image class="record-icon" src="{{item.icon}}" mode="aspectFit"></image>
+        </view>
+        <view class="record-main">
+          <view class="record-title">{{item.title}}</view>
+          <view class="record-detail">{{item.detail}}</view>
+          <view class="record-time">{{item.timeText}}</view>
+        </view>
+        <view class="record-side">
+          <view class="record-price">{{item.priceText}}</view>
+          <view class="record-status {{item.statusClass}}">{{item.statusText}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:else class="empty-state">
+      <view class="empty-text">{{loading ? '加载中...' : emptyText}}</view>
+    </view>
+
+    <view class="records-bottom-space"></view>
+  </scroll-view>
+
+  <image class="records-bottom-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/records-bottom-bg.png" mode="aspectFill"></image>
+</view>

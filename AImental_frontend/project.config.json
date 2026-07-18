@@ -78,14 +78,6 @@
         "value": "images/cloud.png"
       },
       {
-        "type": "file",
-        "value": "images/community.png"
-      },
-      {
-        "type": "file",
-        "value": "images/community_selected.png"
-      },
-      {
         "type": "folder",
         "value": "images/community-affinity"
       },
@@ -100,6 +92,18 @@
       {
         "type": "folder",
         "value": "images/community-redesign"
+      },
+      {
+        "type": "folder",
+        "value": "images/privacy"
+      },
+      {
+        "type": "folder",
+        "value": "images/vip"
+      },
+      {
+        "type": "file",
+        "value": "images/community-profile-mbti.png"
       },
       {
         "type": "file",
@@ -175,6 +179,14 @@
       },
       {
         "type": "folder",
+        "value": "pages/daily-checkin/assets"
+      },
+      {
+        "type": "folder",
+        "value": "pkgDailyCheckin/assets"
+      },
+      {
+        "type": "folder",
         "value": "pkgDailyCheckin/components-ecanvas/pages"
       },
       {
@@ -218,14 +230,10 @@
       {
         "type": "file",
         "value": "utils/privacy.js"
-      },
-      {
-        "type": "folder",
-        "value": "images/privacy"
       }
     ]
   },
-  "appid": "wx3a565bb4664b579a",
+  "appid": "wxd90fc334d65b9a0a",
   "editorSetting": {},
   "libVersion": "3.8.10"
 }

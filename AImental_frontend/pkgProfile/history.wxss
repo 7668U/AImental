@@ -152,6 +152,95 @@ page {
   margin-top: 28rpx;
 }
 
+.synthesis-history {
+  margin-top: 28rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 18rpx 42rpx rgba(152, 111, 50, 0.1);
+  overflow: hidden;
+}
+
+.synthesis-heading {
+  min-height: 112rpx;
+  padding: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.synthesis-title,
+.synthesis-subtitle {
+  display: block;
+}
+
+.synthesis-title {
+  color: #332018;
+  font-size: 30rpx;
+  line-height: 1.2;
+  font-weight: 900;
+}
+
+.synthesis-subtitle {
+  margin-top: 10rpx;
+  color: #9d8580;
+  font-size: 24rpx;
+  line-height: 1.3;
+}
+
+.synthesis-count {
+  color: #df7d1c;
+  font-size: 26rpx;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.synthesis-report-row {
+  min-height: 112rpx;
+  padding: 26rpx 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1rpx solid rgba(182, 144, 100, 0.16);
+  background: #fffdf8;
+  box-sizing: border-box;
+}
+
+.synthesis-report-row:active {
+  opacity: 0.76;
+}
+
+.synthesis-report-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.synthesis-report-date {
+  color: #332018;
+  font-size: 29rpx;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.synthesis-report-meta {
+  margin-top: 10rpx;
+  color: #9d8580;
+  font-size: 24rpx;
+  line-height: 1.2;
+}
+
+.synthesis-report-arrow {
+  width: 18rpx;
+  height: 18rpx;
+  margin-left: 20rpx;
+  border-right: 5rpx solid #b58a6c;
+  border-top: 5rpx solid #b58a6c;
+  border-radius: 2rpx;
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
 .card-header {
   min-height: 112rpx;
   padding: 30rpx 28rpx 26rpx;
@@ -283,7 +372,6 @@ page {
 .history-item {
   position: relative;
   overflow: hidden;
-  transform: translateZ(0);
   background: #fffdf8;
 }
 
@@ -302,7 +390,6 @@ page {
   justify-content: space-between;
   background: #fffdf8;
   box-sizing: border-box;
-  transition: transform 0.2s ease-out;
 }
 
 .history-item-content:active {
@@ -355,33 +442,6 @@ page {
   letter-spacing: 0;
 }
 
-.delete-action {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 160rpx;
-  z-index: 1;
-  background: #ffe4df;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.delete-btn {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.delete-text {
-  color: #cf4f43;
-  font-size: 28rpx;
-  font-weight: 800;
-}
-
 .loading-tip,
 .empty-container {
   position: relative;
@@ -413,7 +473,10 @@ page {
 
 .mood-report-card {
   margin-top: 28rpx;
-  padding: 28rpx;
+  min-height: 104rpx;
+  padding: 0 30rpx;
+  display: flex;
+  align-items: center;
   border-radius: 24rpx;
   background: rgba(255, 255, 255, 0.86);
   box-shadow: 0 18rpx 42rpx rgba(152, 111, 50, 0.1);
@@ -425,36 +488,9 @@ page {
   transform: scale(0.995);
 }
 
-.mood-report-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20rpx;
-}
-
-.mood-report-meta {
-  flex: 1;
-  min-width: 0;
-}
-
-.mood-report-type {
-  min-width: 0;
-  color: #332018;
-  font-size: 30rpx;
-  line-height: 1.25;
-  font-weight: 900;
-  letter-spacing: 0;
-}
-
-.mood-report-updated {
-  margin-top: 10rpx;
-  color: #a98976;
-  font-size: 24rpx;
-  line-height: 1.3;
-  letter-spacing: 0;
-}
-
 .mood-report-arrow {
+  position: absolute;
+  right: 0;
   width: 18rpx;
   height: 18rpx;
   border-right: 5rpx solid #b58a6c;
@@ -465,14 +501,12 @@ page {
 }
 
 .mood-report-period {
-  margin-top: 22rpx;
-  padding: 20rpx 22rpx;
+  position: relative;
+  width: 100%;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 10rpx;
-  border-radius: 16rpx;
-  background: #fff8ed;
+  justify-content: center;
+  gap: 12rpx;
   color: #65412d;
   font-size: 30rpx;
   line-height: 1.3;
@@ -485,14 +519,6 @@ page {
   color: #b58a6c;
   font-size: 24rpx;
   font-weight: 800;
-}
-
-.mood-report-hint {
-  margin-top: 16rpx;
-  color: #9d8580;
-  font-size: 24rpx;
-  line-height: 1.3;
-  letter-spacing: 0;
 }
 
 @media (max-height: 700px) {

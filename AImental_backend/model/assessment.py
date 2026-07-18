@@ -39,6 +39,7 @@ ASSESSMENT_DISPLAY_GROUPS = {
     "REAL-MAJOR-V1": ("趣味探索", 4, 3),
     "AGLT": ("趣味探索", 4, 4),
     "RFLT": ("趣味探索", 4, 5),
+    "SOUL-DRINK": ("趣味探索", 4, 6),
 }
 
 BDI_DIMENSIONS = {
@@ -484,7 +485,16 @@ class AssessmentTables:
         except json.JSONDecodeError:
             return
 
-        should_refresh = record.result_level is None or self._scale_uses_reverse_scoring(scale_data)
+        # Historical results are immutable once they have a stored level.
+        # Only repair records that were saved without a usable result.
+        should_refresh = (
+            record.result_level is None
+            or (
+                record.raw_score is None
+                and record.final_score is None
+                and record.result_interpretation is None
+            )
+        )
         if not should_refresh:
             return
 
@@ -494,17 +504,56 @@ class AssessmentTables:
             return
 
         result_data = self._calculate_scoring_result(answers, scale_data)
-        result_data = self._attach_ai_analysis(record.scale.short_name, answers, result_data)
-
+        next_raw_score = (
+            record.raw_score
+            if record.raw_score is not None
+            else result_data.get("raw_score")
+        )
+        next_final_score = (
+            record.final_score
+            if record.final_score is not None
+            else result_data.get("final_score")
+        )
+        next_result_level = (
+            record.result_level
+            if record.result_level is not None
+            else result_data.get("result_level")
+        )
+        next_interpretation = (
+            record.result_interpretation
+            if record.result_interpretation
+            else result_data.get("result_interpretation")
+        )
+        next_recommendation = (
+            record.result_recommendation
+            if record.result_recommendation
+            else result_data.get("result_recommendation")
+        )
         has_changes = (
-            record.raw_score != result_data.get("raw_score")
-            or record.final_score != result_data.get("final_score")
-            or record.result_level != result_data.get("result_level")
-            or record.result_interpretation != result_data.get("result_interpretation")
-            or record.result_recommendation != result_data.get("result_recommendation")
+            record.raw_score != next_raw_score
+            or record.final_score != next_final_score
+            or record.result_level != next_result_level
+            or record.result_interpretation != next_interpretation
+            or record.result_recommendation != next_recommendation
         )
 
-        next_details = result_data.get("result_details")
+        try:
+            existing_details = json.loads(record.result_details) if record.result_details else {}
+        except json.JSONDecodeError:
+            existing_details = {}
+        cached_ai_analysis = existing_details.get("ai_analysis") if isinstance(existing_details, dict) else None
+
+        calculated_details = result_data.get("result_details")
+        if not isinstance(calculated_details, dict):
+            calculated_details = {}
+        if isinstance(existing_details, dict) and existing_details:
+            next_details = dict(existing_details)
+            for key, value in calculated_details.items():
+                next_details.setdefault(key, value)
+        else:
+            next_details = dict(calculated_details)
+        if isinstance(cached_ai_analysis, dict):
+            next_details["ai_analysis"] = cached_ai_analysis
         next_details_json = json.dumps(next_details, ensure_ascii=False) if next_details else None
         if record.result_details != next_details_json:
             has_changes = True
@@ -512,11 +561,11 @@ class AssessmentTables:
         if not has_changes:
             return
 
-        record.raw_score = result_data.get("raw_score")
-        record.final_score = result_data.get("final_score")
-        record.result_level = result_data.get("result_level")
-        record.result_interpretation = result_data.get("result_interpretation")
-        record.result_recommendation = result_data.get("result_recommendation")
+        record.raw_score = next_raw_score
+        record.final_score = next_final_score
+        record.result_level = next_result_level
+        record.result_interpretation = next_interpretation
+        record.result_recommendation = next_recommendation
         record.result_details = next_details_json
         record.save()
 
@@ -659,28 +708,6 @@ class AssessmentTables:
             },
             "risk_note": risk_note,
         }
-
-    def _attach_ai_analysis(
-        self,
-        scale_short_name: str,
-        request_answers: Dict[str, Any],
-        result_data: Dict[str, Any],
-    ) -> Dict[str, Any]:
-        if scale_short_name != "SDS":
-            return result_data
-
-        ai_analysis = self._build_bdi_ai_analysis(
-            request_answers=request_answers,
-            result_level=result_data.get("result_level"),
-            final_score=result_data.get("final_score"),
-        )
-        result_details = result_data.get("result_details")
-        if not isinstance(result_details, dict):
-            result_details = {}
-        result_details["ai_analysis"] = ai_analysis
-        result_data["result_details"] = result_details
-        result_data["ai_analysis"] = ai_analysis
-        return result_data
 
     def _calculate_aglt_talent_radar_result(self, request_answers: Dict[str, str], scale_data: Dict) -> Dict:
         rules = scale_data.get('scale_info', {}).get('scoring_rules', {})
@@ -907,6 +934,9 @@ class AssessmentTables:
         if scoring_type == 'talent_radar_dual_axis':
             return self._calculate_aglt_talent_radar_result(request_answers, scale_data)
 
+        if scoring_type == 'soul_drink_3d':
+            return self._calculate_soul_drink_result(request_answers, scale_data)
+
         # ==============================================================================
         # 规则 1: 处理 ECR 问卷的 "subscale_average_2d" (二维度平均分)
         # ==============================================================================
@@ -1071,7 +1101,87 @@ class AssessmentTables:
                     "image_url": final_result.get('image_url')
                 }
             }
-                
+
+    def _calculate_soul_drink_result(self, request_answers: Dict[str, str], scale_data: Dict) -> Dict:
+        """处理灵魂饮料测试的 S/N、T/F、J/P 三维组合计分。"""
+        questions = {str(q.get('order')): q for q in scale_data.get('questions', [])}
+        interpretations = scale_data.get('interpretations', {})
+        dim_counts = {'S': 0, 'N': 0, 'T': 0, 'F': 0, 'J': 0, 'P': 0}
+
+        for q_order, option_id in request_answers.items():
+            question = questions.get(str(q_order))
+            if not question:
+                continue
+
+            selected_option = next(
+                (opt for opt in question.get('options', []) if str(opt.get('id')) == str(option_id)),
+                None,
+            )
+            if not selected_option:
+                continue
+
+            score_map = selected_option.get('score', {})
+            if not isinstance(score_map, dict):
+                continue
+
+            for dimension, value in score_map.items():
+                if dimension not in dim_counts:
+                    continue
+                try:
+                    dim_counts[dimension] += int(value)
+                except (TypeError, ValueError):
+                    continue
+
+        result_type = ''
+        result_type += 'S' if dim_counts['S'] > dim_counts['N'] else 'N'
+        result_type += 'T' if dim_counts['T'] > dim_counts['F'] else 'F'
+        result_type += 'J' if dim_counts['J'] > dim_counts['P'] else 'P'
+
+        final_result = interpretations.get(result_type, {})
+        dimension_pairs = {
+            'SN': {'S': dim_counts['S'], 'N': dim_counts['N'], 'winner': result_type[0]},
+            'TF': {'T': dim_counts['T'], 'F': dim_counts['F'], 'winner': result_type[1]},
+            'JP': {'J': dim_counts['J'], 'P': dim_counts['P'], 'winner': result_type[2]},
+        }
+        result_card_base_url = (
+            'https://assets.feelyourself.cn/miniprogram/assets/v1/'
+            'pkgAssessment/images/drink-ti/result-cards'
+        )
+        result_card_map = {
+            'STJ': f'{result_card_base_url}/stj-unsweetened-oolong-tea.jpg',
+            'STP': f'{result_card_base_url}/stp-lime-electrolyte-water.jpg',
+            'SFJ': f'{result_card_base_url}/sfj-hot-milk-tea.jpg',
+            'SFP': f'{result_card_base_url}/sfp-peach-sparkling-water.jpg',
+            'NTJ': f'{result_card_base_url}/ntj-cold-brew-black-coffee.jpg',
+            'NTP': f'{result_card_base_url}/ntp-special-cocktail.jpg',
+            'NFJ': f'{result_card_base_url}/nfj-honey-grapefruit-tea.jpg',
+            'NFP': f'{result_card_base_url}/nfp-colorful-fruit-tea.jpg',
+        }
+
+        return {
+            "raw_score": None,
+            "final_score": None,
+            "result_level": final_result.get('title', result_type),
+            "result_interpretation": final_result.get('description', ''),
+            "result_recommendation": '',
+            "result_details": {
+                "title": final_result.get('title', result_type),
+                "type_code": result_type,
+                "trait": final_result.get('trait', ''),
+                "college": final_result.get('trait', ''),
+                "college_motto": final_result.get('college_motto', ''),
+                "career_teaser": final_result.get('career_teaser', ''),
+                "profile_title": final_result.get('profile_title', ''),
+                "in_relationships": final_result.get('in_relationships', ''),
+                "under_stress": final_result.get('under_stress', ''),
+                "facing_change": final_result.get('facing_change', ''),
+                "dimension_scores": dim_counts,
+                "dimension_pairs": dimension_pairs,
+                "image_url": final_result.get('image_url', ''),
+                "result_card_url": result_card_map.get(result_type, ''),
+            }
+        }
+
     def _calculate_mbti_dimensional_result(self, request_answers: Dict[str, str], scale_data: Dict) -> Dict:
         """【新增】专门处理 MBTI 维度计分的私有方法"""
         questions = {str(q['order']): q for q in scale_data.get('questions', [])}
@@ -1142,8 +1252,6 @@ class AssessmentTables:
         else:
             raise ValueError(f"Unsupported assessment type: {scale.assessment_type}")
 
-        result_data = self._attach_ai_analysis(scale.short_name, request_data.answers, result_data)
-        
         user_assessment = UserAssessment.create(
             user=user_id,
             scale=scale.id,
@@ -1170,15 +1278,9 @@ class AssessmentTables:
         self.ensure_scoring_result_for_record(record)
         return record
 
-    def ensure_ai_analysis_for_record(self, record: UserAssessment) -> Optional[Dict[str, Any]]:
-        """为历史 SDS/BDI-II 记录补齐 AI 分析，并返回分析对象。"""
-        if not record or not record.scale or record.scale.short_name != "SDS":
+    def get_cached_ai_analysis_for_record(self, record: UserAssessment) -> Optional[Dict[str, Any]]:
+        if not record:
             return None
-
-        try:
-            answers = json.loads(record.answers) if record.answers else {}
-        except json.JSONDecodeError:
-            answers = {}
 
         try:
             result_details = json.loads(record.result_details) if record.result_details else {}
@@ -1191,16 +1293,24 @@ class AssessmentTables:
         existing_analysis = result_details.get("ai_analysis")
         if isinstance(existing_analysis, dict):
             return existing_analysis
+        return None
 
-        ai_analysis = self._build_bdi_ai_analysis(
-            request_answers=answers,
-            result_level=record.result_level,
-            final_score=record.final_score,
-        )
+    def save_ai_analysis_for_record(
+        self,
+        record: UserAssessment,
+        ai_analysis: Dict[str, Any],
+    ) -> None:
+        if not record:
+            return
+        try:
+            result_details = json.loads(record.result_details) if record.result_details else {}
+        except json.JSONDecodeError:
+            result_details = {}
+        if not isinstance(result_details, dict):
+            result_details = {}
         result_details["ai_analysis"] = ai_analysis
         record.result_details = json.dumps(result_details, ensure_ascii=False)
         record.save()
-        return ai_analysis
 
     def delete_user_assessment(self, user_id: str, record_id: str) -> bool:
         """删除一条属于特定用户的测评记录"""

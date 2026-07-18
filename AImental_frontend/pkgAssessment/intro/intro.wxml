@@ -7,7 +7,7 @@
     <text>问卷介绍加载失败，请返回后重试</text>
   </view>
 
-  <view class="hero-panel" wx:else>
+  <view class="hero-panel {{scale.coverImagePath ? 'has-cover' : ''}}" wx:else>
     <view class="sparkle sparkle-a">✦</view>
     <view class="sparkle sparkle-b">✧</view>
     <view class="sparkle sparkle-c">✦</view>
@@ -17,6 +17,15 @@
     </view>
 
     <image
+      wx:if="{{scale.coverImagePath}}"
+      class="intro-cover-image"
+      src="{{scale.coverImagePath}}"
+      mode="aspectFill"
+      binderror="handleCoverImageError"
+    />
+
+    <image
+      wx:else
       class="intro-icon"
       src="{{scale.iconPath}}"
       mode="aspectFit"

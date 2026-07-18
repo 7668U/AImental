@@ -30,6 +30,11 @@ page {
   box-shadow: inset 0 2rpx 0 rgba(255, 255, 255, 0.85);
 }
 
+.hero-panel.has-cover {
+  top: 42rpx;
+  padding-top: 44rpx;
+}
+
 .state-panel {
   height: 100vh;
   display: flex;
@@ -85,6 +90,49 @@ page {
   height: 342rpx;
   margin: 0 auto 30rpx;
   border-radius: 58rpx;
+}
+
+.intro-cover-image {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 480rpx;
+  height: 480rpx;
+  margin: 0 auto 28rpx;
+  border-radius: 42rpx;
+  box-shadow: 0 22rpx 48rpx rgba(158, 119, 76, 0.13);
+  background: #fff6e7;
+}
+
+.hero-panel.has-cover .title-zone {
+  min-height: 92rpx;
+  margin-bottom: 14rpx;
+}
+
+.hero-panel.has-cover .intro-title {
+  min-height: 82rpx;
+  font-size: 46rpx;
+}
+
+.hero-panel.has-cover .card-zone {
+  height: 336rpx;
+}
+
+.hero-panel.has-cover .info-card {
+  height: 154rpx;
+  padding: 20rpx 28rpx;
+}
+
+.hero-panel.has-cover .mini-icon-wrap,
+.hero-panel.has-cover .mini-icon {
+  width: 104rpx;
+  height: 104rpx;
+}
+
+.hero-panel.has-cover .strong-copy,
+.hero-panel.has-cover .muted-copy {
+  -webkit-line-clamp: 3;
+  font-size: 27rpx;
 }
 
 .card-zone {

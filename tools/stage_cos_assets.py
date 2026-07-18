@@ -16,6 +16,7 @@ from pathlib import Path
 
 WORKSPACE_ROOT = Path(__file__).resolve().parents[1]
 FRONTEND_ROOT = WORKSPACE_ROOT / "AImental_frontend"
+BACKEND_ROOT = WORKSPACE_ROOT / "AImental_backend"
 OUTPUT_ROOT = WORKSPACE_ROOT / "output" / "cos-assets"
 ASSET_ROOT = OUTPUT_ROOT / "miniprogram" / "assets" / "v1"
 
@@ -24,6 +25,18 @@ COPY_MAP = (
     (FRONTEND_ROOT / "pkgAssessment" / "images", ASSET_ROOT / "pkgAssessment" / "images"),
     (FRONTEND_ROOT / "pkgDailyCheckin" / "images", ASSET_ROOT / "pkgDailyCheckin" / "images"),
     (FRONTEND_ROOT / "pkgProfile" / "images", ASSET_ROOT / "pkgProfile" / "images"),
+    (
+        FRONTEND_ROOT / "pages" / "daily-checkin" / "assets",
+        ASSET_ROOT / "pages" / "daily-checkin" / "assets",
+    ),
+    (
+        FRONTEND_ROOT / "pkgDailyCheckin" / "assets",
+        ASSET_ROOT / "pkgDailyCheckin" / "assets",
+    ),
+    (
+        BACKEND_ROOT / "static" / "avatars",
+        ASSET_ROOT / "backend" / "avatars",
+    ),
 )
 
 

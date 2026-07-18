@@ -1,5 +1,5 @@
 <view class="page-container">
-  <image class="trajectory-bg" src="/pkgDailyCheckin/assets/trajectory/trajectory-bg.jpg" mode="aspectFill"></image>
+  <image class="trajectory-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/assets/trajectory/trajectory-bg.jpg" mode="aspectFill"></image>
   <view class="trajectory-nav" style="padding-top: {{statusBarHeight}}px; height: {{totalNavBarHeight}}px;">
     <view class="nav-row" style="height: {{navBarHeight}}px;">
       <view class="nav-button nav-back" bindtap="goBack">‹</view>
@@ -13,12 +13,12 @@
       <view class="date-header">
         <view class="date-title-row">
           <view class="date-title">{{dateLabel}}</view>
-          <image class="title-leaf" src="/pkgDailyCheckin/assets/trajectory/leaf-title.jpg" mode="aspectFit"></image>
+          <image class="title-leaf" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/assets/trajectory/leaf-title.png" mode="aspectFit"></image>
         </view>
-        <view class="date-subtitle">{{isToday ? '今天的心情正在流动' : '回看这一天的心情变化'}}</view>
+        <view wx:if="{{moments.length > 0}}" class="date-subtitle">{{isToday ? '今天的心情正在流动' : '回看这一天的心情变化'}}</view>
       </view>
 
-      <view class="sequence-section">
+      <view wx:if="{{moments.length > 0}}" class="sequence-section">
         <scroll-view class="sequence-scroll" scroll-x="true" show-scrollbar="false">
           <view class="sequence-list">
             <view wx:for="{{moments}}" wx:key="id" class="sequence-node">
@@ -29,28 +29,35 @@
         </scroll-view>
       </view>
 
-      <view wx:if="{{moments.length === 0}}" class="empty-card">
-        <view class="empty-title">这一天还没有心情记录</view>
-        <view class="empty-text">{{isToday ? '可以从此刻开始，留下第一条心情。' : '没有记录也没关系，这一天也安静地经过了。'}}</view>
-        <view wx:if="{{isToday}}" class="empty-button" bindtap="goToRecord">记录此刻</view>
+      <view wx:if="{{moments.length === 0}}" class="trajectory-empty-state">
+        <image
+          class="trajectory-empty-image"
+          src="https://assets.feelyourself.cn/miniprogram/assets/v1/pages/daily-checkin/assets/trajectory-empty-transparent.png"
+          mode="aspectFill"
+        ></image>
+        <view class="empty-text">{{isToday ? '今天还没有心情记录，把这一刻轻轻记下来吧' : '这一天没有留下心情记录，也安静地经过了'}}</view>
       </view>
 
       <view wx:if="{{moments.length > 0}}" class="timeline-section">
         <view class="timeline-heading">
           <view>
             <view class="section-title">心情变化</view>
-            <view class="trend-copy">{{trendText}}</view>
+            <view wx:if="{{trendText}}" class="trend-copy">{{trendText}}</view>
           </view>
-          <view class="timeline-filter">按时间查看⌄</view>
         </view>
 
         <view class="timeline-list">
           <view wx:for="{{moments}}" wx:key="id" class="timeline-item">
             <view class="timeline-time">{{item.localTime}}</view>
             <view class="timeline-line">
-              <view class="timeline-dot"></view>
+              <view class="timeline-dot" style="background-color: {{item.timelineColor}};"></view>
             </view>
-            <view class="timeline-card mood-tone-{{item.moodTone}}">
+            <view
+              class="timeline-card mood-tone-{{item.moodTone}}"
+              bindtap="onMomentTap"
+              bindlongpress="onMomentLongPress"
+              data-id="{{item.id}}"
+            >
               <image class="timeline-scene" src="{{item.moodScene}}" mode="aspectFill"></image>
               <view class="timeline-scene-fade"></view>
               <view class="timeline-card-main">
@@ -61,7 +68,6 @@
                     <view wx:for="{{item.tags}}" wx:for-item="tag" wx:key="*this" class="tag-chip">{{tag}}</view>
                   </view>
                 </view>
-                <view class="color-dot" style="background-color: {{item.color}};"></view>
               </view>
 
               <view wx:if="{{item.text_content}}" class="memory-text">{{item.text_content}}</view>
@@ -73,7 +79,7 @@
                   class="photo-thumb"
                   src="{{photo}}"
                   mode="aspectFill"
-                  bindtap="previewImage"
+                  catchtap="previewImage"
                   data-current="{{photo}}"
                   data-urls="{{item.imageUrls}}"
                 ></image>

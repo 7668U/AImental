@@ -3,16 +3,11 @@
 const SERVER_BASE_URL = 'http://127.0.0.1:8000';
 const ASSESSMENTS_API_URL = `${SERVER_BASE_URL}/api/v1/assessments`;
 const MOOD_ANALYSIS_HISTORY_API_URL = `${SERVER_BASE_URL}/api/v1/report/history`;
+const ASSESSMENT_ANALYSIS_HISTORY_API_URL = `${SERVER_BASE_URL}/api/v1/history-analysis/`;
 const { getScaleDisplayName } = require('../utils/assessment-display.js');
 
-const DELETE_BTN_WIDTH = 80;
 const REQUEST_TIMEOUT = 8000;
-const MOOD_ANALYSIS_TYPE_ORDER = {
-  mood: 1,
-  'tag-mood': 2,
-  'word-cloud': 3,
-  color: 4
-};
+const MOOD_ANALYSIS_HISTORY_REPORT_KEY = 'mood_analysis_history_report';
 const MOOD_ANALYSIS_FRONTEND_TYPE_MAP = {
   mood: 'mood_distribution',
   'tag-mood': 'tag_correlation',
@@ -28,15 +23,17 @@ Page({
     activeHistoryTab: 'assessment',
     isLoading: true,
     isMoodAnalysisLoading: false,
+    isAssessmentAnalysisLoading: false,
     groupedHistory: [],
     moodAnalysisHistory: [],
-    touchStartX: 0,
+    assessmentAnalysisHistory: [],
   },
 
   onLoad(options) {
     this.setNavSize();
     this.fetchHistory();
     this.fetchMoodAnalysisHistory();
+    this.fetchAssessmentAnalysisHistory();
   },
 
   setNavSize() {
@@ -96,7 +93,6 @@ Page({
   switchHistoryTab(e) {
     const tab = e.currentTarget.dataset.tab;
     if (!tab || tab === this.data.activeHistoryTab) return;
-    this.closeOtherSwipedItems(-1, -1);
     this.setData({ activeHistoryTab: tab });
   },
 
@@ -125,6 +121,33 @@ Page({
     });
   },
 
+  fetchAssessmentAnalysisHistory() {
+    this.setData({ isAssessmentAnalysisLoading: true });
+    wx.request({
+      url: ASSESSMENT_ANALYSIS_HISTORY_API_URL,
+      method: 'GET',
+      header: {
+        'Authorization': 'Bearer ' + wx.getStorageSync('token')
+      },
+      timeout: REQUEST_TIMEOUT,
+      success: (res) => {
+        if (res.statusCode === 200 && Array.isArray(res.data)) {
+          this.setData({
+            assessmentAnalysisHistory: this.processAssessmentAnalysisHistory(res.data)
+          });
+        } else {
+          this.handleFetchError('综合测评历史加载失败');
+        }
+      },
+      fail: () => {
+        this.handleFetchError('网络错误，请检查网络连接');
+      },
+      complete: () => {
+        this.setData({ isAssessmentAnalysisLoading: false });
+      }
+    });
+  },
+
   toggleExpand(e) {
     const { index } = e.currentTarget.dataset;
     const key = `groupedHistory[${index}].is_expanded`;
@@ -135,7 +158,6 @@ Page({
   },
 
   goToResultDetail(e) {
-    this.closeOtherSwipedItems(-1, -1);
     try {
       const { record } = e.currentTarget.dataset;
       if (!record || !record.id) { 
@@ -153,19 +175,36 @@ Page({
   },
 
   goToMoodAnalysisReport(e) {
-    const { record } = e.currentTarget.dataset;
-    if (!record || !record.start_date || !record.end_date || !record.frontend_analysis_type) {
+    const index = Number(e.currentTarget.dataset.index);
+    const record = this.data.moodAnalysisHistory[index];
+    if (!record || !record.start_date || !record.end_date) {
       wx.showToast({ title: '报告信息不完整，暂时无法打开', icon: 'none' });
       return;
     }
+    wx.setStorageSync(MOOD_ANALYSIS_HISTORY_REPORT_KEY, {
+      start_date: record.start_date,
+      end_date: record.end_date,
+      reports: record.reports || {},
+    });
     const params = [
-      `type=${encodeURIComponent(record.frontend_analysis_type)}`,
       `start_date=${encodeURIComponent(record.start_date)}`,
       `end_date=${encodeURIComponent(record.end_date)}`,
       'from=history'
     ].join('&');
     wx.navigateTo({
       url: `/pkgDailyCheckin/analysis?${params}`
+    });
+  },
+
+  goToAssessmentAnalysisReport(e) {
+    const index = Number(e.currentTarget.dataset.index);
+    const record = this.data.assessmentAnalysisHistory[index];
+    if (!record || !record.id) {
+      wx.showToast({ title: '报告信息不完整，暂时无法打开', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({
+      url: `/pkgProfile/history_analysis?id=${encodeURIComponent(record.id)}`
     });
   },
 
@@ -182,32 +221,33 @@ Page({
     const historyMap = new Map();
 
     records.forEach(record => {
-      // 增加一个安全检查，如果记录没有 scale_info，则跳过
-      if (!record.scale_info) {
-        console.warn("记录缺少 scale_info，已跳过:", record);
-        return;
-      }
+      const scaleInfo = record.scale_info || record.scale_details || {
+        id: record.scale_id || `legacy-${record.id}`,
+        short_name: 'LEGACY',
+        name: '历史测评',
+        assessment_type: record.final_score !== null && record.final_score !== undefined
+          ? 'scoring'
+          : 'categorical'
+      };
+      record.scale_info = scaleInfo;
         
-      record.x_offset = 0;
       record.completed_at_formatted = this.formatDateToYYYYMMDD(record.completed_at);
       record.display_result_level = this.getDisplayResultLevel(record.result_level);
       record.display_final_score = this.formatScore(record.final_score);
       
-      const scaleId = record.scale_info.id;
+      const scaleId = scaleInfo.id;
       if (historyMap.has(scaleId)) {
         historyMap.get(scaleId).records.push(record);
         historyMap.get(scaleId).count += 1;
       } else {
-        const shortName = record.scale_info.short_name;
+        const shortName = scaleInfo.short_name;
         historyMap.set(scaleId, {
           scale_id: scaleId,
-          scale_name: getScaleDisplayName(shortName, record.scale_info.name),
+          scale_name: getScaleDisplayName(shortName, scaleInfo.name),
           count: 1,
           is_expanded: true,
           records: [record],
-          // ✅ 【核心修改已集成】
-          // 从当前记录的 scale_info 中获取 assessment_type，并存入分组信息
-          assessment_type: record.scale_info.assessment_type 
+          assessment_type: scaleInfo.assessment_type
         });
       }
     });
@@ -216,21 +256,51 @@ Page({
 
   processMoodAnalysisHistory(records) {
     if (!records || records.length === 0) return [];
+    const grouped = new Map();
+
+    records.forEach((record) => {
+      if (!record.start_date || !record.end_date) return;
+      const key = `${record.start_date}_${record.end_date}`;
+      const sortTime = this.resolveSortTime(record.updated_at || record.created_at);
+      const existing = grouped.get(key);
+      if (!existing) {
+        grouped.set(key, {
+          id: key,
+          start_date: record.start_date,
+          end_date: record.end_date,
+          sort_time: sortTime,
+          reports: {},
+        });
+      }
+
+      const target = grouped.get(key);
+      target.sort_time = Math.max(target.sort_time, sortTime);
+      const frontendType = MOOD_ANALYSIS_FRONTEND_TYPE_MAP[record.analysis_type];
+      if (!frontendType) return;
+      const currentReport = target.reports[frontendType];
+      if (!currentReport || sortTime >= currentReport.sort_time) {
+        target.reports[frontendType] = {
+          analysis_type: record.analysis_type,
+          summary_text: record.summary_text || '',
+          report_text: record.report_text || '',
+          sort_time: sortTime,
+        };
+      }
+    });
+
+    return Array.from(grouped.values())
+      .sort((a, b) => b.sort_time - a.sort_time);
+  },
+
+  processAssessmentAnalysisHistory(records) {
+    if (!records || records.length === 0) return [];
     return records
+      .filter(record => record && record.id)
       .map(record => ({
         ...record,
-        date_range: `${record.start_date || '--'} 至 ${record.end_date || '--'}`,
-        display_report: record.report_text || record.summary_text || '暂无报告内容',
-        display_summary: record.summary_text || '',
-        updated_at_formatted: this.formatRecordDateTime(record.updated_at),
-        sort_time: this.resolveSortTime(record.updated_at || record.created_at),
-        type_order: MOOD_ANALYSIS_TYPE_ORDER[record.analysis_type] || 99,
-        frontend_analysis_type: MOOD_ANALYSIS_FRONTEND_TYPE_MAP[record.analysis_type] || ''
-      }))
-      .sort((a, b) => {
-        if (b.sort_time !== a.sort_time) return b.sort_time - a.sort_time;
-        return a.type_order - b.type_order;
-      });
+        created_at_formatted: this.formatRecordDateTime(record.created_at),
+        overall_assessment: record.overall_assessment || '这份综合报告暂时没有摘要。'
+      }));
   },
 
   resolveSortTime(value) {
@@ -268,47 +338,7 @@ Page({
     return String(Math.round(numericScore * 100) / 100);
   },
 
-  handleTouchStart(e) {
-    this.setData({ touchStartX: e.touches[0].clientX });
-  },
-
-  handleTouchMove(e) {
-    const { groupIndex, recordIndex } = e.currentTarget.dataset;
-    const moveX = e.touches[0].clientX;
-    const deltaX = moveX - this.data.touchStartX;
-    if (deltaX < 0) {
-      const newOffset = Math.max(deltaX, -DELETE_BTN_WIDTH);
-      const key = `groupedHistory[${groupIndex}].records[${recordIndex}].x_offset`;
-      this.setData({ [key]: newOffset });
-    }
-  },
-
-  handleTouchEnd(e) {
-    const { groupIndex, recordIndex } = e.currentTarget.dataset;
-    const endX = e.changedTouches[0].clientX;
-    const deltaX = endX - this.data.touchStartX;
-    const threshold = DELETE_BTN_WIDTH / 2;
-    const finalOffset = deltaX < -threshold ? -DELETE_BTN_WIDTH : 0;
-    const key = `groupedHistory[${groupIndex}].records[${recordIndex}].x_offset`;
-    this.closeOtherSwipedItems(groupIndex, recordIndex);
-    this.setData({ [key]: finalOffset });
-  },
-
-  closeOtherSwipedItems(currentGroupIndex, currentRecordIndex) {
-    const updates = {};
-    this.data.groupedHistory.forEach((group, gIndex) => {
-      group.records.forEach((record, rIndex) => {
-        if ((gIndex !== currentGroupIndex || rIndex !== currentRecordIndex) && record.x_offset < 0) {
-          updates[`groupedHistory[${gIndex}].records[${rIndex}].x_offset`] = 0;
-        }
-      });
-    });
-    if (Object.keys(updates).length > 0) {
-      this.setData(updates);
-    }
-  },
-
-  handleConfirmDelete(e) {
+  handleLongPressDelete(e) {
     const { groupIndex, recordIndex, recordId } = e.currentTarget.dataset;
     wx.showModal({
       title: '删除确认',
@@ -317,9 +347,6 @@ Page({
       success: (res) => {
         if (res.confirm) {
           this.deleteRecord(groupIndex, recordIndex, recordId);
-        } else {
-          const key = `groupedHistory[${groupIndex}].records[${recordIndex}].x_offset`;
-          this.setData({ [key]: 0 });
         }
       }
     });

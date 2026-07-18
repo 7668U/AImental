@@ -20,7 +20,7 @@ from security.data_encryption import (
     blind_index,
 )
 
-DEFAULT_AVATAR_URL = "/static/avatars/default.png"
+DEFAULT_AVATAR_URL = "https://assets.feelyourself.cn/miniprogram/assets/v1/backend/avatars/default.png"
 
 class User(Model):
     """The Peewee Model for the 'users' table."""
@@ -207,6 +207,7 @@ class UserTable:
         if not user:
             return None
 
+        old_reference = user.avatar_url
         try:
             from model.private_media import private_media_table
 
@@ -215,14 +216,56 @@ class UserTable:
                 media_type="avatar",
                 upload=image_file,
             )
-        except (OSError, ValueError) as exc:
-            print(f"Error saving encrypted avatar: {exc}")
+        except Exception as exc:
+            print(f"Error saving private avatar: {exc}")
             return None
 
-        user.avatar_url = reference
-        user.save(only=[User.avatar_url])
+        try:
+            user.avatar_url = reference
+            user.save(only=[User.avatar_url])
+        except Exception:
+            private_media_table.delete(reference, owner_user_id=user_id)
+            raise
+
+        if old_reference and old_reference != reference:
+            try:
+                private_media_table.delete(
+                    old_reference,
+                    owner_user_id=user_id,
+                )
+            except Exception as exc:
+                print(f"Error deleting replaced avatar media: {exc}")
         return private_media_table.signed_url(reference)
-        
+
+    def update_avatar_reference(
+        self,
+        user_id: str,
+        reference: str,
+    ) -> Optional[str]:
+        user = User.get_or_none(User.id == user_id)
+        if not user:
+            return None
+
+        from model.private_media import private_media_table
+
+        normalized_reference = private_media_table.normalize_owner_reference(
+            reference,
+            user_id,
+        )
+        old_reference = user.avatar_url
+        user.avatar_url = normalized_reference
+        user.save(only=[User.avatar_url])
+
+        if old_reference and old_reference != normalized_reference:
+            try:
+                private_media_table.delete(
+                    old_reference,
+                    owner_user_id=user_id,
+                )
+            except Exception as exc:
+                print(f"Error deleting replaced avatar media: {exc}")
+        return private_media_table.signed_url(normalized_reference)
+
     def update_user_info(self, user_id: str, nickname: Optional[str], gender: Optional[int], birthday: Optional[date]) -> bool:
         user = self.get_user_by_id(user_id)
         if not user:

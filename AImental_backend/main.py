@@ -10,7 +10,7 @@ import pytz
 
 # Load environment variables
 load_dotenv()
-from feature_flags import ENABLE_COMMUNITY_BACKEND
+from feature_flags import ENABLE_COMMUNITY_BACKEND, COMMUNITY_DEV_MODE
 
 GENERATE_SCHEDULES_ON_API_STARTUP = os.getenv(
     "GENERATE_SCHEDULES_ON_API_STARTUP",
@@ -136,6 +136,12 @@ def check_and_generate_today_schedules():
     BEIJING_TZ = pytz.timezone('Asia/Shanghai')
     today_in_beijing = datetime.now(BEIJING_TZ).date()
     # --- ------------------------------------ ---
+
+    # 开发模式：不调用 LLM，直接克隆历史日程作为测试数据。
+    if COMMUNITY_DEV_MODE:
+        from community_dev_mode import ensure_dev_schedules
+        ensure_dev_schedules(today_in_beijing)
+        return
 
     print(f"🤖 [Startup Check]: 正在检查AI角色在北京时间 {today_in_beijing} 的日程...")
     
@@ -308,7 +314,19 @@ def on_startup():
             db.close()
     print("👍 [Startup]: 服务准备就绪！连接已交由中间件按需管理。")
 
-    if ENABLE_COMMUNITY_BACKEND and GENERATE_SCHEDULES_ON_API_STARTUP:
+    if ENABLE_COMMUNITY_BACKEND and COMMUNITY_DEV_MODE:
+        # 开发模式下克隆历史日程，纯本地操作、瞬间完成，直接同步执行。
+        print("🧪 [Startup]: 心灵社区开发模式已开启，直接克隆历史日程作为测试数据（不调用 LLM）。")
+        for db in (chat_db, status_db):
+            if db.is_closed():
+                db.connect()
+        try:
+            check_and_generate_today_schedules()
+        finally:
+            for db in (chat_db, status_db):
+                if not db.is_closed():
+                    db.close()
+    elif ENABLE_COMMUNITY_BACKEND and GENERATE_SCHEDULES_ON_API_STARTUP:
         print("🧵 [Startup]: AI角色日程检查已转入后台，不阻塞接口启动。")
         start_schedule_check_in_background()
     elif ENABLE_COMMUNITY_BACKEND:

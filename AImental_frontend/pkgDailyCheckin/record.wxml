@@ -92,7 +92,10 @@
             <view class="section-title">写下此刻的小记忆</view>
           </view>
           <view class="meta-row">
-            <view class="meta-chip">▣ {{dateLabel}}</view>
+            <picker wx:if="{{canPickTime}}" mode="time" value="{{recordTime}}" end="{{maxTime}}" bindchange="onTimeChange">
+              <view class="meta-chip meta-chip-editable">▣ {{dateLabel}} ✎</view>
+            </picker>
+            <view wx:else class="meta-chip">▣ {{dateLabel}}</view>
             <view class="meta-chip location-chip" bindtap="chooseRecordLocation">⌖ {{locationText}}</view>
           </view>
         </view>

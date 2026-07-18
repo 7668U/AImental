@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="theme-color" content="#fff7ee" />
+    <title>Drink-TI</title>
+    <meta name="description" content="15 题测出你的灵魂饮料，看看你自然流露出的气质会调成哪一杯。" />
+    <meta property="og:title" content="Drink-TI" />
+    <meta property="og:description" content="凭第一反应选择，测出你的灵魂饮料。" />
+    <meta property="og:image" content="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti/cover/drink-ti-cover-reference.png" />
+    <link rel="preload" as="image" href="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti/cover/drink-ti-cover-reference.png" />
+    <link rel="preload" as="image" href="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti/cover/cover-start-button-pop.png" />
+    <link rel="preload" as="image" href="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti/feel-yourself-qr.png" />
+    <link rel="preload" as="image" href="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti/audio/audio-on-wood-note.png" />
+    <link rel="preload" as="image" href="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti/audio/audio-muted-wood-note.png" />
+    <link rel="preload" as="audio" href="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti/audio/candidates/glass_005.ogg" type="audio/ogg" />
+    <link rel="preload" as="audio" href="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti/audio/first-light-particles-bgm.mp3" type="audio/mpeg" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell" id="app">
+      <div class="warm-bg warm-bg-top" aria-hidden="true"></div>
+      <div class="warm-bg warm-bg-bottom" aria-hidden="true"></div>
+      <div class="bg-dot bg-dot-one" aria-hidden="true"></div>
+      <div class="bg-dot bg-dot-two" aria-hidden="true"></div>
+      <img class="sparkle-img bg-sparkle-one" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti/sparkle.png" width="182" height="220" alt="" aria-hidden="true" />
+
+      <header class="topbar">
+        <button class="icon-button" id="backBtn" type="button" aria-label="返回首页" hidden>
+          <span aria-hidden="true">‹</span>
+        </button>
+        <div class="nav-title" aria-hidden="true"></div>
+        <button class="icon-button icon-button-soft audio-toggle" id="audioToggle" type="button" aria-label="关闭音效">
+          <img class="audio-toggle-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti/audio/audio-on-wood-note.png" width="512" height="512" alt="" aria-hidden="true" />
+        </button>
+        <button class="icon-button icon-button-soft" id="restartTopBtn" type="button" aria-label="重新开始" hidden>
+          <span aria-hidden="true">↻</span>
+        </button>
+      </header>
+
+      <section class="view start-view" id="startView">
+        <div class="cover-frame" aria-label="Drink-TI">
+          <div class="cover-artboard">
+            <img
+              class="cover-base"
+              src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti/cover/drink-ti-cover-reference.png"
+              width="941"
+              height="1672"
+              fetchpriority="high"
+              alt="Drink-TI，哪一种饮料才是你的本体"
+            />
+            <h1 class="sr-only">Drink-TI</h1>
+            <p class="sr-only">哪一种饮料才是你的本体</p>
+
+            <button class="cover-start-hit" id="startBtn" type="button" aria-label="开始测试">
+              <img
+                class="cover-start-visual"
+                src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti/cover/cover-start-button-pop.png"
+                width="665"
+                height="170"
+                fetchpriority="high"
+                alt=""
+                aria-hidden="true"
+              />
+              <span class="sr-only">开始测试</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="view quiz-view" id="quizView" hidden>
+        <div class="quiz-body">
+          <div class="quiz-meta">
+            <span class="dimension-tag" id="dimensionTag">可能性联想</span>
+            <span class="question-counter" id="questionCounter">01 / 15</span>
+          </div>
+
+          <article class="question-card">
+            <div class="question-index-row">
+              <span class="index-line" aria-hidden="true"></span>
+              <span class="question-index" id="questionIndex">第 1 题</span>
+              <span class="index-line" aria-hidden="true"></span>
+            </div>
+            <img class="sparkle-img question-sparkle-one" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti/sparkle.png" width="182" height="220" alt="" aria-hidden="true" />
+            <img class="sparkle-img question-sparkle-two" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti/sparkle.png" width="182" height="220" alt="" aria-hidden="true" />
+            <h2 class="question-text" id="questionText"></h2>
+          </article>
+
+          <div class="options-panel">
+            <div class="option-group" id="optionList"></div>
+          </div>
+        </div>
+
+        <div class="footer-shell">
+          <button class="answer-card-toggle" id="answerCardToggle" type="button" aria-label="展开答题卡" aria-expanded="false">
+            <span class="answer-card-toggle-icon" id="answerCardToggleIcon" aria-hidden="true"></span>
+          </button>
+
+          <div class="answer-card-panel" id="answerCardPanel" hidden>
+            <div class="answer-card-grid" id="answerCardGrid"></div>
+          </div>
+
+          <div class="footer-card">
+            <div class="progress-row">
+              <div class="progress-track-wrap">
+                <div class="progress-track">
+                  <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <img class="runner-icon" id="runnerIcon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti/runner.png" width="320" height="255" alt="" aria-hidden="true" />
+              </div>
+              <div class="progress-text" id="progressText">0/15</div>
+            </div>
+
+            <div class="action-buttons">
+              <button class="prev-btn" id="prevBtn" type="button">
+                <span class="btn-chevron" aria-hidden="true">‹</span>
+                <span>上一题</span>
+              </button>
+              <button class="next-btn" id="nextBtn" type="button">
+                <img class="sparkle-img btn-sparkle-one" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti/sparkle.png" width="182" height="220" alt="" aria-hidden="true" />
+                <span id="nextBtnText">下一题</span>
+                <span class="btn-chevron" aria-hidden="true">›</span>
+                <img class="sparkle-img btn-sparkle-two" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/drink-ti/sparkle.png" width="182" height="220" alt="" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view result-view" id="resultView" hidden>
+        <img class="result-card-image" id="resultCardImage" src="" decoding="async" alt="Drink-TI结果卡" draggable="false" />
+        <div class="result-floating-actions" id="resultFloatingActions" hidden>
+          <button class="floating-action-btn poster-action-btn" id="posterBtn" type="button">
+            <span>生成海报</span>
+          </button>
+          <button class="floating-action-btn restart-action-btn" id="restartBtn" type="button">
+            <span class="floating-action-icon" aria-hidden="true">↻</span>
+            <span>重新测试</span>
+          </button>
+        </div>
+      </section>
+
+      <div class="modal-layer" id="posterModal" hidden>
+        <div class="modal-backdrop" data-close-modal="poster"></div>
+        <section class="poster-dialog" role="dialog" aria-modal="true" aria-labelledby="posterTitle">
+          <button class="modal-close-btn" id="posterCloseBtn" type="button" aria-label="关闭海报弹窗">×</button>
+          <h2 id="posterTitle">长按图片保存你的Drink-TI吧~</h2>
+          <div class="poster-preview-shell">
+            <img class="poster-preview-image" id="posterPreviewImage" src="" alt="Drink-TI分享海报" />
+            <div class="poster-loading" id="posterLoading">正在生成海报...</div>
+          </div>
+        </section>
+      </div>
+
+      <div class="modal-layer" id="restartModal" hidden>
+        <div class="modal-backdrop" data-close-modal="restart"></div>
+        <section class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="restartTitle">
+          <h2 id="restartTitle">重新测试？</h2>
+          <p>本次结果会被覆盖，是否继续？</p>
+          <div class="confirm-actions">
+            <button class="confirm-secondary" id="restartCancelBtn" type="button">先不重测</button>
+            <button class="confirm-primary" id="restartConfirmBtn" type="button">确认重测</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </main>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>

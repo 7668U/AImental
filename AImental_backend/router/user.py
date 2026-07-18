@@ -55,6 +55,9 @@ class AvatarUpdateResponse(BaseModel):
     message: str
     new_avatar_url: str
 
+class DirectAvatarUpdateRequest(BaseModel):
+    upload_token: str = Field(min_length=32)
+
 class UserInfoUpdateRequest(BaseModel):
     nickname: Optional[str] = Field(None, max_length=50)
     gender: Optional[int] = Field(None, ge=0, le=2, description="0: 未知, 1: 男, 2: 女")
@@ -310,6 +313,40 @@ def update_current_user_avatar(
     return AvatarUpdateResponse(
         message="Avatar updated successfully",
         new_avatar_url=new_path
+    )
+
+
+@router.put(
+    "/me/avatar/direct",
+    response_model=AvatarUpdateResponse,
+    summary="Use a direct COS upload as the current avatar",
+)
+def update_current_user_avatar_direct(
+    payload: DirectAvatarUpdateRequest,
+    current_user_id: str = Depends(get_current_user_id),
+):
+    from model.private_media import private_media_table
+
+    try:
+        reference = private_media_table.confirm_direct_upload(
+            token=payload.upload_token,
+            owner_user_id=current_user_id,
+            media_type="avatar",
+        )
+        new_path = user_table.update_avatar_reference(
+            user_id=current_user_id,
+            reference=reference,
+        )
+    except (RuntimeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    if not new_path:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found or avatar could not be saved.",
+        )
+    return AvatarUpdateResponse(
+        message="Avatar updated successfully",
+        new_avatar_url=new_path,
     )
 
 

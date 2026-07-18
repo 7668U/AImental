@@ -1,7 +1,9 @@
-from fastapi import APIRouter, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from pydantic import BaseModel, Field
 
 from model.private_media import private_media_table
 from security.data_encryption import DataEncryptionError
+from .auth import get_current_user_id
 
 
 router = APIRouter(
@@ -10,7 +12,31 @@ router = APIRouter(
 )
 
 
-@router.get("/{media_id}", summary="读取短时签名保护的用户图片")
+class DirectUploadRequest(BaseModel):
+    media_type: str = Field(pattern="^(avatar|checkin)$")
+    content_type: str
+    size: int = Field(gt=0)
+
+
+@router.post("/uploads", summary="Prepare a private COS direct upload")
+def prepare_direct_upload(
+    payload: DirectUploadRequest,
+    current_user_id: str = Depends(get_current_user_id),
+):
+    try:
+        return private_media_table.prepare_direct_upload(
+            owner_user_id=current_user_id,
+            media_type=payload.media_type,
+            content_type=payload.content_type,
+            size=payload.size,
+        )
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.get("/{media_id}", summary="Read a signed private media object")
 def read_private_media(
     media_id: str,
     expires: int = Query(...),

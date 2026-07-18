@@ -14,7 +14,7 @@
 
 <view class="main-content" style="padding-top: {{navHeight + navTop}}px;">
   
-  <view class="controls-wrapper">
+  <view class="controls-wrapper {{isHistoryMode ? 'history-mode' : ''}}">
     <view class="page-title-wrap">
       <view class="title-deco title-deco-left">
         <view class="title-petal"></view>
@@ -25,124 +25,217 @@
         <view class="title-line"></view>
       </view>
     </view>
-    <view class="range-panel">
-      <view class="day-selector">
-        <view
-          wx:for="{{dayOptions}}"
-          wx:key="days"
-          class="day-option {{selectedDayCount === item.days ? 'active' : ''}}"
-          bind:tap="selectDayRange"
-          data-days="{{item.days}}"
-        >{{item.label}}</view>
-      </view>
-      <view class="date-selector">
-        <picker mode="date" value="{{rangeStartDate}}" end="{{maxDate}}" bindchange="onStartDateChange">
-          <view class="date-field">
-            <text class="date-label">开始</text>
-            <text class="date-value">{{rangeStartDate}}</text>
-          </view>
-        </picker>
-        <view class="date-arrow">至</view>
-        <picker mode="date" value="{{rangeEndDate}}" start="{{rangeStartDate}}" end="{{maxDate}}" bindchange="onEndDateChange">
-          <view class="date-field">
-            <text class="date-label">结束</text>
-            <text class="date-value">{{rangeEndDate}}</text>
-          </view>
-        </picker>
-      </view>
+    <view wx:if="{{isHistoryMode}}" class="history-range-label">
+      {{rangeStartDate}} 至 {{rangeEndDate}}
     </view>
-    <view class="analyze-button {{isLoading ? 'disabled' : ''}}" bindtap="loadAllAnalyses">
-      <view class="analyze-button-dot" wx:if="{{isLoading}}"></view>
-      <text>{{isLoading ? '分析中' : '一键分析'}}</text>
-    </view>
+    <block wx:else>
+      <view class="range-panel">
+        <view class="day-selector">
+          <view
+            wx:for="{{dayOptions}}"
+            wx:key="days"
+            class="day-option {{selectedDayCount === item.days ? 'active' : ''}}"
+            bind:tap="selectDayRange"
+            data-days="{{item.days}}"
+          >{{item.label}}</view>
+        </view>
+        <view class="date-selector">
+          <picker mode="date" value="{{rangeStartDate}}" end="{{maxDate}}" bindchange="onStartDateChange">
+            <view class="date-field">
+              <text class="date-label">开始</text>
+              <text class="date-value">{{rangeStartDate}}</text>
+            </view>
+          </picker>
+          <view class="date-arrow">至</view>
+          <picker mode="date" value="{{rangeEndDate}}" start="{{rangeStartDate}}" end="{{maxDate}}" bindchange="onEndDateChange">
+            <view class="date-field">
+              <text class="date-label">结束</text>
+              <text class="date-value">{{rangeEndDate}}</text>
+            </view>
+          </picker>
+        </view>
+      </view>
+      <view class="analyze-button {{isLoading ? 'disabled' : ''}}" bindtap="loadAllAnalyses">
+        <view class="analyze-button-dot" wx:if="{{isLoading}}"></view>
+        <text>{{isLoading ? '分析中' : '一键分析'}}</text>
+      </view>
+    </block>
   </view>
 
   <view class="content-wrapper">
     <view class="loading-wrapper" wx:if="{{isLoading}}">
-      <view class="loading-text">正在分析这段时间的心情记录...</view>
+      <view class="loading-text">{{isHistoryMode ? '正在载入完整分析报告...' : '正在分析这段时间的心情记录...'}}</view>
     </view>
     <view class="result-wrapper" wx:if="{{analysisReports.length > 0 && !isLoading}}">
-      <view class="report-entry-grid">
-        <view
-          class="report-entry {{selectedAnalysis === item.frontendType ? 'active' : ''}} {{item.skipped || item.error ? 'disabled' : ''}}"
-          wx:for="{{analysisReports}}"
-          wx:key="frontendType"
-          bindtap="selectReportSection"
-          data-type="{{item.frontendType}}"
-        >
-          <image class="report-entry-icon" src="{{item.icon}}" mode="aspectFit"></image>
-          <view class="report-entry-copy">
-            <view class="report-entry-title">{{item.title}}</view>
-            <view class="report-entry-desc" wx:if="{{item.skipped || item.error}}">暂不可分析</view>
-            <view class="report-entry-desc" wx:else>点击查看报告</view>
-          </view>
-        </view>
-      </view>
-
-      <view class="initial-placeholder detail-placeholder" wx:if="{{!activeReport}}">
-        <text>选择一个部分，查看对应的心情分析报告。</text>
-      </view>
-
-      <view class="analysis-section" wx:if="{{activeReport}}">
-        <view class="chart-container" wx:if="{{!activeReport.skipped && !activeReport.error && isChartReady}}">
-          <view class="chart-header">
-            <view class="chart-title-wrap">
-              <image class="leaf-mark" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-leaf.png" mode="aspectFit"></image>
-              <text class="chart-title">{{activeReport.chartTitle}}</text>
+      <block wx:if="{{isHistoryMode}}">
+        <view class="history-report-list">
+          <view
+            class="analysis-section history-analysis-section"
+            wx:for="{{analysisReports}}"
+            wx:key="frontendType"
+          >
+            <view class="history-module-heading">
+              <image class="history-module-icon" src="{{item.icon}}" mode="aspectFit"></image>
+              <view class="history-module-title">{{item.title}}</view>
             </view>
-            <image class="chart-star" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-star.png" mode="aspectFit"></image>
-          </view>
-          <view class="chart-canvas-wrap">
-            <ec-canvas id="analysis-chart" canvas-id="analysis-chart" ec="{{ ec }}"></ec-canvas>
+
+            <view class="chart-container" wx:if="{{!item.skipped && !item.error && item.chartData}}">
+              <view class="chart-header">
+                <view class="chart-title-wrap">
+                  <image class="leaf-mark" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-leaf.png" mode="aspectFit"></image>
+                  <text class="chart-title">{{item.chartTitle}}</text>
+                </view>
+                <image class="chart-star" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-star.png" mode="aspectFit"></image>
+              </view>
+              <view class="chart-canvas-wrap">
+                <ec-canvas id="{{item.chartId}}" canvas-id="{{item.chartId}}" ec="{{ ec }}"></ec-canvas>
+              </view>
+            </view>
+
+            <view wx:if="{{item.frontendType === 'color_palette' && !item.skipped && !item.error}}" class="color-card-preview">
+              <view wx:if="{{isColorCardLoading}}" class="color-card-loading">
+                <view class="color-card-loading-dot"></view>
+                <text>专属色卡载入中...</text>
+              </view>
+              <view wx:elif="{{colorCardResult && colorCardResult.imageUrl}}" class="color-card-image-wrap" bindtap="previewColorCardImage">
+                <image class="color-card-image" src="{{colorCardResult.imageUrl}}" mode="aspectFill" show-menu-by-longpress="{{true}}"></image>
+                <view class="color-card-name-layer">
+                  <view class="color-card-name">{{colorCardResult.naming_result.color_name}}</view>
+                </view>
+              </view>
+              <view wx:elif="{{colorCardError}}" class="color-card-error">{{colorCardError}}</view>
+            </view>
+
+            <view class="result-card skip-card" wx:if="{{item.skipped || item.error}}">
+              <view class="card-title">
+                <image class="heart-mark" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-heart.png" mode="aspectFit"></image>
+                <text>{{item.title}}</text>
+              </view>
+              <text class="card-content">{{item.skipMessage}}</text>
+            </view>
+
+            <block wx:else>
+              <view class="result-card interpretation-card">
+                <image class="interpretation-deco" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-sun-cloud.png" mode="aspectFit"></image>
+                <view class="card-title">
+                  <image class="heart-mark" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-heart.png" mode="aspectFit"></image>
+                  <text>{{item.title}}解读</text>
+                </view>
+                <view class="card-divider"></view>
+                <text class="card-content" user-select="{{true}}">{{item.interpretation}}</text>
+              </view>
+              <view class="result-card ai-card">
+                <image class="ai-deco" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-ai-deco.png" mode="aspectFit"></image>
+                <view class="card-title">
+                  <image class="ai-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/robot.png" mode="aspectFit"></image>
+                  <text>{{item.title}}报告</text>
+                </view>
+                <text class="card-content" user-select="{{true}}">{{item.aiReport}}</text>
+              </view>
+            </block>
           </view>
         </view>
+        <view class="history-export-button {{isExporting ? 'disabled' : ''}}" bindtap="exportHistoryReportImage">
+          <text class="history-export-button-icon">↓</text>
+          <text>{{isExporting ? '正在生成长图' : '导出报告图片'}}</text>
+        </view>
+      </block>
 
-        <view wx:if="{{activeReport.frontendType === 'color_palette' && !activeReport.skipped && !activeReport.error}}" class="color-card-preview">
-          <view wx:if="{{isColorCardLoading}}" class="color-card-loading">
-            <view class="color-card-loading-dot"></view>
-            <text>专属色卡产生中...</text>
-          </view>
-          <view wx:elif="{{colorCardResult && colorCardResult.imageUrl}}" class="color-card-image-wrap" bindtap="previewColorCardImage">
-            <image class="color-card-image" src="{{colorCardResult.imageUrl}}" mode="aspectFill"></image>
-            <view class="color-card-name-layer">
-              <view class="color-card-name">{{colorCardResult.naming_result.color_name}}</view>
+      <block wx:else>
+        <view class="report-entry-grid">
+          <view
+            class="report-entry {{selectedAnalysis === item.frontendType ? 'active' : ''}} {{item.skipped || item.error ? 'disabled' : ''}}"
+            wx:for="{{analysisReports}}"
+            wx:key="frontendType"
+            bindtap="selectReportSection"
+            data-type="{{item.frontendType}}"
+          >
+            <image class="report-entry-icon" src="{{item.icon}}" mode="aspectFit"></image>
+            <view class="report-entry-copy">
+              <view class="report-entry-title">{{item.title}}</view>
+              <view class="report-entry-desc" wx:if="{{item.skipped || item.error}}">暂不可分析</view>
+              <view class="report-entry-desc" wx:else>点击查看报告</view>
             </view>
           </view>
-          <view wx:elif="{{colorCardError}}" class="color-card-error">{{colorCardError}}</view>
         </view>
 
-        <view class="result-card skip-card" wx:if="{{activeReport.skipped || activeReport.error}}">
-          <view class="card-title">
-            <image class="heart-mark" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-heart.png" mode="aspectFit"></image>
-            <text>{{activeReport.title}}</text>
+        <view class="initial-placeholder detail-placeholder" wx:if="{{!activeReport}}">
+          <text>选择一个部分，查看对应的心情分析报告。</text>
+        </view>
+
+        <view class="analysis-section" wx:if="{{activeReport}}">
+          <view class="chart-container" wx:if="{{!activeReport.skipped && !activeReport.error && isChartReady}}">
+            <view class="chart-header">
+              <view class="chart-title-wrap">
+                <image class="leaf-mark" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-leaf.png" mode="aspectFit"></image>
+                <text class="chart-title">{{activeReport.chartTitle}}</text>
+              </view>
+              <image class="chart-star" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-star.png" mode="aspectFit"></image>
+            </view>
+            <view class="chart-canvas-wrap">
+              <ec-canvas id="analysis-chart" canvas-id="analysis-chart" ec="{{ ec }}"></ec-canvas>
+            </view>
           </view>
-          <text class="card-content">{{activeReport.skipMessage}}</text>
-        </view>
 
-        <block wx:else>
-          <view class="result-card interpretation-card">
-            <image class="interpretation-deco" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-sun-cloud.png" mode="aspectFit"></image>
+          <view wx:if="{{activeReport.frontendType === 'color_palette' && !activeReport.skipped && !activeReport.error}}" class="color-card-preview">
+            <view wx:if="{{isColorCardLoading}}" class="color-card-loading">
+              <view class="color-card-loading-dot"></view>
+              <text>专属色卡产生中...</text>
+            </view>
+            <view wx:elif="{{colorCardResult && colorCardResult.imageUrl}}" class="color-card-image-wrap" bindtap="previewColorCardImage">
+              <image class="color-card-image" src="{{colorCardResult.imageUrl}}" mode="aspectFill" show-menu-by-longpress="{{true}}"></image>
+              <view class="color-card-name-layer">
+                <view class="color-card-name">{{colorCardResult.naming_result.color_name}}</view>
+              </view>
+            </view>
+            <view wx:elif="{{colorCardError}}" class="color-card-error">{{colorCardError}}</view>
+          </view>
+
+          <view class="result-card skip-card" wx:if="{{activeReport.skipped || activeReport.error}}">
             <view class="card-title">
               <image class="heart-mark" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-heart.png" mode="aspectFit"></image>
-              <text>{{activeReport.title}}解读</text>
+              <text>{{activeReport.title}}</text>
             </view>
-            <view class="card-divider"></view>
-            <text class="card-content" user-select="{{true}}">{{ activeReport.interpretation }}</text>
+            <text class="card-content">{{activeReport.skipMessage}}</text>
           </view>
-          <view class="result-card ai-card">
-            <image class="ai-deco" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-ai-deco.png" mode="aspectFit"></image>
-            <view class="card-title">
-              <image class="ai-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/robot.png" mode="aspectFit"></image>
-              <text>{{activeReport.title}}报告</text>
+
+          <block wx:else>
+            <view class="result-card interpretation-card">
+              <image class="interpretation-deco" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-sun-cloud.png" mode="aspectFit"></image>
+              <view class="card-title">
+                <image class="heart-mark" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-heart.png" mode="aspectFit"></image>
+                <text>{{activeReport.title}}解读</text>
+              </view>
+              <view class="card-divider"></view>
+              <text class="card-content" user-select="{{true}}">{{activeReport.interpretation}}</text>
             </view>
-            <text class="card-content" user-select="{{true}}">{{ activeReport.aiReport }}</text>
-          </view>
-        </block>
-      </view>
+            <view class="result-card ai-card">
+              <image class="ai-deco" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/report-ai-deco.png" mode="aspectFit"></image>
+              <view class="card-title">
+                <image class="ai-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/images/analysis/robot.png" mode="aspectFit"></image>
+                <text>{{activeReport.title}}报告</text>
+              </view>
+              <text class="card-content" user-select="{{true}}">{{activeReport.aiReport}}</text>
+            </view>
+          </block>
+        </view>
+      </block>
     </view>
-    <view class="initial-placeholder" wx:if="{{analysisReports.length === 0 && !isLoading}}">
+    <view class="initial-placeholder" wx:if="{{analysisReports.length === 0 && !isLoading && !isHistoryMode}}">
       <text>选择时间段后，点击一键分析生成四个部分。</text>
     </view>
-        </view>
+    <view class="initial-placeholder" wx:if="{{analysisReports.length === 0 && !isLoading && isHistoryMode}}">
+      <text>这份历史分析报告暂时无法载入。</text>
+    </view>
   </view>
+</view>
+<canvas
+  wx:if="{{exportCanvasReady}}"
+  class="history-report-export-canvas"
+  canvas-id="history-report-export"
+  id="history-report-export"
+  width="{{exportCanvasWidth}}"
+  height="{{exportCanvasHeight}}"
+  style="width: {{exportCanvasWidth}}px; height: {{exportCanvasHeight}}px;"
+></canvas>
 </view>

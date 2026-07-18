@@ -33,6 +33,10 @@ class CheckinImageUrlsPayload(BaseModel):
     image_urls: List[str] = Field(default_factory=list, max_length=MAX_CHECKIN_IMAGES)
 
 
+class DirectCheckinImagePayload(BaseModel):
+    upload_token: str = Field(min_length=32)
+
+
 class SeedFiveDaysPayload(BaseModel):
     year: Optional[int] = None
     month: Optional[int] = Field(default=None, ge=1, le=12)
@@ -43,6 +47,32 @@ def get_owned_checkin_or_404(checkin_id: str, current_user_id: str):
     if not existing_checkin or existing_checkin.user_id != current_user_id:
         raise HTTPException(status_code=404, detail="Check-in not found or not authorized.")
     return existing_checkin
+
+
+def cleanup_uploaded_media(values: List[str], current_user_id: str) -> None:
+    if not values:
+        return
+    from model.private_media import private_media_table
+
+    try:
+        private_media_table.delete_many(
+            values,
+            owner_user_id=current_user_id,
+        )
+    except Exception as exc:
+        print(f"Error cleaning up unreferenced uploaded media: {exc}")
+
+
+def _today_str() -> str:
+    import datetime as _dt
+    return _dt.datetime.now().strftime("%Y-%m-%d")
+
+
+def _checkin_record_date(checkin) -> str:
+    import datetime as _dt
+    return getattr(checkin, "record_date", None) or _dt.datetime.fromtimestamp(
+        checkin.timestamp
+    ).strftime("%Y-%m-%d")
 
 
 # --- 【修改】创建接口，恢复为只接收JSON ---
@@ -96,8 +126,60 @@ def upload_checkin_image(
     if not image_url:
         raise HTTPException(status_code=500, detail="Failed to save image.")
 
-    checkin_table.update_image_url(checkin_id=checkin_id, image_url=image_url)
+    if not checkin_table.update_image_url(
+        checkin_id=checkin_id,
+        image_url=image_url,
+    ):
+        cleanup_uploaded_media([image_url], current_user_id)
+        raise HTTPException(status_code=500, detail="Failed to update image.")
     return model_to_dict(checkin_table.get_checkin_by_id(checkin_id))
+
+
+@router.put(
+    "/{checkin_id}/images/{image_index}/direct",
+    response_model=CheckinModel,
+    summary="Use a direct COS upload as a check-in image",
+)
+def replace_checkin_image_direct(
+    checkin_id: str,
+    image_index: int,
+    payload: DirectCheckinImagePayload,
+    current_user_id: str = Depends(get_current_user_id),
+):
+    existing_checkin = get_owned_checkin_or_404(checkin_id, current_user_id)
+    existing_urls = checkin_table.get_image_urls(existing_checkin)
+    if (
+        image_index < 0
+        or image_index > len(existing_urls)
+        or image_index >= MAX_CHECKIN_IMAGES
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid image index or image limit exceeded.",
+        )
+
+    from model.private_media import private_media_table
+
+    try:
+        image_reference = private_media_table.confirm_direct_upload(
+            token=payload.upload_token,
+            owner_user_id=current_user_id,
+            media_type="checkin",
+        )
+    except (RuntimeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    updated_checkin = checkin_table.replace_image_url(
+        checkin_id,
+        image_index,
+        image_reference,
+    )
+    if not updated_checkin:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid image index or image limit exceeded.",
+        )
+    return model_to_dict(updated_checkin)
 
 
 @router.post(
@@ -122,11 +204,13 @@ def upload_checkin_images(
     for image in images:
         image_url = checkin_table.save_checkin_image(user_id=current_user_id, image_file=image)
         if not image_url:
+            cleanup_uploaded_media(image_urls, current_user_id)
             raise HTTPException(status_code=500, detail="Failed to save image.")
         image_urls.append(image_url)
 
     updated_checkin = checkin_table.append_image_urls(checkin_id, image_urls)
     if not updated_checkin:
+        cleanup_uploaded_media(image_urls, current_user_id)
         raise HTTPException(status_code=400, detail=f"最多只能保留 {MAX_CHECKIN_IMAGES} 张照片。")
     return model_to_dict(updated_checkin)
 
@@ -176,6 +260,7 @@ def replace_checkin_image(
 
     updated_checkin = checkin_table.replace_image_url(checkin_id, image_index, image_url)
     if not updated_checkin:
+        cleanup_uploaded_media([image_url], current_user_id)
         raise HTTPException(status_code=400, detail="Invalid image index or image limit exceeded.")
     return model_to_dict(updated_checkin)
 
@@ -232,6 +317,16 @@ def seed_five_days_for_current_user(
         month=payload.month,
     )
 
+@router.get("/moment/{checkin_id}", response_model=CheckinModel, summary="按ID获取单条此刻心情记录")
+def get_checkin_by_id_endpoint(
+    checkin_id: str,
+    current_user_id: str = Depends(get_current_user_id),
+):
+    """按具体 moment 的 id 加载记录，供心情轨迹点击后编辑/回看使用。"""
+    existing_checkin = get_owned_checkin_or_404(checkin_id, current_user_id)
+    return model_to_dict(existing_checkin)
+
+
 @router.get("/date/{record_date}/timeline", response_model=Dict[str, Any], summary="获取指定日期的心情轨迹")
 def get_timeline_for_date(
     record_date: str,
@@ -257,7 +352,10 @@ def get_checkin_for_date(
 
 @router.put("/{checkin_id}", response_model=CheckinModel, summary="更新指定的打卡记录")
 def update_existing_checkin(checkin_id: str, checkin_data: CheckinBaseModel, current_user_id: str = Depends(get_current_user_id)):
-    get_owned_checkin_or_404(checkin_id, current_user_id)
+    existing_checkin = get_owned_checkin_or_404(checkin_id, current_user_id)
+    # 只允许修改今天的记录：过了今天不允许补充打卡，也不允许修改。
+    if _checkin_record_date(existing_checkin) != _today_str():
+        raise HTTPException(status_code=403, detail="只能修改今天的记录，过去的记录无法修改。")
     updated_checkin = checkin_table.update_checkin(checkin_id=checkin_id, data=checkin_data)
     if not updated_checkin:
         raise HTTPException(status_code=500, detail="Failed to update the check-in.")

@@ -122,12 +122,13 @@ page {
 
 .card-scroll-area {
   flex: 1;
-  overflow-y: auto;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .daily-layout {
   width: 100%;
-  padding: 0 35rpx 60rpx;
+  padding: 0 35rpx 28rpx;
   box-sizing: border-box;
 }
 
@@ -204,26 +205,11 @@ page {
   letter-spacing: 0;
 }
 
-.primary-count-hint {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 188rpx;
-  min-height: 42rpx;
-  margin-top: 22rpx;
-  padding: 0 22rpx;
-  border-radius: 999rpx;
-  background: rgba(255, 150, 56, 0.18);
-  color: #d85812;
-  font-size: 25rpx;
-  font-weight: 800;
-  line-height: 1;
-  text-align: center;
-  box-sizing: border-box;
-}
-
 .primary-action {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   left: auto;
   bottom: auto;
   z-index: 2;
@@ -236,7 +222,6 @@ page {
   color: #ffffff;
   font-size: 28rpx;
   font-weight: 800;
-  line-height: 68rpx;
   text-align: center;
 }
 
@@ -253,16 +238,16 @@ page {
   align-items: center;
   flex: 1;
   min-width: 0;
-  height: 166rpx;
-  padding: 26rpx 22rpx 24rpx;
+  height: 198rpx;
+  padding: 30rpx 24rpx 28rpx;
   overflow: hidden;
   border-radius: 28rpx;
 }
 
 .secondary-icon {
   flex-shrink: 0;
-  width: 98rpx;
-  height: 98rpx;
+  width: 118rpx;
+  height: 118rpx;
   margin-right: 18rpx;
 }
 
@@ -386,27 +371,22 @@ page {
   text-align: center;
 }
 
-.trajectory-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 62rpx;
-  margin-top: 16rpx;
-  padding-top: 18rpx;
-  border-top: 2rpx solid rgba(226, 184, 132, 0.42);
-  color: #8b6757;
-  font-size: 25rpx;
-}
-
 .trajectory-empty {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 20rpx;
-  margin-top: 28rpx;
-  padding: 26rpx;
+  justify-content: center;
+  gap: 6rpx;
+  margin-top: 12rpx;
+  padding: 8rpx 20rpx 22rpx;
+  overflow: hidden;
   border-radius: 24rpx;
   background: rgba(255, 249, 240, 0.82);
+}
+
+.trajectory-empty-image {
+  width: 340rpx;
+  height: 170rpx;
 }
 
 .trajectory-empty-text {
@@ -414,21 +394,7 @@ page {
   color: #8a604b;
   font-size: 26rpx;
   line-height: 1.35;
-}
-
-.trajectory-empty-button {
-  flex-shrink: 0;
-  min-width: 132rpx;
-  height: 52rpx;
-  padding: 0 20rpx;
-  border-radius: 999rpx;
-  background: linear-gradient(180deg, #ff9332 0%, #ff681d 100%);
-  color: #ffffff;
-  font-size: 24rpx;
-  font-weight: 800;
-  line-height: 52rpx;
   text-align: center;
-  box-sizing: border-box;
 }
 
 .daily-guide-modal {

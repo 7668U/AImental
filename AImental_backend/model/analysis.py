@@ -117,7 +117,10 @@ class AnalysisTable:
             Analysis.select()
             .where(
                 (Analysis.user_id == user_id) &
-                (Analysis.analysis_type.contains("_ai_report_"))
+                (
+                    (Analysis.analysis_type.contains("_ai_report_")) |
+                    (Analysis.analysis_type.startswith("ai_report_"))
+                )
             )
             .order_by(Analysis.updated_at.desc())
             .limit(limit)

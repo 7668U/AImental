@@ -20,7 +20,7 @@ import pytz
 
 # --- 导入我们项目的所有组件 ---
 from db import chat_db, status_db, user_db
-from feature_flags import ENABLE_COMMUNITY_BACKEND
+from feature_flags import ENABLE_COMMUNITY_BACKEND, COMMUNITY_DEV_MODE
 # 导入我们全局配置好的日志记录器
 from logger_config import logger
 
@@ -201,6 +201,14 @@ def schedule_daily_status_generation():
 
     today_in_beijing = datetime.now(BEIJING_TZ).date()
     target_date = today_in_beijing + timedelta(days=1)
+
+    # 开发模式：克隆历史日程作为测试数据，不调用 LLM。
+    if COMMUNITY_DEV_MODE:
+        logger.info(f"JOB_STATUS_GEN: 开发模式已开启，克隆历史日程作为 {target_date} 的测试数据（不调用 LLM）。")
+        from community_dev_mode import ensure_dev_schedules
+        ensure_dev_schedules(target_date)
+        return
+
     logger.info(f"JOB_STATUS_GEN: 开始为所有角色生成 {target_date} 的日程...")
 
     all_characters = ai_character_table.get_all_characters()

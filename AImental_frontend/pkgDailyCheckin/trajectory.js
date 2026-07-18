@@ -37,7 +37,7 @@ const MOOD_LABEL_TO_ID = MOOD_OPTIONS.reduce((map, item) => {
   尴尬: 'confused',
 });
 
-const MOOD_SCENE_BASE = '/pkgDailyCheckin/assets/trajectory';
+const MOOD_SCENE_BASE = 'https://assets.feelyourself.cn/miniprogram/assets/v1/pkgDailyCheckin/assets/trajectory';
 
 const MOOD_SCENE_MAP = {
   happy: `${MOOD_SCENE_BASE}/happy.jpg`,
@@ -133,7 +133,7 @@ Page({
     dateLabel: '',
     isToday: false,
     moments: [],
-    trendText: '今天的心情并不是固定的一种，它在不同时间里轻轻变化。',
+    trendText: '把心情的点滴轻轻收好，日后回望，都是认真生活过的痕迹。',
   },
 
   onLoad(options) {
@@ -176,6 +176,53 @@ Page({
     wx.navigateTo({ url: '/pkgDailyCheckin/record' });
   },
 
+  onMomentTap(e) {
+    if (Date.now() < (this.suppressMomentTapUntil || 0)) return;
+    const { id } = e.currentTarget.dataset;
+    if (!id) return;
+    // 今天的记录可编辑，过去的记录只读回看。
+    const mode = this.data.isToday ? 'edit' : 'view';
+    wx.navigateTo({
+      url: `/pkgDailyCheckin/record?mode=${mode}&id=${id}&date=${this.data.targetDate}`,
+    });
+  },
+
+  onMomentLongPress(e) {
+    const { id } = e.currentTarget.dataset;
+    if (!id) return;
+
+    this.suppressMomentTapUntil = Date.now() + 800;
+    wx.showModal({
+      title: '删除这条记录？',
+      content: '删除后将无法恢复。',
+      confirmText: '删除',
+      confirmColor: '#d85d4a',
+      success: (res) => {
+        if (res.confirm) this.deleteMoment(id);
+      },
+    });
+  },
+
+  async deleteMoment(id) {
+    wx.showLoading({ title: '删除中...' });
+    try {
+      await request({
+        url: `/checkin/${id}`,
+        method: 'DELETE',
+      });
+      const moments = this.data.moments.filter(item => item.id !== id);
+      this.setData({
+        moments,
+        trendText: this.buildTrendText(moments),
+      });
+      wx.hideLoading();
+      wx.showToast({ title: '已删除', icon: 'success' });
+    } catch (error) {
+      wx.hideLoading();
+      wx.showToast({ title: '删除失败，请重试', icon: 'none' });
+    }
+  },
+
   async loadTimeline() {
     wx.showLoading({ title: '加载中...' });
     try {
@@ -202,6 +249,7 @@ Page({
       moodIcon: item.mood_icon || moodId,
       moodScene: MOOD_SCENE_MAP[moodId] || MOOD_SCENE_MAP.calm,
       moodTone: MOOD_TONE_MAP[moodId] || 'blue',
+      timelineColor: item.color || '#8BB8FF',
       localTime: item.local_time || this.formatTimeFromTimestamp(item.recorded_at || item.timestamp),
       tags,
       imageUrls: (item.image_urls || []).map(normalizeImageUrl),
@@ -210,7 +258,7 @@ Page({
 
   buildTrendText(moments) {
     if (moments.length < 2) {
-      return '今天的心情并不是固定的一种，它在不同时间里轻轻变化。';
+      return '把心情的点滴轻轻收好，日后回望，都是认真生活过的痕迹。';
     }
     const first = this.energyScore(moments[0]);
     const last = this.energyScore(moments[moments.length - 1]);
@@ -219,7 +267,7 @@ Page({
     if (last - first >= 1) return '今天像是慢慢亮起来了。';
     if (first - last >= 1) return '今天后半段可能有些消耗。';
     if (max - min >= 2) return '今天的情绪有一些波动。';
-    return '今天的状态整体比较稳定。';
+    return '把心情的点滴轻轻收好，日后回望，都是认真生活过的痕迹。';
   },
 
   energyScore(moment) {

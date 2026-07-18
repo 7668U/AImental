@@ -157,6 +157,8 @@ class CheckinBaseModel(BaseModel):
     location_address: Optional[str] = None
     location_latitude: Optional[float] = None
     location_longitude: Optional[float] = None
+    # 客户端可传入想要的“今天”时刻（HH:MM），用于时间戳微调；不传则用当前时间。
+    local_time: Optional[str] = None
 
 class CheckinModel(CheckinBaseModel):
     """The full Pydantic Model for a Checkin response."""
@@ -222,19 +224,19 @@ class CheckinTable:
                 )
         self.db.execute_sql(
             "UPDATE checkins SET record_type = 'moment' "
-            "WHERE record_type IS NULL OR record_type = ''"
+            "WHERE record_type IS NULL OR record_type = '' OR record_type = 'record_type'"
         )
         self.db.execute_sql(
             "UPDATE checkins SET recorded_at = timestamp "
-            "WHERE recorded_at IS NULL"
+            "WHERE recorded_at IS NULL OR recorded_at = 'recorded_at'"
         )
         self.db.execute_sql(
             "UPDATE checkins SET record_date = strftime('%Y-%m-%d', timestamp, 'unixepoch', 'localtime') "
-            "WHERE record_date IS NULL OR record_date = ''"
+            "WHERE record_date IS NULL OR record_date = '' OR record_date = 'record_date'"
         )
         self.db.execute_sql(
             "UPDATE checkins SET local_time = strftime('%H:%M', timestamp, 'unixepoch', 'localtime') "
-            "WHERE local_time IS NULL OR local_time = ''"
+            "WHERE local_time IS NULL OR local_time = '' OR local_time = 'local_time'"
         )
 
     def _normalize_record_date(self, value: Optional[str] = None, timestamp: Optional[int] = None) -> str:
@@ -248,6 +250,27 @@ class CheckinTable:
             return value
         ts = timestamp if timestamp is not None else int(time.time())
         return datetime.datetime.fromtimestamp(ts).strftime("%H:%M")
+
+    def _resolve_today_timestamp(self, local_time: Optional[str]) -> int:
+        """
+        把用户想要的时刻（"HH:MM"）落在“服务器本地今天”这一天，返回时间戳。
+        规则：仅允许今天且不超过当前时刻；格式非法或超过现在则回退为当前时间。
+        始终锚定“今天”，天然禁止补记到过去或未来的日期。
+        """
+        now = datetime.datetime.now()
+        now_ts = int(now.timestamp())
+        if not local_time:
+            return now_ts
+        try:
+            parsed = datetime.datetime.strptime(local_time.strip(), "%H:%M").time()
+        except (ValueError, AttributeError):
+            return now_ts
+        candidate = datetime.datetime.combine(now.date(), parsed)
+        candidate_ts = int(candidate.timestamp())
+        # 不允许超过当前时刻（避免未来时间）。
+        if candidate_ts > now_ts:
+            return now_ts
+        return candidate_ts
         
     def create_dummy_data_for_month(self, user_id: str = "c959d470-64e7-45fe-8942-45ee05d0f153"):
         """
@@ -401,13 +424,15 @@ class CheckinTable:
     def create_moment(self, user_id: str, data: CheckinBaseModel) -> Optional[Checkin]:
         """Creates a moment check-in without enforcing a per-day limit."""
         payload = data.model_dump(exclude_unset=True)
-        now_ts = int(time.time())
+        # 用户可传入想要的今日时刻（HH:MM）微调时间戳；否则用当前时间。
+        requested_local_time = payload.pop("local_time", None)
+        ts = self._resolve_today_timestamp(requested_local_time)
         payload.update({
             "record_type": "moment",
-            "timestamp": now_ts,
-            "recorded_at": now_ts,
-            "record_date": self._normalize_record_date(timestamp=now_ts),
-            "local_time": self._normalize_local_time(timestamp=now_ts),
+            "timestamp": ts,
+            "recorded_at": ts,
+            "record_date": self._normalize_record_date(timestamp=ts),
+            "local_time": self._normalize_local_time(timestamp=ts),
         })
         try:
             return Checkin.create(user_id=user_id, **self._prepare_checkin_payload(payload))
@@ -541,7 +566,17 @@ class CheckinTable:
 
     def update_checkin(self, checkin_id: str, data: CheckinBaseModel) -> Optional[Checkin]:
         """Updates an existing checkin record."""
-        update_data = self._prepare_checkin_payload(data.model_dump(exclude_unset=True))
+        raw = data.model_dump(exclude_unset=True)
+        # 若传入 local_time，重算今天的时间戳并同步 timestamp/recorded_at/local_time，
+        # 保证轨迹按时间正确排序；record_date 仍固定为今天。
+        requested_local_time = raw.pop("local_time", None)
+        update_data = self._prepare_checkin_payload(raw)
+        if requested_local_time:
+            ts = self._resolve_today_timestamp(requested_local_time)
+            update_data["timestamp"] = ts
+            update_data["recorded_at"] = ts
+            update_data["record_date"] = self._normalize_record_date(timestamp=ts)
+            update_data["local_time"] = self._normalize_local_time(timestamp=ts)
         update_data['updated_at'] = int(time.time())
 
         query = Checkin.update(update_data).where(Checkin.id == checkin_id)
@@ -553,8 +588,22 @@ class CheckinTable:
 
     def delete_checkin(self, checkin_id: str) -> bool:
         """Deletes a checkin record by its ID."""
+        checkin = self.get_checkin_by_id(checkin_id)
+        if not checkin:
+            return False
+        image_urls = self.get_image_urls(checkin)
         query = Checkin.delete().where(Checkin.id == checkin_id)
         rows_affected = query.execute()
+        if rows_affected > 0 and image_urls:
+            from model.private_media import private_media_table
+
+            try:
+                private_media_table.delete_many(
+                    image_urls,
+                    owner_user_id=checkin.user_id,
+                )
+            except Exception as exc:
+                print(f"Error deleting check-in private media: {exc}")
         return rows_affected > 0
     
     def save_checkin_image(self, user_id: str, image_file: UploadFile) -> Optional[str]:
@@ -567,26 +616,13 @@ class CheckinTable:
                 media_type="checkin",
                 upload=image_file,
             )
-        except (OSError, ValueError) as exc:
-            print(f"Error saving encrypted check-in image: {exc}")
+        except Exception as exc:
+            print(f"Error saving private check-in image: {exc}")
             return None
             
     def update_image_url(self, checkin_id: str, image_url: str) -> bool:
         """Updates only the image_url for a given check-in."""
-        checkin = self.get_checkin_by_id(checkin_id)
-        if not checkin:
-            return False
-        image_urls = self._normalize_owned_image_urls(
-            [image_url],
-            checkin.user_id,
-        )
-        query = Checkin.update(
-            image_url=image_urls[0] if image_urls else None,
-            image_urls=dump_image_urls(image_urls),
-            updated_at=int(time.time()),
-        ).where(Checkin.id == checkin_id)
-        rows_affected = query.execute()
-        return rows_affected > 0
+        return self.set_image_urls(checkin_id, [image_url]) is not None
 
     def get_image_urls(self, checkin: Checkin) -> List[str]:
         return normalize_image_urls(
@@ -598,6 +634,7 @@ class CheckinTable:
         checkin = self.get_checkin_by_id(checkin_id)
         if not checkin:
             return None
+        previous_urls = self.get_image_urls(checkin)
         urls = self._normalize_owned_image_urls(image_urls, checkin.user_id)
         if len(image_urls) > MAX_CHECKIN_IMAGES or len(urls) > MAX_CHECKIN_IMAGES:
             return None
@@ -608,6 +645,29 @@ class CheckinTable:
         ).where(Checkin.id == checkin_id)
         rows_affected = query.execute()
         if rows_affected > 0:
+            from model.private_media import extract_media_id, private_media_table
+
+            retained_media_ids = {
+                media_id
+                for media_id in (extract_media_id(value) for value in urls)
+                if media_id
+            }
+            removed_urls = [
+                value
+                for value in previous_urls
+                if (
+                    extract_media_id(value)
+                    and extract_media_id(value) not in retained_media_ids
+                )
+            ]
+            if removed_urls:
+                try:
+                    private_media_table.delete_many(
+                        removed_urls,
+                        owner_user_id=checkin.user_id,
+                    )
+                except Exception as exc:
+                    print(f"Error deleting removed check-in media: {exc}")
             return self.get_checkin_by_id(checkin_id)
         return None
 

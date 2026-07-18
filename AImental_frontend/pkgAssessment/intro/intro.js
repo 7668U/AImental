@@ -1,6 +1,8 @@
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 const { getScaleDisplayName, getScaleIconName } = require('../../utils/assessment-display.js');
 
+const SERVER_BASE_URL = 'http://127.0.0.1:8000';
+
 function request(options) {
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
@@ -109,6 +111,10 @@ const SCALE_INTRO_COPY = {
   RFLT: {
     summary: '探索你的近期好运气，看看生活正在悄悄送你什么小惊喜！',
     instruction: '请凭直觉选择最像自己的答案，抽取一张属于你的近期好运签。'
+  },
+  'SOUL-DRINK': {
+    summary: '用 15 道第一反应题，测出你的灵魂饮料是哪一杯。',
+    instruction: '请不要选“我应该怎样”，而是选“我更自然会怎样”。'
   }
 };
 
@@ -149,6 +155,7 @@ Page({
       scaleData.name = displayName;
       scaleData.displayName = displayName;
       scaleData.iconPath = `https://assets.feelyourself.cn/miniprogram/assets/v1/pkgAssessment/images/scale-icons/${getScaleIconName(scaleData.short_name)}.png`;
+      scaleData.coverImagePath = this.resolveAssetUrl(scaleData.cover_image_url);
       scaleData.coverSummary = shortCopy.summary;
       scaleData.coverInstruction = shortCopy.instruction;
 
@@ -175,6 +182,13 @@ Page({
     };
   },
 
+  resolveAssetUrl(url) {
+    if (!url) return '';
+    const normalizedUrl = String(url);
+    if (/^https?:\/\//.test(normalizedUrl)) return normalizedUrl;
+    return `${SERVER_BASE_URL}${normalizedUrl.startsWith('/') ? '' : '/'}${normalizedUrl}`;
+  },
+
   startTest() {
     const scaleId = this.data.scaleId;
     if (scaleId) {
@@ -192,6 +206,12 @@ Page({
   handleIconError(e) {
     this.setData({
       'scale.iconPath': DEFAULT_ICON_PATH
+    });
+  },
+
+  handleCoverImageError() {
+    this.setData({
+      'scale.coverImagePath': ''
     });
   },
 

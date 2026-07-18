@@ -5,28 +5,28 @@ const FEATURE_PRESENTATION = {
   tree_hole: {
     name: '心情树洞',
     shortName: '树洞',
-    icon: '/images/vip/feature-tree-hole.png',
+    icon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/feature-tree-hole.png',
     color: '#ff8a24',
     description: '陪你倾诉，温暖每一次心事',
   },
   community: {
     name: '心灵社区',
     shortName: '社区',
-    icon: '/images/vip/feature-community.png',
+    icon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/feature-community.png',
     color: '#6fc3a5',
     description: '更多陪伴，更多温柔回应',
   },
   mood_analysis: {
-    name: '单项心情分析',
+    name: '心情分析',
     shortName: '心情分析',
-    icon: '/images/vip/feature-mood-analysis.png',
+    icon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/feature-mood-analysis.png',
     color: '#ef7369',
     description: '看见情绪背后的线索',
   },
   assessment_analysis: {
     name: '测评分析',
     shortName: '测评分析',
-    icon: '/images/vip/feature-assessment-analysis.png',
+    icon: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/feature-assessment-analysis.png',
     color: '#77b9e7',
     description: '解读测评，获得更清晰的自己',
   },
@@ -42,18 +42,18 @@ const FEATURE_ORDER = [
 const PLAN_PRESENTATION = {
   light: {
     name: '轻语会员',
-    image: '/images/vip/member-badge-light.png',
-    memberBadge: '/images/vip/member-badge-light.png',
+    image: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-light.png',
+    memberBadge: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-light.png',
   },
   knowing: {
     name: '相知会员',
-    image: '/images/vip/member-badge-knowing.png',
-    memberBadge: '/images/vip/member-badge-knowing.png',
+    image: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-knowing.png',
+    memberBadge: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-knowing.png',
   },
   companion: {
     name: '长伴会员',
-    image: '/images/vip/member-badge-companion.png',
-    memberBadge: '/images/vip/member-badge-companion.png',
+    image: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-companion.png',
+    memberBadge: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-companion.png',
   },
 };
 

@@ -184,6 +184,14 @@ def _get_date_range_info(start_date: str, end_date: str, enforce_min_days: bool 
     if end_day < start_day:
         raise HTTPException(status_code=400, detail="结束日期不能早于开始日期。")
 
+    # 只允许分析今天之前的记录：今天仍在进行中，结束日期最晚到昨天。
+    today = datetime.date.today()
+    if end_day >= today:
+        raise HTTPException(
+            status_code=400,
+            detail="心情分析只能分析今天之前的记录，请选择到昨天为止的范围。",
+        )
+
     range_days = (end_day - start_day).days + 1
     if enforce_min_days and range_days < MIN_ANALYSIS_RANGE_DAYS:
         raise HTTPException(
@@ -242,6 +250,10 @@ def _format_compact_date(value: str) -> str:
 
 def _analysis_type_from_cache_type(cache_type: str) -> Optional[str]:
     marker = "_ai_report_"
+    legacy_marker = "ai_report_"
+    if cache_type.startswith(legacy_marker):
+        analysis_type = cache_type.split(legacy_marker, 1)[1]
+        return analysis_type if analysis_type in ANALYSIS_TYPE_TITLES else None
     if marker not in cache_type:
         return None
     analysis_type = cache_type.split(marker, 1)[1]
@@ -264,6 +276,29 @@ def _parse_analysis_period_key(period_key: str, analysis_type: str) -> Optional[
             year = int(parts[1])
             value = int(parts[2])
             period_type = parts[3]
+            start_ts, end_ts, _period_name = _get_period_info(period_type, year, value)
+            start_date = datetime.datetime.fromtimestamp(start_ts).strftime("%Y-%m-%d")
+            end_date = (
+                datetime.datetime.fromtimestamp(end_ts) - datetime.timedelta(days=1)
+            ).strftime("%Y-%m-%d")
+            return {
+                "start_date": start_date,
+                "end_date": end_date,
+                "period_name": f"{start_date} 至 {end_date}",
+            }
+        except Exception:
+            return None
+
+    if len(parts) >= 5 and parts[-1] == "ai":
+        try:
+            if parts[0].startswith("v"):
+                year = int(parts[1])
+                value = int(parts[2])
+                period_type = parts[3]
+            else:
+                year = int(parts[0])
+                value = int(parts[1])
+                period_type = parts[2]
             start_ts, end_ts, _period_name = _get_period_info(period_type, year, value)
             start_date = datetime.datetime.fromtimestamp(start_ts).strftime("%Y-%m-%d")
             end_date = (

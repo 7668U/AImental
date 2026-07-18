@@ -202,7 +202,7 @@ expire
 | --- | --- | --- |
 | 心情树洞 | `POST /api/v1/chats/{chat_id}/respond` | `tree_hole` |
 | 心灵社区 | `POST /api/v1/community/chats/{character_id}/messages` | `community` |
-| 单项心情分析 | `GET /api/v1/report/ai/...` | `mood_analysis` |
+| 心情分析 | `GET /api/v1/report/ai/...` | `mood_analysis` |
 | 历史测评综合分析 | `POST /api/v1/history-analysis/synthesize` | `assessment_analysis` |
 
 社区旧版 `GET /api/v1/community/chats/status` 接口仍保留

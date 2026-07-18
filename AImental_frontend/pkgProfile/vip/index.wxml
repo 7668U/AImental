@@ -2,7 +2,7 @@
   <block wx:if="{{!isMemberView}}">
     <image
       class="page-background"
-      src="/images/vip/membership-background.jpg"
+      src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/membership-background.jpg"
       mode="aspectFill"
     ></image>
 
@@ -123,15 +123,15 @@
       <view class="member-page-side-placeholder"></view>
       <view class="member-page-title">会员权益</view>
       <view class="record-entry" bindtap="openPurchaseRecords">
-        <image class="record-icon" src="/images/vip/purchase-record-icon-cutout.png" mode="aspectFit"></image>
+        <image class="record-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/purchase-record-icon-cutout.png" mode="aspectFit"></image>
         <text>购买记录</text>
       </view>
     </view>
 
     <view class="member-card">
-      <image class="member-card-bg" src="/images/vip/member-card-bg-redesign.png" mode="aspectFill"></image>
+      <image class="member-card-bg" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-card-bg-redesign.png" mode="aspectFill"></image>
       <view class="member-validity">
-        <image class="member-validity-icon" src="/images/vip/member-validity-leaf.png" mode="aspectFit"></image>
+        <image class="member-validity-icon" src="https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-validity-leaf.png" mode="aspectFit"></image>
         <text>{{currentMember.expiresText}}</text>
       </view>
       <view class="member-name">{{currentMember.name}}</view>
@@ -260,9 +260,9 @@
             <view class="agreement-paragraph">对应小程序底部导航中的“心灵社区”模块，包括社区 AI 虚拟角色列表、角色聊天页、与虚拟角色建立对话关系、查看角色信息与好感度相关互动等内容。</view>
             <view class="agreement-paragraph">当你在心灵社区中向 AI 虚拟角色发送一条消息，并且系统成功生成并返回角色回复时，扣除 1 次心灵社区额度。社区中的角色均为 AI 虚拟角色，不代表真实用户、真人咨询师或现实联系人。</view>
 
-            <view class="agreement-item-title">3. 单项心情分析</view>
-            <view class="agreement-paragraph">对应心情记录、心情报告或相关统计页面中的 AI 心情分析能力。该权益包含四个可独立生成的分析模块：心情分布分析、状态与心情关联分析、日记词云与主题分析、情绪颜色分析。</view>
-            <view class="agreement-paragraph">每成功新生成 1 个分析模块，扣除 1 次单项心情分析额度。若一次完整生成上述四个模块，则共扣除 4 次。查看已生成结果、命中缓存、重复打开同一报告时，不重复扣除额度；如果你的记录发生变化并触发重新生成，或你主动刷新并实际调用 AI 生成新内容，则按实际生成模块数扣除。</view>
+            <view class="agreement-item-title">3. 心情分析</view>
+            <view class="agreement-paragraph">对应心情记录、心情报告或相关统计页面中的 AI 心情分析能力。一次心情分析会一起生成四个模块：心情分布分析、状态与心情关联分析、日记词云与主题分析、情绪颜色分析。</view>
+            <view class="agreement-paragraph">每成功新生成 1 次心情分析（四个模块一起生成），扣除 1 次心情分析额度。查看已生成结果、命中缓存、重复打开同一报告时，不重复扣除额度；如果你的记录发生变化并触发重新生成，或你主动刷新并实际调用 AI 生成新内容，才会再次扣除 1 次。</view>
 
             <view class="agreement-item-title">4. 测评分析</view>
             <view class="agreement-paragraph">对应心理测评结果页、历史测评报告和历史测评综合分析中的 AI 解读能力。该权益用于生成单份测评结果的新 AI 解读，或基于多份历史测评生成综合分析。</view>

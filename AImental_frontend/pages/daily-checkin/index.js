@@ -8,7 +8,7 @@ const {
 } = require('../../utils/auth.js');
 
 const DAILY_CHECKIN_GUIDE_VERSION = 'v1';
-const DAILY_CHECKIN_GUIDE_ICON = '/pages/daily-checkin/assets/calendar-card.png';
+const DAILY_CHECKIN_GUIDE_ICON = 'https://assets.feelyourself.cn/miniprogram/assets/v1/pages/daily-checkin/assets/calendar-card.png';
 
 // 从 ai-therapist 页面“借鉴”过来的网络请求函数，你也可以把它封装成公共模块
 function request(options) {
@@ -43,7 +43,6 @@ Page({
     todayDate: '',
     todayMomentCount: 0,
     todayTrajectoryPreview: [],
-    latestMomentTime: '',
     trajectorySubtitle: '今天还没有留下心情记录',
     showCalendar: false,
     statusBarHeight: 0,
@@ -97,7 +96,6 @@ Page({
         todayDate: '',
         todayMomentCount: 0,
         todayTrajectoryPreview: [],
-        latestMomentTime: '',
         trajectorySubtitle: '今天还没有留下心情记录',
         showCalendar: false
       });
@@ -190,7 +188,7 @@ Page({
       const serverDateStr = timeRes.server_date;
       const timeline = await request({ url: `/checkin/date/${serverDateStr}/timeline` });
       const moments = Array.isArray(timeline.moments) ? timeline.moments : [];
-      const preview = moments.slice(-5).map(item => ({
+      const preview = moments.map(item => ({
         id: item.id,
         mood: item.mood,
         moodIcon: item.mood_icon || item.mood_id || item.mood,
@@ -201,7 +199,6 @@ Page({
         hasCheckedInToday: moments.length > 0,
         todayMomentCount: moments.length,
         todayTrajectoryPreview: preview,
-        latestMomentTime: preview.length ? preview[preview.length - 1].localTime : '',
         trajectorySubtitle: moments.length > 0 ? `今天已记录 ${moments.length} 次` : '今天还没有留下心情记录',
       });
 
@@ -211,7 +208,6 @@ Page({
         hasCheckedInToday: false,
         todayMomentCount: 0,
         todayTrajectoryPreview: [],
-        latestMomentTime: '',
         trajectorySubtitle: '今天还没有留下心情记录',
       });
     }

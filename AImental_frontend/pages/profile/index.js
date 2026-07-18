@@ -6,12 +6,12 @@ const API_BASE_URL = `${SERVER_BASE_URL}/api/v1/users`;
 const VIP_API_BASE_URL = `${SERVER_BASE_URL}/api/v1/vip`;
 const defaultAvatarUrl = 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/default-avatar.png';
 const MEMBERSHIP_ICON_BY_PLAN = {
-  light: '/images/vip/member-badge-light.png',
-  knowing: '/images/vip/member-badge-knowing.png',
-  companion: '/images/vip/member-badge-companion.png',
-  vip_light: '/images/vip/member-badge-light.png',
-  vip_knowing: '/images/vip/member-badge-knowing.png',
-  vip_companion: '/images/vip/member-badge-companion.png',
+  light: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-light.png',
+  knowing: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-knowing.png',
+  companion: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-companion.png',
+  vip_light: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-light.png',
+  vip_knowing: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-knowing.png',
+  vip_companion: 'https://assets.feelyourself.cn/miniprogram/assets/v1/images/vip/member-badge-companion.png',
 };
 
 function getMembershipIcon(planCode) {
@@ -21,6 +21,10 @@ function getMembershipIcon(planCode) {
 const { getShareInfo, getTimelineInfo } = require('../../utils/share.js');
 const { loginWithBackend } = require('../../utils/auth.js');
 const { hasCurrentPrivacyConsent } = require('../../utils/privacy.js');
+const {
+  isDirectUploadUnavailable,
+  uploadPrivateImageDirect,
+} = require('../../utils/private-media-upload.js');
 Page({
   data: {
     isLogin: false,
@@ -265,7 +269,7 @@ Page({
         wx.showLoading({ title: '正在上传...' });
         const tempFilePath = res.tempFiles[0].tempFilePath;
         const token = wx.getStorageSync('token');
-        wx.uploadFile({
+        this.uploadAvatarFile({
           url: `${API_BASE_URL}/me/avatar`,
           filePath: tempFilePath,
           name: 'image',
@@ -275,7 +279,9 @@ Page({
             const data = JSON.parse(uploadRes.data);
             if (uploadRes.statusCode === 200) {
               wx.showToast({ title: '头像更新成功!', icon: 'success' });
-              const fullAvatarUrl = SERVER_BASE_URL + data.new_avatar_url;
+              const fullAvatarUrl = data.new_avatar_url.startsWith('http')
+                ? data.new_avatar_url
+                : SERVER_BASE_URL + data.new_avatar_url;
               const newUserInfo = { ...this.data.userInfo, avatar_url: fullAvatarUrl };
               this.setData({ userInfo: newUserInfo });
               wx.setStorageSync('userInfo', newUserInfo);
@@ -290,6 +296,31 @@ Page({
         });
       }
     });
+  },
+
+  uploadAvatarFile: function(options) {
+    const token = wx.getStorageSync('token');
+    uploadPrivateImageDirect({
+      apiBaseUrl: SERVER_BASE_URL,
+      token,
+      mediaType: 'avatar',
+      filePath: options.filePath,
+      bindUrl: `${API_BASE_URL}/me/avatar/direct`,
+      bindMethod: 'PUT',
+    })
+      .then((data) => {
+        options.success({
+          statusCode: 200,
+          data: JSON.stringify(data),
+        });
+      })
+      .catch((error) => {
+        if (isDirectUploadUnavailable(error)) {
+          wx.uploadFile(options);
+          return;
+        }
+        options.fail(error);
+      });
   },
   
   goToVip: function() {

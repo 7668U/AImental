@@ -152,6 +152,35 @@ class AiStatusTable:
         ).exists()
         
         return query
+    def get_latest_schedule_date_before(self, character_id: str, target_date: date) -> date | None:
+        """
+        【开发模式辅助】查找该角色在 target_date 之前、最近一个存在真实日程的日期。
+        用于开发模式下克隆历史日程作为测试数据。找不到返回 None。
+        """
+        start_of_target = BEIJING_TZ.localize(datetime.combine(target_date, datetime.min.time()))
+        latest = (
+            AiStatus.select()
+            .where(
+                (AiStatus.character == character_id)
+                & (AiStatus.status_category != OFFLINE_STATUS_CATEGORY)
+                & (AiStatus.start_time < start_of_target)
+            )
+            .order_by(AiStatus.start_time.desc())
+            .first()
+        )
+        if not latest or not latest.start_time:
+            return None
+        try:
+            dt_obj = (
+                latest.start_time
+                if isinstance(latest.start_time, datetime)
+                else datetime.fromisoformat(str(latest.start_time))
+            )
+            return dt_obj.date()
+        except (ValueError, TypeError):
+            logger.warning(f"无法解析最近日程的开始时间: {latest.start_time}")
+            return None
+
     def get_schedule_for_date(self, character_id: str, target_date: date) -> list:
         """
         【新增】获取指定角色在特定一整天的所有日程安排。

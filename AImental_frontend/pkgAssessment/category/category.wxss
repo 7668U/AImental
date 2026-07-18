@@ -171,8 +171,8 @@ page {
 
 .test-action {
   flex: 0 0 auto;
-  width: 180rpx;
-  height: 80rpx;
+  width: 220rpx;
+  height: 96rpx;
   margin-left: 16rpx;
 }
 
