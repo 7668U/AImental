@@ -282,7 +282,10 @@ def enrich_checkin_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
         data["mood_valence"] = data.get("mood_valence") or mood_meta["valence"]
         data["mood_energy"] = data.get("mood_energy") or mood_meta["energy"]
 
-    status_metas = build_status_meta_from_tags(data.get("tags"), data.get("status_ids"))
+    status_metas = build_status_meta_from_tags(
+        data.get("tags"),
+        data.get("status_ids"),
+    )[:1]
     if status_metas:
         status_labels = [meta["label"] for meta in status_metas]
         data["tags"] = ",".join(status_labels)
