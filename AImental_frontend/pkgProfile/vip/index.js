@@ -325,7 +325,6 @@ Page({
     purchaseDisabled: false,
     purchaseButtonText: '开通',
     agreementModalVisible: false,
-    mockPaymentAvailable: false,
   },
 
   onLoad() {
@@ -373,10 +372,7 @@ Page({
             const addonProducts = Array.isArray(res.data.addon_products)
               ? res.data.addon_products.map(normalizeAddon)
               : this.data.addonProducts;
-            this.setData({
-              addonProducts,
-              mockPaymentAvailable: Boolean(res.data.mock_payment_available),
-            });
+            this.setData({ addonProducts });
           }
           resolve();
         },
@@ -693,92 +689,27 @@ Page({
     });
   },
 
-  endpointToUrl(endpoint) {
-    return endpoint && endpoint.startsWith('http')
-      ? endpoint
-      : `${SERVER_BASE_URL}${endpoint}`;
-  },
-
   handleVirtualPayment(payment, token, purchaseType, order) {
     const orderId = order && order.id;
-    if (payment.mode === 'local_virtual_mock' && payment.local_confirm_endpoint) {
-      this.completeLocalVirtualPayment(
-        payment.local_confirm_endpoint,
+    if (payment.mode === 'wechat_virtual' && payment.payload) {
+      this.requestVirtualPayment(
+        payment.payload,
         token,
         purchaseType,
         orderId
       );
       return;
     }
-    if (payment.mode === 'wechat_virtual' && payment.payload) {
-      this.requestVirtualPayment(
-        payment.payload,
-        token,
-        purchaseType,
-        orderId,
-        payment.local_confirm_endpoint
-      );
-      return;
-    }
-    if (payment.mode === 'mock' && payment.mock_pay_endpoint) {
-      this.completeMockPayment(payment.mock_pay_endpoint, token, purchaseType);
-      return;
-    }
-    if (payment.legacy_mock_pay_endpoint) {
-      this.completeMockPayment(payment.legacy_mock_pay_endpoint, token, purchaseType);
-      return;
-    }
     this.cancelPendingOrder(orderId, token);
     this.setData({ purchaseLoading: false });
     wx.showModal({
       title: '\u652f\u4ed8\u672a\u914d\u7f6e',
-      content: '\u672c\u5730\u865a\u62df\u652f\u4ed8\u6216\u5fae\u4fe1\u865a\u62df\u652f\u4ed8\u53c2\u6570\u5c1a\u672a\u5c31\u7eea\u3002',
+      content: '\u5fae\u4fe1\u5b98\u65b9\u865a\u62df\u652f\u4ed8\u53c2\u6570\u5c1a\u672a\u5c31\u7eea\u3002',
       showCancel: false,
     });
   },
 
-  completeLocalVirtualPayment(endpoint, token, purchaseType, orderId) {
-    wx.showModal({
-      title: '\u672c\u5730\u865a\u62df\u652f\u4ed8',
-      content: '\u5c06\u6a21\u62df wx.requestVirtualPayment \u6210\u529f\uff0c\u5e76\u8ba9\u540e\u7aef\u786e\u8ba4\u6743\u76ca\u5230\u8d26\u3002',
-      confirmText: '\u786e\u8ba4\u652f\u4ed8',
-      cancelText: '\u53d6\u6d88',
-      success: (modalRes) => {
-        if (!modalRes.confirm) {
-          this.cancelPendingOrder(orderId, token);
-          this.setData({ purchaseLoading: false });
-          return;
-        }
-        this.confirmVirtualPayment(endpoint, token, purchaseType);
-      },
-      fail: () => {
-        this.cancelPendingOrder(orderId, token);
-        this.setData({ purchaseLoading: false });
-      },
-    });
-  },
-
-  confirmVirtualPayment(endpoint, token, purchaseType) {
-    wx.request({
-      url: this.endpointToUrl(endpoint),
-      method: 'POST',
-      header: { Authorization: `Bearer ${token}` },
-      success: (res) => {
-        if (res.statusCode !== 200 || !res.data) {
-          this.finishPurchaseWithError(
-            getRequestErrorMessage(res, '\u652f\u4ed8\u786e\u8ba4\u5931\u8d25\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5')
-          );
-          return;
-        }
-        this.finishPurchaseSuccess(purchaseType);
-      },
-      fail: () => {
-        this.finishPurchaseWithError('\u652f\u4ed8\u786e\u8ba4\u8bf7\u6c42\u5931\u8d25');
-      },
-    });
-  },
-
-  requestVirtualPayment(payload, token, purchaseType, orderId, localConfirmEndpoint) {
+  requestVirtualPayment(payload, token, purchaseType, orderId) {
     if (!canUseVirtualPayment()) {
       this.finishPurchaseWithError('\u5f53\u524d\u5fae\u4fe1\u7248\u672c\u4e0d\u652f\u6301\u865a\u62df\u652f\u4ed8');
       return;
@@ -790,7 +721,7 @@ Page({
       this.setData({ purchaseLoading: false });
       wx.showModal({
         title: '\u8bf7\u4f7f\u7528\u771f\u673a\u8c03\u8bd5',
-        content: '\u5f00\u53d1\u8005\u5de5\u5177\u6a21\u62df\u5668\u65e0\u6cd5\u7a33\u5b9a\u52a0\u8f7d\u5fae\u4fe1\u865a\u62df\u652f\u4ed8 SDK\u3002\u8bf7\u70b9\u51fb\u5f00\u53d1\u8005\u5de5\u5177\u7684\u300c\u771f\u673a\u8c03\u8bd5\u300d\uff0c\u5728 Android \u5fae\u4fe1\u4e2d\u5b8c\u6210\u6c99\u7bb1\u652f\u4ed8\u3002',
+        content: '\u5f00\u53d1\u8005\u5de5\u5177\u6a21\u62df\u5668\u65e0\u6cd5\u7a33\u5b9a\u52a0\u8f7d\u5fae\u4fe1\u5b98\u65b9\u865a\u62df\u652f\u4ed8\u3002\u8bf7\u4f7f\u7528\u771f\u673a\u5fae\u4fe1\u5b8c\u6210\u6d4b\u8bd5\u3002',
         showCancel: false,
       });
       return;
@@ -798,10 +729,6 @@ Page({
     wx.requestVirtualPayment({
       ...payload,
       success: () => {
-        if (localConfirmEndpoint) {
-          this.confirmVirtualPayment(localConfirmEndpoint, token, purchaseType);
-          return;
-        }
         this.reconcileVirtualOrder(orderId, token, purchaseType);
       },
       fail: (error) => {
@@ -911,36 +838,6 @@ Page({
     this.fetchVipState().finally(() => {
       this.setData({ purchaseLoading: false });
       this.navigateToSuccessPage();
-    });
-  },
-
-  completeMockPayment(endpoint, token, purchaseType) {
-    const url = endpoint.startsWith('http')
-      ? endpoint
-      : `${SERVER_BASE_URL}${endpoint}`;
-    wx.request({
-      url,
-      method: 'POST',
-      header: { Authorization: `Bearer ${token}` },
-      success: (res) => {
-        if (res.statusCode !== 200) {
-          this.finishPurchaseWithError(
-            getRequestErrorMessage(res, '模拟支付失败，请稍后重试')
-          );
-          return;
-        }
-        if (purchaseType === 'addon') {
-          this.finishAddonPurchaseSuccess();
-          return;
-        }
-        this.fetchVipState().finally(() => {
-          this.setData({ purchaseLoading: false });
-          this.navigateToSuccessPage();
-        });
-      },
-      fail: () => {
-        this.finishPurchaseWithError('模拟支付请求失败');
-      },
     });
   },
 
