@@ -28,6 +28,7 @@ from vip_catalog import (
 )
 from vip_service import VipQuotaExceeded, VipService, add_months
 from vip_access import validate_ai_input
+import vip_virtual_payment as vip_virtual_payment_module
 from vip_virtual_payment import (
     _virtual_payment_app_key,
     build_virtual_payment,
@@ -513,7 +514,15 @@ class VipServiceTestCase(unittest.TestCase):
 
     def test_vip_api_catalog_order_and_mock_payment(self):
         previous_mock_setting = vip_router_module.ENABLE_VIP_MOCK_PAYMENT
+        previous_router_local_setting = (
+            vip_router_module.ENABLE_VIP_LOCAL_VIRTUAL_PAYMENT
+        )
+        previous_virtual_local_setting = (
+            vip_virtual_payment_module.ENABLE_VIP_LOCAL_VIRTUAL_PAYMENT
+        )
         vip_router_module.ENABLE_VIP_MOCK_PAYMENT = True
+        vip_router_module.ENABLE_VIP_LOCAL_VIRTUAL_PAYMENT = True
+        vip_virtual_payment_module.ENABLE_VIP_LOCAL_VIRTUAL_PAYMENT = True
         try:
             catalog = vip_router_module.get_vip_catalog()
             self.assertEqual(len(catalog["membership_products"]), 3)
@@ -551,35 +560,60 @@ class VipServiceTestCase(unittest.TestCase):
             )
         finally:
             vip_router_module.ENABLE_VIP_MOCK_PAYMENT = previous_mock_setting
+            vip_router_module.ENABLE_VIP_LOCAL_VIRTUAL_PAYMENT = (
+                previous_router_local_setting
+            )
+            vip_virtual_payment_module.ENABLE_VIP_LOCAL_VIRTUAL_PAYMENT = (
+                previous_virtual_local_setting
+            )
 
     def test_vip_api_membership_local_virtual_payment(self):
-        created = vip_router_module.create_vip_order(
-            vip_router_module.CreateOrderRequest(product_code="vip_light"),
-            current_user_id="api-member-user",
+        previous_router_local_setting = (
+            vip_router_module.ENABLE_VIP_LOCAL_VIRTUAL_PAYMENT
         )
-        self.assertEqual(created.payment["mode"], "local_virtual_mock")
-        self.assertEqual(created.payment["payload"]["mode"], "short_series_goods")
-
-        paid = vip_router_module.local_confirm_virtual_payment(
-            created.order.id,
-            current_user_id="api-member-user",
+        previous_virtual_local_setting = (
+            vip_virtual_payment_module.ENABLE_VIP_LOCAL_VIRTUAL_PAYMENT
         )
-        self.assertEqual(paid.status, "fulfilled")
-
-        summary = vip_router_module.get_my_vip_state(
-            current_user_id="api-member-user"
-        )
-        self.assertEqual(summary["user_type"], "member")
-        self.assertEqual(summary["membership"]["plan_code"], "light")
-
-        previous_test_tools_setting = vip_router_module.ENABLE_VIP_TEST_TOOLS
-        vip_router_module.ENABLE_VIP_TEST_TOOLS = True
+        vip_router_module.ENABLE_VIP_LOCAL_VIRTUAL_PAYMENT = True
+        vip_virtual_payment_module.ENABLE_VIP_LOCAL_VIRTUAL_PAYMENT = True
         try:
-            reset = vip_router_module.test_cancel_my_vip_membership(
+            created = vip_router_module.create_vip_order(
+                vip_router_module.CreateOrderRequest(product_code="vip_light"),
                 current_user_id="api-member-user",
             )
+            self.assertEqual(created.payment["mode"], "local_virtual_mock")
+            self.assertEqual(
+                created.payment["payload"]["mode"],
+                "short_series_goods",
+            )
+
+            paid = vip_router_module.local_confirm_virtual_payment(
+                created.order.id,
+                current_user_id="api-member-user",
+            )
+            self.assertEqual(paid.status, "fulfilled")
+
+            summary = vip_router_module.get_my_vip_state(
+                current_user_id="api-member-user"
+            )
+            self.assertEqual(summary["user_type"], "member")
+            self.assertEqual(summary["membership"]["plan_code"], "light")
+
+            previous_test_tools_setting = vip_router_module.ENABLE_VIP_TEST_TOOLS
+            vip_router_module.ENABLE_VIP_TEST_TOOLS = True
+            try:
+                reset = vip_router_module.test_cancel_my_vip_membership(
+                    current_user_id="api-member-user",
+                )
+            finally:
+                vip_router_module.ENABLE_VIP_TEST_TOOLS = previous_test_tools_setting
         finally:
-            vip_router_module.ENABLE_VIP_TEST_TOOLS = previous_test_tools_setting
+            vip_router_module.ENABLE_VIP_LOCAL_VIRTUAL_PAYMENT = (
+                previous_router_local_setting
+            )
+            vip_virtual_payment_module.ENABLE_VIP_LOCAL_VIRTUAL_PAYMENT = (
+                previous_virtual_local_setting
+            )
         self.assertEqual(reset["user_type"], "free")
         self.assertIsNone(reset["membership"])
 
@@ -615,8 +649,8 @@ class VipServiceTestCase(unittest.TestCase):
             {
                 "addon_tree_500": (500, 199),
                 "addon_community_500": (500, 299),
-                "addon_mood_50": (50, 99),
-                "addon_assessment_50": (50, 99),
+                "addon_mood_50": (50, 100),
+                "addon_assessment_50": (50, 100),
             },
         )
 
